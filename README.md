@@ -1,4 +1,4 @@
-# Pedro Suárez Gallardo — Portfolio
+# pedro-suarez-cv
 
 Personal résumé and portfolio website of **Pedro Suárez Gallardo**, web developer.
 
@@ -40,6 +40,27 @@ git clone <repository-url>
 cd <repository-folder>
 pnpm install
 ```
+## Project structure
+
+```text
+.
+├── app/                    # Next.js App Router
+│   ├── favicon.ico
+│   ├── globals.css         # Global styles and Tailwind entry point
+│   ├── layout.tsx          # Root layout
+│   └── page.tsx            # Home page
+├── public/                 # Static assets served as-is
+├── AGENTS.md               # Instructions for coding agents
+├── eslint.config.mjs       # ESLint configuration
+├── next.config.ts          # Next.js configuration
+├── package.json
+├── pnpm-lock.yaml
+├── pnpm-workspace.yaml
+├── README.md
+└── tsconfig.json           # TypeScript configuration
+```
+
+> The structure is still minimal and will grow as the project does (i18n routing, components, dictionaries, tests, `docs/`...). Keep this section up to date when it changes.
 
 ### Run locally
 
