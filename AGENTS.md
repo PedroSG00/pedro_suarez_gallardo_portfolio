@@ -32,6 +32,7 @@ Para iterar rápido, ejecuta solo el test afectado (por ejemplo `pnpm exec vites
 - Todos los textos visibles para el usuario van en los diccionarios i18n (inglés y castellano), nunca escritos directamente en los componentes. Cualquier texto nuevo debe añadirse en ambos idiomas.
 - Respetar siempre la identidad visual: minimalista, crudo y negro, fuente monoespaciada, y que modo claro y oscuro se vean bien.
 - SEO: todo contenido nuevo debe tener metadatos propios por idioma (Metadata API), estructura semántica de encabezados y renderizado en servidor o estático. Sigue el principio de SEO de `docs/constitution.md`.
+- Animaciones: suaves, elegantes y sutiles, solo donde aporten (transiciones de tema, hover, aparición de secciones). Duraciones cortas (150-400 ms) con easing suave. Respeta siempre `prefers-reduced-motion`. No uses librerías de animación sin preguntar; prefiere transiciones CSS/Tailwind.
 
 ## Reglas
 - Si existen `docs/constitution.md` y una spec activa, léelos antes de tocar código. Si no existen, no los inventes: pregunta antes de empezar cualquier cambio no trivial.
