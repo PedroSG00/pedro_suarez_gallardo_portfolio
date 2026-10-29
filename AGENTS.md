@@ -33,6 +33,9 @@ Para iterar rápido, ejecuta solo el test afectado (por ejemplo `pnpm exec vites
 - Respetar siempre la identidad visual: minimalista, crudo y negro, fuente monoespaciada, y que modo claro y oscuro se vean bien.
 - SEO: todo contenido nuevo debe tener metadatos propios por idioma (Metadata API), estructura semántica de encabezados y renderizado en servidor o estático. Sigue el principio de SEO de `docs/constitution.md`.
 - Animaciones: suaves, elegantes y sutiles, solo donde aporten (transiciones de tema, hover, aparición de secciones). Duraciones cortas (150-400 ms) con easing suave. Respeta siempre `prefers-reduced-motion`. No uses librerías de animación sin preguntar; prefiere transiciones CSS/Tailwind.
+- Componentes: la UI se construye con componentes pequeños, de una sola responsabilidad y reutilizables. Antes de crear un componente, busca si ya existe uno que sirva y reutilízalo o extiéndelo mediante props. Si un bloque de JSX se repite o un componente crece demasiado, divídelo.
+- Los componentes de presentación no contienen textos ni datos: reciben todo por props o desde los diccionarios i18n.
+- Cada componente reutilizable tiene tipado explícito de sus props y un test (Vitest + React Testing Library).
 
 ## Reglas
 - Si existen `docs/constitution.md` y una spec activa, léelos antes de tocar código. Si no existen, no los inventes: pregunta antes de empezar cualquier cambio no trivial.
@@ -42,6 +45,7 @@ Para iterar rápido, ejecuta solo el test afectado (por ejemplo `pnpm exec vites
   - Modificar capas de abstracción muy transversales (layout raíz, sistema de i18n, configuración de tema y estilos globales, configuración de Tailwind/TypeScript/ESLint...).
 - No introduzcas base de datos, backend ni servicios externos.
 - Cambios pequeños y enfocados: no mezcles refactors con funcionalidades nuevas.
+- Atomizar no significa abstraer en exceso: no crees hooks, contextos ni wrappers genéricos "por si acaso". Extrae un componente cuando hay repetición real o una responsabilidad claramente separable.
 
 ## Al terminar cualquier tarea
 Ejecuta y comprueba que pasan, en este orden:
