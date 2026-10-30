@@ -1,0 +1,267 @@
+# 001 — Estilos globales de la aplicación
+
+- **Estado:** Borrador — En revisión
+- **Fecha:** 30 de octubre de 2026
+- **Alcance:** fundamentos visuales compartidos por todo el sitio
+- **Depende de:** nada (es la primera funcionalidad)
+- **Bloquea a:** cualquier sección o componente futuro del portfolio
+
+## 1. Contexto y objetivo
+
+El portfolio de Pedro Suárez Gallardo será un sitio estático y bilingüe dirigido principalmente a reclutadores y, en segundo lugar, a clientes potenciales. Hoy solo existe el andamiaje generado por el scaffold: una paleta genérica de blanco y negro, una tipografía sans y una página de ejemplo. Antes de construir la primera sección real hay que fijar la identidad visual, porque cada pantalla futura heredará estas decisiones.
+
+Esta funcionalidad define y aplica la **base visual única** del sitio: color, tipografía, escala de espaciado, anchura de lectura, foco, selección, movimiento y tema claro/oscuro. Su objetivo es que cualquier página nueva se vea como parte del mismo producto sin redefinir estilos, que el sitio sea legible y accesible en ambos temas y que la estética minimalista de estética "tech" —crudo y negro, monoespaciada— sea reconocible desde la primera visita.
+
+### Decisiones ya acordadas (fuente de verdad)
+
+- **Paleta monocroma cálida:** crudo y negro como extremos, con una escala corta de grises cálidos intermedios (definida en §4.1) y **sin color de acento**. Estados y enlaces se distinguen por peso, subrayado, contraste y contorno.
+- **Tipografía monoespaciada:** **Geist Mono** para todo el sitio (titulares, párrafos, navegación, etiquetas, datos, controles). Geist Mono ofrece pesos 400 y 700, pero **RF-10 prohíbe usar `font-weight: bold` para jerarquía**; la jerarquía se expresa mediante tamaño, contraste, espaciado e itálico (400 y 400 itálico).
+- **Tema elegible con opción de sistema:** el visitante alterna entre **claro**, **oscuro** y **sistema**; la primera visita sigue la preferencia del sistema operativo; la elección se recuerda y se sincroniza entre pestañas del mismo navegador.
+- **Selector oculto / revelado:** un **botón de tema** permanece siempre visible en el layout. Al pulsarlo por primera vez, se aplica el tema elegido y se **revela** el `<select>` oculto inicialmente. Una vez revelado, permanece visible en el layout. El selector se implementa como un componente reutilizable de una sola responsabilidad.
+- **Modal informativo:** se muestra al interactuar con el selector. Implementado con `<dialog>` invocado mediante `show()` (no bloqueante), no mediante `showModal()`.
+- **Solo fundamentos:** no se crean componentes de interfaz ni se define el contenido del currículum, excepto el selector de tema que forma parte de esta funcionalidad.
+- **Accesibilidad:** WCAG 2.2 AA en ambos temas, con animaciones suaves y elegantes que forman parte de la estética.
+- **La impresión queda fuera de alcance.**
+
+## 2. Usuarios
+
+- **Reclutador (usuario principal).** Revisa el portfolio en escritorio y móvil, a menudo con prisa, y necesita entender quién es Pedro y qué ofrece en pocos segundos.
+- **Cliente potencial.** Evalúa si el trabajo y el gusto visual encajan con lo que busca; la coherencia estética forma parte de su impresión.
+- **Visitante con preferencia de tema.** Trabaja de día en claro o de noche en oscuro y espera que el sitio respete su elección sin repetirla en cada visita.
+- **Visitante que usa teclado, lector de pantalla, zoom o movimiento reducido.** Necesita foco visible, contraste suficiente y ausencia de animaciones molestas.
+- **Pedro, mantenedor del sitio.** Necesita una base de estilos coherente y única para no repetir decisiones en cada sección nueva.
+
+## 3. Historias de usuario
+
+- **HU-1.** Como reclutador que abre el sitio por primera vez, quiero ver de inmediato una identidad visual clara y legible, para formarme una impresión profesional sin esfuerzo.
+- **HU-2.** Como visitante que prefiere el modo oscuro, quiero que el sitio se abra en oscuro sin tener que configurarlo, para no deslumbrarme.
+- **HU-3.** Como visitante que prefiere el modo claro, quiero poder cambiar el tema y que el sitio lo recuerde, para no repetir el cambio en cada visita.
+- **HU-4.** Como visitante que navega con teclado, quiero ver siempre dónde está mi foco, para moverme sin perderme.
+- **HU-5.** Como visitante con sensibilidad al movimiento, quiero que el cambio de tema y las transiciones se desactiven según mi preferencia del sistema, para evitar molestias.
+- **HU-6.** Como visitante que lee en el móvil o con poco ancho de pantalla, quiero que el texto siga siendo legible y no se corte, para leer con comodidad.
+- **HU-7.** Como visitante con baja visión o daltonismo, quiero distinguir enlaces, estados y foco sin depender del color, para usar el sitio con autonomía.
+- **HU-8.** Como Pedro, quiero que todas las páginas compartan una sola base visual, para que añadir secciones no reintroduzca decisiones de color, tipografía o espaciado.
+
+## 4. Requisitos funcionales
+
+### RF-1 — Identidad cromática cálida y monocroma
+
+El sitio debe presentar una paleta monocroma cálida con dos extremos (crudo y negro) y una escala corta de grises cálidos intermedios, organizada en roles semánticos estables: fondo, superficie, texto principal, texto secundario, borde o separador, superficie invertida (con su texto), foco y selección.
+
+- **Criterios de aceptación (EARS):**
+  - **El sistema deberá** usar exclusivamente la paleta monocroma cálida definida para todos los colores visibles de la interfaz.
+  - **El sistema deberá** disponer de un valor propio para cada rol semántico en el tema claro, el tema oscuro y el tema que siga al sistema.
+  - **El sistema no deberá** introducir colores de acento ni colores fuera de los grises cálidos acordados.
+  - **Cuando** una pantalla necesite un color que no corresponda a ningún rol, **el sistema deberá** reutilizar el rol más cercano en lugar de improvisar un valor nuevo.
+
+#### 4.1 Escala de grises cálidos (valores exactos)
+
+```css
+:root {
+  --warm-1: #f8f5f0; /* warm-white / base clara */
+  --warm-2: #e9e5dc; /* warm-100 */
+  --warm-3: #d6d1bb; /* warm-200 */
+  --warm-4: #b0a99a; /* warm-300 */
+  --warm-5: #8a8478; /* warm-400 / negro cálido */
+}
+```
+
+Los nombres de las variables están en inglés (Constitución 6).
+
+### RF-2 — Tema inicial según la preferencia del sistema
+
+- **Criterios de aceptación (EARS):**
+  - **Cuando** un visitante abra el sitio por primera vez y no exista una elección previa, **el sistema deberá** mostrar el tema claro u oscuro que indique su sistema operativo.
+  - **Mientras** el visitante no haya elegido tema manualmente, **el sistema deberá** seguir la preferencia del sistema operativo, también si esta cambia con la página abierta.
+  - **Si** el sistema operativo no expone ninguna preferencia, **entonces el sistema deberá** mostrar el tema claro.
+  - **El sistema deberá** declarar a qué tema corresponde la página mediante la propiedad CSS nativa `color-scheme`, de modo que los controles nativos del navegador (barras de desplazamiento, campos, menús) se muestren en consonancia.
+
+### RF-3 — Selector manual de tema con opción "sistema"
+
+- **Criterios de aceptación (EARS):**
+  - **El sistema deberá** ofrecer en todas las páginas un **botón de tema visible** que permita abrir el control de tema, y un `<select>` oculto inicialmente que permita alternar entre **claro**, **oscuro** y **sistema**.
+  - **Cuando** el visitante pulse el botón de tema, **el sistema deberá** aplicar la opción elegida de inmediato, sin recargar ni navegar, y revelar el `<select>`.
+  - **Cuando** la opción sea "sistema", **el sistema deberá** seguir la preferencia del sistema operativo en tiempo real.
+  - **El sistema deberá** comunicar el tema activo y la acción disponible mediante un nombre accesible en inglés y castellano, no solo mediante iconografía.
+  - **El sistema deberá** permitir operar el control tanto con ratón como con teclado y lector de pantalla.
+
+### RF-4 — Persistencia de la elección y sincronización entre pestañas
+
+- **Criterios de aceptación (EARS):**
+  - **Cuando** el visitante elija una opción manualmente (claro, oscuro o sistema), **el sistema deberá** recordarla en el navegador y aplicarla en visitas posteriores.
+  - **Mientras** exista una elección manual, **el sistema no deberá** sobrescribirla con cambios posteriores de la preferencia del sistema operativo, a menos que la opción activa sea explícitamente "sistema".
+  - **Si** la elección recordada no puede leerse o no es válida, **entonces el sistema deberá** ignorarla, aplicar la preferencia del sistema y mantener el sitio completamente funcional.
+  - **Si** el navegador bloquea o no permite conservar la elección, **entonces el sistema deberá** aplicar la opción elegida durante la visita, sin mostrar errores y sin impedir nuevos cambios de tema.
+  - **El sistema deberá** sincronizar la preferencia entre pestañas abiertas del mismo navegador: al cambiar en una pestaña, las demás pestañas con el mismo origen deberán reflejar la nueva preferencia sin recargar su contenido.
+
+### RF-5 — Selector oculto por defecto y revelado bajo preferencia
+
+- **Criterios de aceptación (EARS):**
+  - **El sistema deberá** ocultar el selector de tema (`<select>`) en la carga inicial.
+  - **Cuando** el visitante pulse el botón de tema por primera vez, **el sistema deberá** revelar el selector de forma visible.
+  - **El sistema no deberá** ocultar ni eliminar el selector una vez revelado, salvo que se defina una acción explícita para ello (que queda fuera del alcance de esta funcionalidad).
+
+### RF-6 — Modal informativo para JavaScript desactivado
+
+- **Criterios de aceptación (EARS):**
+  - **Cuando** el visitante interactúe con el selector de tema, **el sistema deberá** mostrar un mensaje breve (en inglés y castellano) que informe de que, si JavaScript está desactivado, algunas funcionalidades (como la persistencia automática del tema) pueden verse limitadas.
+  - **El sistema no deberá** impedir el cambio de tema si JavaScript está desactivado: la página seguirá funcionando con el tema del sistema.
+  - **El sistema deberá** mostrar el mensaje como un `<dialog>` accesible invocado mediante `show()` (no modal, no bloqueante), que no atrape el foco ni impida la interacción con la página.
+
+### RF-7 — Cambio de tema sin destellos ni pérdida de contexto
+
+- **Criterios de aceptación (EARS):**
+  - **Mientras** una página se carga con una elección previa, **el sistema no deberá** mostrar durante un instante el tema distinto al elegido.
+  - **Cuando** el tema cambie, **el sistema deberá** conservar el contenido, la posición de lectura y el foco del teclado.
+  - **El sistema deberá** aplicar el tema a la totalidad de la página visible, incluidos el fondo general, los controles, la selección de texto y las barras de desplazamiento.
+
+### RF-8 — Transición de tema suave y elegante
+
+- **Criterios de aceptación (EARS):**
+  - **Cuando** el tema cambie, **el sistema deberá** transicionar los colores con una duración de entre 150 y 400 ms y una curva de aceleración suave, sin parpadeos.
+  - **El sistema no deberá** animar propiedades que alteren el tamaño o la posición del contenido al cambiar de tema.
+  - **Cuando** la página se cargue por primera vez, **el sistema no deberá** ejecutar la transición de tema.
+  - **Si** el sistema operativo indica que el visitante prefiere movimiento reducido, **entonces el sistema deberá** aplicar los cambios de tema de forma instantánea y suprimir cualquier animación no esencial.
+
+### RF-9 — Tipografía monoespaciada en todo el sitio
+
+- **Criterios de aceptación (EARS):**
+  - **El sistema deberá** usar **Geist Mono** como única familia tipográfica monoespaciada para todo el texto visible: titulares, párrafos, navegación, etiquetas, datos y controles.
+  - **El sistema no deberá** usar una segunda familia tipográfica para el texto corrido.
+  - **Si** la fuente no está disponible o la carga es lenta, **entonces el sistema deberá** recurrir a una monoespaciada del sistema (`monospace`) sin salto perceptible de maquetación.
+  - **El sistema deberá** mostrar el texto legible desde el primer momento, sin que la aparición de la tipografía desplace el contenido.
+
+### RF-10 — Escala tipográfica sin negrita
+
+- **Criterios de aceptación (EARS):**
+  - **El sistema deberá** definir una escala acotada de estilos de texto con roles diferenciados: título de página, título de sección, subtítulo, cuerpo, texto secundario y texto técnico o de datos.
+  - **El sistema no deberá** usar `font-weight: bold` (o valores superiores a 400) para expresar jerarquía.
+  - **El sistema deberá** expresar la jerarquía mediante **tamaño**, **contraste de color**, **espaciado** y, cuando sea apropiado, **itálico** (`font-style: italic`).
+  - **El sistema deberá** usar un tamaño de cuerpo no inferior a 16 px y una altura de línea que mantenga el texto cómodo de leer.
+  - **El sistema deberá** limitar la longitud de línea del texto corrido a un rango legible de entre 45 y 75 caracteres.
+  - **Umbral de texto grande:** se considera texto grande a partir de **18 px** (o 14 px si es itálico), para efectos del contraste mínimo 3:1 de NFR-1.
+
+### RF-11 — Escala de espaciado y ritmo vertical
+
+- **Criterios de aceptación (EARS):**
+  - **El sistema deberá** definir una escala corta y consistente de espaciados y usarla para separar elementos, bloques y secciones.
+  - **El sistema deberá** mantener un ritmo vertical regular entre títulos, párrafos y grupos de contenido.
+  - **El sistema deberá** aumentar la separación entre secciones respecto a la separación dentro de una misma sección.
+
+### RF-12 — Anchura de contenido y adaptación a la pantalla
+
+- **Criterios de aceptación (EARS):**
+  - **El sistema deberá** centrar el contenido en una anchura máxima de **65ch** que mantenga líneas legibles en pantallas grandes.
+  - **Mientras** la pantalla sea estrecha, **el sistema deberá** reducir los márgenes laterales sin que el contenido toque los bordes.
+  - **Cuando** la ventana se estreche hasta 320 px de ancho, **el sistema no deberá** producir desplazamiento horizontal.
+  - **El sistema deberá** adaptar tipografía y espaciado a pantallas pequeñas sin perder jerarquía ni legibilidad.
+
+### RF-13 — Foco de teclado visible
+
+- **Criterios de aceptación (EARS):**
+  - **Cuando** un elemento interactivo reciba el foco, **el sistema deberá** mostrarlo con un indicador visible y distinguible sobre el fondo correspondiente, con un contraste mínimo de 3:1.
+  - **El sistema no deberá** eliminar ni ocultar el indicador de foco por motivos estéticos.
+  - **Mientras** el visitante navegue con teclado, **el sistema deberá** mantener el indicador visible aunque el elemento esté junto al borde de la ventana o sobre una superficie invertida.
+
+### RF-14 — Enlaces y estados sin color de acento
+
+- **Criterios de aceptación (EARS):**
+  - **El sistema deberá** distinguir los enlaces dentro del texto mediante subrayado u otro recurso no cromático, de modo que sigan siendo identificables sin percibir el color.
+  - **Cuando** un enlace o elemento interactivo esté bajo el puntero, **el sistema deberá** indicarlo mediante un cambio perceptible de peso (si aplica), subrayado, contraste o superficie, sin introducir colores fuera de la paleta.
+  - **Cuando** un enlace reciba el foco de teclado, **el sistema deberá** mostrar el mismo tratamiento reforzado que el resto de elementos interactivos.
+
+### RF-15 — Selección de texto y controles nativos
+
+- **Criterios de aceptación (EARS):**
+  - **Cuando** el visitante seleccione texto, **el sistema deberá** mostrarlo con un color de selección de la paleta y texto legible con contraste equivalente a AA.
+  - **El sistema deberá** hacer que las barras de desplazamiento visibles sigan la paleta del tema activo.
+  - **Si** el navegador no permite personalizar las barras de desplazamiento, **entonces el sistema deberá** mostrar las barras nativas coherentes con el tema declarado.
+
+### RF-16 — Coherencia de la base visual en todo el sitio
+
+- **Criterios de aceptación (EARS):**
+  - **El sistema deberá** aplicar la misma base visual a todas las páginas y estados del sitio.
+  - **El sistema no deberá** permitir que una página o sección redefina colores, tipografía, espaciado o movimiento al margen de los valores compartidos.
+  - **Cuando** se añada una página o sección nueva, **el sistema deberá** heredar la base visual sin requerir ajustes de estilo propios.
+
+## 5. Requisitos no funcionales
+
+- **NFR-1 — Contraste (WCAG 2.2 AA).** Todo texto normal alcanzará al menos 4,5:1 sobre su fondo; el texto grande, al menos 3:1; los componentes de interfaz, bordes relevantes e indicadores de foco, al menos 3:1. Se verificará en todos los pares rol/fondo de ambos temas.
+- **NFR-2 — Accesibilidad más allá del color.** Ningún estado, enlace o jerarquía se comunicará solo mediante color. Se mantendrá la legibilidad con zoom del 200 %, con reflow a 320 px y con colores forzados de alto contraste del sistema operativo.
+- **NFR-3 — Rendimiento y estabilidad visual.** La base visual no bloqueará el primer renderizado, no provocará desplazamientos perceptibles por la carga de tipografía y no incluirá animaciones decorativas infinitas ni recursos pesados de terceros.
+- **NFR-4 — Respuesta percibida.** El cambio de tema se percibirá inmediato (sin recarga ni re-descarga de contenido) y no perderá el estado de la página.
+- **NFR-5 — Compatibilidad.** El sitio se verá y funcionará correctamente en las dos últimas versiones de Chrome, Firefox, Safari y Edge, tanto en escritorio como en móvil, sin degradaciones que rompan la legibilidad o el tema.
+- **NFR-6 — Fuente única de verdad.** Los valores de color, tipografía, espaciado, foco y movimiento se definirán una sola vez y todas las pantallas los consumirán; no se duplicarán valores a mano.
+- **NFR-7 — Privacidad.** La preferencia de tema se conservará únicamente en el navegador del visitante (`localStorage`); no se enviará a terceros ni se usará para rastreo.
+- **NFR-8 — Dependencias.** No se añadirán dependencias nuevas para implementar esta funcionalidad; se usará lo ya disponible en el stack aprobado (Next.js, React, TypeScript, Tailwind, Geist Mono).
+- **NFR-9 — Contenido bilingüe.** Cualquier texto visible asociado al tema (nombre accesible del selector, mensajes del modal, opciones del `<select>`) existirá en inglés y castellano conforme a la constitución (`docs/constitution.md`) y se almacenará en los diccionarios i18n del proyecto.
+
+## 6. Casos límite
+
+1. **Primera visita con el sistema en oscuro:** se muestra el tema oscuro, sin transición ni destello claro.
+2. **Elección guardada contraria a la del sistema:** prevalece la elección guardada; el sistema operativo no la sobrescribe a menos que la opción activa sea "sistema".
+3. **El sistema cambia de tema con la web abierta y el visitante nunca eligió (o eligió "sistema"):** la web acompaña el cambio sin recargar.
+4. **El sistema cambia de tema con una elección manual activa (claro u oscuro):** la web no cambia.
+5. **Preferencia guardada inválida o corrupta:** se ignora, se usa la preferencia del sistema y no se muestra ningún error.
+6. **Navegador en modo privado o con almacenamiento bloqueado o lleno:** la opción elegida funciona durante la visita; solo se pierde al cerrar y el control sigue operativo.
+7. **Dos pestañas abiertas con temas distintos:** al cambiar en una pestaña, las demás pestañas con el mismo origen reflejan la nueva preferencia mediante el evento `storage` sin perder contenido ni posición de lectura.
+8. **JavaScript desactivado o fallido:** la página se muestra legible con el tema del sistema; el selector puede quedar inerte u oculto; el modal no se muestra, pero la página sigue funcional.
+9. **Tipografía no disponible o red lenta:** se usa una monoespaciada del sistema (`monospace`) sin salto perceptible de maquetación.
+10. **Movimiento reducido activado:** el cambio de tema es instantáneo y no hay animaciones no esenciales.
+11. **Alto contraste forzado por el sistema operativo:** el contenido sigue siendo legible y el foco visible aunque la paleta se sustituya.
+12. **Zoom del 200 % o ventana de 320 px:** no hay desplazamiento horizontal ni texto recortado.
+13. **Texto seleccionado sobre una superficie invertida:** la selección sigue siendo legible.
+14. **Enlace dentro de un párrafo:** se distingue por subrayado incluso en escala de grises.
+15. **Página larga:** la barra de desplazamiento es coherente con el tema activo en ambos temas.
+16. **Cambio de idioma (futuro):** la base visual no depende del idioma y no cambia al alternarlo.
+17. **Selector revelado tras cambio de preferencia:** una vez revelado, el `<select>` permanece visible en el layout.
+18. **Modal mostrado con JavaScript activo:** el mensaje informativo aparece sin bloquear la interacción, es accesible (rol de alerta o diálogo) y se presenta en inglés y castellano.
+
+## 7. Fuera de alcance
+
+- El contenido del currículum y las secciones del portfolio (presentación, experiencia, proyectos, contacto, etc.).
+- Componentes de interfaz reutilizables (botones, tarjetas, navegación, formularios, badges), excepto el selector de tema que forma parte de esta funcionalidad y se implementa como componente de una sola responsabilidad.
+- El sistema completo de internacionalización (`i18n`) y los diccionarios de textos, más allá de las cadenas asociadas al selector y al modal.
+- Impresión y exportación a PDF.
+- Temas adicionales, personalización de acento, densidad o tipografía por parte del visitante.
+- Animaciones de entrada de secciones, revelados al hacer scroll y microinteracciones decorativas.
+- Iconografía, ilustraciones, imágenes, favicon y metadatos SEO.
+- Estados de error, aviso o éxito: el sitio no tiene formularios ni acciones con error.
+
+## 8. Criterios de finalización
+
+La funcionalidad se considerará terminada cuando:
+
+- [ ] La paleta monocroma cálida está definida para ambos temas con roles semánticos documentados.
+- [ ] `Geist Mono` es la fuente exclusiva para todo el texto visible; no hay `font-weight` superior a 400 ni segunda familia para texto corrido.
+- [ ] El selector (`<select>`) está presente en `layout`, oculto por defecto, revelado tras el primer cambio de preferencia, y ofrece las opciones: claro, oscuro, sistema.
+- [ ] El tema por defecto en la primera visita sigue la preferencia del sistema; la opción "sistema" funciona en tiempo real.
+- [ ] La elección (claro/oscuro/sistema) se persiste en `localStorage` y se sincroniza entre pestañas del mismo navegador.
+- [ ] No se observa destello de tema incorrecto al cargar ni al navegar con una elección previa.
+- [ ] La transición de tema es suave (150–400 ms) con easing suave; con `prefers-reduced-motion` es instantánea.
+- [ ] Se ha verificado el contraste AA (4,5:1 texto / 3:1 interfaz) en ambos temas y en todos los roles.
+- [ ] Foco de teclado visible y operable en todas las páginas, sin eliminarlo en ningún caso.
+- [ ] Enlaces y estados se distinguen sin depender del color (subrayado, contraste, superficie).
+- [ ] Reflow correcto a 320 px y zoom al 200 % sin desplazamiento horizontal.
+- [ ] El selector está oculto al inicio y se revela tras el cambio de preferencia.
+- [ ] El modal informativo (en inglés y castellano) se muestra al interactuar con el selector, es accesible y no bloquea la interacción; con JavaScript desactivado el sitio sigue funcional.
+- [ ] Comprobados los casos límite 1–18 en al menos un navegador de escritorio y uno móvil.
+- [ ] Existen pruebas automatizadas del cambio de tema, la persistencia, la sincronización, la revelación del selector, el comportamiento sin JavaScript y la ausencia de destello, además de una prueba end-to-end del flujo completo.
+- [ ] Lint, typecheck y pruebas en verde; sin dependencias nuevas.
+
+## 9. Dudas abiertas (resueltas y pendientes)
+
+- **[RESUELTA]** ¿Qué familia monoespaciada concreta se usará? → **Geist Mono** (incluida en el scaffold; pesos 400 y 400 itálico; jerarquía sin negrita).
+- **[RESUELTA]** ¿En qué idiomas debe existir el texto del selector y del modal? → **Inglés y castellano** (en diccionarios i18n).
+- **[RESUELTA]** ¿Se ofrece la opción de "sistema" junto a claro y oscuro? → **Sí**, con tres opciones en el `<select>`.
+- **[RESUELTA]** ¿Se sincroniza la preferencia entre pestañas? → **Sí**, mediante el evento `storage`.
+- **[RESUELTA]** ¿Cómo se revela el selector si está oculto por defecto? → **Mediante un botón de tema siempre visible** que dispara la revelación y el cambio.
+- **[RESUELTA]** ¿El modal es bloqueante? → **No**, se usa `<dialog>` con `show()` (no `showModal()`).
+- **[RESUELTA]** ¿Valores exactos de paleta? → **Escala de 5 grises cálidos (`--warm-1` a `--warm-5`)** con nombres en inglés.
+- **[RESUELTA]** ¿Anchura máxima? → **65ch**.
+- **[RESUELTA]** ¿Umbral de texto grande para contraste 3:1? → **≥ 18 px** (o 14 px itálico).
+- **[RESUELTA]** ¿Mecanismo para controles nativos del navegador? → **Propiedad CSS `color-scheme`**.
+- **[RESUELTA]** ¿Dónde vive el selector? → **Componente reutilizable de una sola responsabilidad** incluido en `layout.tsx`.
+- **[RESUELTA]** ¿Dónde viven las cadenas del selector y modal? → **En diccionarios i18n** (inglés y castellano).
+
+**Estado del cribado:** todas las ambigüedades, contradicciones y casos límite detectados en la auditoría QA quedan resueltos en este documento. El spec se mantiene en **Borrador**; el spec Activo que respaldará el código será `specs/001-styles-globals/implementation.md`.
