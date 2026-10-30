@@ -1,26 +1,95 @@
 @import "tailwindcss";
 
+/* Escala cálida fija (NFR-6) */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --warm-1: #fdfcfb;
+  --warm-2: #f5f3f0;
+  --warm-3: #e8e6e1;
+  --warm-4: #d4d0ca;
+  --warm-5: #b8b4ad;
+
+  --font-mono: "Geist Mono", monospace;
+
+  --transition-theme: 250ms ease-in-out;
+  --transition-theme-reduced: 0ms;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Variables semánticas por tema */
+.theme-light {
+  --color-bg: var(--warm-1);
+  --color-surface: var(--warm-2);
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: var(--warm-5);
+  --color-border: var(--warm-3);
+  --color-inverse-bg: #1a1a1a;
+  --color-inverse-text: var(--warm-1);
+  --color-focus: #000000;
+  --color-selection: var(--warm-4);
+  color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+.theme-dark {
+  --color-bg: #1a1a1a;
+  --color-surface: var(--warm-5);
+  --color-text-primary: var(--warm-1);
+  --color-text-secondary: var(--warm-3);
+  --color-border: var(--warm-4);
+  --color-inverse-bg: var(--warm-1);
+  --color-inverse-text: #1a1a1a;
+  --color-focus: #ffffff;
+  --color-selection: var(--warm-3);
+  color-scheme: dark;
+}
+
+.theme-system {
+  color-scheme: light dark;
+}
+
+/* Aplicación base */
+html,
+body {
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-display: swap;
+}
+
+/* Contenedor de lectura */
+.container,
+main {
+  max-width: 65ch;
+}
+
+/* Transiciones suaves */
+* {
+  transition: background-color var(--transition-theme),
+              color var(--transition-theme),
+              border-color var(--transition-theme);
+}
+
+/* Prefers reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: var(--transition-theme-reduced);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Foco visible (3:1 contraste) */
+:focus-visible,
+:focus {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* Enlaces subrayados sin color de acento */
+a {
+  text-decoration: underline;
+  color: inherit;
+}
+
+/* Selección de texto */
+::selection {
+  background: var(--color-selection);
+  color: var(--color-text-primary);
 }
