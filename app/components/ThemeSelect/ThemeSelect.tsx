@@ -9,6 +9,7 @@ export default function ThemeSelect({ lang = 'en' }: { lang?: 'en' | 'es' }) {
     const v = e.target.value as 'light' | 'dark' | 'system';
     setValue(v);
     saveTheme(v);
+    window.dispatchEvent(new CustomEvent('theme-change', { detail: v }));
   };
 
   const label = lang === 'es' ? 'Tema' : 'Theme';

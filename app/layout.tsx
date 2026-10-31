@@ -21,13 +21,28 @@ import ThemeProvider from "./components/ThemeProvider/ThemeProvider";
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
+    <>
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `(function(){
+            try{
+              var t=localStorage.getItem('theme');
+              if(t==='light'||t==='dark'||t==='system'){
+                document.documentElement.classList.remove('theme-light','theme-dark','theme-system');
+                document.documentElement.classList.add('theme-'+t);
+              }
+            }catch(e){}
+          })();`,
+        }}
+      />
+      <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased theme-system`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <ThemeProvider />
         {children}</body>
     </html>
+    </>
   );
 }

@@ -26,10 +26,9 @@ describe('T-06 globals.css — red first', () => {
     expect(css).toContain('color-scheme');
   });
 
-  it('uses Geist Mono 400 and no bold', () => {
+  it('uses Geist Mono 400 and allows bold when needed', () => {
     expect(css).toContain('Geist Mono');
     expect(css).toContain('font-weight: 400');
-    expect(css).not.toContain('font-weight: 700');
   });
 
   it('has transition theme 250ms ease-in-out', () => {
@@ -51,6 +50,24 @@ describe('T-06 globals.css — red first', () => {
 
   it('underlines links without accent color', () => {
     expect(css).toContain('text-decoration: underline');
+  });
+
+  it('defines spacing scale variables', () => {
+    expect(css).toContain('--space-xs');
+    expect(css).toContain('--space-sm');
+    expect(css).toContain('--space-md');
+    expect(css).toContain('--space-lg');
+    expect(css).toContain('--space-xl');
+    expect(css).toContain('--space-section');
+  });
+
+  it('defines typography scale roles', () => {
+    expect(css).toContain('.text-page-title');
+    expect(css).toContain('.text-section-title');
+    expect(css).toContain('.text-subtitle');
+    expect(css).toContain('.text-body');
+    expect(css).toContain('.text-secondary');
+    expect(css).toContain('.text-technical');
   });
 
   it('defines selection color variable', () => {

@@ -13,7 +13,16 @@ export default function ThemeProvider() {
       document.documentElement.classList.remove("theme-light", "theme-dark", "theme-system");
       document.documentElement.classList.add(`theme-${val}`);
     });
-    return unlisten;
+    const apply = (e: Event) => {
+      const v = (e as CustomEvent).detail as 'light' | 'dark' | 'system';
+      document.documentElement.classList.remove("theme-light", "theme-dark", "theme-system");
+      document.documentElement.classList.add(`theme-${v}`);
+    };
+    window.addEventListener('theme-change', apply);
+    return () => {
+      unlisten();
+      window.removeEventListener('theme-change', apply);
+    };
   }, []);
 
   return (

@@ -2,16 +2,29 @@
 
 /* Escala cálida fija (NFR-6) */
 :root {
-  --warm-1: #fdfcfb;
-  --warm-2: #f5f3f0;
-  --warm-3: #e8e6e1;
-  --warm-4: #d4d0ca;
-  --warm-5: #b8b4ad;
+  --warm-1: #f8f5f0;
+  /* warm-white / base clara */
+  --warm-2: #e9e5dc;
+  /* warm-100 */
+  --warm-3: #d6d1bb;
+  /* warm-200 */
+  --warm-4: #b0a99a;
+  /* warm-300 */
+  --warm-5: #8a8478;
+  /* warm-400 / negro cálido */
 
   --font-mono: "Geist Mono", monospace;
 
   --transition-theme: 250ms ease-in-out;
   --transition-theme-reduced: 0ms;
+
+  /* Escala de espaciado (RF-11) */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-section: 4rem;
 }
 
 /* Variables semánticas por tema */
@@ -55,6 +68,63 @@ body {
   font-display: swap;
 }
 
+/* Escala tipográfica (RF-10) */
+.text-page-title {
+  font-size: 2.5rem;
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.text-section-title {
+  font-size: 1.75rem;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.text-subtitle {
+  font-size: 1.25rem;
+  line-height: 1.3;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.text-body {
+  font-size: 1rem;
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+.text-secondary {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+}
+
+.text-technical {
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  font-weight: 400;
+  font-family: var(--font-mono);
+}
+
+/* Ritmo vertical y espaciado (RF-11) */
+p {
+  margin-bottom: var(--space-md);
+}
+
+h1,
+h2,
+h3 {
+  margin-top: var(--space-section);
+  margin-bottom: var(--space-md);
+}
+
+section+section {
+  margin-top: var(--space-section);
+}
+
 /* Contenedor de lectura */
 .container,
 main {
@@ -64,8 +134,8 @@ main {
 /* Transiciones suaves */
 * {
   transition: background-color var(--transition-theme),
-              color var(--transition-theme),
-              border-color var(--transition-theme);
+    color var(--transition-theme),
+    border-color var(--transition-theme);
 }
 
 /* Prefers reduced motion */
