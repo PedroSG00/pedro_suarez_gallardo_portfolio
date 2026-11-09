@@ -2,9 +2,9 @@ import { describe, it, expect } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
 
-describe('T-06 globals.css — red first', () => {
-  const css = fs.readFileSync(path.resolve('app/globals.css'), 'utf8');
+const css = fs.readFileSync(path.resolve('app/globals.css'), 'utf8');
 
+describe('T-06 globals.css — red first', () => {
   it('defines --warm-1 to --warm-5', () => {
     expect(css).toContain('--warm-1');
     expect(css).toContain('--warm-5');
@@ -72,5 +72,50 @@ describe('T-06 globals.css — red first', () => {
 
   it('defines selection color variable', () => {
     expect(css).toContain('--color-selection');
+  });
+});
+
+describe('T-10 impact scale and full-bleed composition — red first', () => {
+  it('defines the editorial display scale tokens', () => {
+    expect(css).toContain('--type-display');
+    expect(css).toContain('--type-page-title');
+    expect(css).toContain('--type-section-title');
+  });
+
+  it('defines --measure as 65ch for running text', () => {
+    expect(css).toMatch(/--measure:\s*65ch/);
+  });
+
+  it('applies the reading measure through the shared token', () => {
+    expect(css).toMatch(/max-width:\s*var\(--measure\)/);
+  });
+
+  it('defines fluid gutter and section spacing tokens', () => {
+    expect(css).toContain('--gutter');
+    expect(css).toContain('--section-space');
+  });
+
+  it('defines the full-bleed layout token', () => {
+    expect(css).toMatch(/--layout-wide:\s*100%/);
+  });
+
+  it('provides a full-bleed container that cannot overflow horizontally', () => {
+    expect(css).toContain('.layout-wide');
+    expect(css).toMatch(/max-width:\s*none/);
+    expect(css).toMatch(/overflow-x:\s*clip/);
+  });
+
+  it('provides an inverted block utility', () => {
+    expect(css).toContain('.inverted');
+    expect(css).toContain('--color-inverse-bg');
+    expect(css).toContain('--color-inverse-text');
+  });
+
+  it('provides a reveal utility that is disabled with reduced motion', () => {
+    expect(css).toContain('.reveal');
+    expect(css).toContain('--transition-reveal');
+    expect(css).toMatch(
+      /@media\s*\(prefers-reduced-motion:\s*reduce\)\s*\{[\s\S]*\.reveal/,
+    );
   });
 });

@@ -21,28 +21,30 @@ import ThemeProvider from "./components/ThemeProvider/ThemeProvider";
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <>
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `(function(){
-            try{
-              var t=localStorage.getItem('theme');
-              if(t==='light'||t==='dark'||t==='system'){
-                document.documentElement.classList.remove('theme-light','theme-dark','theme-system');
-                document.documentElement.classList.add('theme-'+t);
-              }
-            }catch(e){}
-          })();`,
-        }}
-      />
-      <html
+    <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
+      className={`${geistSans.variable} ${geistMono.variable} theme-system h-full antialiased`}
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){
+              try{
+                var t=localStorage.getItem('theme');
+                if(t==='light'||t==='dark'||t==='system'){
+                  document.documentElement.classList.remove('theme-light','theme-dark','theme-system');
+                  document.documentElement.classList.add('theme-'+t);
+                }
+              }catch(e){}
+            })();`,
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col">
         <ThemeProvider />
-        {children}</body>
+        <div className="layout-wide flex flex-1 flex-col">{children}</div>
+      </body>
     </html>
-    </>
   );
 }

@@ -10,12 +10,14 @@
 
 El portfolio de Pedro Suárez Gallardo será un sitio estático y bilingüe dirigido principalmente a reclutadores y, en segundo lugar, a clientes potenciales. Hoy solo existe el andamiaje generado por el scaffold: una paleta genérica de blanco y negro, una tipografía sans y una página de ejemplo. Antes de construir la primera sección real hay que fijar la identidad visual, porque cada pantalla futura heredará estas decisiones.
 
-Esta funcionalidad define y aplica la **base visual única** del sitio: color, tipografía, escala de espaciado, anchura de lectura, foco, selección, movimiento y tema claro/oscuro. Su objetivo es que cualquier página nueva se vea como parte del mismo producto sin redefinir estilos, que el sitio sea legible y accesible en ambos temas y que la estética minimalista de estética "tech" —crudo y negro, monoespaciada— sea reconocible desde la primera visita.
+Esta funcionalidad define y aplica la **base visual única** del sitio: color, tipografía, escala de espaciado, anchura de lectura, foco, selección, movimiento y tema claro/oscuro. Su objetivo es que cualquier página nueva se vea como parte del mismo producto sin redefinir estilos, que el sitio sea legible y accesible en ambos temas y que la identidad **minimalista pero visualmente espectacular** —crudo y negro, monoespaciada, editorial— sea reconocible e impactante desde la primera visita. Menos elementos, pero con presencia máxima: el atractivo no vendrá de decorar más, sino de componer mejor.
 
 ### Decisiones ya acordadas (fuente de verdad)
 
-- **Paleta monocroma cálida:** crudo y negro como extremos, con una escala corta de grises cálidos intermedios (definida en §4.1) y **sin color de acento**. Estados y enlaces se distinguen por peso, subrayado, contraste y contorno.
-- **Tipografía monoespaciada:** **Geist Mono** para todo el sitio (titulares, párrafos, navegación, etiquetas, datos, controles). Geist Mono ofrece pesos 400 y 700, pero **RF-10 prohíbe usar `font-weight: bold` para jerarquía**; la jerarquía se expresa mediante tamaño, contraste, espaciado e itálico (400 y 400 itálico).
+- **Paleta monocroma cálida de alto contraste:** crudo y negro como extremos, con una escala corta de grises cálidos intermedios (definida en §4.1) y **sin color de acento**. La espectacularidad nace del contraste extremo, las grandes superficies y la escala tipográfica, no de añadir color. Estados y enlaces se distinguen por peso, subrayado, contraste y contorno.
+- **Tipografía monoespaciada editorial:** **Geist Mono** para todo el sitio (titulares, párrafos, navegación, etiquetas, datos, controles). Geist Mono ofrece pesos 400 y 700, pero **RF-10 prohíbe usar `font-weight: bold` para jerarquía**; la jerarquía se expresa mediante tamaño, contraste, espaciado e itálico (400 y 400 itálico). Los titulares pueden alcanzar escala *display* y funcionar como elemento gráfico.
+- **Composición de alto impacto:** espacio negativo generoso, retícula visible, asimetría controlada, bloques invertidos y detalles tipográficos (numeración de secciones, reglas finas, etiquetas en versalitas). Cada página debe incluir al menos un momento visual deliberado y memorable.
+- **Movimiento contenido pero expresivo:** revelados de entrada escalonados, transiciones de tema y microinteracciones de hover que refuercen la composición. Nada de animaciones infinitas ni efectos gratuitos; con `prefers-reduced-motion` el impacto se mantiene por composición y tipografía estáticas.
 - **Tema elegible con opción de sistema:** el visitante alterna entre **claro**, **oscuro** y **sistema**; la primera visita sigue la preferencia del sistema operativo; la elección se recuerda y se sincroniza entre pestañas del mismo navegador.
 - **Selector oculto / revelado:** un **botón de tema** permanece siempre visible en el layout. Al pulsarlo por primera vez, se aplica el tema elegido y se **revela** el `<select>` oculto inicialmente. Una vez revelado, permanece visible en el layout. El selector se implementa como un componente reutilizable de una sola responsabilidad.
 - **Modal informativo:** se muestra al interactuar con el selector. Implementado con `<dialog>` invocado mediante `show()` (no bloqueante), no mediante `showModal()`.
@@ -33,7 +35,7 @@ Esta funcionalidad define y aplica la **base visual única** del sitio: color, t
 
 ## 3. Historias de usuario
 
-- **HU-1.** Como reclutador que abre el sitio por primera vez, quiero ver de inmediato una identidad visual clara y legible, para formarme una impresión profesional sin esfuerzo.
+- **HU-1.** Como reclutador que abre el sitio por primera vez, quiero ver de inmediato una identidad visual clara, legible y memorable, para formarme una impresión profesional sin esfuerzo.
 - **HU-2.** Como visitante que prefiere el modo oscuro, quiero que el sitio se abra en oscuro sin tener que configurarlo, para no deslumbrarme.
 - **HU-3.** Como visitante que prefiere el modo claro, quiero poder cambiar el tema y que el sitio lo recuerde, para no repetir el cambio en cada visita.
 - **HU-4.** Como visitante que navega con teclado, quiero ver siempre dónde está mi foco, para moverme sin perderme.
@@ -41,6 +43,7 @@ Esta funcionalidad define y aplica la **base visual única** del sitio: color, t
 - **HU-6.** Como visitante que lee en el móvil o con poco ancho de pantalla, quiero que el texto siga siendo legible y no se corte, para leer con comodidad.
 - **HU-7.** Como visitante con baja visión o daltonismo, quiero distinguir enlaces, estados y foco sin depender del color, para usar el sitio con autonomía.
 - **HU-8.** Como Pedro, quiero que todas las páginas compartan una sola base visual, para que añadir secciones no reintroduzca decisiones de color, tipografía o espaciado.
+- **HU-9.** Como visitante que compara portfolios, quiero que el sitio me sorprenda visualmente sin perder claridad, para recordarlo y percibir un nivel de detalle profesional.
 
 ## 4. Requisitos funcionales
 
@@ -52,6 +55,7 @@ El sitio debe presentar una paleta monocroma cálida con dos extremos (crudo y n
   - **El sistema deberá** usar exclusivamente la paleta monocroma cálida definida para todos los colores visibles de la interfaz.
   - **El sistema deberá** disponer de un valor propio para cada rol semántico en el tema claro, el tema oscuro y el tema que siga al sistema.
   - **El sistema no deberá** introducir colores de acento ni colores fuera de los grises cálidos acordados.
+  - **El sistema deberá** generar impacto visual mediante contraste extremo entre crudo y negro, grandes superficies y jerarquía tipográfica, sin depender del color.
   - **Cuando** una pantalla necesite un color que no corresponda a ningún rol, **el sistema deberá** reutilizar el rol más cercano en lugar de improvisar un valor nuevo.
 
 #### 4.1 Escala de grises cálidos (valores exactos)
@@ -127,6 +131,7 @@ Los nombres de las variables están en inglés (Constitución 6).
 
 - **Criterios de aceptación (EARS):**
   - **El sistema deberá** usar **Geist Mono** como única familia tipográfica monoespaciada para todo el texto visible: titulares, párrafos, navegación, etiquetas, datos y controles.
+  - **El sistema deberá** tratar los titulares y los datos como elementos gráficos: escala *display*, interletrado ajustado, alineaciones intencionadas y contraste de tamaños.
   - **El sistema no deberá** usar una segunda familia tipográfica para el texto corrido.
   - **Si** la fuente no está disponible o la carga es lenta, **entonces el sistema deberá** recurrir a una monoespaciada del sistema (`monospace`) sin salto perceptible de maquetación.
   - **El sistema deberá** mostrar el texto legible desde el primer momento, sin que la aparición de la tipografía desplace el contenido.
@@ -134,7 +139,8 @@ Los nombres de las variables están en inglés (Constitución 6).
 ### RF-10 — Escala tipográfica sin negrita
 
 - **Criterios de aceptación (EARS):**
-  - **El sistema deberá** definir una escala acotada de estilos de texto con roles diferenciados: título de página, título de sección, subtítulo, cuerpo, texto secundario y texto técnico o de datos.
+  - **El sistema deberá** definir una escala editorial acotada de estilos de texto con roles diferenciados: título *display*, título de página, título de sección, subtítulo, cuerpo, texto secundario y texto técnico o de datos.
+  - **El sistema deberá** permitir que los títulos de página o de sección alcancen tamaños *display* y funcionen como recurso visual principal, sin dejar de ser texto semántico.
   - **El sistema no deberá** usar `font-weight: bold` (o valores superiores a 400) para expresar jerarquía.
   - **El sistema deberá** expresar la jerarquía mediante **tamaño**, **contraste de color**, **espaciado** y, cuando sea apropiado, **itálico** (`font-style: italic`).
   - **El sistema deberá** usar un tamaño de cuerpo no inferior a 16 px y una altura de línea que mantenga el texto cómodo de leer.
@@ -145,13 +151,15 @@ Los nombres de las variables están en inglés (Constitución 6).
 
 - **Criterios de aceptación (EARS):**
   - **El sistema deberá** definir una escala corta y consistente de espaciados y usarla para separar elementos, bloques y secciones.
+  - **El sistema deberá** usar espacio negativo generoso como recurso compositivo, alternando bloques densos y bloques amplios para crear ritmo visual.
   - **El sistema deberá** mantener un ritmo vertical regular entre títulos, párrafos y grupos de contenido.
   - **El sistema deberá** aumentar la separación entre secciones respecto a la separación dentro de una misma sección.
 
 ### RF-12 — Anchura de contenido y adaptación a la pantalla
 
 - **Criterios de aceptación (EARS):**
-  - **El sistema deberá** centrar el contenido en una anchura máxima de **65ch** que mantenga líneas legibles en pantallas grandes.
+  - **El sistema deberá** limitar el texto corrido a una medida máxima de **65ch** para mantener líneas legibles en pantallas grandes.
+  - **El sistema deberá** permitir composiciones de ancho completo (*full-bleed*) para titulares, bloques invertidos, retículas y elementos gráficos, sin aplicarles la medida de lectura.
   - **Mientras** la pantalla sea estrecha, **el sistema deberá** reducir los márgenes laterales sin que el contenido toque los bordes.
   - **Cuando** la ventana se estreche hasta 320 px de ancho, **el sistema no deberá** producir desplazamiento horizontal.
   - **El sistema deberá** adaptar tipografía y espaciado a pantallas pequeñas sin perder jerarquía ni legibilidad.
@@ -184,17 +192,27 @@ Los nombres de las variables están en inglés (Constitución 6).
   - **El sistema no deberá** permitir que una página o sección redefina colores, tipografía, espaciado o movimiento al margen de los valores compartidos.
   - **Cuando** se añada una página o sección nueva, **el sistema deberá** heredar la base visual sin requerir ajustes de estilo propios.
 
+### RF-17 — Impacto visual deliberado y memorable
+
+- **Criterios de aceptación (EARS):**
+  - **El sistema deberá** incluir en cada página al menos un **momento visual deliberado** (titular a gran escala, bloque invertido, retícula, composición asimétrica o revelado contenido) que aporte personalidad sin competir con la lectura.
+  - **El sistema deberá** conseguir el impacto mediante tipografía, composición, contraste y movimiento, no mediante color de acento, ilustraciones recargadas ni efectos gratuitos.
+  - **Cuando** el visitante prefiera movimiento reducido, **el sistema deberá** conservar el impacto visual mediante composición y tipografía estáticas.
+  - **El sistema no deberá** sacrificar legibilidad, contraste, rendimiento, semántica ni accesibilidad para conseguir impacto visual.
+  - **El sistema deberá** verse intencionado y editorial en ambos temas, nunca como una plantilla genérica ni como una inversión plana de colores.
+
 ## 5. Requisitos no funcionales
 
 - **NFR-1 — Contraste (WCAG 2.2 AA).** Todo texto normal alcanzará al menos 4,5:1 sobre su fondo; el texto grande, al menos 3:1; los componentes de interfaz, bordes relevantes e indicadores de foco, al menos 3:1. Se verificará en todos los pares rol/fondo de ambos temas.
 - **NFR-2 — Accesibilidad más allá del color.** Ningún estado, enlace o jerarquía se comunicará solo mediante color. Se mantendrá la legibilidad con zoom del 200 %, con reflow a 320 px y con colores forzados de alto contraste del sistema operativo.
-- **NFR-3 — Rendimiento y estabilidad visual.** La base visual no bloqueará el primer renderizado, no provocará desplazamientos perceptibles por la carga de tipografía y no incluirá animaciones decorativas infinitas ni recursos pesados de terceros.
+- **NFR-3 — Rendimiento y estabilidad visual.** La base visual no bloqueará el primer renderizado, no provocará desplazamientos perceptibles por la carga de tipografía y no incluirá animaciones decorativas infinitas ni recursos pesados de terceros. Los revelados de entrada se implementarán con CSS/Tailwind, serán breves y no bloquearán la lectura.
 - **NFR-4 — Respuesta percibida.** El cambio de tema se percibirá inmediato (sin recarga ni re-descarga de contenido) y no perderá el estado de la página.
 - **NFR-5 — Compatibilidad.** El sitio se verá y funcionará correctamente en las dos últimas versiones de Chrome, Firefox, Safari y Edge, tanto en escritorio como en móvil, sin degradaciones que rompan la legibilidad o el tema.
 - **NFR-6 — Fuente única de verdad.** Los valores de color, tipografía, espaciado, foco y movimiento se definirán una sola vez y todas las pantallas los consumirán; no se duplicarán valores a mano.
 - **NFR-7 — Privacidad.** La preferencia de tema se conservará únicamente en el navegador del visitante (`localStorage`); no se enviará a terceros ni se usará para rastreo.
 - **NFR-8 — Dependencias.** No se añadirán dependencias nuevas para implementar esta funcionalidad; se usará lo ya disponible en el stack aprobado (Next.js, React, TypeScript, Tailwind, Geist Mono).
 - **NFR-9 — Contenido bilingüe.** Cualquier texto visible asociado al tema (nombre accesible del selector, mensajes del modal, opciones del `<select>`) existirá en inglés y castellano conforme a la constitución (`docs/constitution.md`) y se almacenará en los diccionarios i18n del proyecto.
+- **NFR-10 — Impacto sin dependencias.** El impacto visual se conseguirá con CSS/Tailwind, tipografía y composición, sin añadir librerías de animación, fuentes adicionales ni assets pesados. La identidad debe mantenerse reconocible en ambos temas y en cualquier tamaño de pantalla.
 
 ## 6. Casos límite
 
@@ -216,6 +234,8 @@ Los nombres de las variables están en inglés (Constitución 6).
 16. **Cambio de idioma (futuro):** la base visual no depende del idioma y no cambia al alternarlo.
 17. **Selector revelado tras cambio de preferencia:** una vez revelado, el `<select>` permanece visible en el layout.
 18. **Modal mostrado con JavaScript activo:** el mensaje informativo aparece sin bloquear la interacción, es accesible (rol de alerta o diálogo) y se presenta en inglés y castellano.
+19. **Movimiento reducido con revelados de entrada:** el contenido aparece completo desde el primer momento y el impacto se mantiene mediante composición y tipografía estáticas.
+20. **Titular *display* en pantalla de 320 px:** la escala se adapta sin desbordar, sin cortar palabras ni generar desplazamiento horizontal.
 
 ## 7. Fuera de alcance
 
@@ -224,8 +244,8 @@ Los nombres de las variables están en inglés (Constitución 6).
 - El sistema completo de internacionalización (`i18n`) y los diccionarios de textos, más allá de las cadenas asociadas al selector y al modal.
 - Impresión y exportación a PDF.
 - Temas adicionales, personalización de acento, densidad o tipografía por parte del visitante.
-- Animaciones de entrada de secciones, revelados al hacer scroll y microinteracciones decorativas.
-- Iconografía, ilustraciones, imágenes, favicon y metadatos SEO.
+- Efectos decorativos gratuitos, animaciones infinitas, parallax pesado, 3D y cualquier recurso que sacrifique rendimiento o accesibilidad por espectáculo.
+- Iconografía, ilustraciones, imágenes, favicon y metadatos SEO. El impacto de esta base visual se consigue con tipografía, composición y movimiento contenido; las imágenes se definirán en funcionalidades posteriores.
 - Estados de error, aviso o éxito: el sitio no tiene formularios ni acciones con error.
 
 ## 8. Criterios de finalización
@@ -233,12 +253,16 @@ Los nombres de las variables están en inglés (Constitución 6).
 La funcionalidad se considerará terminada cuando:
 
 - [ ] La paleta monocroma cálida está definida para ambos temas con roles semánticos documentados.
+- [ ] La identidad se percibe como minimalista pero visualmente espectacular: contraste editorial, escala *display* y composición intencionada, nunca una plantilla genérica.
+- [ ] Cada página incluye al menos un momento visual deliberado y memorable (titular a gran escala, bloque invertido, retícula, asimetría o revelado contenido).
+- [ ] El texto corrido respeta una medida máxima de 65ch, mientras las composiciones *full-bleed* aprovechan todo el ancho disponible.
 - [ ] `Geist Mono` es la fuente exclusiva para todo el texto visible; no hay `font-weight` superior a 400 ni segunda familia para texto corrido.
 - [ ] El selector (`<select>`) está presente en `layout`, oculto por defecto, revelado tras el primer cambio de preferencia, y ofrece las opciones: claro, oscuro, sistema.
 - [ ] El tema por defecto en la primera visita sigue la preferencia del sistema; la opción "sistema" funciona en tiempo real.
 - [ ] La elección (claro/oscuro/sistema) se persiste en `localStorage` y se sincroniza entre pestañas del mismo navegador.
 - [ ] No se observa destello de tema incorrecto al cargar ni al navegar con una elección previa.
 - [ ] La transición de tema es suave (150–400 ms) con easing suave; con `prefers-reduced-motion` es instantánea.
+- [ ] Los revelados de entrada y microinteracciones son contenidos, se implementan con CSS/Tailwind, no bloquean la lectura y se desactivan con `prefers-reduced-motion`.
 - [ ] Se ha verificado el contraste AA (4,5:1 texto / 3:1 interfaz) en ambos temas y en todos los roles.
 - [ ] Foco de teclado visible y operable en todas las páginas, sin eliminarlo en ningún caso.
 - [ ] Enlaces y estados se distinguen sin depender del color (subrayado, contraste, superficie).
@@ -251,6 +275,7 @@ La funcionalidad se considerará terminada cuando:
 
 ## 9. Dudas abiertas (resueltas y pendientes)
 
+- **[RESUELTA]** ¿Cómo se consigue que el diseño sea minimalista pero visualmente espectacular? → **Menos elementos, máxima presencia:** contraste crudo/negro, escala tipográfica editorial, composición asimétrica, espacio negativo generoso, retícula y movimiento contenido. Sin color de acento, decoración recargada ni dependencias extra.
 - **[RESUELTA]** ¿Qué familia monoespaciada concreta se usará? → **Geist Mono** (incluida en el scaffold; pesos 400 y 400 itálico; jerarquía sin negrita).
 - **[RESUELTA]** ¿En qué idiomas debe existir el texto del selector y del modal? → **Inglés y castellano** (en diccionarios i18n).
 - **[RESUELTA]** ¿Se ofrece la opción de "sistema" junto a claro y oscuro? → **Sí**, con tres opciones en el `<select>`.

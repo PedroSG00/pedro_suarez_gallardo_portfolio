@@ -17,6 +17,20 @@
 
   --transition-theme: 250ms ease-in-out;
   --transition-theme-reduced: 0ms;
+  --transition-reveal: 550ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Escala editorial de impacto (RF-9, RF-10, RF-12, RF-17) */
+  /* Lower minimum keeps long display words inside 320px without breaking them (edge case 20) */
+  --type-display: clamp(2rem, 11vw, 9rem);
+  --type-page-title: clamp(2.5rem, 7vw, 5rem);
+  --type-section-title: clamp(1.75rem, 4vw, 3rem);
+  --type-body: 1rem;
+
+  /* Medida de lectura, márgenes y composición full-bleed (RF-11, RF-12) */
+  --measure: 65ch;
+  --gutter: clamp(1.25rem, 5vw, 4rem);
+  --section-space: clamp(5rem, 12vw, 10rem);
+  --layout-wide: 100%;
 
   /* Escala de espaciado (RF-11) */
   --space-xs: 0.25rem;
@@ -24,7 +38,7 @@
   --space-md: 1rem;
   --space-lg: 1.5rem;
   --space-xl: 2.5rem;
-  --space-section: 4rem;
+  --space-section: var(--section-space);
 }
 
 /* Variables semánticas por tema */
@@ -54,8 +68,33 @@
   color-scheme: dark;
 }
 
+/* System theme: light roles by default, dark roles when the OS prefers dark */
 .theme-system {
+  --color-bg: var(--warm-1);
+  --color-surface: var(--warm-2);
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: var(--warm-5);
+  --color-border: var(--warm-3);
+  --color-inverse-bg: #1a1a1a;
+  --color-inverse-text: var(--warm-1);
+  --color-focus: #000000;
+  --color-selection: var(--warm-4);
   color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  .theme-system {
+    --color-bg: #1a1a1a;
+    --color-surface: var(--warm-5);
+    --color-text-primary: var(--warm-1);
+    --color-text-secondary: var(--warm-3);
+    --color-border: var(--warm-4);
+    --color-inverse-bg: var(--warm-1);
+    --color-inverse-text: #1a1a1a;
+    --color-focus: #ffffff;
+    --color-selection: var(--warm-3);
+    color-scheme: dark;
+  }
 }
 
 /* Aplicación base */
@@ -66,20 +105,32 @@ body {
   font-family: var(--font-mono);
   font-weight: 400;
   font-display: swap;
+  overflow-x: clip;
 }
 
-/* Escala tipográfica (RF-10) */
+/* Escala tipográfica editorial (RF-9, RF-10, RF-17) */
+.text-display {
+  font-size: var(--type-display);
+  line-height: 0.95;
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
+}
+
 .text-page-title {
-  font-size: 2.5rem;
-  line-height: 1.1;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-size: var(--type-page-title);
+  line-height: 1.05;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
 }
 
 .text-section-title {
-  font-size: 1.75rem;
-  line-height: 1.2;
-  font-weight: 700;
+  font-size: var(--type-section-title);
+  line-height: 1.15;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
 }
 
 .text-subtitle {
@@ -90,8 +141,8 @@ body {
 }
 
 .text-body {
-  font-size: 1rem;
-  line-height: 1.6;
+  font-size: var(--type-body);
+  line-height: 1.7;
   font-weight: 400;
 }
 
@@ -117,18 +168,34 @@ p {
 h1,
 h2,
 h3 {
-  margin-top: var(--space-section);
+  margin-top: var(--section-space);
   margin-bottom: var(--space-md);
 }
 
 section+section {
-  margin-top: var(--space-section);
+  margin-top: var(--section-space);
 }
 
-/* Contenedor de lectura */
-.container,
+/* Medida de lectura y composición full-bleed (RF-11, RF-12, RF-17) */
 main {
-  max-width: 65ch;
+  width: var(--layout-wide);
+  max-width: none;
+  padding-inline: var(--gutter);
+}
+
+.measure,
+.container {
+  max-width: var(--measure);
+}
+
+.layout-wide,
+.full-bleed {
+  width: var(--layout-wide);
+  max-width: none;
+}
+
+.full-bleed {
+  padding-inline: var(--gutter);
 }
 
 /* Transiciones suaves */
@@ -162,4 +229,38 @@ a {
 ::selection {
   background: var(--color-selection);
   color: var(--color-text-primary);
+}
+
+/* Bloque invertido como momento visual (RF-17) */
+.inverted {
+  background: var(--color-inverse-bg);
+  color: var(--color-inverse-text);
+}
+
+/* Revelado de entrada solo con CSS (RF-17, NFR-3) */
+@media (prefers-reduced-motion: no-preference) {
+  .reveal {
+    animation: reveal-in var(--transition-reveal) both;
+  }
+}
+
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(1.5rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Con movimiento reducido el contenido aparece completo (RF-8, RF-17) */
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
 }

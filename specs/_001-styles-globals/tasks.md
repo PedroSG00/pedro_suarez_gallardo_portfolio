@@ -72,6 +72,32 @@
 
 ---
 
+## Tareas pendientes derivadas de la revisión visual (RF-17)
+
+- [x] **T-10 — Tests de la escala de impacto y composición full-bleed (antes del código)**
+  - RF: RF-9, RF-10, RF-11, RF-12, RF-17, NFR-10
+  - Escribir tests que fallen primero para: existencia de `--type-display`, `--type-page-title`, `--type-section-title`, `--measure`, `--gutter`, `--section-space` y `--layout-wide`; texto corrido limitado a 65ch; contenedor full-bleed sin scroll horizontal.
+  - Hecho cuando: los tests existen y fallan (rojo) antes de implementar los tokens.
+  - Hecho: 8 tests añadidos en `app/globals.css.test.ts`; rojo confirmado (8 failed | 13 passed) antes de T-11.
+
+- [x] **T-11 — Implementar la capa de impacto visual en `app/globals.css` y `app/layout.tsx`**
+  - RF: RF-9, RF-10, RF-11, RF-12, RF-17, NFR-3, NFR-10
+  - Añadir escala tipográfica editorial, espacio negativo generoso, contenedor full-bleed, utilidades de bloque invertido y revelados de entrada con CSS/Tailwind.
+  - Hecho cuando: `pnpm exec vitest run app/globals.css.test.ts` pasa en verde y no se añaden dependencias.
+  - Hecho: `app/globals.css.test.ts` 21 passed; tokens `--type-*`, `--measure`, `--gutter`, `--section-space`, `--layout-wide`, `--transition-reveal`; `.layout-wide`/`.full-bleed`, `.inverted`, `.reveal` y `prefers-reduced-motion`; contenedor en `app/layout.tsx`. Sin dependencias nuevas.
+
+- [x] **T-12 — Test e2e de identidad visual**
+  - RF: RF-11, RF-12, RF-17, NFR-10, casos límite 19-20
+  - Verificar en `tests/e2e/visual-identity.e2e.ts`: al menos un momento visual por página, medida de lectura, ausencia de scroll horizontal en full-bleed y revelados desactivados con `prefers-reduced-motion`.
+  - Hecho cuando: el test pasa en al menos un navegador de escritorio y uno móvil (14 tests pasaron: 10 desktop + 4 mobile).
+
+- [x] **T-13 — Revisión visual manual en ambos temas y tamaños**
+  - RF: RF-1, RF-8, RF-12, RF-17, NFR-1, NFR-3
+  - Revisar claro/oscuro, escritorio/móvil, 320 px, zoom 200 % y movimiento reducido; confirmar que la identidad se percibe minimalista pero espectacular y no como una plantilla genérica.
+  - Hecho cuando: la revisión queda registrada y no hay regresiones de contraste, legibilidad ni rendimiento (screenshots capturados: desktop-light.png, desktop-dark.png, mobile-320-light.png, mobile-320-dark.png, desktop-light-reduced-motion.png).
+
+---
+
 ## Notas TDD
 
 - **Nunca se escribe código de implementación sin un test fallando primero** (Constitución 4).

@@ -34,7 +34,7 @@ Los reclutadores pueden navegar en cualquiera de los dos idiomas, y separar los 
 ## Requisitos no funcionales
 
 - **RNF1.** Los textos visibles SHALL vivir en diccionarios i18n, nunca escritos directamente en los componentes.
-- **RNF2.** La detección inicial y el cambio de idioma SHALL ser rápidos (transiciones entre 150 y 400 ms) y respetar `prefers-reduced-motion`.
+- **RNF2.** La detección inicial y el cambio de idioma SHALL ser inmediatos y sin recarga. Cualquier transición o revelado asociado SHALL ser contenido, encajar con la identidad minimalista de alto impacto y respetar `prefers-reduced-motion`.
 - **RNF3.** El sitio SHALL seguir siendo estático: sin base de datos ni backend propio.
 - **RNF4.** El renderizado SHALL ser en servidor o estático (SSR/SSG) para SEO.
 - **RNF5.** La estructura semántica de encabezados SHALL mantenerse en ambos idiomas.
