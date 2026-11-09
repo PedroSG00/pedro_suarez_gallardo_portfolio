@@ -1,4 +1,34 @@
 {
+  "nav": {
+    "home": "Inicio",
+    "projects": "Proyectos",
+    "cv": "CV",
+    "contact": "Contacto",
+    "language": "Idioma"
+  },
+  "languages": {
+    "en": "English",
+    "es": "Español"
+  },
+  "sections": {
+    "hero": { "title": "Pedro Suárez Gallardo", "role": "Desarrollador web" },
+    "about": { "title": "Sobre mí" }
+  },
+  "metadata": {
+    "home": {
+      "title": "Pedro Suárez Gallardo — Desarrollador web",
+      "description": "Portfolio y currículum de Pedro Suárez Gallardo, desarrollador web."
+    },
+    "projects": {
+      "title": "Proyectos — Pedro Suárez Gallardo",
+      "description": "Selección de proyectos de desarrollo web de Pedro Suárez Gallardo."
+    }
+  },
+  "common": {
+    "notFound": "Página no encontrada",
+    "back": "Volver",
+    "copyright": "© Pedro Suárez Gallardo"
+  },
   "themeSelect": {
     "label": "Tema",
     "option": {

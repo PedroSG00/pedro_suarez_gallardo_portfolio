@@ -7,7 +7,7 @@
 
 ---
 
-## Tareas
+## TarReviseas
 
 - [x] **T1 — Diccionarios i18n del selector y modal (EN/ES)**  
   RF cubiertos: NFR-9, RF-3, RF-6  
