@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -27,19 +28,17 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} theme-system h-full antialiased`}
     >
       <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){
-              try{
-                var t=localStorage.getItem('theme');
-                if(t==='light'||t==='dark'||t==='system'){
-                  document.documentElement.classList.remove('theme-light','theme-dark','theme-system');
-                  document.documentElement.classList.add('theme-'+t);
-                }
-              }catch(e){}
-            })();`,
-          }}
-        />
+        <Script id="theme-init" strategy="beforeInteractive">
+          {`(function(){
+            try{
+              var t=localStorage.getItem('theme');
+              if(t==='light'||t==='dark'||t==='system'){
+                document.documentElement.classList.remove('theme-light','theme-dark','theme-system');
+                document.documentElement.classList.add('theme-'+t);
+              }
+            }catch(e){}
+          })();`}
+        </Script>
       </head>
       <body className="min-h-full flex flex-col">
         <ThemeProvider />
