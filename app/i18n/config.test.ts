@@ -22,6 +22,6 @@ describe('config — T11', () => {
   });
 
   it('metadataRoutes maps routes to metadata keys', () => {
-    expect(metadataRoutes).toEqual({ '/': 'home', '/proyectos': 'projects' });
+    expect(metadataRoutes).toEqual({ '/': 'home', '/projects': 'projects' });
   });
 });

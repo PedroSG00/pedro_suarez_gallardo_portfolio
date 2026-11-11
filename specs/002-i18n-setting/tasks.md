@@ -26,7 +26,7 @@ Small tasks (max 20-30 min each), in dependency order, each covering the RFs and
 
 - [x] **T6: Test unitario del middleware** — RF: **RF1, RNF8**
     - **Depende de:** Ninguna
-    - **Hecho cuando:** Test Vitest en `app/middleware.test.ts` pasa: rutas con prefijo válido pasan sin redirigir; las que no, redirigen 307 con header `Vary: Cookie, Accept-Language`. Excluye `/_next`, `/favicon.ico` y ficheros con extensión. Middleware implementado en `middleware.ts`. Test pasa (4 tests).
+    - **Hecho cuando:** Test Vitest en `app/middleware.test.ts` pasa: rutas con prefijo válido pasan sin redirigir; las que no, redirigen 307 con header `Vary: Cookie, Accept-Language`. Excluye `/_next`, `/favicon.ico` y ficheros con extensión. Middleware implementado en `proxy.ts` (convención `proxy` de Next.js 16, antes `middleware`). Test pasa (4 tests).
 
 ## Fase 2: Escenarios E2E (12 escenarios del plan sección 6.3, agrupados en 4 tareas)
 
@@ -36,7 +36,7 @@ Small tasks (max 20-30 min each), in dependency order, each covering the RFs and
 
 - [x] **T8: E2E - URL manda sobre cookie y persistencia** — RF: **RNF8**
     - **Depende de:** Ninguna
-    - **Hecho cuando:** Test Playwright: al visitar `/es/proyectos` sin cookie, la URL manda sobre la detección de idioma. Al borrar la cookie y recargar, el idioma se restaura desde `localStorage` si existe (no modo incógnito). Escenario escrito y ejecutado (en rojo hasta Fase 3).
+    - **Hecho cuando:** Test Playwright: al visitar `/es/projects` sin cookie, la URL manda sobre la detección de idioma. Al borrar la cookie y recargar, el idioma se restaura desde `localStorage` si existe (no modo incógnito). Escenario escrito y ejecutado (en rojo hasta Fase 3).
 
 - [x] **T9: E2E - Almacenamiento bloqueado y idioma `fr`** — RF: **RNF6**
     - **Depende de:** Ninguna
@@ -92,9 +92,9 @@ Small tasks (max 20-30 min each), in dependency order, each covering the RFs and
     - **Depende de:** T14, T15
     - **Hecho cuando:** `app/[locale]/page.tsx` exporta `generateMetadata({ params })` que lee `metadata.home.title/description` del diccionario fusionado en servidor. Test en `app/[locale]/page.test.tsx` pasa (2 tests).
 
-- [x] **T22: app/[locale]/proyectos/page.tsx con generateMetadata** — RF: **RF8**
+- [x] **T22: app/[locale]/projects/page.tsx con generateMetadata** — RF: **RF8**
     - **Depende de:** T21
-    - **Hecho cuando:** `app/[locale]/proyectos/page.tsx` exporta `generateMetadata({ params })` que lee `metadata.projects.title/description` del diccionario fusionado. Test en `app/[locale]/proyectos/page.test.tsx` pasa (2 tests).
+    - **Hecho cuando:** `app/[locale]/projects/page.tsx` exporta `generateMetadata({ params })` que lee `metadata.projects.title/description` del diccionario fusionado. Test en `app/[locale]/projects/page.test.tsx` pasa (2 tests).
 
 - [x] **T23: Validación de locale en ruta (dynamicParams = false)** — RF: **RF8**
     - **Depende de:** T20
@@ -106,20 +106,20 @@ Small tasks (max 20-30 min each), in dependency order, each covering the RFs and
 
 ## Fase 4: Verificación final (tareas cortas)
 
-- [ ] **T25: pnpm lint en verde**
-    - **Hecho cuando:** `pnpm lint` pasa sin errores, aplicando la regla `jsx-no-literals` en `components/` y `app/`.
+- [x] **T25: pnpm lint en verde**
+    - **Hecho cuando:** `pnpm lint` pasa sin errores, aplicando la regla `jsx-no-literals` en `components/` y `app/`. Verificado: 0 errores y 0 warnings.
 
-- [ ] **T26: pnpm typecheck en verde**
-    - **Hecho cuando:** `pnpm typecheck` (`tsc --noEmit`) pasa sin errores.
+- [x] **T26: pnpm typecheck en verde**
+    - **Hecho cuando:** `pnpm typecheck` (`tsc --noEmit`) pasa sin errores. Verificado: exit 0.
 
-- [ ] **T27: pnpm test en verde**
-    - **Hecho cuando:** `pnpm test` pasa todos los tests unitarios e de integración (Fases 1 y 2).
+- [x] **T27: pnpm test en verde**
+    - **Hecho cuando:** `pnpm test` pasa todos los tests unitarios e de integración (Fases 1 y 2). Verificado: 23 ficheros, 129 tests.
 
-- [ ] **T28: pnpm test:e2e en verde**
-    - **Hecho cuando:** `pnpm test:e2e` pasa todos los escenarios E2E (Fase 2).
+- [x] **T28: pnpm test:e2e en verde**
+    - **Hecho cuando:** `pnpm test:e2e` pasa todos los escenarios E2E (Fase 2). Verificado: 40 tests en chromium y mobile-chromium.
 
-- [ ] **T29: Comprobación RNF3**
-    - **Hecho cuando:** No existe `app/api/` ni acceso a base de datos. Verificado revisando la estructura de la aplicación.
+- [x] **T29: Comprobación RNF3**
+    - **Hecho cuando:** No existe `app/api/` ni acceso a base de datos. Verificado revisando la estructura de la aplicación: no existe `app/api/` y no hay dependencias ni referencias a base de datos.
 
 ## Trazabilidad
 

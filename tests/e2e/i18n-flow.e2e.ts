@@ -30,7 +30,7 @@ test.describe('T7 — SSR without JavaScript and RNF5', () => {
 
     // The HTML served by the server already carries the correct language
     await expect(page.locator('html')).toHaveAttribute('lang', 'es');
-    await expect(page.locator('main, body')).not.toBeEmpty();
+    await expect(page.locator('main')).not.toBeEmpty();
   });
 
   test('heading hierarchy identical in /en and /es, single h1 (RNF5)', async ({
@@ -60,72 +60,74 @@ test.describe('T7 — SSR without JavaScript and RNF5', () => {
 // ── T8: URL overrides cookie and persistence ──────────────────────────────
 
 test.describe('T8 — URL overrides cookie and persistence', () => {
-  test.beforeEach(async ({ context }) => {
-    await context.clearCookies();
-  });
-
   test('Accept-Language: es-ES, no cookie, / → redirects to /es', async ({
-    page,
-    context,
+    browser,
   }) => {
-    await context.setExtraHTTPHeaders({ 'accept-language': 'es-ES' });
-    await page.goto('/');
+    const context = await browser.newContext({ locale: 'es-ES' });
+    const page = await context.newPage();
+    await page.goto('http://localhost:3000/');
 
     await expect(page).toHaveURL(/.*\/es(\?.*)?$/);
+    await context.close();
   });
 
   test('Accept-Language: fr, no cookie, / → /en (fallback)', async ({
-    page,
-    context,
+    browser,
   }) => {
-    await context.setExtraHTTPHeaders({ 'accept-language': 'fr' });
-    await page.goto('/');
+    const context = await browser.newContext({ locale: 'fr-FR' });
+    const page = await context.newPage();
+    await page.goto('http://localhost:3000/');
 
     await expect(page).toHaveURL(/.*\/en(\?.*)?$/);
+    await context.close();
   });
 
   test('cookie lang=es wins over Accept-Language: en, / → /es', async ({
-    page,
-    context,
+    browser,
   }) => {
+    const context = await browser.newContext({ locale: 'en-US' });
     await context.addCookies([
       { name: 'lang', value: 'es', url: 'http://localhost:3000' },
     ]);
-    await context.setExtraHTTPHeaders({ 'accept-language': 'en' });
-    await page.goto('/');
+    const page = await context.newPage();
+    await page.goto('http://localhost:3000/');
 
     await expect(page).toHaveURL(/.*\/es(\?.*)?$/);
+    await context.close();
   });
 
   test('cookie deleted → / redetects by Accept-Language', async ({
-    page,
-    context,
+    browser,
   }) => {
+    const context = await browser.newContext({ locale: 'en-US' });
     await context.addCookies([
       { name: 'lang', value: 'es', url: 'http://localhost:3000' },
     ]);
     await context.clearCookies();
-    await context.setExtraHTTPHeaders({ 'accept-language': 'en' });
-    await page.goto('/');
+    const page = await context.newPage();
+    await page.goto('http://localhost:3000/');
 
     await expect(page).toHaveURL(/.*\/en(\?.*)?$/);
+    await context.close();
   });
 
-  test('direct link /en/proyectos with cookie es → served in English and cookie unchanged', async ({
-    page,
-    context,
+  test('direct link /en/projects with cookie es → served in English and cookie unchanged', async ({
+    browser,
   }) => {
+    const context = await browser.newContext({ locale: 'es-ES' });
     await context.addCookies([
       { name: 'lang', value: 'es', url: 'http://localhost:3000' },
     ]);
-    await page.goto('/en/proyectos');
+    const page = await context.newPage();
+    await page.goto('http://localhost:3000/en/projects');
 
-    await expect(page).toHaveURL(/.*\/en\/proyectos/);
+    await expect(page).toHaveURL(/.*\/en\/projects/);
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
 
     const cookie = await context.cookies('http://localhost:3000');
     const langCookie = cookie.find((c) => c.name === 'lang');
     expect(langCookie?.value).toBe('es');
+    await context.close();
   });
 });
 
@@ -162,14 +164,14 @@ test.describe('T9 — Storage blocked and fr language', () => {
   });
 
   test('fr language in Accept-Language → fallback to English, fr not accepted', async ({
-    page,
-    context,
+    browser,
   }) => {
-    await context.clearCookies();
-    await context.setExtraHTTPHeaders({ 'accept-language': 'fr' });
-    await page.goto('/');
+    const context = await browser.newContext({ locale: 'fr-FR' });
+    const page = await context.newPage();
+    await page.goto('http://localhost:3000/');
 
     await expect(page).toHaveURL(/.*\/en(\?.*)?$/);
+    await context.close();
   });
 });
 
@@ -189,7 +191,7 @@ test.describe('T10 — No full page reload and window marker', () => {
     await context.addCookies([
       { name: 'lang', value: 'es', url: 'http://localhost:3000' },
     ]);
-    await page.goto('/es/proyectos');
+    await page.goto('/es/projects');
 
     // Inject window marker BEFORE changing language
     await page.evaluate(() => {
@@ -199,7 +201,7 @@ test.describe('T10 — No full page reload and window marker', () => {
     // The language selector uses router.push (no full page reload)
     await page.click('[data-testid="language-selector-en"]');
 
-    await expect(page).toHaveURL(/.*\/en\/proyectos(\?.*)?$/);
+    await expect(page).toHaveURL(/.*\/en\/projects(\?.*)?$/);
     const marker = await page.evaluate(() => window.__i18nMarker);
     expect(marker).toBe('alive');
   });
@@ -211,10 +213,10 @@ test.describe('T10 — No full page reload and window marker', () => {
     await context.addCookies([
       { name: 'lang', value: 'es', url: 'http://localhost:3000' },
     ]);
-    await page.goto('/es/proyectos');
+    await page.goto('/es/projects');
 
     await page.click('[data-testid="language-selector-en"]');
-    await expect(page).toHaveURL(/.*\/en\/proyectos/);
+    await expect(page).toHaveURL(/.*\/en\/projects/);
 
     const storageLang = await page.evaluate(() => localStorage.getItem('lang'));
     expect(storageLang).toBe('en');
@@ -231,13 +233,13 @@ test.describe('T10 — No full page reload and window marker', () => {
     await context.addCookies([
       { name: 'lang', value: 'es', url: 'http://localhost:3000' },
     ]);
-    await page.goto('/es/proyectos');
+    await page.goto('/es/projects');
 
     await page.click('[data-testid="language-selector-en"]');
-    await expect(page).toHaveURL(/.*\/en\/proyectos/);
+    await expect(page).toHaveURL(/.*\/en\/projects/);
 
     await page.reload();
-    await expect(page).toHaveURL(/.*\/en\/proyectos/);
+    await expect(page).toHaveURL(/.*\/en\/projects/);
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
   });
 });

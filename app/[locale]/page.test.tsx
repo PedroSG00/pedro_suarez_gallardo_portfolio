@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom/vitest';
 
 // T21: app/[locale]/page.tsx generateMetadata — RF8, RNF4
 describe('app/[locale]/page — T21 (generateMetadata)', () => {
@@ -18,5 +20,15 @@ describe('app/[locale]/page — T21 (generateMetadata)', () => {
     });
     expect(metadata.title).toContain('Web Developer');
     expect(metadata.description).toContain('résumé');
+  });
+
+  it('renders a single h1 with the translated hero title (RNF5)', async () => {
+    const { default: HomePage } = await import('./page');
+    const ui = await HomePage({ params: Promise.resolve({ locale: 'es' }) });
+    render(ui);
+
+    const headings = screen.getAllByRole('heading', { level: 1 });
+    expect(headings).toHaveLength(1);
+    expect(headings[0]).toHaveTextContent('Pedro Suárez Gallardo');
   });
 });

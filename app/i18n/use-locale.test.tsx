@@ -40,7 +40,7 @@ describe('useLocale — T18', () => {
     vi.clearAllMocks();
     mockPush.mockClear();
     Object.defineProperty(window, 'location', {
-      value: { pathname: '/es/proyectos', search: '?q=1', hash: '#top' },
+      value: { pathname: '/es/projects', search: '?q=1', hash: '#top' },
       configurable: true,
     });
   });
@@ -68,7 +68,7 @@ describe('useLocale — T18', () => {
     fireEvent.click(screen.getByRole('button', { name: 'to en' }));
     expect(writeStorage).toHaveBeenCalledWith('lang', 'en');
     expect(writeCookie).toHaveBeenCalledWith('lang', 'en');
-    expect(mockPush).toHaveBeenCalledWith('/en/proyectos?q=1#top');
+    expect(mockPush).toHaveBeenCalledWith('/en/projects?q=1#top');
   });
 
   it('setLocale with valid locale navigates and persists', () => {
@@ -79,6 +79,6 @@ describe('useLocale — T18', () => {
     );
     fireEvent.click(screen.getByRole('button', { name: 'to es' }));
     expect(writeStorage).toHaveBeenCalledWith('lang', 'es');
-    expect(mockPush).toHaveBeenCalledWith('/es/proyectos?q=1#top');
+    expect(mockPush).toHaveBeenCalledWith('/es/projects?q=1#top');
   });
 });

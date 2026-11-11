@@ -1,11 +1,12 @@
 /**
- * app/[locale]/proyectos/page.tsx — T22 (RF8)
- * Proyectos page per language. Exports generateMetadata({ params }) that reads
+ * app/[locale]/projects/page.tsx — T22 (RF8)
+ * Projects page per language. Exports generateMetadata({ params }) that reads
  * metadata.projects.title/description from the merged dictionary on the server.
  */
 
 import { getDictionary } from '../../i18n/get-dictionary';
 import { Locale } from '../../i18n/config';
+import { createT } from '../../i18n/translate';
 
 export async function generateMetadata({
   params,
@@ -24,6 +25,17 @@ export async function generateMetadata({
   };
 }
 
-export default function ProyectosPage() {
-  return <main />;
+export default async function ProjectsPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = (await params) as { locale: Locale };
+  const t = createT(getDictionary(locale));
+
+  return (
+    <main>
+      <h1>{t('nav.projects')}</h1>
+    </main>
+  );
 }

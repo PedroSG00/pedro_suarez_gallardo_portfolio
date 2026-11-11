@@ -18,7 +18,7 @@ vi.mock('next/link', () => {
 
 vi.mock('next/navigation', () => ({
   useRouter: vi.fn(() => ({ push: vi.fn() })),
-  usePathname: vi.fn(() => '/es/proyectos'),
+  usePathname: vi.fn(() => '/es/projects'),
 }));
 
 vi.mock('../../i18n/use-locale', () => ({
@@ -74,7 +74,7 @@ describe('LanguageSelector — T19', () => {
   it('each option is a Link to the same route in the other language', () => {
     render(<LanguageSelector />);
     const esLink = screen.getByRole('link', { name: 'Español' });
-    expect(esLink).toHaveAttribute('href', '/es/proyectos');
+    expect(esLink).toHaveAttribute('href', '/es/projects');
   });
 
   it('active state carries aria-current', () => {
@@ -96,5 +96,14 @@ describe('LanguageSelector — T19', () => {
     expect(mockedWriteCookie).toHaveBeenCalledWith('lang', 'es');
     const { setLocale } = mockedUseLocale.mock.results[0]?.value;
     expect(setLocale).not.toHaveBeenCalled();
+  });
+
+  it('exposes a stable test id per locale', () => {
+    render(<LanguageSelector />);
+    expect(screen.getByTestId('language-selector-en')).toBeInTheDocument();
+    expect(screen.getByTestId('language-selector-es')).toHaveAttribute(
+      'href',
+      '/es/projects'
+    );
   });
 });

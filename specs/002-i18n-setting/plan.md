@@ -11,14 +11,14 @@
 
 - **S1.** Next.js con **App Router** y TypeScript. El idioma viaja en la URL (`/[locale]/...`) y las páginas se generan con SSG (`generateStaticParams`).
 - **S2.** "Estático" (RNF3) significa: sin base de datos, sin API routes y sin backend propio. El middleware (RNF8) se ejecuta en el edge/servidor de la plataforma de despliegue. **No es compatible con `output: 'export'`.**
-- **S3.** El slug de las rutas **no se traduce**: `/es/proyectos` y `/en/proyectos` comparten segmento (igual que el ejemplo de RNF7). Así el cambio de idioma solo sustituye el primer segmento.
+- **S3.** El slug de las rutas **no se traduce**: `/es/projects` y `/en/projects` comparten segmento. Así el cambio de idioma solo sustituye el primer segmento.
 - **S4.** Sin dependencias nuevas (constitución #1). No se usa `next-i18next`, `next-intl`, `react-i18next` ni librerías de animación.
 
 **[NECESITA ACLARACIÓN]**
 
 - **A1.** Plataforma de despliegue: debe soportar middleware de Next.js (p. ej. Vercel). Si el destino fuera hosting estático puro, RNF8 no se puede cumplir tal como está escrito y habría que reabrir la spec.
 - **A2.** Lista exacta de claves de diccionario (duda ya abierta en la spec). Este plan fija solo la estructura y un conjunto mínimo (`nav`, `common`, `sections`, `metadata`).
-- **A3.** Nombre del segmento de ruta: `proyectos` (como en la spec) o `projects`. Es indiferente para el diseño.
+- **A3.** Nombre del segmento de ruta: `projects` (resuelto; el ejemplo de RNF7 usa `proyectos`, pero la spec permite cualquier slug compartido).
 
 ---
 
@@ -47,7 +47,7 @@ src/
     [locale]/
       layout.tsx                 # <html lang>, generateStaticParams, LocaleProvider
       page.tsx                   # generateMetadata (metadata.home)
-      proyectos/
+      projects/
         page.tsx                 # generateMetadata (metadata.projects)
 ```
 
@@ -66,8 +66,8 @@ src/
 
 ### Flujo de datos
 
-1. **Petición sin prefijo** (`/`, `/proyectos`): el middleware resuelve el idioma (cookie → `Accept-Language` → `en`) y responde con redirect 307 a `/<locale>/...` conservando query. Añade `Vary: Cookie, Accept-Language`.
-2. **Petición con prefijo válido** (`/es/proyectos`): el middleware no interviene. **La URL manda sobre la cookie**, para que un enlace compartido en otro idioma funcione.
+1. **Petición sin prefijo** (`/`, `/projects`): el middleware resuelve el idioma (cookie → `Accept-Language` → `en`) y responde con redirect 307 a `/<locale>/...` conservando query. Añade `Vary: Cookie, Accept-Language`.
+2. **Petición con prefijo válido** (`/es/projects`): el middleware no interviene. **La URL manda sobre la cookie**, para que un enlace compartido en otro idioma funcione.
 3. El servidor renderiza (SSG) `app/[locale]/...` con el diccionario fusionado y la metadata de ese idioma. El HTML ya llega en el idioma correcto, sin JS.
 4. El cliente hidrata. `LocaleProvider` sincroniza `localStorage` y cookie (ver algoritmo 3.3). **Nunca sobrescribe la preferencia con el idioma de la URL**: solo una acción explícita del usuario la cambia.
 5. El usuario cambia de idioma: `setLocale` guarda `localStorage` + cookie y hace navegación cliente a la misma ruta bajo el nuevo prefijo (sin recarga completa).
@@ -256,7 +256,7 @@ export type Locale = (typeof locales)[number]      // RF7: se amplía añadiendo
 export const defaultLocale: Locale = "en"
 export const LOCALE_COOKIE = "lang"
 export const LOCALE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365
-export const metadataRoutes = { "/": "home", "/proyectos": "projects" } as const
+export const metadataRoutes = { "/": "home", "/projects": "projects" } as const
 ```
 
 ### 4.2. Hook `useLocale` (componentes cliente)
@@ -399,7 +399,7 @@ Principio (constitución #4): los criterios de aceptación se escriben como test
 | 2 | `Accept-Language: fr`, sin cookie, `/` → `/en` | 1, 8 |
 | 3 | Cookie `lang=es` + `Accept-Language: en` → `/` redirige a `/es` (cookie gana) | 7, 8 |
 | 4 | **Sin JavaScript** (`javaScriptEnabled: false`), `/es` → el HTML recibido ya contiene el texto y `<html lang="es">` | 7 |
-| 5 | En `/es/proyectos`, usar el selector → URL `/en/proyectos`, textos en inglés, **sin recarga completa** (el marcador JS de `window` sigue vivo) | 2 |
+| 5 | En `/es/projects`, usar el selector → URL `/en/projects`, textos en inglés, **sin recarga completa** (el marcador JS de `window` sigue vivo) | 2 |
 | 6 | Tras el cambio: `localStorage.lang === "en"` y cookie `lang=en` | 9 |
 | 7 | Recargar tras elegir idioma, y cerrar y reabrir la sesión conservando cookies → se mantiene | 3 |
 | 8 | Almacenamiento bloqueado (`addInitScript` que hace lanzar a `Storage`): el sitio carga, el selector funciona y la detección cae en `Accept-Language` | Caso límite |

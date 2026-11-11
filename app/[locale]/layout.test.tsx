@@ -60,4 +60,18 @@ describe('app/[locale]/layout — T20', () => {
       expect(screen.getByTestId('language-selector')).toBeInTheDocument()
     );
   });
+
+  it('mounts the theme controls in the locale root layout', async () => {
+    const params = Promise.resolve({ locale: 'en' });
+    await act(async () => {
+      render(
+        <React.Suspense fallback={null}>
+          <Layout params={params}><div>content</div></Layout>
+        </React.Suspense>
+      );
+    });
+    await vi.waitFor(() =>
+      expect(screen.getByRole('button', { name: /theme/i })).toBeVisible()
+    );
+  });
 });

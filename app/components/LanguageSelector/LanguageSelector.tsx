@@ -52,6 +52,7 @@ export default function LanguageSelector() {
             href={linkHref}
             onClick={() => persistLocale(l)}
             aria-current={isActive ? 'true' : undefined}
+            data-testid={`language-selector-${l}`}
           >
             {t(`languages.${l}`)}
           </Link>

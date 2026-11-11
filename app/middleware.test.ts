@@ -21,10 +21,10 @@ describe('middleware — T6 (red first)', () => {
   }
 
   it('redirects / to /es when Accept-Language is es-ES and no cookie', async () => {
-    const { middleware } = await import('../middleware/middleware');
+    const { proxy } = await import('../proxy');
     const req = makeRequest('http://localhost:3000/', { 'accept-language': 'es-ES' });
 
-    const result = await middleware(req);
+    const result = await proxy(req);
     expect(result.status).toBe(307);
     expect(result.headers.get('location')).toBe('http://localhost:3000/es/');
     expect(result.headers.get('Vary')).toContain('Cookie');
@@ -32,28 +32,28 @@ describe('middleware — T6 (red first)', () => {
   });
 
   it('falls back to English when Accept-Language is fr', async () => {
-    const { middleware } = await import('../middleware/middleware');
+    const { proxy } = await import('../proxy');
     const req = makeRequest('http://localhost:3000/', { 'accept-language': 'fr' });
 
-    const result = await middleware(req);
+    const result = await proxy(req);
     expect(result.status).toBe(307);
     expect(result.headers.get('location')).toBe('http://localhost:3000/en/');
   });
 
   it('calls next() when path already has valid locale prefix', async () => {
-    const { middleware } = await import('../middleware/middleware');
-    const req = makeRequest('http://localhost:3000/es/proyectos');
+    const { proxy } = await import('../proxy');
+    const req = makeRequest('http://localhost:3000/es/projects');
 
-    const result = await middleware(req);
+    const result = await proxy(req);
     expect(result.status).toBe(200);
     expect(result.headers.get('location')).toBeNull();
   });
 
   it('excludes /_next and files with extensions', async () => {
-    const { middleware } = await import('../middleware/middleware');
+    const { proxy } = await import('../proxy');
     const req = makeRequest('http://localhost:3000/_next/static/chunks/main.js');
 
-    const result = await middleware(req);
+    const result = await proxy(req);
     expect(result.status).toBe(200);
     expect(result.headers.get('location')).toBeNull();
   });

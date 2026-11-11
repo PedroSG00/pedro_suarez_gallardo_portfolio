@@ -6,6 +6,7 @@
 
 import { getDictionary } from '../i18n/get-dictionary';
 import { Locale } from '../i18n/config';
+import { createT } from '../i18n/translate';
 
 export async function generateMetadata({
   params,
@@ -24,6 +25,17 @@ export async function generateMetadata({
   };
 }
 
-export default function HomePage() {
-  return <main />;
+export default async function HomePage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = (await params) as { locale: Locale };
+  const t = createT(getDictionary(locale));
+
+  return (
+    <main>
+      <h1>{t('sections.hero.title')}</h1>
+    </main>
+  );
 }
