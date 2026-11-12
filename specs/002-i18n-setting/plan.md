@@ -1,5 +1,7 @@
 # Plan: Configuración i18n (internacionalización)
 
+> **Aviso del 12 de noviembre de 2026.** Las partes de este documento relativas al respaldo a inglés, a la persistencia dual (`localStorage` + cookie) y a la sincronización al hidratar quedan obsoletas. La 003 las sustituye por paridad obligatoria de diccionarios y una única cookie `lang`. El resto del plan sigue siendo útil como contexto histórico.
+
 **Spec origen:** `specs/002-i18n-setting/spec.md`
 **Constitución:** `docs/constitution.md`
 **Idiomas iniciales:** `en` (default y fallback), `es`

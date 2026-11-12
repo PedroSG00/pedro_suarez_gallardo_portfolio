@@ -1,5 +1,7 @@
 # Tareas: Configuración i18n (internacionalización)
 
+> **Aviso del 12 de noviembre de 2026.** Las tareas de respaldo a inglés, persistencia dual (`localStorage` + cookie) y sincronización al hidratar quedan obsoletas. La 003 las sustituye por paridad obligatoria de diccionarios y una única cookie `lang`.
+
 Small tasks (max 20-30 min each), in dependency order, each covering the RFs and with a verifiable "Hecho cuando:". Use checkboxes.
 
 ## Fase 1: Tests unitarios e integración (en rojo, antes de implementación)

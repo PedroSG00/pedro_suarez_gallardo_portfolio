@@ -1,4 +1,6 @@
-# 001 — Estilos globales de la aplicación — Tareas (TDD)
+# 001 - Estilos globales de la aplicación - Tareas (TDD)
+
+> **Aviso del 12 de noviembre de 2026.** Las partes de este documento relativas al botón que revela el selector, al selector oculto y al modal de aviso quedan obsoletas. El control de tema vigente se especifica en la 004 (RF-6), sobre la persistencia que fija la 003 (RF-6). El resto del plan y de las tareas sigue siendo válido.
 
 **Estado:** Pendiente  
 **Especificaciones:** `specs/001-styles-globals/spec.md`, `specs/001-styles-globals/plan.md`  

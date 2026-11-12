@@ -6,6 +6,8 @@
 - **Depende de:** nada (es la primera funcionalidad)
 - **Bloquea a:** cualquier sección o componente futuro del portfolio
 
+> **Actualizada el 12 de noviembre de 2026.** La 003 corrige la base y la 004 sustituye el control de tema: deja de existir el botón que revelaba un selector oculto y el aviso modal sobre JavaScript. El control pasa a ser un único botón que alterna entre claro, oscuro y sistema, siempre visible (ver 004, RF-6). Este documento se conserva como fuente de la paleta, la tipografía, el espaciado y los criterios de accesibilidad; los requisitos derogados se marcan como tales y no se reescribe el resto.
+
 ## 1. Contexto y objetivo
 
 El portfolio de Pedro Suárez Gallardo será un sitio estático y bilingüe dirigido principalmente a reclutadores y, en segundo lugar, a clientes potenciales. Hoy solo existe el andamiaje generado por el scaffold: una paleta genérica de blanco y negro, una tipografía sans y una página de ejemplo. Antes de construir la primera sección real hay que fijar la identidad visual, porque cada pantalla futura heredará estas decisiones.
@@ -19,9 +21,9 @@ Esta funcionalidad define y aplica la **base visual única** del sitio: color, t
 - **Composición de alto impacto:** espacio negativo generoso, retícula visible, asimetría controlada, bloques invertidos y detalles tipográficos (numeración de secciones, reglas finas, etiquetas en versalitas). Cada página debe incluir al menos un momento visual deliberado y memorable.
 - **Movimiento contenido pero expresivo:** revelados de entrada escalonados, transiciones de tema y microinteracciones de hover que refuercen la composición. Nada de animaciones infinitas ni efectos gratuitos; con `prefers-reduced-motion` el impacto se mantiene por composición y tipografía estáticas.
 - **Tema elegible con opción de sistema:** el visitante alterna entre **claro**, **oscuro** y **sistema**; la primera visita sigue la preferencia del sistema operativo; la elección se recuerda y se sincroniza entre pestañas del mismo navegador.
-- **Selector oculto / revelado:** un **botón de tema** permanece siempre visible en el layout. Al pulsarlo por primera vez, se aplica el tema elegido y se **revela** el `<select>` oculto inicialmente. Una vez revelado, permanece visible en el layout. El selector se implementa como un componente reutilizable de una sola responsabilidad.
-- **Modal informativo:** se muestra al interactuar con el selector. Implementado con `<dialog>` invocado mediante `show()` (no bloqueante), no mediante `showModal()`.
-- **Solo fundamentos:** no se crean componentes de interfaz ni se define el contenido del currículum, excepto el selector de tema que forma parte de esta funcionalidad.
+- **Control de tema siempre visible:** un único botón, visible desde la carga inicial, que avanza en cada pulsación entre claro, oscuro y sistema. No hay selector oculto ni estado que dependa de una interacción previa. Su forma y su comportamiento se especifican en la 004 (RF-6); su persistencia, en la 003 (RF-6).
+- **Sin aviso sobre JavaScript:** no se muestra ningún diálogo informativo. La limitación de no recordar preferencias sin JavaScript se asume como intrínseca y no se anuncia a quien sí lo tiene, que es el único que podría verlo.
+- **Solo fundamentos:** no se crean componentes de interfaz ni se define el contenido del currículum, excepto los fundamentos del control de tema, cuya forma se especifica en la 004.
 - **Accesibilidad:** WCAG 2.2 AA en ambos temas, con animaciones suaves y elegantes que forman parte de la estética.
 - **La impresión queda fuera de alcance.**
 
@@ -80,13 +82,13 @@ Los nombres de las variables están en inglés (Constitución 6).
   - **Si** el sistema operativo no expone ninguna preferencia, **entonces el sistema deberá** mostrar el tema claro.
   - **El sistema deberá** declarar a qué tema corresponde la página mediante la propiedad CSS nativa `color-scheme`, de modo que los controles nativos del navegador (barras de desplazamiento, campos, menús) se muestren en consonancia.
 
-### RF-3 — Selector manual de tema con opción "sistema"
+### RF-3 — Control manual de tema con opción "sistema"
 
 - **Criterios de aceptación (EARS):**
-  - **El sistema deberá** ofrecer en todas las páginas un **botón de tema visible** que permita abrir el control de tema, y un `<select>` oculto inicialmente que permita alternar entre **claro**, **oscuro** y **sistema**.
-  - **Cuando** el visitante pulse el botón de tema, **el sistema deberá** aplicar la opción elegida de inmediato, sin recargar ni navegar, y revelar el `<select>`.
+  - **El sistema deberá** ofrecer un control de tema visible desde la carga inicial y durante toda la visita, con las opciones **claro**, **oscuro** y **sistema**.
+  - **El sistema deberá** resolver el control con un único botón que, en cada pulsación, avance en el ciclo claro, oscuro, sistema y de nuevo claro, sin recargar ni navegar.
+  - **El sistema deberá** mostrar en el texto visible del botón el estado activo y comunicar en su nombre accesible el estado y la acción disponible, en inglés y castellano, sin depender de iconografía.
   - **Cuando** la opción sea "sistema", **el sistema deberá** seguir la preferencia del sistema operativo en tiempo real.
-  - **El sistema deberá** comunicar el tema activo y la acción disponible mediante un nombre accesible en inglés y castellano, no solo mediante iconografía.
   - **El sistema deberá** permitir operar el control tanto con ratón como con teclado y lector de pantalla.
 
 ### RF-4 — Persistencia de la elección y sincronización entre pestañas
@@ -98,19 +100,13 @@ Los nombres de las variables están en inglés (Constitución 6).
   - **Si** el navegador bloquea o no permite conservar la elección, **entonces el sistema deberá** aplicar la opción elegida durante la visita, sin mostrar errores y sin impedir nuevos cambios de tema.
   - **El sistema deberá** sincronizar la preferencia entre pestañas abiertas del mismo navegador: al cambiar en una pestaña, las demás pestañas con el mismo origen deberán reflejar la nueva preferencia sin recargar su contenido.
 
-### RF-5 — Selector oculto por defecto y revelado bajo preferencia
+### RF-5 — [Derogado] Selector oculto por defecto y revelado bajo preferencia
 
-- **Criterios de aceptación (EARS):**
-  - **El sistema deberá** ocultar el selector de tema (`<select>`) en la carga inicial.
-  - **Cuando** el visitante pulse el botón de tema por primera vez, **el sistema deberá** revelar el selector de forma visible.
-  - **El sistema no deberá** ocultar ni eliminar el selector una vez revelado, salvo que se defina una acción explícita para ello (que queda fuera del alcance de esta funcionalidad).
+Este requisito queda sin efecto: la 003 elimina el revelado y la 004 define el control como un único botón siempre visible (ver 004, RF-6). Se conserva el número para no romper las referencias de `plan.md` y `tasks.md`.
 
-### RF-6 — Modal informativo para JavaScript desactivado
+### RF-6 — [Derogado] Modal informativo para JavaScript desactivado
 
-- **Criterios de aceptación (EARS):**
-  - **Cuando** el visitante interactúe con el selector de tema, **el sistema deberá** mostrar un mensaje breve (en inglés y castellano) que informe de que, si JavaScript está desactivado, algunas funcionalidades (como la persistencia automática del tema) pueden verse limitadas.
-  - **El sistema no deberá** impedir el cambio de tema si JavaScript está desactivado: la página seguirá funcionando con el tema del sistema.
-  - **El sistema deberá** mostrar el mensaje como un `<dialog>` accesible invocado mediante `show()` (no modal, no bloqueante), que no atrape el foco ni impida la interacción con la página.
+Este requisito queda sin efecto por la 003: no se muestra ningún aviso sobre JavaScript. Se conserva el número para no romper las referencias de `plan.md` y `tasks.md`.
 
 ### RF-7 — Cambio de tema sin destellos ni pérdida de contexto
 
@@ -167,9 +163,12 @@ Los nombres de las variables están en inglés (Constitución 6).
 ### RF-13 — Foco de teclado visible
 
 - **Criterios de aceptación (EARS):**
-  - **Cuando** un elemento interactivo reciba el foco, **el sistema deberá** mostrarlo con un indicador visible y distinguible sobre el fondo correspondiente, con un contraste mínimo de 3:1.
+  - **Cuando** un elemento interactivo reciba el foco, **el sistema deberá** mostrarlo con un indicador visible que se distinga del estado sin foco y alcance un contraste mínimo de 3:1 frente a los colores adyacentes.
   - **El sistema no deberá** eliminar ni ocultar el indicador de foco por motivos estéticos.
   - **Mientras** el visitante navegue con teclado, **el sistema deberá** mantener el indicador visible aunque el elemento esté junto al borde de la ventana o sobre una superficie invertida.
+  - **El sistema deberá** garantizar que ningún elemento que reciba el foco quede oculto por contenido superpuesto.
+  - **El sistema deberá** ofrecer objetivos interactivos de al menos 24 por 24 píxeles.
+  - **El sistema deberá** mantener el contenido legible y completo cuando el visitante amplíe el espaciado del texto.
 
 ### RF-14 — Enlaces y estados sin color de acento
 
@@ -211,7 +210,7 @@ Los nombres de las variables están en inglés (Constitución 6).
 - **NFR-6 — Fuente única de verdad.** Los valores de color, tipografía, espaciado, foco y movimiento se definirán una sola vez y todas las pantallas los consumirán; no se duplicarán valores a mano.
 - **NFR-7 — Privacidad.** La preferencia de tema se conservará únicamente en el navegador del visitante (`localStorage`); no se enviará a terceros ni se usará para rastreo.
 - **NFR-8 — Dependencias.** No se añadirán dependencias nuevas para implementar esta funcionalidad; se usará lo ya disponible en el stack aprobado (Next.js, React, TypeScript, Tailwind, Geist Mono).
-- **NFR-9 — Contenido bilingüe.** Cualquier texto visible asociado al tema (nombre accesible del selector, mensajes del modal, opciones del `<select>`) existirá en inglés y castellano conforme a la constitución (`docs/constitution.md`) y se almacenará en los diccionarios i18n del proyecto.
+- **NFR-9 — Contenido bilingüe.** Cualquier texto visible asociado al tema (estado del botón y nombre accesible) existirá en inglés y castellano conforme a la constitución (`docs/constitution.md`) y se almacenará en los diccionarios i18n del proyecto.
 - **NFR-10 — Impacto sin dependencias.** El impacto visual se conseguirá con CSS/Tailwind, tipografía y composición, sin añadir librerías de animación, fuentes adicionales ni assets pesados. La identidad debe mantenerse reconocible en ambos temas y en cualquier tamaño de pantalla.
 
 ## 6. Casos límite
@@ -223,7 +222,7 @@ Los nombres de las variables están en inglés (Constitución 6).
 5. **Preferencia guardada inválida o corrupta:** se ignora, se usa la preferencia del sistema y no se muestra ningún error.
 6. **Navegador en modo privado o con almacenamiento bloqueado o lleno:** la opción elegida funciona durante la visita; solo se pierde al cerrar y el control sigue operativo.
 7. **Dos pestañas abiertas con temas distintos:** al cambiar en una pestaña, las demás pestañas con el mismo origen reflejan la nueva preferencia mediante el evento `storage` sin perder contenido ni posición de lectura.
-8. **JavaScript desactivado o fallido:** la página se muestra legible con el tema del sistema; el selector puede quedar inerte u oculto; el modal no se muestra, pero la página sigue funcional.
+8. **JavaScript desactivado o fallido:** la página se muestra legible con el tema del sistema; el control de tema puede quedar inerte, pero la página sigue funcional y no aparece ningún aviso.
 9. **Tipografía no disponible o red lenta:** se usa una monoespaciada del sistema (`monospace`) sin salto perceptible de maquetación.
 10. **Movimiento reducido activado:** el cambio de tema es instantáneo y no hay animaciones no esenciales.
 11. **Alto contraste forzado por el sistema operativo:** el contenido sigue siendo legible y el foco visible aunque la paleta se sustituya.
@@ -232,16 +231,16 @@ Los nombres de las variables están en inglés (Constitución 6).
 14. **Enlace dentro de un párrafo:** se distingue por subrayado incluso en escala de grises.
 15. **Página larga:** la barra de desplazamiento es coherente con el tema activo en ambos temas.
 16. **Cambio de idioma (futuro):** la base visual no depende del idioma y no cambia al alternarlo.
-17. **Selector revelado tras cambio de preferencia:** una vez revelado, el `<select>` permanece visible en el layout.
-18. **Modal mostrado con JavaScript activo:** el mensaje informativo aparece sin bloquear la interacción, es accesible (rol de alerta o diálogo) y se presenta en inglés y castellano.
+17. **Control de tema tras varias pulsaciones:** el botón avanza por los tres estados y siempre muestra el estado efectivo, también tras recargar.
+18. **[Derogado por 003] Modal mostrado con JavaScript activo:** no existe modal.
 19. **Movimiento reducido con revelados de entrada:** el contenido aparece completo desde el primer momento y el impacto se mantiene mediante composición y tipografía estáticas.
 20. **Titular *display* en pantalla de 320 px:** la escala se adapta sin desbordar, sin cortar palabras ni generar desplazamiento horizontal.
 
 ## 7. Fuera de alcance
 
 - El contenido del currículum y las secciones del portfolio (presentación, experiencia, proyectos, contacto, etc.).
-- Componentes de interfaz reutilizables (botones, tarjetas, navegación, formularios, badges), excepto el selector de tema que forma parte de esta funcionalidad y se implementa como componente de una sola responsabilidad.
-- El sistema completo de internacionalización (`i18n`) y los diccionarios de textos, más allá de las cadenas asociadas al selector y al modal.
+- Componentes de interfaz reutilizables (botones, tarjetas, navegación, formularios, badges), excepto los fundamentos del control de tema, cuya forma se especifica en la 004.
+- El sistema completo de internacionalización (`i18n`) y los diccionarios de textos, más allá de las cadenas asociadas al control de tema.
 - Impresión y exportación a PDF.
 - Temas adicionales, personalización de acento, densidad o tipografía por parte del visitante.
 - Efectos decorativos gratuitos, animaciones infinitas, parallax pesado, 3D y cualquier recurso que sacrifique rendimiento o accesibilidad por espectáculo.
@@ -257,7 +256,7 @@ La funcionalidad se considerará terminada cuando:
 - [ ] Cada página incluye al menos un momento visual deliberado y memorable (titular a gran escala, bloque invertido, retícula, asimetría o revelado contenido).
 - [ ] El texto corrido respeta una medida máxima de 65ch, mientras las composiciones *full-bleed* aprovechan todo el ancho disponible.
 - [ ] `Geist Mono` es la fuente exclusiva para todo el texto visible; no hay `font-weight` superior a 400 ni segunda familia para texto corrido.
-- [ ] El selector (`<select>`) está presente en `layout`, oculto por defecto, revelado tras el primer cambio de preferencia, y ofrece las opciones: claro, oscuro, sistema.
+- [ ] El control de tema es un único botón visible desde la carga inicial, alterna claro, oscuro y sistema, y muestra el estado efectivo.
 - [ ] El tema por defecto en la primera visita sigue la preferencia del sistema; la opción "sistema" funciona en tiempo real.
 - [ ] La elección (claro/oscuro/sistema) se persiste en `localStorage` y se sincroniza entre pestañas del mismo navegador.
 - [ ] No se observa destello de tema incorrecto al cargar ni al navegar con una elección previa.
@@ -267,26 +266,25 @@ La funcionalidad se considerará terminada cuando:
 - [ ] Foco de teclado visible y operable en todas las páginas, sin eliminarlo en ningún caso.
 - [ ] Enlaces y estados se distinguen sin depender del color (subrayado, contraste, superficie).
 - [ ] Reflow correcto a 320 px y zoom al 200 % sin desplazamiento horizontal.
-- [ ] El selector está oculto al inicio y se revela tras el cambio de preferencia.
-- [ ] El modal informativo (en inglés y castellano) se muestra al interactuar con el selector, es accesible y no bloquea la interacción; con JavaScript desactivado el sitio sigue funcional.
+- [ ] No existe selector oculto ni aviso modal; con JavaScript desactivado el sitio sigue funcional y no muestra errores.
 - [ ] Comprobados los casos límite 1–18 en al menos un navegador de escritorio y uno móvil.
-- [ ] Existen pruebas automatizadas del cambio de tema, la persistencia, la sincronización, la revelación del selector, el comportamiento sin JavaScript y la ausencia de destello, además de una prueba end-to-end del flujo completo.
+- [ ] Existen pruebas automatizadas del cambio de tema, la persistencia, la sincronización, el ciclo de estados del botón, el comportamiento sin JavaScript y la ausencia de destello, además de una prueba end-to-end del flujo completo.
 - [ ] Lint, typecheck y pruebas en verde; sin dependencias nuevas.
 
 ## 9. Dudas abiertas (resueltas y pendientes)
 
 - **[RESUELTA]** ¿Cómo se consigue que el diseño sea minimalista pero visualmente espectacular? → **Menos elementos, máxima presencia:** contraste crudo/negro, escala tipográfica editorial, composición asimétrica, espacio negativo generoso, retícula y movimiento contenido. Sin color de acento, decoración recargada ni dependencias extra.
 - **[RESUELTA]** ¿Qué familia monoespaciada concreta se usará? → **Geist Mono** (incluida en el scaffold; pesos 400 y 400 itálico; jerarquía sin negrita).
-- **[RESUELTA]** ¿En qué idiomas debe existir el texto del selector y del modal? → **Inglés y castellano** (en diccionarios i18n).
-- **[RESUELTA]** ¿Se ofrece la opción de "sistema" junto a claro y oscuro? → **Sí**, con tres opciones en el `<select>`.
+- **[RESUELTA]** ¿En qué idiomas debe existir el texto del control de tema? → **Inglés y castellano** (en diccionarios i18n).
+- **[ACTUALIZADA por 004]** ¿Se ofrece la opción de "sistema" junto a claro y oscuro? → **Sí**, como tercer estado del botón de tema.
 - **[RESUELTA]** ¿Se sincroniza la preferencia entre pestañas? → **Sí**, mediante el evento `storage`.
-- **[RESUELTA]** ¿Cómo se revela el selector si está oculto por defecto? → **Mediante un botón de tema siempre visible** que dispara la revelación y el cambio.
-- **[RESUELTA]** ¿El modal es bloqueante? → **No**, se usa `<dialog>` con `show()` (no `showModal()`).
+- **[DEROGADA por 003 y 004]** ¿Cómo se revela el selector si está oculto por defecto? → **No se revela: no hay selector oculto.** El control es un único botón siempre visible.
+- **[DEROGADA por 003]** ¿El modal es bloqueante? → **No hay modal.**
 - **[RESUELTA]** ¿Valores exactos de paleta? → **Escala de 5 grises cálidos (`--warm-1` a `--warm-5`)** con nombres en inglés.
 - **[RESUELTA]** ¿Anchura máxima? → **65ch**.
 - **[RESUELTA]** ¿Umbral de texto grande para contraste 3:1? → **≥ 18 px** (o 14 px itálico).
 - **[RESUELTA]** ¿Mecanismo para controles nativos del navegador? → **Propiedad CSS `color-scheme`**.
-- **[RESUELTA]** ¿Dónde vive el selector? → **Componente reutilizable de una sola responsabilidad** incluido en `layout.tsx`.
-- **[RESUELTA]** ¿Dónde viven las cadenas del selector y modal? → **En diccionarios i18n** (inglés y castellano).
+- **[ACTUALIZADA por 004]** ¿Dónde vive el control de tema? → **En la cabecera del sitio**, como componente reutilizable de una sola responsabilidad.
+- **[RESUELTA]** ¿Dónde viven las cadenas del control de tema? → **En diccionarios i18n** (inglés y castellano).
 
 **Estado del cribado:** todas las ambigüedades, contradicciones y casos límite detectados en la auditoría QA quedan resueltos en este documento. El spec se mantiene en **Borrador**; el spec Activo que respaldará el código será `specs/001-styles-globals/implementation.md`.
