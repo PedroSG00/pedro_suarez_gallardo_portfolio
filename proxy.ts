@@ -47,11 +47,21 @@ export function proxy(request: NextRequest) {
     return new NextResponse(null, { status: 404 });
   }
 
-  // 4. Parse first segment
+  // 4. Pathname longer than 2048 chars → 404 (RF-5 case 25)
+  if (pathname.length > 2048) {
+    return new NextResponse(null, { status: 404 });
+  }
+
+  // 5. Parse first segment
   const segments = pathname.split('/').filter(Boolean);
   const firstSegment = segments[0];
 
-  // 5. No locale segment (root "/") → permanent redirect 308 to /{resolvedLocale}/
+  // 6. Any segment longer than 255 chars → 404 (RF-5 case 25)
+  if (segments.some((s) => s.length > 255)) {
+    return new NextResponse(null, { status: 404 });
+  }
+
+  // 6. No locale segment (root "/") → permanent redirect 308 to /{resolvedLocale}/
   if (!firstSegment) {
     const cookie = request.cookies.get(LOCALE_COOKIE)?.value;
     const acceptLanguage = request.headers.get('accept-language') || '';
@@ -65,25 +75,25 @@ export function proxy(request: NextRequest) {
     return response;
   }
 
-  // 6. First segment is exactly a supported locale → pass through (200)
+  // 7. First segment is exactly a supported locale → pass through (200)
   if (LOCALES.includes(firstSegment)) {
     return NextResponse.next();
   }
 
-  // 7. Multiple segments where the first is not a valid locale → 404
+  // 8. Multiple segments where the first is not a valid locale → 404
   //    (e.g. /projects/en: locale not in first position)
   if (segments.length > 1) {
     return new NextResponse(null, { status: 404 });
   }
 
-  // 8. Single segment that is a two-letter code but not 'en'/'es' → 404
+  // 9. Single segment that is a two-letter code but not 'en'/'es' → 404
   //    (unsupported locale, or uppercase variant like /ES)
   const isTwoLetterCode = /^[a-zA-Z]{2}$/.test(firstSegment);
   if (isTwoLetterCode) {
     return new NextResponse(null, { status: 404 });
   }
 
-  // 9. Single segment that is not a language code → no locale prefix, redirect 308
+  // 10. Single segment that is not a language code → no locale prefix, redirect 308
   //    (e.g. /projects → /en/projects)
   const cookie = request.cookies.get(LOCALE_COOKIE)?.value;
   const acceptLanguage = request.headers.get('accept-language') || '';

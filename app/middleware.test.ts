@@ -222,5 +222,28 @@ describe('proxy — T13', () => {
       const result = await proxy(req);
       expect(result.status).toBe(404);
     });
+
+    it('pathname longer than 2048 chars → 404 (RF-5 case 25)', async () => {
+      const { proxy } = await import('../proxy');
+      const longPath = '/a'.repeat(2049);
+      const req = makeRequest(`http://localhost:3000${longPath}`, {
+        'accept-language': 'en',
+      });
+
+      const result = await proxy(req);
+      expect(result.status).toBe(404);
+    });
+
+    it('segment longer than 255 chars → 404 (RF-5 case 25)', async () => {
+      const { proxy } = await import('../proxy');
+      const longSegment = 'x'.repeat(256);
+      const req = makeRequest(
+        `http://localhost:3000/en/${longSegment}`,
+        { 'accept-language': 'en' }
+      );
+
+      const result = await proxy(req);
+      expect(result.status).toBe(404);
+    });
   });
 });
