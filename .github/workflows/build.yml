@@ -10,7 +10,7 @@ on:
 jobs:
   Analyze:
     name: Analyze
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -33,6 +33,9 @@ jobs:
 
       - name: Run tests with coverage
         run: pnpm exec vitest run --coverage
+
+      - name: Verify coverage report exists
+        run: test -f coverage/lcov.info
 
       - name: SonarQube scan
         uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6

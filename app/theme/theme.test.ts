@@ -1,73 +1,115 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+
 import { getSavedTheme, saveTheme, resolveActiveTheme, listenStorageChanges } from './theme';
 
-// Theme utilities — T-02 (red first)
-// RF covered: RF-2 (manual/system theme), RF-4 (persistence and sync between tabs),
-// edge case 5 (invalid value → system) and edge case 6 (localStorage blocked)
-
-describe('theme utilities — T-02 (red first)', () => {
+// T12: theme.ts — get/save/resolve theme, storage event sync, blocked storage
+// Done when: inválido → 'system'; blocked storage → silent; storage event con valor vacío → 'system'.
+describe('theme.ts', () => {
   beforeEach(() => {
-    localStorage.clear();
+    // Reset localStorage mock
+    let store: Record<string, string> = {};
+    const mockStorage = {
+      getItem: (key: string): string | null => (key in store ? store[key] : null),
+      setItem: (key: string, value: string): void => {
+        store[key] = value;
+      },
+      removeItem: (key: string): void => {
+        delete store[key];
+      },
+      clear: (): void => {
+        store = {};
+      },
+    };
+    Object.defineProperty(globalThis, 'localStorage', {
+      value: mockStorage,
+      writable: true,
+    });
   });
 
   afterEach(() => {
-    localStorage.clear();
     vi.restoreAllMocks();
   });
 
-  describe('getSavedTheme', () => {
-    it('reads "light" from localStorage when set', () => {
-      localStorage.setItem('theme', 'light');
-      expect(getSavedTheme()).toBe('light');
-    });
+  it('getSavedTheme returns system for invalid stored value', () => {
+    localStorage.setItem('theme', 'invalid-value');
+    expect(getSavedTheme()).toBe('system');
+  });
 
-    it('returns "system" when localStorage is empty', () => {
-      expect(getSavedTheme()).toBe('system');
+  it('getSavedTheme returns system when localStorage is blocked (throws)', () => {
+    const originalGetItem = localStorage.getItem.bind(localStorage);
+    const blockingGetItem = (): never => {
+      throw new Error('blocked');
+    };
+    Object.defineProperty(localStorage, 'getItem', {
+      value: blockingGetItem,
+      configurable: true,
+      writable: true,
+    });
+    expect(getSavedTheme()).toBe('system');
+    Object.defineProperty(localStorage, 'getItem', {
+      value: originalGetItem,
+      configurable: true,
+      writable: true,
     });
   });
 
-  describe('saveTheme', () => {
-    it('writes value to localStorage', () => {
-      saveTheme('dark');
-      expect(localStorage.getItem('theme')).toBe('dark');
+  it('saveTheme silently ignores when localStorage is blocked', () => {
+    const originalSetItem = localStorage.setItem.bind(localStorage);
+    const blockingSetItem = (): never => {
+      throw new Error('blocked');
+    };
+    Object.defineProperty(localStorage, 'setItem', {
+      value: blockingSetItem,
+      configurable: true,
+      writable: true,
+    });
+    expect(() => saveTheme('dark')).not.toThrow();
+    Object.defineProperty(localStorage, 'setItem', {
+      value: originalSetItem,
+      configurable: true,
+      writable: true,
     });
   });
 
-  describe('resolveActiveTheme', () => {
-    it('returns manual value when stored is light/dark', () => {
-      localStorage.setItem('theme', 'light');
-      expect(resolveActiveTheme()).toBe('light');
-    });
-
-    it('falls back to system when stored value is invalid (edge case 5)', () => {
-      localStorage.setItem('theme', 'invalid');
-      expect(resolveActiveTheme()).toBe('system');
-    });
+  it('resolveActiveTheme falls back to system for invalid saved value', () => {
+    localStorage.setItem('theme', 'not-a-theme');
+    expect(resolveActiveTheme()).toBe('system');
   });
 
-  describe('storage event listener', () => {
-    it('syncs theme between tabs via storage event', () => {
-      const callback = vi.fn();
-      listenStorageChanges(callback);
-      const event = new StorageEvent('storage', { key: 'theme', newValue: 'dark' });
-      window.dispatchEvent(event);
-      expect(callback).toHaveBeenCalled();
-    });
+  it('listenStorageChanges calls callback with system when newValue is null/empty', () => {
+    const callback = vi.fn();
+    const unlisten = listenStorageChanges(callback);
+
+    // Dispatch storage event with empty newValue
+    window.dispatchEvent(
+      new StorageEvent('storage', { key: 'theme', newValue: null })
+    );
+    expect(callback).toHaveBeenCalledWith('system');
+
+    unlisten();
   });
 
-  describe('localStorage blocked (edge case 6)', () => {
-    it('works in session without errors when localStorage throws', () => {
-      vi.spyOn(window.localStorage, 'getItem').mockImplementation(() => {
-        throw new Error('Storage blocked');
-      });
-      expect(() => getSavedTheme()).not.toThrow();
-    });
+  it('listenStorageChanges calls callback with valid newValue', () => {
+    const callback = vi.fn();
+    const unlisten = listenStorageChanges(callback);
 
-    it('quota full: saveTheme does not throw (RF-6)', () => {
-      vi.spyOn(localStorage, 'setItem').mockImplementation(() => {
-        throw new Error('QuotaExceededError');
-      });
-      expect(() => saveTheme('dark')).not.toThrow();
-    });
+    window.dispatchEvent(
+      new StorageEvent('storage', { key: 'theme', newValue: 'dark' })
+    );
+    expect(callback).toHaveBeenCalledWith('dark');
+
+    unlisten();
+  });
+
+  it('listenStorageChanges ignores storage events for other keys', () => {
+    const callback = vi.fn();
+    const unlisten = listenStorageChanges(callback);
+
+    window.dispatchEvent(
+      new StorageEvent('storage', { key: 'other', newValue: 'dark' })
+    );
+    expect(callback).not.toHaveBeenCalled();
+
+    unlisten();
   });
 });

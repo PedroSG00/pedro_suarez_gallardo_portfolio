@@ -60,6 +60,18 @@ describe('storage — T16', () => {
       expect(readCookie('nonexistent')).toBeNull();
     });
 
+    it('returns null and does not throw if document.cookie read is blocked', () => {
+      const originalDescriptor = Object.getOwnPropertyDescriptor(Document.prototype, 'cookie');
+      Object.defineProperty(document, 'cookie', {
+        get() { throw new Error('blocked'); },
+        configurable: true,
+      });
+      expect(readCookie('lang')).toBeNull();
+      if (originalDescriptor) {
+        Object.defineProperty(document, 'cookie', originalDescriptor);
+      }
+    });
+
     it('writes cookie with default attributes: Path=/, Max-Age=1 year, SameSite=Lax, no HttpOnly', () => {
       writeCookie('lang', 'es');
       expect(cookieStore.value).toContain('lang=');
@@ -131,5 +143,15 @@ describe('legacy localStorage.lang → cookie migration (RF-3, RF-8)', () => {
     expect(result).toBeNull();
     expect(readCookie('lang')).toBeNull();
     expect(localStorage.getItem('lang')).toBeNull();
+  });
+
+  it('does not throw if localStorage read is blocked during migration', () => {
+    const originalGetItem = Storage.prototype.getItem;
+    Storage.prototype.getItem = vi.fn(() => {
+      throw new Error('blocked');
+    });
+    const result = migrateLegacyLang();
+    expect(result).toBeNull();
+    Storage.prototype.getItem = originalGetItem;
   });
 });

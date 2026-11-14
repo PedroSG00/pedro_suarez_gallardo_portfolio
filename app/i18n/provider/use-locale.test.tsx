@@ -84,4 +84,14 @@ describe('useLocale — T18', () => {
     expect(mockedWriteCookie).toHaveBeenCalledWith('lang', 'es');
     expect(mockPush).toHaveBeenCalledWith('/es/projects?q=1#top');
   });
+
+  it('throws when used outside LocaleProvider', () => {
+    function NoProvider() {
+      const { locale } = useLocale();
+      return <span data-testid="locale">{locale}</span>;
+    }
+    expect(() => render(<NoProvider />)).toThrow(
+      'useLocale must be used within a LocaleProvider'
+    );
+  });
 });
