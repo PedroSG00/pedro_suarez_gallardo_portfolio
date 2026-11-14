@@ -243,10 +243,10 @@ La funcionalidad se considerará terminada cuando:
 - [x] Los objetivos interactivos miden al menos 24 por 24 píxeles y el contenido soporta zoom de página y de texto al 200 %.
 - [x] No hay desplazamiento horizontal a 320 px ni con texto ampliado.
 - [x] Los cambios de tema respetan `prefers-reduced-motion`.
-- [ ] Cada requisito funcional tiene al menos una prueba asociada, escrita antes del código; los componentes con comportamiento se prueban con pruebas de componente y los flujos de idioma, tema y página no encontrada con pruebas end-to-end en los cuatro navegadores de escritorio y dos móviles. RF-2 se comprueba en revisión, no con pruebas estructurales.
-- [ ] Existe un único mecanismo por comportamiento compartido y no quedan rutas de código ni puntos de entrada sin uso.
-- [ ] Las URLs publicadas y las preferencias guardadas antes del cambio siguen funcionando.
-- [ ] La paridad de diccionarios se comprueba en `pnpm build` (el build falla si hay desajuste) y en `pnpm test`; el gate es local y obligatorio antes del despliegue.
+- [x] Cada requisito funcional tiene al menos una prueba asociada, escrita antes del código; los componentes con comportamiento se prueban con pruebas de componente y los flujos de idioma, tema y página no encontrada con pruebas end-to-end en los cuatro navegadores de escritorio y dos móviles. RF-2 se comprueba en revisión, no con pruebas estructurales.
+- [x] Existe un único mecanismo por comportamiento compartido y no quedan rutas de código ni puntos de entrada sin uso.
+- [x] Las URLs publicadas y las preferencias guardadas antes del cambio siguen funcionando.
+- [x] La paridad de diccionarios se comprueba en `pnpm build` (el build falla si hay desajuste) y en `pnpm test`; el gate es local y obligatorio antes del despliegue.
 - [x] Lint, comprobación de tipos, pruebas, pruebas end-to-end y build pasan sin dependencias nuevas.
 
 ## 9. Decisiones cerradas

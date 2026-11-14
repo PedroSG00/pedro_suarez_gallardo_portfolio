@@ -16,9 +16,11 @@ export const metadata = {
 export default async function NotFound({
   params,
 }: {
-  params: Promise<{ locale: string }>;
+  params?: Promise<{ locale: string }>;
 }) {
-  const { locale } = (await params) as { locale: Locale };
+  const { locale = 'en' } = (await params ?? { locale: 'en' }) as {
+    locale?: Locale;
+  };
   const t = createT(getDictionary(locale));
   const otherLocale = locale === 'en' ? 'es' : 'en';
 
