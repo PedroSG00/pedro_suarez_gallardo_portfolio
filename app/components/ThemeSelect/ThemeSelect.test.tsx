@@ -1,46 +1,80 @@
-/// <reference types="@testing-library/jest-dom" />
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
+import React from 'react';
+
+vi.mock('../../theme/theme', () => ({
+  getSavedTheme: vi.fn(() => 'system'),
+  saveTheme: vi.fn(),
+}));
+
+vi.mock('../../i18n/provider/use-locale', () => ({
+  useLocale: vi.fn(() => ({
+    locale: 'en',
+    t: (key: string) => {
+      const dict: Record<string, string> = {
+        'themeSelect.label': 'Theme',
+        'themeSelect.option.light': 'Light',
+        'themeSelect.option.dark': 'Dark',
+        'themeSelect.option.system': 'System',
+      };
+      return dict[key] ?? key;
+    },
+  })),
+}));
+
+import { saveTheme } from '../../theme/theme';
 import ThemeSelect from './ThemeSelect';
 
-// T-04: Tests fallidos (rojo) antes de implementar ThemeSelect.tsx
-// RF cubiertos: RF-3, RF-5, RF-6
+const mockedSaveTheme = vi.mocked(saveTheme);
 
-describe('ThemeSelect component — T-04 (red first)', () => {
-  it('select is hidden by default', () => {
-    render(<ThemeSelect />);
-    const select = screen.queryByRole('combobox');
-    expect(select).toBeNull();
+describe('ThemeSelect — T20', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
   });
 
-  it('reveals select after clicking theme button', () => {
-    render(<ThemeSelect />);
-    fireEvent.click(screen.getByRole('button', { name: /theme/i }));
-    expect(screen.getByRole('combobox')).not.toBeDisabled();
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
-  it('has light, dark, and system options', () => {
+  it('select is always visible (no reveal button)', () => {
     render(<ThemeSelect />);
-    fireEvent.click(screen.getByRole('button', { name: /theme/i }));
-    const options = screen.getAllByRole('option');
-    expect(options.length).toBe(3);
+    expect(screen.getByRole('combobox')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /theme/i })).toBeNull();
   });
 
-  it('applies change immediately without reload', () => {
+  it('uses dictionary labels for the control name and options', () => {
     render(<ThemeSelect />);
-    fireEvent.click(screen.getByRole('button', { name: /theme/i }));
+    expect(screen.getByLabelText(/theme/i)).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Light' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Dark' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'System' })).toBeInTheDocument();
+  });
+
+  it('calls saveTheme with the selected value on change', () => {
+    render(<ThemeSelect />);
     fireEvent.change(screen.getByRole('combobox'), { target: { value: 'dark' } });
-    expect(window.localStorage.getItem('theme')).toBe('dark');
+    expect(mockedSaveTheme).toHaveBeenCalledWith('dark');
   });
 
-  it('uses accessible names from i18n EN/ES', () => {
-    render(<ThemeSelect lang="es" />);
-    expect(screen.getByLabelText(/tema/i)).toBeInTheDocument();
-  });
-
-  it('renders a dialog element for show()', () => {
+  it('has an accessible name on the select', () => {
     render(<ThemeSelect />);
-    expect(document.getElementById('theme-dialog')).toBeInTheDocument();
+    const select = screen.getByRole('combobox');
+    expect(select).toHaveAttribute('aria-label', 'Theme');
+  });
+
+  it('renders light, dark, and system options', () => {
+    render(<ThemeSelect />);
+    const options = screen.getAllByRole('option');
+    expect(options.map((o) => o.getAttribute('value'))).toEqual([
+      'light',
+      'dark',
+      'system',
+    ]);
+  });
+
+  it('does not render a dialog element', () => {
+    render(<ThemeSelect />);
+    expect(document.getElementById('theme-dialog')).toBeNull();
   });
 });

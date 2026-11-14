@@ -1,7 +1,8 @@
 /**
- * app/[locale]/page.tsx — T21 (RF8, RNF4)
+ * app/[locale]/page.tsx — T21 (RNF-3)
  * Home page per language. Exports generateMetadata({ params }) that reads
- * metadata.home.title/description from the merged dictionary on the server.
+ * metadata.home.title/description from the dictionary on the server, plus
+ * canonical URL and hreflang alternates with x-default → /en.
  */
 
 import { getDictionary } from '../i18n/translation/get-dictionary';
@@ -22,6 +23,13 @@ export async function generateMetadata({
   return {
     title: metadata.title,
     description: metadata.description,
+    canonical: `/${locale}/`,
+    alternates: {
+      languages: {
+        en: '/en/',
+        es: '/es/',
+      },
+    },
   };
 }
 

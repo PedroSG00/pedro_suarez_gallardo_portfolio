@@ -1,9 +1,9 @@
 /**
- * use-locale.ts — T18 (RF3, RF4, RF5, RNF6, RNF7)
+ * use-locale.ts — T18 (RF-4, RF-8)
  * Client hook that returns { locale, setLocale, t }.
- * setLocale validates that next is in locales, writes localStorage + cookie,
- * and navigates with router.push to the same route under the new prefix
- * (without a full page reload), preserving query and hash.
+ * setLocale validates that next is in locales, writes the lang cookie (never
+ * localStorage), and navigates with router.push to the same route under the
+ * new prefix (without a full page reload), preserving query and hash.
  * Storage errors are caught and do not interrupt the change.
  */
 
@@ -12,7 +12,7 @@
 import { useContext, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { LocaleContext } from './locale-provider';
-import { writeStorage, writeCookie } from '../storage/storage';
+import { writeCookie } from '../storage/storage';
 import { Locale, locales, LOCALE_COOKIE } from '../config';
 
 export function useLocale() {
@@ -27,17 +27,13 @@ export function useLocale() {
     (next: Locale) => {
       if (!locales.includes(next)) return;
       try {
-        writeStorage(LOCALE_COOKIE, next);
-      } catch {
-        // Silently ignore storage errors (RF4, RNF6)
-      }
-      try {
         writeCookie(LOCALE_COOKIE, next);
       } catch {
-        // Silently ignore cookie errors (RF4, RNF6)
+        // Silently ignore cookie errors (RF-4, RNF-7)
       }
       contextSetLocale(next);
-      // RNF7: navigate to the same route under the new prefix, without full reload
+      // RF-4: navigate to the same route under the new prefix, without full reload,
+      // preserving query string and hash.
       const pathname = window.location.pathname;
       const segments = pathname.split('/');
       const idx = segments.findIndex((s) => locales.includes(s as Locale));

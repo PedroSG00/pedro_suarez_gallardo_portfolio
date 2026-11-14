@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Escala cálida fija (NFR-6) */
+/* Fixed warm scale (RNF-6) */
 :root {
   --warm-1: #f8f5f0;
   /* warm-white / base clara */
@@ -19,20 +19,20 @@
   --transition-theme-reduced: 0ms;
   --transition-reveal: 550ms cubic-bezier(0.16, 1, 0.3, 1);
 
-  /* Escala editorial de impacto (RF-9, RF-10, RF-12, RF-17) */
+  /* Editorial impact scale (RF-9, RF-10, RF-12, RF-17) */
   /* Lower minimum keeps long display words inside 320px without breaking them (edge case 20) */
   --type-display: clamp(2rem, 11vw, 9rem);
   --type-page-title: clamp(2.5rem, 7vw, 5rem);
   --type-section-title: clamp(1.75rem, 4vw, 3rem);
   --type-body: 1rem;
 
-  /* Medida de lectura, márgenes y composición full-bleed (RF-11, RF-12) */
+  /* Reading measure, margins and full-bleed composition (RF-11, RF-12) */
   --measure: 65ch;
   --gutter: clamp(1.25rem, 5vw, 4rem);
   --section-space: clamp(5rem, 12vw, 10rem);
   --layout-wide: 100%;
 
-  /* Escala de espaciado (RF-11) */
+  /* Spacing scale (RF-11) */
   --space-xs: 0.25rem;
   --space-sm: 0.5rem;
   --space-md: 1rem;
@@ -41,7 +41,7 @@
   --space-section: var(--section-space);
 }
 
-/* Variables semánticas por tema */
+/* Semantic variables by theme */
 .theme-light {
   --color-bg: var(--warm-1);
   --color-surface: var(--warm-2);
@@ -97,7 +97,7 @@
   }
 }
 
-/* Aplicación base */
+/* Base application */
 html,
 body {
   background: var(--color-bg);
@@ -108,7 +108,7 @@ body {
   overflow-x: clip;
 }
 
-/* Escala tipográfica editorial (RF-9, RF-10, RF-17) */
+/* Editorial typography scale (RF-9, RF-10, RF-17) */
 .text-display {
   font-size: var(--type-display);
   line-height: 0.95;
@@ -160,7 +160,7 @@ body {
   font-family: var(--font-mono);
 }
 
-/* Ritmo vertical y espaciado (RF-11) */
+/* Vertical rhythm and spacing (RF-11) */
 p {
   margin-bottom: var(--space-md);
 }
@@ -176,7 +176,7 @@ section+section {
   margin-top: var(--section-space);
 }
 
-/* Medida de lectura y composición full-bleed (RF-11, RF-12, RF-17) */
+/* Reading measure and full-bleed composition (RF-11, RF-12, RF-17) */
 main {
   width: var(--layout-wide);
   max-width: none;
@@ -198,7 +198,7 @@ main {
   padding-inline: var(--gutter);
 }
 
-/* Transiciones suaves */
+/* Smooth transitions */
 * {
   transition: background-color var(--transition-theme),
     color var(--transition-theme),
@@ -208,36 +208,36 @@ main {
 /* Prefers reduced motion */
 @media (prefers-reduced-motion: reduce) {
   * {
-    transition-duration: var(--transition-theme-reduced);
+    transition-duration: 0ms;
   }
 }
 
-/* Foco visible (3:1 contraste) */
+/* Visible focus (3:1 contrast) */
 :focus-visible,
 :focus {
   outline: 2px solid var(--color-focus);
   outline-offset: 2px;
 }
 
-/* Enlaces subrayados sin color de acento */
+/* Links underlined without accent color */
 a {
   text-decoration: underline;
   color: inherit;
 }
 
-/* Selección de texto */
+/* Text selection */
 ::selection {
   background: var(--color-selection);
   color: var(--color-text-primary);
 }
 
-/* Bloque invertido como momento visual (RF-17) */
+/* Inverted block as visual moment (RF-17) */
 .inverted {
   background: var(--color-inverse-bg);
   color: var(--color-inverse-text);
 }
 
-/* Revelado de entrada solo con CSS (RF-17, NFR-3) */
+/* Entrance reveal with CSS only (RF-17, RNF-3) */
 @media (prefers-reduced-motion: no-preference) {
   .reveal {
     animation: reveal-in var(--transition-reveal) both;
@@ -256,7 +256,7 @@ a {
   }
 }
 
-/* Con movimiento reducido el contenido aparece completo (RF-8, RF-17) */
+/* With reduced motion, content appears complete (RF-8, RF-17) */
 @media (prefers-reduced-motion: reduce) {
   .reveal {
     animation: none;

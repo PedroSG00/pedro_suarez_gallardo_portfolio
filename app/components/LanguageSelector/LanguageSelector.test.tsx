@@ -19,38 +19,38 @@ vi.mock('next/link', () => {
 vi.mock('next/navigation', () => ({
   useRouter: vi.fn(() => ({ push: vi.fn() })),
   usePathname: vi.fn(() => '/es/projects'),
+  useLocale: vi.fn(),
 }));
 
 vi.mock('../../i18n/provider/use-locale', () => ({
-  useLocale: vi.fn(() => ({
-    locale: 'en',
-    setLocale: vi.fn(),
-    t: (key: string) => key,
-  })),
+  useLocale: vi.fn(),
 }));
 
 vi.mock('../../i18n/storage/storage', () => ({
-  readStorage: vi.fn(() => null),
   writeStorage: vi.fn(),
-  readCookie: vi.fn(() => null),
   writeCookie: vi.fn(),
 }));
 
 import { writeStorage, writeCookie } from '../../i18n/storage/storage';
 import { useLocale } from '../../i18n/provider/use-locale';
+import { Locale } from '../../i18n/config';
 import LanguageSelector from './LanguageSelector';
 
 const mockedWriteStorage = vi.mocked(writeStorage);
 const mockedWriteCookie = vi.mocked(writeCookie);
 const mockedUseLocale = vi.mocked(useLocale);
 
-// T19: LanguageSelector.tsx — RF2, RF7
-describe('LanguageSelector — T19', () => {
+// T18: LanguageSelector.tsx — native links per language; unique writer of lang cookie (RF-4, RF-8)
+// Done when: language change preserves route/query/hash, updates URL, adds history entry,
+// saves preference only via cookie (never localStorage), and is the single write point.
+describe('LanguageSelector — T18', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockedUseLocale.mockReturnValue({
       locale: 'en',
-      setLocale: vi.fn(),
+      setLocale: vi.fn((next: Locale) => {
+        writeCookie('lang', next);
+      }),
       t: (key: string) => {
         const dict: Record<string, string> = {
           'languages.en': 'English',
@@ -65,13 +65,13 @@ describe('LanguageSelector — T19', () => {
     vi.restoreAllMocks();
   });
 
-  it('renders one option per locale with dictionary labels', () => {
+  it('renders one link per locale with dictionary labels', () => {
     render(<LanguageSelector />);
     expect(screen.getByRole('link', { name: 'English' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Español' })).toBeInTheDocument();
   });
 
-  it('each option is a Link to the same route in the other language', () => {
+  it('each link navigates to the same route in the other language', () => {
     render(<LanguageSelector />);
     const esLink = screen.getByRole('link', { name: 'Español' });
     expect(esLink).toHaveAttribute('href', '/es/projects');
@@ -89,13 +89,19 @@ describe('LanguageSelector — T19', () => {
     );
   });
 
-  it('clicking an option writes localStorage and cookie via persistLocale, without calling setLocale', () => {
+  it('clicking a link calls setLocale (unique writer) and does not write to localStorage', () => {
     render(<LanguageSelector />);
     fireEvent.click(screen.getByRole('link', { name: 'Español' }));
-    expect(mockedWriteStorage).toHaveBeenCalledWith('lang', 'es');
-    expect(mockedWriteCookie).toHaveBeenCalledWith('lang', 'es');
     const { setLocale } = mockedUseLocale.mock.results[0]?.value;
-    expect(setLocale).not.toHaveBeenCalled();
+    expect(setLocale).toHaveBeenCalledWith('es');
+    expect(mockedWriteStorage).not.toHaveBeenCalled();
+  });
+
+  it('setLocale writes only the cookie (never localStorage)', () => {
+    render(<LanguageSelector />);
+    fireEvent.click(screen.getByRole('link', { name: 'Español' }));
+    expect(mockedWriteCookie).toHaveBeenCalledWith('lang', 'es');
+    expect(mockedWriteStorage).not.toHaveBeenCalledWith('lang', 'es');
   });
 
   it('exposes a stable test id per locale', () => {

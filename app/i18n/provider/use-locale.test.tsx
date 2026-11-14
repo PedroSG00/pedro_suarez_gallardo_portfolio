@@ -18,9 +18,13 @@ vi.mock('../storage/storage', () => ({
 
 import { useLocale } from './use-locale';
 import LocaleProvider from './locale-provider';
-import { writeStorage, writeCookie } from '../storage/storage';
+import { writeCookie } from '../storage/storage';
 
-// T18: use-locale.ts — RF3, RF4, RF5, RNF6, RNF7
+const mockedWriteCookie = vi.mocked(writeCookie);
+
+// T18: use-locale.ts — RF-4, RF-8
+// Done when: setLocale validates locale, writes only the cookie (never localStorage),
+// and navigates with router.push preserving path, query and hash.
 describe('useLocale — T18', () => {
   const dictionary = { nav: { home: 'Home' } };
 
@@ -59,15 +63,14 @@ describe('useLocale — T18', () => {
     expect(screen.getByTestId('greeting')).toHaveTextContent('Home');
   });
 
-  it('setLocale writes localStorage, cookie, and navigates with router.push preserving path, query and hash', () => {
+  it('setLocale writes only the cookie (never localStorage) and navigates with router.push preserving path, query and hash', () => {
     render(
       <LocaleProvider locale="es" dictionary={dictionary}>
         <Consumer />
       </LocaleProvider>
     );
     fireEvent.click(screen.getByRole('button', { name: 'to en' }));
-    expect(writeStorage).toHaveBeenCalledWith('lang', 'en');
-    expect(writeCookie).toHaveBeenCalledWith('lang', 'en');
+    expect(mockedWriteCookie).toHaveBeenCalledWith('lang', 'en');
     expect(mockPush).toHaveBeenCalledWith('/en/projects?q=1#top');
   });
 
@@ -78,7 +81,7 @@ describe('useLocale — T18', () => {
       </LocaleProvider>
     );
     fireEvent.click(screen.getByRole('button', { name: 'to es' }));
-    expect(writeStorage).toHaveBeenCalledWith('lang', 'es');
+    expect(mockedWriteCookie).toHaveBeenCalledWith('lang', 'es');
     expect(mockPush).toHaveBeenCalledWith('/es/projects?q=1#top');
   });
 });

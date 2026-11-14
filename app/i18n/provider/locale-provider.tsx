@@ -82,8 +82,8 @@ export default function LocaleProvider({
 
   const setLocale = useCallback((next: Locale) => {
     if (!locales.includes(next)) return;
-    writeStorage(LOCALE_COOKIE, next);
-    writeCookie(LOCALE_COOKIE, next);
+    // Cookie write is the responsibility of use-locale.ts (unique writer, RF-4).
+    // Here we only update the context; the cookie is written by use-locale.
     setCurrentLocale(next);
   }, []);
 

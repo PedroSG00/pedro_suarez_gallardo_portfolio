@@ -1,17 +1,16 @@
 /**
- * app/[locale]/layout.tsx — T20 (RF8, RNF4, RNF5)
+ * app/[locale]/layout.tsx — T14 (RF-1, RF-4, RF-6)
  * Root layout per language: <html lang={locale}>, generateStaticParams (SSG per
- * locale), theme layer, and LocaleProvider wrapping children with the
- * server-resolved merged dictionary.
+ * locale), inline synchronous theme bootstrap script in <head>, and layout
+ * providers (ThemeProvider + LocaleProvider) without visible controls.
+ * Visible controls (LanguageSelector, ThemeSelect) live in (site)/layout.
  */
 
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import Script from 'next/script';
 import { getDictionary } from '../i18n/translation/get-dictionary';
-import LocaleProvider from '../i18n/provider/locale-provider';
-import LanguageSelector from '../components/LanguageSelector/LanguageSelector';
-import ThemeProvider from '../components/ThemeProvider/ThemeProvider';
+import LayoutProvider from './layout-provider';
 import '../globals.css';
 import { Locale } from '../i18n/config';
 
@@ -59,13 +58,9 @@ export default async function RootLayout({
         </Script>
       </head>
       <body className="min-h-full flex flex-col">
-        <ThemeProvider />
-        <div className="layout-wide flex flex-1 flex-col">
-          <LocaleProvider locale={locale} dictionary={dictionary}>
-            {children}
-            <LanguageSelector />
-          </LocaleProvider>
-        </div>
+        <LayoutProvider locale={locale} dictionary={dictionary}>
+          <div className="layout-wide flex flex-1 flex-col">{children}</div>
+        </LayoutProvider>
       </body>
     </html>
   );

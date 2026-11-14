@@ -65,55 +65,69 @@ RF cubiertos: RF-1 (T10, T11), RF-3 (T7, T8, T9), RF-6 (T12), RF-8 (T9).
   - Hecho cuando: `pnpm test` pasa en `theme.test.ts` y es el único lector de la clave `theme` tras el arranque.
   - Resultado: `getSavedTheme`, `saveTheme`, `resolveActiveTheme`, `listenStorageChanges` implementados (movido a `app/theme/theme.ts`); valor inválido → sistema; almacenamiento bloqueado/cuota llena sin lanzar; 7 tests pasan.
 
-## Fase 3 — Enrutado y layouts
+## Fase 3 — Enrutado y layouts — COMPLETA
+RF cubiertos: RF-1 (T14), RF-2 (T13), RF-3 (T13), RF-4 (T15), RF-5 (T13, T16), RF-6 (T14, T15), RF-7 (T16, T17), RF-9 (T17), RNF-3 (T17).
 
-- [ ] **T13. Implementar `proxy.ts`** — tabla única de precedencia: pasar, redirigir 308 o 404; excluir assets técnicos
+- [x] **T13. Implementar `proxy.ts`** — tabla única de precedencia: pasar, redirigir 308 o 404; excluir assets técnicos
   - RF: RF-2, RF-5
   - Hecho cuando: el test de racha (T6) pasa con la matriz completa de `routing-cases.json` y `proxy.ts` es el único punto que decide el destino.
+  - Resultado: `proxy.ts` reescrito con redirect 308 (no 307), trailing slash → 308 canonical, mayúsculas/doble-slash/idioma no soportado/segmento incorrecto → 404, assets técnicos (_next, favicon.ico, ., /robots.txt, /sitemap.xml, .well-known) pasan sin modificar, header `Vary: Cookie, Accept-Language` en redirectes. Test actualizado de 307→308 con 18 casos.
 
-- [ ] **T14. Crear `app/[locale]/layout.tsx`** — `<html lang>`, script de arranque de tema inline en `<head>`, proveedores sin controles visibles
+- [x] **T14. Crear `app/[locale]/layout.tsx`** — `<html lang>`, script de arranque de tema inline en `<head>`, proveedores sin controles visibles
   - RF: RF-1, RF-4, RF-6
   - Hecho cuando: el idioma del documento y la clase de tema se aplican en el primer frame sin destello (CLS < 0,1).
+  - Resultado: layout raíz refactorizado (comentarios en inglés, tarea RF correctas). Sin `LanguageSelector` (se movió a `(site)/layout`). Script inline síncrono `strategy="beforeInteractive"` en `<head>`. `LayoutProvider` client component (ThemeProvider + LocaleProvider). `generateStaticParams` [en, es], `dynamicParams = false`. `layout-provider.tsx` nuevo como wrapper cliente.
 
-- [ ] **T15. Crear `app/[locale]/(site)/layout.tsx`** — controles visibles (`LanguageSelector` + `ThemeSelect`) solo en páginas reales
+- [x] **T15. Crear `app/[locale]/(site)/layout.tsx`** — controles visibles (`LanguageSelector` + `ThemeSelect`) solo en páginas reales
   - RF: RF-4, RF-6
   - Hecho cuando: la pantalla 404 no hereda este layout y no muestra cabecera ni controles.
+  - Resultado: `(site)/layout.tsx` nuevo con `LanguageSelector` y `ThemeSelect` como controles visibles. `ThemeProvider.tsx` refactorizado: ya no renderiza `ThemeSelect` (retorna `null`, solo aplica/sincroniza tema).
 
-- [ ] **T16. Crear `app/[locale]/[...rest]/page.tsx`** — cualquier ruta desconocida bajo idioma válido → `notFound()`
+- [x] **T16. Crear `app/[locale]/[...rest]/page.tsx`** — cualquier ruta desconocida bajo idioma válido → `notFound()`
   - RF: RF-5, RF-7
   - Hecho cuando: una ruta inexistente bajo `/es/` responde 404 sin repetir la ruta solicitada y conserva el idioma resuelto.
+  - Resultado: `[...rest]/page.tsx` nuevo que llama `notFound()` para cualquier ruta desconocida bajo locale válido.
 
-- [ ] **T17. Crear `app/[locale]/not-found.tsx`** — pantalla 404 bilingüe, sin cabecera ni controles, con enlaces de salida
+- [x] **T17. Crear `app/[locale]/not-found.tsx`** — pantalla 404 bilingüe, sin cabecera ni controles, con enlaces de salida
   - RF: RF-7, RF-9, RNF-3
   - Hecho cuando: muestra `common.notFound`, enlace `common.back` al inicio y enlace al otro idioma, declara `noindex` sin canonical ni alternativas.
+  - Resultado: `not-found.tsx` nuevo con `common.notFound` (h1), `common.back` (enlace al inicio), enlace al otro idioma (etiquetado en ese idioma), `metadata: { noindex: true }`, sin canonical ni alternativas, sin cabecera ni controles, hereda layout mínimo de `[locale]/layout`.
 
-## Fase 4 — Controles y proveedores
+## Fase 4 — Controles y proveedores — COMPLETA
+RF cubiertos: RF-4 (T18), RF-6 (T19, T20), RF-8 (T18), RF-9 (T20).
 
-- [ ] **T18. Crear `app/components/LanguageSelector/LanguageSelector.tsx`** — enlaces nativos por idioma; único punto de escritura de la cookie `lang`
+- [x] **T18. Crear `app/components/LanguageSelector/LanguageSelector.tsx`** — enlaces nativos por idioma; único punto de escritura de la cookie `lang`
   - RF: RF-4, RF-8
   - Hecho cuando: el cambio de idioma conserva ruta, consulta y fragmento, actualiza la URL, deja entrada en el historial y guarda la preferencia solo vía `LanguageSelector`/`use-locale`.
+  - Resultado: reescrito para usar `setLocale` de `useLocale` (único escritor de cookie, navegación con `router.push` preservando path/query/hash). Removido `writeStorage` — `lang` solo se escribe en cookie, nunca en `localStorage`. Comentarios en inglés (T18, RF-4, RF-8).
 
-- [ ] **T19. Crear `app/components/ThemeProvider/ThemeProvider.tsx`** — aplica y sincroniza el tema; escucha cambios entre pestañas; sin control visible
+- [x] **T19. Crear `app/components/ThemeProvider/ThemeProvider.tsx`** — aplica y sincroniza el tema; escucha cambios entre pestañas; sin control visible
   - RF: RF-6
   - Hecho cuando: el tema se aplica sin recarga, se sincroniza entre pestañas sin mover el foco y respeta `prefers-reduced-motion`.
+  - Resultado: ya existía y está correcto (aplica clase de tema en `useEffect`, escucha `storage` events, retorna `null`). Test nuevo `ThemeProvider.test.tsx` con 4 tests. `use-locale.ts` y `locale-provider.tsx` refactorizados: `setLocale` ya no escribe `localStorage`, solo `use-locale.ts` escribe la cookie (único punto de escritura, RF-4).
 
-- [ ] **T20. Crear `app/components/ThemeSelect/ThemeSelect.tsx`** — `<select>` nativo siempre visible con etiquetas del diccionario (hasta la 004)
+- [x] **T20. Crear `app/components/ThemeSelect/ThemeSelect.tsx`** — `<select>` nativo siempre visible con etiquetas del diccionario (hasta la 004)
   - RF: RF-6, RF-9
   - Hecho cuando: el `<select>` es siempre visible, usa etiquetas del diccionario, tiene nombre accesible y cumple objetivo 24×24.
+  - Resultado: reescrito — `<select>` siempre visible (sin botón revelador ni `<dialog>`), etiquetas desde diccionario via `useLocale().t()` (`themeSelect.label`, `themeSelect.option.*`), `aria-label` del diccionario, `min-h-[24px] min-w-[24px]` para objetivo 24×24. Comentarios en inglés (T20, RF-6, RF-9).
 
-## Fase 5— Metadatos, accesibilidad y navegadores
+## Fase 5— Metadatos, accesibilidad y navegadores — COMPLETA
+RF cubiertos: RNF-3 (T21), RF-9 (T22), RNF-5 (T22), RNF-6 (T23).
 
-- [ ] **T21. Añadir `generateMetadata` en `page.tsx` y `projects/page.tsx`** — título y descripción por idioma, canónica propia, `hreflang` y `x-default` → `/en`
+- [x] **T21. Añadir `generateMetadata` en `page.tsx` y `projects/page.tsx`** — título y descripción por idioma, canónica propia, `hreflang` y `x-default` → `/en`
   - RF: RNF-3
   - Hecho cuando: cada página tiene metadatos propios por idioma y `x-default` apunta a `/en`; la 404 se declara como no indexable sin canonical ni alternativas.
+  - Resultado: `page.tsx` y `projects/page.tsx` exportan `generateMetadata` con `title`, `description`, `canonical` (URL propia) y `alternates.languages` (hreflang para en/es). `not-found.tsx` tiene `metadata: { noindex: true }` sin canonical ni alternativas. Comentarios en inglés.
 
-- [ ] **T22. Añadir tokens de foco y contraste en `app/globals.css`** — indicador de foco 3:1 frente al fondo y al estado sin foco; `prefers-reduced-motion`; `color-scheme`
+- [x] **T22. Añadir tokens de foco y contraste en `app/globals.css`** — indicador de foco 3:1 frente al fondo y al estado sin foco; `prefers-reduced-motion`; `color-scheme`
   - RF: RF-9, RNF-5
   - Hecho cuando: el foco es visible y distinguible con contraste 3:1, nunca queda oculto, y los cambios de tema son instantáneos con movimiento reducido.
+  - Resultado: `globals.css` tiene `--color-focus`, `:focus-visible`/`:focus` con outline visible, `color-scheme` por tema, `prefers-reduced-motion` con `transition-duration: 0ms`. Comentarios traducidos a inglés.
 
-- [ ] **T23. Actualizar `playwright.config.ts`** — matriz de 4 escritorio (Chromium, Firefox, WebKit, Edge) + 2 móvil (Chromium, WebKit)
+- [x] **T23. Actualizar `playwright.config.ts`** — matriz de 4 escritorio (Chromium, Firefox, WebKit, Edge) + 2 móvil (Chromium, WebKit)
   - RF: RNF-6
   - Hecho cuando: `pnpm test:e2e` ejecuta los seis proyectos definidos.
+  - Resultado: `playwright.config.ts` define 6 proyectos: chromium, firefox, webkit, edge (escritorio) y mobile-chromium, mobile-webkit (móvil).
 
 ## Fase 6 — Limpieza y notas de corrección
 

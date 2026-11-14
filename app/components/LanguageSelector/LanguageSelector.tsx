@@ -1,10 +1,10 @@
 /**
- * LanguageSelector.tsx — T19 (RF2, RF7)
- * Language selector: one option per locale from config.ts, labels from
- * languages.<locale> in the dictionary. Each option is a <Link> to the same
- * route in the other language (works without JS). onClick calls persistLocale
- * (writes localStorage + cookie) and never setLocale, to avoid double
- * navigation. Active state uses aria-current.
+ * LanguageSelector.tsx — T18 (RF-4, RF-8)
+ * Language selector: one native link per locale. Labels come from
+ * languages.<locale> in the dictionary. Each link points to the same route in
+ * the other language (works without JS). onClick calls setLocale from useLocale,
+ * which is the unique writer of the lang cookie and handles navigation with
+ * router.push, preserving path, query and hash. Active state uses aria-current.
  */
 
 'use client';
@@ -12,24 +12,10 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useLocale } from '../../i18n/provider/use-locale';
-import { Locale, locales, LOCALE_COOKIE } from '../../i18n/config';
-import { writeStorage, writeCookie } from '../../i18n/storage/storage';
-
-function persistLocale(next: Locale): void {
-  try {
-    writeStorage(LOCALE_COOKIE, next);
-  } catch {
-    // Silently ignore storage errors (RF4, RNF6)
-  }
-  try {
-    writeCookie(LOCALE_COOKIE, next);
-  } catch {
-    // Silently ignore cookie errors (RF4, RNF6)
-  }
-}
+import { Locale, locales } from '../../i18n/config';
 
 export default function LanguageSelector() {
-  const { locale, t } = useLocale();
+  const { locale, setLocale, t } = useLocale();
   const pathname = usePathname();
 
   const otherLocale = locales.find((l) => l !== locale);
@@ -50,11 +36,13 @@ export default function LanguageSelector() {
           <Link
             key={l}
             href={linkHref}
-            onClick={() => persistLocale(l)}
+            onClick={() => {
+              setLocale(l);
+            }}
             aria-current={isActive ? 'true' : undefined}
             data-testid={`language-selector-${l}`}
           >
-            {t(`languages.${l}`)}
+            {t?.(`languages.${l}`) ?? l.toUpperCase()}
           </Link>
         );
       })}

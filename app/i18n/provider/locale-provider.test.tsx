@@ -60,7 +60,7 @@ describe('LocaleProvider — T17', () => {
     expect(screen.getByTestId('greeting')).toHaveTextContent('Home');
   });
 
-  it('setLocale changes the locale, writes localStorage and cookie, and re-renders', () => {
+  it('setLocale changes the locale and re-renders (cookie write is use-locale responsibility)', () => {
     render(
       <LocaleProvider locale="en" dictionary={dictionary}>
         <Consumer />
@@ -69,22 +69,17 @@ describe('LocaleProvider — T17', () => {
     expect(screen.getByTestId('locale')).toHaveTextContent('en');
     fireEvent.click(screen.getByRole('button', { name: 'to es' }));
     expect(screen.getByTestId('locale')).toHaveTextContent('es');
-    expect(mockedWriteStorage).toHaveBeenCalledWith('lang', 'es');
-    expect(mockedWriteCookie).toHaveBeenCalledWith('lang', 'es');
   });
 
-  it('setLocale ignores unsupported locale (no change, no write)', () => {
+  it('setLocale ignores unsupported locale (no change)', () => {
     render(
       <LocaleProvider locale="en" dictionary={dictionary}>
         <Consumer />
       </LocaleProvider>
     );
-    // setLocale with invalid value is not exposed in buttons, but the
-    // callback validates internally: the locale does not change.
     expect(screen.getByTestId('locale')).toHaveTextContent('en');
     fireEvent.click(screen.getByRole('button', { name: 'to en' }));
     expect(screen.getByTestId('locale')).toHaveTextContent('en');
-    expect(mockedWriteStorage).not.toHaveBeenCalledWith('lang', 'xx');
   });
 });
 
