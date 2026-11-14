@@ -75,6 +75,7 @@ describe('ThemeSelect — T20', () => {
 
   it('does not render a dialog element', () => {
     render(<ThemeSelect />);
+    // eslint-disable-next-line testing-library/no-node-access
     expect(document.getElementById('theme-dialog')).toBeNull();
   });
 });

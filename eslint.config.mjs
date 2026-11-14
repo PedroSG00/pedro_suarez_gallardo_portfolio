@@ -2,6 +2,8 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 import reactPlugin from "eslint-plugin-react";
+import vitestPlugin from "eslint-plugin-vitest";
+import testingLibraryPlugin from "eslint-plugin-testing-library";
 
 const nonVisibleProps = [
   "className", "id", "href", "src", "type", "name", "value",
@@ -64,6 +66,18 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  // RNF2: reglas específicas para archivos de test (Vitest + Testing Library).
+  {
+    files: ["**/*.test.{ts,tsx}"],
+    plugins: {
+      vitest: vitestPlugin,
+      "testing-library": testingLibraryPlugin,
+    },
+    rules: {
+      ...vitestPlugin.configs.recommended.rules,
+      ...testingLibraryPlugin.configs["flat/react"].rules,
+    },
+  },
 ]);
 
 export default eslintConfig;

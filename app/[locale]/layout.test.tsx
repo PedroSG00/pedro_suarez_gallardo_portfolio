@@ -115,6 +115,7 @@ describe('app/[locale]/layout — T14', () => {
     const ui = await Layout({ params, children: <div>content</div> });
     render(ui);
 
+    // eslint-disable-next-line testing-library/no-node-access
     const script = document.querySelector('script#theme-init');
     expect(script).not.toBeNull();
     expect(script?.getAttribute('data-strategy')).toBe('beforeInteractive');

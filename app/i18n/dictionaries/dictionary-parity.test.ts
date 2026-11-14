@@ -25,9 +25,7 @@ describe('dictionary parity — T1', () => {
         const enRecord = enObj as Record<string, unknown>;
         for (const key of Object.keys(esRecord)) {
           const fullPath = `${path}${path ? '.' : ''}${key}`;
-          expect(enRecord, `key missing in en.json: ${fullPath}`).toHaveProperty(
-            key
-          );
+          expect(enRecord).toHaveProperty(key);
           checkKeys(enRecord[key], esRecord[key], fullPath);
         }
       }
@@ -46,10 +44,7 @@ describe('dictionary parity — T1', () => {
         const esRecord = esObj as Record<string, unknown>;
         for (const key of Object.keys(enRecord)) {
           const fullPath = `${path}${path ? '.' : ''}${key}`;
-          expect(
-            esRecord,
-            `extra key in en.json / missing in es.json: ${fullPath}`
-          ).toHaveProperty(key);
+          expect(esRecord).toHaveProperty(key);
           checkKeys(enRecord[key], esRecord[key], fullPath);
         }
       }

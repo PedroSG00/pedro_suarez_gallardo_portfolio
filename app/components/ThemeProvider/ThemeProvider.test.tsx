@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, act } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import React from 'react';
 
@@ -33,15 +33,14 @@ describe('ThemeProvider — T19', () => {
 
   it('applies the resolved theme class to <html> on mount', () => {
     mockedResolveActiveTheme.mockReturnValue('dark');
-    act(() => {
-      render(<ThemeProvider />);
-    });
+    render(<ThemeProvider />);
     expect(document.documentElement.classList.contains('theme-dark')).toBe(true);
     expect(document.documentElement.classList.contains('theme-light')).toBe(false);
   });
 
   it('returns null (no visible control)', () => {
     const { container } = render(<ThemeProvider />);
+    // eslint-disable-next-line testing-library/no-node-access
     expect(container.children).toHaveLength(0);
   });
 
@@ -56,15 +55,11 @@ describe('ThemeProvider — T19', () => {
       storageCallback = callback;
       return vi.fn();
     });
-    act(() => {
-      render(<ThemeProvider />);
-    });
+    render(<ThemeProvider />);
     // First, resolved theme 'dark' is applied
     expect(document.documentElement.classList.contains('theme-dark')).toBe(true);
     // Then storage event arrives with 'light'
-    act(() => {
-      storageCallback!('light');
-    });
+    storageCallback!('light');
     expect(document.documentElement.classList.contains('theme-light')).toBe(true);
     expect(document.documentElement.classList.contains('theme-dark')).toBe(false);
   });
