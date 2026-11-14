@@ -31,9 +31,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Install coverage provider
-        run: pnpm add -D c8@latest
-
       - name: Run tests with coverage
         run: pnpm exec vitest run --coverage
 

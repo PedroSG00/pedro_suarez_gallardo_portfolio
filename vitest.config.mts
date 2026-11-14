@@ -5,7 +5,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     coverage: {
-      provider: 'c8',
+      provider: 'v8',
       reporter: ['text', 'lcov'],
       include: ['app/**/*.{ts,tsx}', 'middleware/**/*.ts', 'proxy.ts'],
       exclude: [
@@ -22,7 +22,7 @@ export default defineConfig({
         'specs/',
         'docs/',
         'public/',
-        'vitest.config.ts',
+        'vitest.config.mts',
         'playwright.config.ts',
         'playwright.config.test.ts',
         'next.config.ts',
