@@ -36,9 +36,5 @@
       "dark": "Oscuro",
       "system": "Sistema"
     }
-  },
-  "modalInfoJSDisabled": {
-    "title": "JavaScript desactivado",
-    "body": "Algunas funciones del tema requieren JavaScript para funcionar completamente."
   }
 }

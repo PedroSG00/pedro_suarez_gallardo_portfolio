@@ -104,4 +104,12 @@ describe('dictionary parity — T1', () => {
       ).toHaveProperty('description');
     }
   });
+
+  it('deprecated key modalInfoJSDisabled is absent from en.json (RF-8)', () => {
+    expect(en).not.toHaveProperty('modalInfoJSDisabled');
+  });
+
+  it('deprecated key modalInfoJSDisabled is absent from es.json (RF-8)', () => {
+    expect(es).not.toHaveProperty('modalInfoJSDisabled');
+  });
 });

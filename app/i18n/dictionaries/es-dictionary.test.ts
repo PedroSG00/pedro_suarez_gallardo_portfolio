@@ -46,8 +46,7 @@ describe('es.json — T13', () => {
     expect(es.common.copyright).toBe('© Pedro Suárez Gallardo');
   });
 
-  it('keeps preexisting themeSelect and modalInfoJSDisabled sections', () => {
+  it('keeps preexisting themeSelect section', () => {
     expect(es.themeSelect.label).toBe('Tema');
-    expect(es.modalInfoJSDisabled.title).toBe('JavaScript desactivado');
   });
 });

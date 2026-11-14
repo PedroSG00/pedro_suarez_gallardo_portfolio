@@ -129,19 +129,23 @@ RF cubiertos: RNF-3 (T21), RF-9 (T22), RNF-5 (T22), RNF-6 (T23).
   - Hecho cuando: `pnpm test:e2e` ejecuta los seis proyectos definidos.
   - Resultado: `playwright.config.ts` define 6 proyectos: chromium, firefox, webkit, edge (escritorio) y mobile-chromium, mobile-webkit (móvil).
 
-## Fase 6 — Limpieza y notas de corrección
+## Fase 6 — Limpieza y notas de corrección — COMPLETA
+RF cubiertos: RF-1 (T24), RF-8 (T24, T25), RNF-8 (T26).
 
-- [ ] **T24. Eliminar claves derogadas de diccionarios** — `modalInfoJSDisabled.*` y claves de estado del revelado del selector
+- [x] **T24. Eliminar claves derogadas de diccionarios** — `modalInfoJSDisabled.*` y claves de estado del revelado del selector
   - RF: RF-1, RF-8
   - Hecho cuando: ninguna de esas claves existe en `en.json` ni `es.json`, y la paridad de diccionarios sigue pasando.
+  - Resultado: `modalInfoJSDisabled` eliminado de ambos `en.json` y `es.json`. Test de paridad añade dos aserciones verificando la ausencia de la clave. `dictionaries.test.ts`, `en-dictionary.test.ts`, `es-dictionary.test.ts` actualizados (eliminadas aserciones sobre la clave derogada). Paridad de diccionarios sigue pasando.
 
-- [ ] **T25. Reescribir pruebas derogadas** — `i18n-flow.e2e.ts` T10 (doble persistencia y ausencia de recarga) y `theme-flow.e2e.ts` (botón que revela el selector)
+- [x] **T25. Reescribir pruebas derogadas** — `i18n-flow.e2e.ts` T10 (doble persistencia y ausencia de recarga) y `theme-flow.e2e.ts` (botón que revela el selector)
   - RF: RF-8
   - Hecho cuando: ninguna prueba end-to-end valida comportamiento derogado y `pnpm test:e2e` pasa en verde.
+  - Resultado: `i18n-flow.e2e.ts` T10 reescrito — eliminada aserción sobre `localStorage.lang` (cookie es única fuente de verdad, RF-8); se añade verificación de que `localStorage.lang` es null. `theme-flow.e2e.ts` reescrito — `<select>` siempre visible (sin botón revelador ni `<dialog>`); se selecciona directamente del combobox.
 
-- [ ] **T26. Corregir notas en specs 001 y 002** — nota fechada sobre control de tema, revelado y aviso de JavaScript (001); respaldo a inglés y persistencia dual (002); quitar referencia inexistente a `implementation.md`
+- [x] **T26. Corregir notas en specs 001 y 002** — nota fechada sobre control de tema, revelado y aviso de JavaScript (001); respaldo a inglés y persistencia dual (002); quitar referencia inexistente a `implementation.md`
   - RF: RNF-8
   - Hecho cuando: `specs/001-styles-globals/spec.md` y `specs/002-i18n-setting/spec.md` tienen nota fechada y aviso en sus planes/tareas, y no existe referencia a `implementation.md`.
+  - Resultado: spec 001 ya tenía nota fechada (línea 9) y aviso en plan.md/tareas.md (línea 3); spec 002 ya tenía nota fechada (línea 5) y aviso en plan.md/tareas.md (línea 3). Eliminada referencia a `specs/001-styles-globals/implementation.md` de spec 001 (línea 289), reemplazada por nota de que este documento es la referencia vigente.
 
 ## Criterio de finalización de la fase
 

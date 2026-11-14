@@ -206,7 +206,7 @@ test.describe('T10 — No full page reload and window marker', () => {
     expect(marker).toBe('alive');
   });
 
-  test('after change: localStorage.lang === "en" and cookie lang=en', async ({
+  test('after change: cookie lang=en (single source of truth)', async ({
     page,
     context,
   }) => {
@@ -218,12 +218,13 @@ test.describe('T10 — No full page reload and window marker', () => {
     await page.click('[data-testid="language-selector-en"]');
     await expect(page).toHaveURL(/.*\/en\/projects/);
 
-    const storageLang = await page.evaluate(() => localStorage.getItem('lang'));
-    expect(storageLang).toBe('en');
-
     const cookies = await context.cookies('http://localhost:3000');
     const langCookie = cookies.find((c) => c.name === 'lang');
     expect(langCookie?.value).toBe('en');
+
+    // localStorage.lang is NOT written (cookie is the single source of truth)
+    const storageLang = await page.evaluate(() => localStorage.getItem('lang'));
+    expect(storageLang).toBeNull();
   });
 
   test('reload after choosing language keeps the language', async ({

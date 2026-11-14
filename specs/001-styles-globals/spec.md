@@ -287,4 +287,4 @@ La funcionalidad se considerará terminada cuando:
 - **[ACTUALIZADA por 004]** ¿Dónde vive el control de tema? → **En la cabecera del sitio**, como componente reutilizable de una sola responsabilidad.
 - **[RESUELTA]** ¿Dónde viven las cadenas del control de tema? → **En diccionarios i18n** (inglés y castellano).
 
-**Estado del cribado:** todas las ambigüedades, contradicciones y casos límite detectados en la auditoría QA quedan resueltos en este documento. El spec se mantiene en **Borrador**; el spec Activo que respaldará el código será `specs/001-styles-globals/implementation.md`.
+**Estado del cribado:** todas las ambigüedades, contradicciones y casos límite detectados en la auditoría QA quedan resueltos en este documento. El spec se mantiene en **Borrador**; este documento es la referencia vigente para la base visual (no existe `implementation.md`).
