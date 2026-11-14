@@ -5,6 +5,7 @@
  * canonical URL and hreflang alternates with x-default → /en.
  */
 
+import { getBaseUrl } from '../../lib/get-base-url';
 import { getDictionary } from '../../i18n/translation/get-dictionary';
 import { Locale } from '../../i18n/config';
 import { createT } from '../../i18n/translation/translate';
@@ -15,6 +16,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = (await params) as { locale: Locale };
+  const baseUrl = await getBaseUrl();
   const dict = getDictionary(locale) as Record<string, unknown>;
   const metadata = (dict.metadata as Record<string, unknown>).projects as Record<
     string,
@@ -23,11 +25,11 @@ export async function generateMetadata({
   return {
     title: metadata.title,
     description: metadata.description,
-    canonical: `/${locale}/projects`,
+    canonical: `${baseUrl}/${locale}/projects`,
     alternates: {
       languages: {
-        en: '/en/projects',
-        es: '/es/projects',
+        en: `${baseUrl}/en/projects`,
+        es: `${baseUrl}/es/projects`,
       },
     },
   };

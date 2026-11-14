@@ -235,14 +235,14 @@ La funcionalidad se considerará terminada cuando:
 - [ ] Las variantes de URL y los idiomas no soportados responden como se describe en RF-5, sin cambiar el idioma de un enlace explícito.
 - [ ] El control de idioma navega a la misma página conservando ruta, consulta y fragmento, actualiza la URL, deja entrada en el historial y guarda la preferencia.
 - [ ] El tema se aplica sin recarga, se recuerda entre visitas, se sincroniza entre pestañas y no produce destello.
-- [ ] La primera visita sigue la preferencia del sistema; sin preferencia del sistema se muestra claro.
+- [x] La primera visita sigue la preferencia del sistema; sin preferencia del sistema se muestra claro.
 - [ ] Los fallos de almacenamiento se gestionan sin errores visibles y sin impedir cambiar la preferencia.
 - [ ] La pantalla de página no encontrada es bilingüe, no indexable, no repetitiva de la ruta, sin cabecera, y ofrece volver al inicio y el otro idioma.
 - [ ] Cada página existente tiene título y descripción propios por idioma, canónica propia y alternativas de idioma con versión por defecto apuntando a `/en`.
-- [ ] El foco es visible y distinguible, con contraste de 3:1 frente al estado sin foco y los colores adyacentes, y nunca queda oculto.
-- [ ] Los objetivos interactivos miden al menos 24 por 24 píxeles y el contenido soporta zoom de página y de texto al 200 %.
-- [ ] No hay desplazamiento horizontal a 320 px ni con texto ampliado.
-- [ ] Los cambios de tema respetan `prefers-reduced-motion`.
+- [x] El foco es visible y distinguible, con contraste de 3:1 frente al estado sin foco y los colores adyacentes, y nunca queda oculto.
+- [x] Los objetivos interactivos miden al menos 24 por 24 píxeles y el contenido soporta zoom de página y de texto al 200 %.
+- [x] No hay desplazamiento horizontal a 320 px ni con texto ampliado.
+- [x] Los cambios de tema respetan `prefers-reduced-motion`.
 - [ ] Cada requisito funcional tiene al menos una prueba asociada, escrita antes del código; los componentes con comportamiento se prueban con pruebas de componente y los flujos de idioma, tema y página no encontrada con pruebas end-to-end en los cuatro navegadores de escritorio y dos móviles. RF-2 se comprueba en revisión, no con pruebas estructurales.
 - [ ] Existe un único mecanismo por comportamiento compartido y no quedan rutas de código ni puntos de entrada sin uso.
 - [ ] Las URLs publicadas y las preferencias guardadas antes del cambio siguen funcionando.
