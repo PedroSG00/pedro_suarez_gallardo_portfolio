@@ -9,7 +9,7 @@ vi.mock('next/navigation', () => ({
   usePathname: vi.fn(() => '/es'),
 }));
 
-vi.mock('./storage', () => ({
+vi.mock('../storage/storage', () => ({
   readStorage: vi.fn(() => null),
   writeStorage: vi.fn(),
   readCookie: vi.fn(() => null),
@@ -18,7 +18,7 @@ vi.mock('./storage', () => ({
 
 import { useLocale } from './use-locale';
 import LocaleProvider from './locale-provider';
-import { writeStorage, writeCookie } from './storage';
+import { writeStorage, writeCookie } from '../storage/storage';
 
 // T18: use-locale.ts — RF3, RF4, RF5, RNF6, RNF7
 describe('useLocale — T18', () => {

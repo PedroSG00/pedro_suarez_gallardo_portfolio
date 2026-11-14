@@ -4,9 +4,9 @@
  * metadata.home.title/description from the merged dictionary on the server.
  */
 
-import { getDictionary } from '../i18n/get-dictionary';
+import { getDictionary } from '../i18n/translation/get-dictionary';
 import { Locale } from '../i18n/config';
-import { createT } from '../i18n/translate';
+import { createT } from '../i18n/translation/translate';
 
 export async function generateMetadata({
   params,

@@ -1,0 +1,50 @@
+[
+  {
+    "id": "root-es-cookie",
+    "url": "/",
+    "cookieLang": "es",
+    "legacyLang": null,
+    "acceptLanguage": "en-US,en;q=0.9",
+    "expectedStatus": 308,
+    "expectedLocale": "es",
+    "expectedLocation": "/es",
+    "observed": { "status": 308, "locale": "es", "location": "/es" },
+    "uniqueResolver": true,
+    "uniqueWriter": true,
+    "noRuntimeFallback": true,
+    "noHardcodedText": true,
+    "keyParity": true
+  },
+  {
+    "id": "trailing-slash",
+    "url": "/en/projects/",
+    "cookieLang": null,
+    "legacyLang": null,
+    "acceptLanguage": null,
+    "expectedStatus": 308,
+    "expectedLocale": "en",
+    "expectedLocation": "/en/projects",
+    "observed": { "status": 308, "locale": "en", "location": "/en/projects" },
+    "uniqueResolver": true,
+    "uniqueWriter": true,
+    "noRuntimeFallback": true,
+    "noHardcodedText": true,
+    "keyParity": true
+  },
+  {
+    "id": "uppercase-locale",
+    "url": "/ES",
+    "cookieLang": null,
+    "legacyLang": null,
+    "acceptLanguage": "es-ES",
+    "expectedStatus": 404,
+    "expectedLocale": "es",
+    "expectedLocation": null,
+    "observed": { "status": 404, "locale": "es", "location": null },
+    "uniqueResolver": true,
+    "uniqueWriter": true,
+    "noRuntimeFallback": true,
+    "noHardcodedText": true,
+    "keyParity": true
+  }
+]

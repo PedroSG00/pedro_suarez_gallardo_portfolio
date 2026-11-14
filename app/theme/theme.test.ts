@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { getSavedTheme, saveTheme, resolveActiveTheme, listenStorageChanges } from './theme';
 
-// T-02: Tests fallidos (rojo) antes de implementar `app/lib/theme.ts`
-// RF cubiertos: RF-2 (tema manual/sistema), RF-4 (persistencia y sync entre pestañas),
-// caso límite 5 (valor inválido -> sistema) y caso límite 6 (localStorage bloqueado)
+// Theme utilities — T-02 (red first)
+// RF covered: RF-2 (manual/system theme), RF-4 (persistence and sync between tabs),
+// edge case 5 (invalid value → system) and edge case 6 (localStorage blocked)
 
 describe('theme utilities — T-02 (red first)', () => {
   beforeEach(() => {
@@ -61,6 +61,13 @@ describe('theme utilities — T-02 (red first)', () => {
         throw new Error('Storage blocked');
       });
       expect(() => getSavedTheme()).not.toThrow();
+    });
+
+    it('quota full: saveTheme does not throw (RF-6)', () => {
+      vi.spyOn(localStorage, 'setItem').mockImplementation(() => {
+        throw new Error('QuotaExceededError');
+      });
+      expect(() => saveTheme('dark')).not.toThrow();
     });
   });
 });

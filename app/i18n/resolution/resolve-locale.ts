@@ -1,9 +1,9 @@
 /**
  * Pure language resolution (server-side, no Next.js).
- * RF covered: RF1, RF5, RNF8
+ * RF covered: RF-3
  */
 
-import { Locale } from './config';
+import { Locale } from '../config';
 
 export function parseAcceptLanguage(
   header: string | undefined | null

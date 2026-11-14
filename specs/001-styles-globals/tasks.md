@@ -9,7 +9,7 @@
 
 ---
 
-## TarReviseas
+## Fase 1
 
 - [x] **T1 — Diccionarios i18n del selector y modal (EN/ES)**  
   RF cubiertos: NFR-9, RF-3, RF-6  
@@ -74,7 +74,7 @@
 
 ---
 
-## Tareas pendientes derivadas de la revisión visual (RF-17)
+## Fase 2
 
 - [x] **T-10 — Tests de la escala de impacto y composición full-bleed (antes del código)**
   - RF: RF-9, RF-10, RF-11, RF-12, RF-17, NFR-10

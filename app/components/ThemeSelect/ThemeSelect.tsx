@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { getSavedTheme, saveTheme } from '../../lib/theme';
+import { getSavedTheme, saveTheme } from '../../theme/theme';
 
 export default function ThemeSelect({ lang = 'en' }: { lang?: 'en' | 'es' }) {
   const [open, setOpen] = useState(false);

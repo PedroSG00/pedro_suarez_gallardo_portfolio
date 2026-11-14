@@ -11,9 +11,9 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useLocale } from '../../i18n/use-locale';
+import { useLocale } from '../../i18n/provider/use-locale';
 import { Locale, locales, LOCALE_COOKIE } from '../../i18n/config';
-import { writeStorage, writeCookie } from '../../i18n/storage';
+import { writeStorage, writeCookie } from '../../i18n/storage/storage';
 
 function persistLocale(next: Locale): void {
   try {

@@ -6,7 +6,7 @@
  */
 
 import { NextResponse, type NextRequest } from 'next/server';
-import { resolveLocale } from './app/i18n/resolve-locale';
+import { resolveLocale } from './app/i18n/resolution/resolve-locale';
 import { locales, defaultLocale, LOCALE_COOKIE } from './app/i18n/config';
 
 const LOCALES: string[] = [...locales];

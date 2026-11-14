@@ -21,7 +21,7 @@ vi.mock('next/navigation', () => ({
   usePathname: vi.fn(() => '/es/projects'),
 }));
 
-vi.mock('../../i18n/use-locale', () => ({
+vi.mock('../../i18n/provider/use-locale', () => ({
   useLocale: vi.fn(() => ({
     locale: 'en',
     setLocale: vi.fn(),
@@ -29,15 +29,15 @@ vi.mock('../../i18n/use-locale', () => ({
   })),
 }));
 
-vi.mock('../../i18n/storage', () => ({
+vi.mock('../../i18n/storage/storage', () => ({
   readStorage: vi.fn(() => null),
   writeStorage: vi.fn(),
   readCookie: vi.fn(() => null),
   writeCookie: vi.fn(),
 }));
 
-import { writeStorage, writeCookie } from '../../i18n/storage';
-import { useLocale } from '../../i18n/use-locale';
+import { writeStorage, writeCookie } from '../../i18n/storage/storage';
+import { useLocale } from '../../i18n/provider/use-locale';
 import LanguageSelector from './LanguageSelector';
 
 const mockedWriteStorage = vi.mocked(writeStorage);

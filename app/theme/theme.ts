@@ -1,7 +1,7 @@
 /**
- * Theme utilities — T-03 implementation
- * RF: RF-2, RF-4, RF-7 (manual/system resolution, persistence,
- * storage event sync, invalid value fallback, blocked storage)
+ * Theme utilities — T12 (RF-6)
+ * Theme model and persistence; storage event sync; invalid value fallback;
+ * blocked and full storage handling.
  */
 
 export type ThemeValue = 'light' | 'dark' | 'system';
@@ -15,7 +15,7 @@ export function getSavedTheme(): ThemeValue {
       return raw;
     }
   } catch {
-    // Edge case 6: localStorage blocked — silent, fall through
+    // localStorage blocked — silent, fall through to system
   }
   return 'system';
 }
@@ -24,7 +24,7 @@ export function saveTheme(value: ThemeValue): void {
   try {
     localStorage.setItem(STORAGE_KEY, value);
   } catch {
-    // Silent write failure (RF-4, edge case 6)
+    // Silent write failure (blocked or full storage)
   }
 }
 
@@ -33,7 +33,7 @@ export function resolveActiveTheme(): ThemeValue {
   if (saved === 'light' || saved === 'dark' || saved === 'system') {
     return saved;
   }
-  // Edge case 5: invalid value fallback to system
+  // Invalid value fallback to system
   return 'system';
 }
 

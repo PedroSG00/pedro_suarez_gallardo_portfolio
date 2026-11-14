@@ -15,14 +15,14 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { createT } from './translate';
+import { createT } from '../translation/translate';
 import {
   readStorage,
   writeStorage,
   readCookie,
   writeCookie,
-} from './storage';
-import { Locale, locales, LOCALE_COOKIE } from './config';
+} from '../storage/storage';
+import { Locale, locales, LOCALE_COOKIE } from '../config';
 
 interface LocaleContextType {
   locale: Locale;

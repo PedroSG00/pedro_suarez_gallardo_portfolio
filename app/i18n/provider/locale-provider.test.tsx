@@ -9,14 +9,14 @@ vi.mock('next/navigation', () => ({
   usePathname: vi.fn(() => '/es'),
 }));
 
-vi.mock('./storage', () => ({
+vi.mock('../storage/storage', () => ({
   readStorage: vi.fn(() => null),
   writeStorage: vi.fn(),
   readCookie: vi.fn(() => null),
   writeCookie: vi.fn(),
 }));
 
-import { writeStorage, writeCookie, readStorage, readCookie } from './storage';
+import { writeStorage, writeCookie, readStorage, readCookie } from '../storage/storage';
 
 const mockedWriteStorage = vi.mocked(writeStorage);
 const mockedWriteCookie = vi.mocked(writeCookie);

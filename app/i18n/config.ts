@@ -1,5 +1,5 @@
 /**
- * i18n config — T11 (RF7)
+ * i18n config — T7 (RF-3, RF-4)
  * Single source of locales, default language, cookie, and metadata routes.
  */
 

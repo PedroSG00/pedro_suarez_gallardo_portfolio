@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import ThemeSelect from "../ThemeSelect/ThemeSelect";
-import { resolveActiveTheme, listenStorageChanges } from "../../lib/theme";
+import { resolveActiveTheme, listenStorageChanges } from "../../theme/theme";
 
 export default function ThemeProvider() {
   useEffect(() => {

@@ -8,8 +8,8 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import Script from 'next/script';
-import { getDictionary } from '../i18n/get-dictionary';
-import LocaleProvider from '../i18n/locale-provider';
+import { getDictionary } from '../i18n/translation/get-dictionary';
+import LocaleProvider from '../i18n/provider/locale-provider';
 import LanguageSelector from '../components/LanguageSelector/LanguageSelector';
 import ThemeProvider from '../components/ThemeProvider/ThemeProvider';
 import '../globals.css';

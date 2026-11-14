@@ -12,8 +12,8 @@
 import { useContext, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { LocaleContext } from './locale-provider';
-import { writeStorage, writeCookie } from './storage';
-import { Locale, locales, LOCALE_COOKIE } from './config';
+import { writeStorage, writeCookie } from '../storage/storage';
+import { Locale, locales, LOCALE_COOKIE } from '../config';
 
 export function useLocale() {
   const context = useContext(LocaleContext);
