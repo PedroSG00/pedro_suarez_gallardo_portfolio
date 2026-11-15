@@ -18,7 +18,7 @@ RF cubiertos: RF-1 (T1, T2), RF-3 (T2), RF-4 (T4, T5, T6), RF-5 (T3, T6), RF-8 (
   - RF: RF-1, RF-6, RF-7, RF-8, RNF-9
   - Hecho cuando: `pnpm exec vitest run app/i18n/dictionaries` pasa y `pnpm typecheck` está limpio con `nav.*`, `header.label`, `themeToggle.state|aria.*` y `languageMenu.label|aria.*` presentes en ambos idiomas, `nav.stack` idéntico en `en` y `es`, y `themeSelect.*` todavía intacto.
 
-- [ ] **T2 — Lista única de destinos** (`app/navigation/destinations.ts` + `destinations.test.ts`)
+- [x] **T2 — Lista única de destinos** (`app/navigation/destinations.ts` + `destinations.test.ts`)
   - RF: RF-1, RF-3, RNF-8, RNF-9
   - Hecho cuando: `pnpm exec vitest run app/navigation/destinations.test.ts` pasa y verifica cinco destinos en orden home→contact, ids y `sectionId` únicos, `projects.page === 'projects'`, y cada `labelKey` resoluble en ambos diccionarios.
 
