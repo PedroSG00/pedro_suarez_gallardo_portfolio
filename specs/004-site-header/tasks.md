@@ -94,7 +94,7 @@ RF cubiertos: RF-1 (T15), RF-6 (T15, T16), RF-7 (T15, T16), RF-8 (T16), RNF-9 (T
 
 RF cubiertos: RF-3 (T17–T21), RF-4 (T20), RF-5 (T18, T21), RF-8 (T17, T19, T21), RNF-4 (T20), RNF-5 (T19), RNF-10 (T18).
 
-- [ ] **T17 — Titular con ancla** (`app/components/SectionAnchor/SectionAnchor.tsx` + `SectionAnchor.test.tsx`)
+- [x] **T17 — Titular con ancla** (`app/components/SectionAnchor/SectionAnchor.tsx` + `SectionAnchor.test.tsx`)
   - RF: RF-3, RF-8
   - Hecho cuando: `SectionAnchor.test.tsx` pasa con un `h2` que tiene `id`, `tabindex="-1"`, `scroll-margin-top` y ningún botón ni enlace añadido.
 
