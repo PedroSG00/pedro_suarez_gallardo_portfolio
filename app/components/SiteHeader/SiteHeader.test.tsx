@@ -139,3 +139,37 @@ describe('SiteHeader — T14 (RF-1, RF-8)', () => {
     expect(banner.textContent).toBe('Nombre raro');
   });
 });
+
+// T20 (004): Altura real y scroll-margin — RF-3, RF-4, RNF-4
+// Done when: --header-height refleja la altura medida al montar y tras
+// resize, con un respaldo CSS que deja el titular debajo de la cabecera
+// antes de medir.
+describe('SiteHeader — T20 (RF-3, RF-4, RNF-4)', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    document.documentElement.style.removeProperty('--header-height');
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    document.documentElement.style.removeProperty('--header-height');
+  });
+
+  it('sets --header-height on document.documentElement after mount', () => {
+    const measure = vi.fn(() => ({ height: 80 } as unknown as DOMRect));
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(measure);
+    renderHeader();
+    expect(document.documentElement.style.getPropertyValue('--header-height')).toBe('80px');
+  });
+
+  it('updates --header-height on resize', () => {
+    const measures = [80, 120];
+    let call = 0;
+    const measure = vi.fn(() => ({ height: measures[call++] } as unknown as DOMRect));
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(measure);
+    renderHeader();
+    expect(document.documentElement.style.getPropertyValue('--header-height')).toBe('80px');
+    window.dispatchEvent(new Event('resize'));
+    expect(document.documentElement.style.getPropertyValue('--header-height')).toBe('120px');
+  });
+});

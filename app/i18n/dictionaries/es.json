@@ -19,8 +19,17 @@
     "hero": {
       "title": "Pedro Suárez Gallardo"
     },
+    "experience": {
+      "title": "Experiencia"
+    },
     "projects": {
       "title": "Proyectos"
+    },
+    "stack": {
+      "title": "Stack"
+    },
+    "contact": {
+      "title": "Contacto"
     }
   },
   "metadata": {

@@ -47,3 +47,79 @@ describe('SectionAnchor — T17 (RF-3, RF-8)', () => {
     expect(screen.queryByText('Sección')).not.toBeInTheDocument();
   });
 });
+
+// T21 (004): Foco en el titular al elegir un destino — RF-3, RF-5, RF-8
+// Done when: al activar #experiencia por clic o hashchange, el titular queda
+// como document.activeElement con focus({ preventScroll: true }),
+// sin scrollIntoView, sin control visible y sin duplicar el desplazamiento del ancla.
+describe('SectionAnchor — T21 (RF-3, RF-5, RF-8)', () => {
+  const scrollIntoViewMock = vi.fn();
+  Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+    value: scrollIntoViewMock,
+    writable: true,
+    configurable: true,
+  });
+
+  function setHash(hash: string): void {
+    window.location.hash = hash;
+  }
+
+  beforeEach(() => {
+    scrollIntoViewMock.mockClear();
+    setHash('');
+  });
+
+  afterEach(() => {
+    scrollIntoViewMock.mockClear();
+    setHash('');
+  });
+
+  it('focuses the heading with preventScroll when hash matches its id', () => {
+    render(<SectionAnchor id="experiencia">Experiencia</SectionAnchor>);
+    const heading = screen.getByRole('heading', { level: 2, name: 'Experiencia' });
+    const focusSpy = vi.spyOn(heading, 'focus');
+
+    setHash('#experiencia');
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+
+    expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true });
+  });
+
+  it('does not focus when hash does not match its id', () => {
+    render(<SectionAnchor id="experiencia">Experiencia</SectionAnchor>);
+    const heading = screen.getByRole('heading', { level: 2, name: 'Experiencia' });
+    const focusSpy = vi.spyOn(heading, 'focus');
+
+    setHash('#proyectos');
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+
+    expect(focusSpy).not.toHaveBeenCalled();
+  });
+
+  it('does not call scrollIntoView', () => {
+    render(<SectionAnchor id="experiencia">Experiencia</SectionAnchor>);
+
+    setHash('#experiencia');
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+
+    expect(scrollIntoViewMock).not.toHaveBeenCalled();
+  });
+
+  it('adds no visible control inside the anchor', () => {
+    render(<SectionAnchor id="experiencia">Experiencia</SectionAnchor>);
+    expect(screen.queryByRole('button')).toBeNull();
+    expect(screen.queryByRole('link')).toBeNull();
+  });
+
+  it('cleans up the hashchange listener on unmount', () => {
+    const { unmount } = render(<SectionAnchor id="experiencia">Experiencia</SectionAnchor>);
+    const heading = screen.getByRole('heading', { level: 2, name: 'Experiencia' });
+    const focusSpy = vi.spyOn(heading, 'focus');
+    unmount();
+
+    setHash('#experiencia');
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+
+    expect(focusSpy).not.toHaveBeenCalled();
+  });
+});

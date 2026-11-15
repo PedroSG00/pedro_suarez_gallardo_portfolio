@@ -11,6 +11,8 @@
 
 'use client';
 
+import { useCallback, useEffect, useRef } from 'react';
+
 import { Brand } from './brand/Brand';
 import { NavDisclosure } from './nav/NavDisclosure';
 import { LanguageMenu } from './language/LanguageMenu';
@@ -63,8 +65,31 @@ export default function SiteHeader({
   ariaLabels,
   headerLabel,
 }: SiteHeaderProps) {
+  const headerRef = useRef<HTMLHeadingElement>(null);
+
+  const updateHeaderHeight = useCallback(() => {
+    if (headerRef.current) {
+      const height = headerRef.current.getBoundingClientRect().height;
+      document.documentElement.style.setProperty(
+        '--header-height',
+        `${Math.round(height)}px`
+      );
+    }
+  }, []);
+
+  useEffect(() => {
+    updateHeaderHeight();
+    window.addEventListener('resize', updateHeaderHeight);
+    return () => window.removeEventListener('resize', updateHeaderHeight);
+  }, [updateHeaderHeight]);
+
   return (
-    <header role="banner" aria-label={headerLabel} data-testid="site-header">
+    <header
+      ref={headerRef}
+      role="banner"
+      aria-label={headerLabel}
+      data-testid="site-header"
+    >
       <Brand name={brandName} />
       <NavDisclosure
         navLabel={navLabel}

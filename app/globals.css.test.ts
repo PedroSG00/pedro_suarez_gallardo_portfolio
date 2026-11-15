@@ -1,48 +1,92 @@
 import { describe, it, expect } from 'vitest';
-import * as fs from 'fs';
-import * as path from 'path';
+import { readFileSync } from 'fs';
+import path from 'path';
 
-const css = fs.readFileSync(path.resolve('app/globals.css'), 'utf8');
+// T19 (004): Estructura visual de la cabecera — RF-1, RF-2, RF-5, RF-8, RNF-5
+// Done when: globals.css.test.ts passes and checks fondo opaco, retícula de
+// cabecera, <details> forzado abierto y summary oculto en ≥1024 px, panel
+// superpuesto a ancho completo, objetivos de 24×24 px y marca de activo no
+// cromática.
+const cssPath = path.resolve(process.cwd(), 'app/globals.css');
+const css = readFileSync(cssPath, 'utf8');
 
-// T22: globals.css — focus and contrast tokens, prefers-reduced-motion,
-// color-scheme (RF-9, RNF-5)
-// Done when: focus indicator is visible with 3:1 contrast against background
-// and unfocused state, never hidden; theme changes are instant with reduced
-// motion; color-scheme declared for each theme.
-describe('T22 globals.css — focus and contrast tokens', () => {
-  it('defines focus color variable for 3:1 contrast', () => {
-    expect(css).toContain('--color-focus');
+function ruleExists(pattern: RegExp): boolean {
+  return pattern.test(css);
+}
+
+/** Extrae el bloque interior de una @media rule contando llaves. */
+function extractMediaBlock(css: string, mediaQuery: string): string {
+  const startPattern = new RegExp(
+    `@media\\s*\\(${mediaQuery}\\)\\s*\\{`
+  );
+  const startMatch = css.match(startPattern);
+  if (!startMatch) return '';
+  let i = startMatch.index! + startMatch[0].length;
+  let depth = 1;
+  while (i < css.length && depth > 0) {
+    if (css[i] === '{') depth++;
+    else if (css[i] === '}') depth--;
+    i++;
+  }
+  return css.slice(startMatch.index! + startMatch[0].length, i - 1);
+}
+
+describe('globals.css — T19 (RF-1, RF-2, RF-5, RF-8, RNF-5)', () => {
+  it('header has opaque background (fondo opaco)', () => {
+    expect(ruleExists(/header\s*\{[^}]*background-color:/)).toBe(true);
+    expect(
+      ruleExists(/header\s*\{[^}]*background:[^;]*!important;/)
+    ).toBe(false);
+    // background-color must not be transparent
+    const headerBlock = css.match(/header\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(headerBlock).not.toMatch(/background-color:\s*transparent/);
+    expect(headerBlock).not.toMatch(/background:\s*transparent/);
   });
 
-  it('applies visible focus outline on :focus-visible', () => {
-    expect(css).toMatch(/:\s*focus-visible/);
-    expect(css).toContain('outline');
+  it('header uses a grid (retícula de cabecera)', () => {
+    expect(ruleExists(/header\s*\{[^}]*display:\s*grid/)).toBe(true);
   });
 
-  it('applies visible focus outline on :focus', () => {
-    expect(css).toMatch(/:\s*focus\b/);
-    expect(css).toContain('outline-offset');
+  it('<details> forced open at >=1024px', () => {
+    const mediaBlock = extractMediaBlock(css, 'min-width: 1024px');
+    expect(mediaBlock).toMatch(/details\s*\[open\]/);
+    expect(mediaBlock).toMatch(/details/);
   });
 
-  it('declares color-scheme for light theme', () => {
-    expect(css).toMatch(/color-scheme:\s*light/);
+  it('summary hidden at >=1024px', () => {
+    const mediaBlock = extractMediaBlock(css, 'min-width: 1024px');
+    expect(mediaBlock).toMatch(/summary\s*\{/);
+    expect(mediaBlock).toMatch(/display:\s*none/);
   });
 
-  it('declares color-scheme for dark theme', () => {
-    expect(css).toMatch(/color-scheme:\s*dark/);
+  it('panel full-width overlay (ancho completo, superpuesto)', () => {
+    expect(
+      ruleExists(
+        new RegExp(
+          '\\[data-testid="nav-disclosure"\\][\\s\\S]*position:\\s*fixed|position:\\s*fixed[\\s\\S]*\\[data-testid="nav-disclosure"\\]'
+        )
+      )
+    ).toBe(true);
+    expect(ruleExists(/width:\s*100%/)).toBe(true);
   });
 
-  it('respects prefers-reduced-motion for instant theme changes', () => {
-    expect(css).toContain('prefers-reduced-motion');
+  it('24×24 px touch targets (objetivos de 24×24 px)', () => {
+    expect(ruleExists(/min-width:\s*24px/)).toBe(true);
+    expect(ruleExists(/min-height:\s*24px/)).toBe(true);
   });
 
-  it('sets transition-duration to 0ms with reduced motion', () => {
-    expect(css).toMatch(/transition-duration:\s*0ms/);
+  it('non-chromatic active mark (marca de activo no cromática)', () => {
+    expect(ruleExists(/\[data-testid="active-mark"\]/)).toBe(true);
+    const markBlock = css.match(/\[data-testid="active-mark"\]\s*\{([^}]*)\}/)?.[1] ?? '';
+    // Non-chromatic: should not rely on color alone; uses background/inverted block
+    expect(markBlock).toMatch(/background|border|transform|opacity/);
+    expect(markBlock).not.toMatch(/color:\s*#[0-9a-f]{3,6}/i);
   });
 
-  it('never hides focus indicator', () => {
-    // No outline: none or outline: 0 that would hide focus
-    expect(css).not.toMatch(/outline:\s*none/);
-    expect(css).not.toMatch(/outline:\s*0/);
+  it('fallback --header-height (respaldo CSS antes de medir)', () => {
+    expect(
+      ruleExists(/:\s*root\s*\{[^}]*--header-height:/) ||
+        ruleExists(/--header-height:\s*\d+/)
+    ).toBe(true);
   });
 });

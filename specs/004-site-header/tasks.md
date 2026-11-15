@@ -98,19 +98,19 @@ RF cubiertos: RF-3 (T17–T21), RF-4 (T20), RF-5 (T18, T21), RF-8 (T17, T19, T21
   - RF: RF-3, RF-8
   - Hecho cuando: `SectionAnchor.test.tsx` pasa con un `h2` que tiene `id`, `tabindex="-1"`, `scroll-margin-top` y ningún botón ni enlace añadido.
 
-- [ ] **T18 — Cascarones de las secciones del inicio** (`app/[locale]/(site)/page.tsx`, `page.test.tsx`)
+- [x] **T18 — Cascarones de las secciones del inicio** (`app/[locale]/(site)/page.tsx`, `page.test.tsx`)
   - RF: RF-3, RF-5, RNF-10
   - Hecho cuando: `page.test.tsx` pasa con el ancla `inicio` y las cuatro secciones `experiencia`, `proyectos`, `stack` y `contacto` en el orden de `DESTINATIONS`, cada una con `SectionAnchor`, titular bilingüe y altura mínima suficiente para que su titular cruce el borde inferior de la cabecera, sin contenido de currículum.
 
-- [ ] **T19 — Estructura visual de la cabecera** (`app/globals.css`, `globals.css.test.ts`)
+- [x] **T19 — Estructura visual de la cabecera** (`app/globals.css`, `globals.css.test.ts`)
   - RF: RF-1, RF-2, RF-5, RF-8, RNF-5
   - Hecho cuando: `globals.css.test.ts` pasa y comprueba fondo opaco, retícula de cabecera, `<details>` forzado abierto y `summary` oculto en ≥1024 px, panel superpuesto a ancho completo, objetivos de 24×24 px y marca de activo no cromática.
 
-- [ ] **T20 — Altura real y `scroll-margin`** (`app/components/SiteHeader/SiteHeader.tsx`, `app/globals.css`, tests de ambos)
+- [x] **T20 — Altura real y `scroll-margin`** (`app/components/SiteHeader/SiteHeader.tsx`, `app/globals.css`, tests de ambos)
   - RF: RF-3, RF-4, RNF-4
   - Hecho cuando: los tests de `SiteHeader` y `globals.css` pasan y `--header-height` refleja la altura medida al montar y tras `resize`, con un respaldo CSS que deja el titular debajo de la cabecera antes de medir.
 
-- [ ] **T21 — Foco en el titular al elegir un destino** (`app/components/SectionAnchor/SectionAnchor.tsx` + `SectionAnchor.test.tsx`)
+- [x] **T21 — Foco en el titular al elegir un destino** (`app/components/SectionAnchor/SectionAnchor.tsx` + `SectionAnchor.test.tsx`)
   - RF: RF-3, RF-5, RF-8
   - Hecho cuando: el test pasa y, al activar `#experiencia` por clic o `hashchange`, el titular queda como `document.activeElement` con `focus({ preventScroll: true })`, sin `scrollIntoView`, sin control visible y sin duplicar el desplazamiento del ancla.
 
