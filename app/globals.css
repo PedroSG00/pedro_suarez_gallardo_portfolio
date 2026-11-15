@@ -41,8 +41,8 @@
   --space-section: var(--section-space);
 }
 
-/* Semantic variables by theme */
-.theme-light {
+/* Semantic variables by theme (driven exclusively by data-theme attributes) */
+:root[data-theme='light'] {
   --color-bg: var(--warm-1);
   --color-surface: var(--warm-2);
   --color-text-primary: #1a1a1a;
@@ -55,7 +55,7 @@
   color-scheme: light;
 }
 
-.theme-dark {
+:root[data-theme='dark'] {
   --color-bg: #1a1a1a;
   --color-surface: var(--warm-5);
   --color-text-primary: var(--warm-1);
@@ -68,22 +68,10 @@
   color-scheme: dark;
 }
 
-/* System theme: light roles by default, dark roles when the OS prefers dark */
-.theme-system {
-  --color-bg: var(--warm-1);
-  --color-surface: var(--warm-2);
-  --color-text-primary: #1a1a1a;
-  --color-text-secondary: var(--warm-5);
-  --color-border: var(--warm-3);
-  --color-inverse-bg: #1a1a1a;
-  --color-inverse-text: var(--warm-1);
-  --color-focus: #000000;
-  --color-selection: var(--warm-4);
-  color-scheme: light dark;
-}
-
+/* Fallback sin JavaScript: cuando no hay data-theme (boot script aún no corrió
+ * o JS desactivado), sigue la preferencia del SO. */
 @media (prefers-color-scheme: dark) {
-  .theme-system {
+  :root:not([data-theme]) {
     --color-bg: #1a1a1a;
     --color-surface: var(--warm-5);
     --color-text-primary: var(--warm-1);

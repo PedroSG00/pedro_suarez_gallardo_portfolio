@@ -47,6 +47,16 @@ describe('app/[locale]/(site)/layout — T15', () => {
     expect(props.locale).toBe('en');
     expect(props.languages).toEqual({ en: 'English', es: 'Español' });
     expect(props.triggerLabel).toBe('English');
+    expect(props.stateLabels).toEqual({
+      light: 'Light',
+      dark: 'Dark',
+      system: 'System',
+    });
+    expect(props.ariaLabels).toEqual({
+      light: 'Light theme. Switch to dark theme',
+      dark: 'Dark theme. Switch to system theme',
+      system: 'System theme. Switch to light theme',
+    });
   });
 
   it('mounts SiteHeader with dictionary texts on Spanish (/es)', async () => {

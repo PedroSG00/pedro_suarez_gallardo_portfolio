@@ -12,26 +12,25 @@ vi.mock('next/font/google', () => ({
   Geist_Mono: () => ({ variable: '--font-geist-mono' }),
 }));
 
+// Captura el script inline de tema para inspeccionar su contenido.
+const themeScriptHtml = vi.hoisted(() => ({ html: '' as string }));
 vi.mock('next/script', () => ({
   default: function Script({
     id,
-    children,
     strategy,
+    dangerouslySetInnerHTML,
   }: {
     id: string;
-    children: string;
     strategy: string;
+    dangerouslySetInnerHTML?: { __html: string };
   }) {
+    themeScriptHtml.html = dangerouslySetInnerHTML?.__html ?? '';
     return React.createElement('script', {
       id,
       'data-strategy': strategy,
-      dangerouslySetInnerHTML: { __html: children },
+      dangerouslySetInnerHTML: { __html: themeScriptHtml.html },
     });
   },
-}));
-
-vi.mock('./components/ThemeProvider/ThemeProvider', () => ({
-  default: () => <div data-testid="theme-provider" />,
 }));
 
 import RootLayout from './layout';
@@ -44,11 +43,13 @@ async function renderRoot(locale: 'en' | 'es') {
 
 // T14: app/layout.tsx — stable document shell shared by pages and the 404
 // (RF-1, RF-4, RF-6, RF-7). Done when: <html lang> comes from the proxy
-// header, the inline theme script runs before interactive, ThemeProvider is
-// mounted once and children render inside the body.
+// header, the inline theme script runs before interactive, no theme class is
+// hardcoded on <html> (classes come from data-theme attributes), and children
+// render inside the body.
 describe('app/layout — T14', () => {
   beforeEach(() => {
     document.documentElement.className = '';
+    themeScriptHtml.html = '';
   });
 
   afterEach(() => {
@@ -67,9 +68,9 @@ describe('app/layout — T14', () => {
     expect(document.documentElement).toHaveAttribute('lang', 'en');
   });
 
-  it('mounts the global ThemeProvider exactly once', async () => {
+  it('does not hardcode a theme class on <html>', async () => {
     await renderRoot('en');
-    expect(screen.getAllByTestId('theme-provider')).toHaveLength(1);
+    expect(document.documentElement.className).not.toContain('theme-');
   });
 
   it('renders children inside the body', async () => {
@@ -83,6 +84,8 @@ describe('app/layout — T14', () => {
     const script = document.querySelector('script#theme-init');
     expect(script).not.toBeNull();
     expect(script?.getAttribute('data-strategy')).toBe('beforeInteractive');
-    expect(script?.textContent).toContain("localStorage.getItem('theme')");
+    expect(themeScriptHtml.html).toContain('localStorage.getItem');
+    expect(themeScriptHtml.html).toContain('setAttribute');
+    expect(themeScriptHtml.html).toContain('matchMedia');
   });
 });

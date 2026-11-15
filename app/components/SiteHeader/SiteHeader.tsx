@@ -17,7 +17,7 @@ import { LanguageMenu } from './language/LanguageMenu';
 import { ThemeToggle } from './theme/ThemeToggle';
 import type { DestinationId } from '../../navigation/destinations';
 import type { Locale } from '../../i18n/config';
-import type { ThemeValue } from '../../theme/theme';
+import type { ThemeValue } from '../../theme/constants';
 
 interface SiteHeaderProps {
   /** Full brand name, shown linked to the home of the active language. */

@@ -14,7 +14,6 @@ import Script from 'next/script';
 import { headers } from 'next/headers';
 import { defaultLocale, type Locale } from './i18n/config';
 import { THEME_BOOT_SCRIPT } from './theme/boot-script';
-import ThemeProvider from './components/ThemeProvider/ThemeProvider';
 import './globals.css';
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] });
@@ -49,15 +48,16 @@ export default async function RootLayout({
     <html
       lang={locale}
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} theme-system h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
-        <Script id="theme-init" strategy="beforeInteractive">
-          {THEME_BOOT_SCRIPT}
-        </Script>
+        <Script
+          id="theme-init"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }}
+        />
       </head>
       <body className="min-h-full flex flex-col">
-        <ThemeProvider />
         {children}
       </body>
     </html>

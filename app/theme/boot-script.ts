@@ -1,52 +1,58 @@
 /**
- * boot-script.ts — T7 (RF-6, RNF-4)
- * Theme bootstrap: fixes the effective theme, the chosen option and its label
- * before the first paint, so there is no flash of the wrong theme.
+ * app/theme/boot-script.ts — Script de arranque del tema inline en <head>.
  *
- * The inline script runs synchronously in <head> (beforeInteractive). It reads
- * the stored theme choice, validates it, sets `data-theme-choice` (the choice,
- * not the effective theme) and the `theme-*` class on <html>, and never throws
- * when storage is blocked.
+ * Corre antes del primer pintado (beforeInteractive). Lee la elección
+ * guardada, la valida, usa matchMedia para resolver el tema efectivo cuando
+ * la elección es "system", y escribe en <html> los atributos
+ * data-theme-choice (elección) y data-theme (efectivo: light|dark).
+ * Nunca lanza: storage bloqueado o DOM ausente se ignoran silenciosamente.
  *
- * `resolveThemeChoice` is pure and shared with the client so the same decision
- * is made everywhere (Constitution 4).
+ * Los literales (clave de storage, nombres de atributo, media query) se
+ * embuten con JSON.stringify desde constants.ts: no hay literales duplicados.
  */
 
-import { isThemeValue, type ThemeValue } from './theme';
-
-/** Theme choice default when nothing valid is stored. */
-const DEFAULT_THEME: ThemeValue = 'system';
+import {
+  DATA_CHOICE_ATTR,
+  DATA_THEME_ATTR,
+  DEFAULT_CHOICE,
+  DARK_QUERY,
+  STORAGE_KEY,
+} from './constants';
 
 /**
- * Resolves the theme choice from a stored value. Any absent or invalid value
- * falls back to `system`. Never throws.
+ * Construye el script inline. Las constantes de configuración se incrustan
+ * como literales mediante JSON.stringify; la lógica (matchMedia, dataset)
+ * corre en el navegador al ejecutar el script.
  */
-export function resolveThemeChoice(stored: string | null): ThemeValue {
-  return isThemeValue(stored) ? stored : DEFAULT_THEME;
+export function buildBootScript(): string {
+  return `(function(){
+    const storageKey = ${JSON.stringify(STORAGE_KEY)};
+    const darkQuery = ${JSON.stringify(DARK_QUERY)};
+    const dataChoiceAttr = ${JSON.stringify(DATA_CHOICE_ATTR)};
+    const dataThemeAttr = ${JSON.stringify(DATA_THEME_ATTR)};
+    let choice = ${JSON.stringify(DEFAULT_CHOICE)};
+    try {
+      const stored = localStorage.getItem(storageKey);
+      if (stored === 'light' || stored === 'dark' || stored === 'system') {
+        choice = stored;
+      }
+    } catch {}
+    try {
+      const html = document.documentElement;
+      html.setAttribute(dataChoiceAttr, choice);
+      let systemDark = false;
+      try {
+        systemDark = window.matchMedia(darkQuery).matches;
+      } catch {
+        // matchMedia puede no estar disponible durante beforeInteractive;
+        // asumimos claro en ese caso, se corregirá tras la hidratación.
+      }
+      const effective =
+        choice === 'system' ? (systemDark ? 'dark' : 'light') : choice;
+      html.setAttribute(dataThemeAttr, effective);
+    } catch {}
+  })();`;
 }
 
-/**
- * Inline theme bootstrap script. Runs in <head> before the body is painted.
- *
- * Sets `data-theme-choice` to the validated stored choice and applies the
- * matching `theme-*` class. Invalid, absent or unreadable values default to
- * `system` without throwing, so blocked storage never breaks the page.
- */
-export const THEME_BOOT_SCRIPT = `(function(){
-  var choice = 'system';
-  try {
-    var stored = localStorage.getItem('theme');
-    if (stored === 'light' || stored === 'dark' || stored === 'system') {
-      choice = stored;
-    }
-  } catch (e) {
-    // Storage blocked or full: keep the default 'system' choice.
-  }
-  try {
-    document.documentElement.dataset.themeChoice = choice;
-    document.documentElement.classList.remove(
-      'theme-light', 'theme-dark', 'theme-system'
-    );
-    document.documentElement.classList.add('theme-' + choice);
-  } catch (e) {}
-})();`;
+/** Script inline listo para insertar en <Script dangerouslySetInnerHTML>. */
+export const THEME_BOOT_SCRIPT = buildBootScript();

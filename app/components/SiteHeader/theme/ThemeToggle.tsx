@@ -1,64 +1,46 @@
-/**
- * ThemeToggle.tsx — T12 (RF-6, RF-8, RNF-7)
- * Single three-state theme button: light → dark → system → light, read from
- * the stored preference. Shows the visible text of the chosen option and a
- * full-sentence accessible name. Persists with saveTheme (never throws on
- * blocked storage) and never moves focus. Tab switches are handled by
- * ThemeProvider (storage listener); this button only advances its own state.
- *
- * All visible text comes from props (Constitution 3 / RF-8): the parent
- * resolves stateLabels and ariaLabels from the dictionary.
- */
-
 'use client';
 
+import { useSyncExternalStore } from 'react';
+
 import {
-  applyTheme,
-  saveTheme,
-  getThemeFromDocument,
-} from '../../../theme/theme';
-import type { ThemeValue } from '../../../theme/theme';
+  getChoice,
+  getServerChoice,
+  setChoice,
+  subscribe,
+} from '../../../theme/store';
+import { nextChoice } from '../../../theme/model';
+import type { ThemeValue } from '../../../theme/constants';
 
-/** Advances the theme cycle: light → dark → system → light. */
-const NEXT: Record<ThemeValue, ThemeValue> = {
-  light: 'dark',
-  dark: 'system',
-  system: 'light',
-};
-
-interface ThemeToggleProps {
-  /** Visible text for each theme option, from the dictionary. */
-  stateLabels: Record<ThemeValue, string>;
-  /** Full-sentence accessible name for each theme option, from the dictionary. */
-  ariaLabels: Record<ThemeValue, string>;
-}
-
+/**
+ * ThemeToggle — botón único de tres estados: light → dark → system → light.
+ *
+ * Lee la elección del store externo con useSyncExternalStore (sin useState ni
+ * useEffect, sin escribir className/classList). Al hacer click avanza el ciclo
+ * y delega la persistencia y la escritura al DOM al store. Nunca mueve el
+ * foco. Los textos visibles y el nombre accesible llegan por props.
+ */
 export function ThemeToggle({
   stateLabels,
   ariaLabels,
-}: ThemeToggleProps) {
-  // Read the effective theme from the document (set by the boot script), never
-  // from storage. This keeps the label in sync with what is actually painted.
-  const theme = getThemeFromDocument();
-  const next = NEXT[theme];
+}: {
+  /** Texto visible de cada opción, desde el diccionario. */
+  stateLabels: Record<ThemeValue, string>;
+  /** Nombre accesible de frase completa de cada opción, desde el diccionario. */
+  ariaLabels: Record<ThemeValue, string>;
+}) {
+  const choice = useSyncExternalStore(
+    subscribe,
+    getChoice,
+    getServerChoice
+  );
 
   return (
     <button
-      aria-label={ariaLabels[theme]}
-      onClick={() => {
-        try {
-          saveTheme(next);
-          // Apply the choice to <html> immediately so the change is visible in
-          // the same tab without a page reload (storage events only fire in
-          // other tabs). ThemeProvider keeps listening for cross-tab changes.
-          applyTheme(next);
-        } catch {
-          // Storage blocked or full: the choice is not persisted, and the
-          // document class is left unchanged. The button does not crash.
-        }
-      }}
+      type="button"
+      aria-label={ariaLabels[choice]}
+      onClick={() => setChoice(nextChoice(choice))}
     >
-      {stateLabels[theme]}
+      {stateLabels[choice]}
     </button>
   );
 }

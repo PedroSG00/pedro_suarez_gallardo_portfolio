@@ -26,7 +26,7 @@ vi.mock('./theme/ThemeToggle', () => ({
 
 import SiteHeader from './SiteHeader';
 import type { Locale } from '../../i18n/config';
-import type { ThemeValue } from '../../theme/theme';
+import type { ThemeValue } from '../../theme/constants';
 import type { DestinationId } from '../../navigation/destinations';
 
 const LABELS: Record<DestinationId, string> = {

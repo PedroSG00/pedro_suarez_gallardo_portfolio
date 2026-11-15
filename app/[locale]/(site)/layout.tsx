@@ -9,7 +9,7 @@ import SiteHeader from '../../components/SiteHeader/SiteHeader';
 import { getDictionary } from '../../i18n/translation/get-dictionary';
 import { Locale } from '../../i18n/config';
 import type { DestinationId } from '../../navigation/destinations';
-import type { ThemeValue } from '../../theme/theme';
+import type { ThemeValue } from '../../theme/constants';
 import type enDictionary from '../../i18n/dictionaries/en.json';
 import { ReactNode } from 'react';
 

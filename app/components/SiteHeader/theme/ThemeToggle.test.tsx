@@ -3,20 +3,12 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import React from 'react';
 
-vi.mock('../../../theme/theme', () => ({
-  saveTheme: vi.fn(),
-  applyTheme: vi.fn(),
-  getThemeFromDocument: vi.fn(() => 'system'),
-}));
-
 import { ThemeToggle } from './ThemeToggle';
-import { saveTheme, applyTheme, getThemeFromDocument } from '../../../theme/theme';
-import type { ThemeValue } from '../../../theme/theme';
+import type { ThemeValue } from '../../../theme/constants';
 
-// T12 (004): ThemeToggle — RF-6, RF-8, RNF-7
-// Done when: cycle light→dark→system→light read from the preference,
-// visible text of the chosen option, full-sentence accessible name,
-// blocked storage without errors, and tab switch without moving focus.
+// T12: ThemeToggle — RF-6, RF-8, RNF-7
+// Usa el store real (useSyncExternalStore). window.matchMedia se mockea porque
+// jsdom no lo define.
 const STATE_LABELS: Record<ThemeValue, string> = {
   light: 'Light',
   dark: 'Dark',
@@ -29,96 +21,114 @@ const ARIA_LABELS: Record<ThemeValue, string> = {
   system: 'System theme. Switch to light theme',
 };
 
+function setThemeChoice(choice: ThemeValue): void {
+  document.documentElement.setAttribute('data-theme-choice', choice);
+}
+
 function renderToggle() {
-  return render(
-    <ThemeToggle
-      stateLabels={STATE_LABELS}
-      ariaLabels={ARIA_LABELS}
-    />
-  );
+  return render(<ThemeToggle stateLabels={STATE_LABELS} ariaLabels={ARIA_LABELS} />);
 }
 
 describe('ThemeToggle — T12 (RF-6, RF-8, RNF-7)', () => {
   beforeEach(() => {
-    vi.mocked(saveTheme).mockReset();
-    vi.mocked(applyTheme).mockReset();
-    vi.mocked(getThemeFromDocument).mockReset();
+    document.documentElement.removeAttribute('data-theme-choice');
+    document.documentElement.removeAttribute('data-theme');
+    localStorage.clear();
+    vi.restoreAllMocks();
+    const w = window as unknown as {
+      matchMedia: ((q: string) => MediaQueryList) | undefined;
+    };
+    w.matchMedia = vi.fn(() => {
+      const listeners: Array<() => void> = [];
+      return {
+        matches: false,
+        addEventListener: (type: string, listener: () => void) => {
+          if (type === 'change') listeners.push(listener);
+        },
+        removeEventListener: (type: string, listener: () => void) => {
+          if (type === 'change') {
+            const i = listeners.indexOf(listener);
+            if (i >= 0) listeners.splice(i, 1);
+          }
+        },
+      } as unknown as MediaQueryList;
+    });
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it('shows the visible text of the chosen light option', () => {
-    vi.mocked(getThemeFromDocument).mockReturnValue('light');
+    setThemeChoice('light');
     renderToggle();
     expect(screen.getByRole('button')).toHaveTextContent('Light');
   });
 
   it('shows the visible text of the chosen dark option', () => {
-    vi.mocked(getThemeFromDocument).mockReturnValue('dark');
+    setThemeChoice('dark');
     renderToggle();
     expect(screen.getByRole('button')).toHaveTextContent('Dark');
   });
 
   it('shows the visible text of the chosen system option', () => {
-    vi.mocked(getThemeFromDocument).mockReturnValue('system');
+    setThemeChoice('system');
     renderToggle();
     expect(screen.getByRole('button')).toHaveTextContent('System');
   });
 
   it('exposes a full-sentence accessible name for each option', () => {
-    vi.mocked(getThemeFromDocument).mockReturnValue('light');
-    const { unmount } = renderToggle();
-    expect(screen.getAllByRole('button')[0]).toHaveAccessibleName(
-      'Light theme. Switch to dark theme'
-    );
-    unmount();
-
-    vi.mocked(getThemeFromDocument).mockReturnValue('dark');
-    const { unmount: unmountDark } = renderToggle();
-    expect(screen.getAllByRole('button')[0]).toHaveAccessibleName(
-      'Dark theme. Switch to system theme'
-    );
-    unmountDark();
-
-    vi.mocked(getThemeFromDocument).mockReturnValue('system');
-    const { unmount: unmountSystem } = renderToggle();
-    expect(screen.getAllByRole('button')[0]).toHaveAccessibleName(
-      'System theme. Switch to light theme'
-    );
-    unmountSystem();
+    for (const [choice, expected] of Object.entries(ARIA_LABELS) as [
+      ThemeValue,
+      string
+    ][]) {
+      setThemeChoice(choice);
+      const { unmount } = renderToggle();
+      expect(screen.getByRole('button')).toHaveAccessibleName(expected);
+      unmount();
+    }
   });
 
-  it('cycles light → dark on click', () => {
-    vi.mocked(getThemeFromDocument).mockReturnValue('light');
+  it('is a plain button that never moves focus', () => {
+    setThemeChoice('light');
     renderToggle();
-    fireEvent.click(screen.getByRole('button'));
-    expect(saveTheme).toHaveBeenCalledWith('dark');
-    expect(applyTheme).toHaveBeenCalledWith('dark');
+    const button = screen.getByRole('button');
+    expect(button).toHaveAttribute('type', 'button');
+    button.focus();
+    expect(button).toHaveFocus();
+    fireEvent.click(button);
+    expect(button).toHaveFocus();
   });
 
-  it('cycles dark → system on click', () => {
-    vi.mocked(getThemeFromDocument).mockReturnValue('dark');
+  it('cycles light → dark → system → light on every click', () => {
+    setThemeChoice('light');
     renderToggle();
+    expect(screen.getByRole('button')).toHaveTextContent('Light');
+
     fireEvent.click(screen.getByRole('button'));
-    expect(saveTheme).toHaveBeenCalledWith('system');
-    expect(applyTheme).toHaveBeenCalledWith('system');
+    expect(document.documentElement.getAttribute('data-theme-choice')).toBe(
+      'dark'
+    );
+    expect(screen.getByRole('button')).toHaveTextContent('Dark');
+
+    fireEvent.click(screen.getByRole('button'));
+    expect(document.documentElement.getAttribute('data-theme-choice')).toBe(
+      'system'
+    );
+    expect(screen.getByRole('button')).toHaveTextContent('System');
+
+    fireEvent.click(screen.getByRole('button'));
+    expect(document.documentElement.getAttribute('data-theme-choice')).toBe(
+      'light'
+    );
+    expect(screen.getByRole('button')).toHaveTextContent('Light');
   });
 
-  it('cycles system → light on click', () => {
-    vi.mocked(getThemeFromDocument).mockReturnValue('system');
-    renderToggle();
-    fireEvent.click(screen.getByRole('button'));
-    expect(saveTheme).toHaveBeenCalledWith('light');
-    expect(applyTheme).toHaveBeenCalledWith('light');
-  });
-
-  it('does not throw when storage is blocked', () => {
-    vi.mocked(getThemeFromDocument).mockReturnValue('light');
-    vi.mocked(saveTheme).mockImplementation(() => {
+  it('does not crash when storage is blocked', () => {
+    setThemeChoice('light');
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new Error('blocked');
     });
-    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     renderToggle();
     let threw = false;
     try {
@@ -127,19 +137,9 @@ describe('ThemeToggle — T12 (RF-6, RF-8, RNF-7)', () => {
       threw = true;
     }
     expect(threw).toBe(false);
-    spy.mockRestore();
-  });
-
-  it('does not move focus when the theme changes', () => {
-    vi.mocked(getThemeFromDocument).mockReturnValue('light');
-    renderToggle();
-    const button = screen.getByRole('button');
-    button.focus();
-    expect(button).toHaveFocus();
-
-    fireEvent.click(button);
-    expect(button).toHaveFocus();
-    expect(saveTheme).toHaveBeenCalledWith('dark');
-    expect(applyTheme).toHaveBeenCalledWith('dark');
+    // DOM is still updated even when storage is blocked.
+    expect(document.documentElement.getAttribute('data-theme-choice')).toBe(
+      'dark'
+    );
   });
 });
