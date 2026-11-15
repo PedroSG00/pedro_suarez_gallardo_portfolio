@@ -74,7 +74,7 @@ RF cubiertos: RF-1 (T8, T9, T14), RF-2 (T10, T11), RF-5 (T9), RF-6 (T12), RF-7 (
   - RF: RF-7, RF-8, RNF-7
   - Hecho cuando: `LanguageMenu.test.tsx` pasa con dos enlaces nativos `hreflang` a la ruta equivalente (y, con JavaScript, misma consulta y fragmento), idioma activo marcado con signo además del estilo, disparador con el nombre del idioma y sin cambiar de idioma al abrir o cerrar.
 
-- [ ] **T14 — Composición de la cabecera** (`app/components/SiteHeader/SiteHeader.tsx` + `SiteHeader.test.tsx`)
+- [x] **T14 — Composición de la cabecera** (`app/components/SiteHeader/SiteHeader.tsx` + `SiteHeader.test.tsx`)
   - RF: RF-1, RF-8
   - Hecho cuando: `SiteHeader.test.tsx` pasa con `<header role="banner" aria-label>`, `<nav aria-label>`, orden marca→navegación→idioma→tema y cero cadenas visibles escritas en el componente.
 

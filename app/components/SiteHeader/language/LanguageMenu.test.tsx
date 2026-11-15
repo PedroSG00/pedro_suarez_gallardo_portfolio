@@ -4,7 +4,7 @@ import '@testing-library/jest-dom/vitest';
 import React from 'react';
 
 import { LanguageMenu } from './LanguageMenu';
-import type { Locale } from '../../i18n/config';
+import type { Locale } from '../../../i18n/config';
 
 // T13 (004): LanguageMenu — RF-7, RF-8, RNF-7
 // Done when: two native hreflang links to the equivalent route (with JS,

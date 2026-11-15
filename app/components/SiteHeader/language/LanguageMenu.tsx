@@ -12,9 +12,9 @@
 
 'use client';
 
-import { useDisclosure } from './hooks/use-disclosure';
-import { locales } from '../../i18n/config';
-import type { Locale } from '../../i18n/config';
+import { useDisclosure } from '../hooks/use-disclosure';
+import { locales } from '../../../i18n/config';
+import type { Locale } from '../../../i18n/config';
 
 interface LanguageMenuProps {
   /** Active locale. */

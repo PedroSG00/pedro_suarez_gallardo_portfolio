@@ -12,8 +12,8 @@
 
 'use client';
 
-import { saveTheme } from '../../theme/theme';
-import type { ThemeValue } from '../../theme/theme';
+import { saveTheme } from '../../../theme/theme';
+import type { ThemeValue } from '../../../theme/theme';
 
 /** Advances the theme cycle: light → dark → system → light. */
 const NEXT: Record<ThemeValue, ThemeValue> = {

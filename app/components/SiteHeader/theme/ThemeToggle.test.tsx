@@ -3,14 +3,14 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import React from 'react';
 
-vi.mock('../../theme/theme', () => ({
+vi.mock('../../../theme/theme', () => ({
   saveTheme: vi.fn(),
   getThemeFromDocument: vi.fn(() => 'system'),
 }));
 
-import { saveTheme } from '../../theme/theme';
+import { saveTheme } from '../../../theme/theme';
 import { ThemeToggle } from './ThemeToggle';
-import type { ThemeValue } from '../../theme/theme';
+import type { ThemeValue } from '../../../theme/theme';
 
 // T12 (004): ThemeToggle — RF-6, RF-8, RNF-7
 // Done when: cycle light→dark→system→light read from the preference,
