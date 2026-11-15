@@ -1,7 +1,7 @@
 # 004 — Cabecera y destinos
 
 - **Estado:** Borrador para revisión
-- **Fecha:** 12 de noviembre de 2026
+- **Fecha:** 12 de noviembre de 2026 (revisada el 15 de noviembre de 2026)
 - **Alcance:** cabecera del sitio, destinos de navegación y forma definitiva de los controles de tema e idioma
 - **Depende de:** 003 (base consolidada)
 - **Bloquea a:** 005 (portada y proyectos), que compone sobre estas anclas
@@ -54,7 +54,8 @@ Esta funcionalidad **no compone la portada ni escribe contenido**. Crea las secc
 - Criterios de aceptación (EARS, en español):
   - **Cuando** el ancho disponible sea inferior a 1024 px, **el sistema deberá** mostrar la marca y los controles en la primera fila y agrupar la navegación en un desplegable que se abre y se cierra con ratón y teclado.
   - **El sistema deberá** mostrar en el disparador del desplegable una etiqueta comprensible en el idioma activo.
-  - **El sistema deberá** permitir usar el desplegable de navegación sin JavaScript, y cerrarlo al elegir un destino, al pulsar Escape y al hacer clic fuera cuando JavaScript esté disponible.
+  - **El sistema deberá** resolver el desplegable con `<details>` y `<summary>` nativos, de modo que abra y cierre sin JavaScript; cuando JavaScript esté disponible, deberá cerrarlo además al elegir un destino, al pulsar Escape y al hacer clic fuera.
+  - **Cuando** el ancho disponible sea de 1024 px o más, **el sistema deberá** mostrar la navegación en su forma ancha y no mostrar el disparador del desplegable.
   - **El sistema no deberá** empujar ni tapar la marca al abrir el desplegable, ni provocar desplazamiento horizontal a 320 px.
   - **El sistema deberá** mantener visibles y operativos el control de idioma y el de tema con el desplegable abierto o cerrado.
 
@@ -68,16 +69,17 @@ Esta funcionalidad **no compone la portada ni escribe contenido**. Crea las secc
   - **Si** JavaScript no está disponible, **entonces el sistema deberá** mantener el ancla funcional y continuar la lectura en la sección elegida.
   - **El sistema deberá** mantener el titular de la sección visible y enfocable con el teclado sin añadir un control a la interfaz.
 
-### RF-4 — Cabecera que se retira al bajar y vuelve al subir
+### RF-4 — Cabecera que se retira progresivamente al bajar y vuelve al subir
 
 - Criterios de aceptación (EARS, en español):
-  - **Mientras** el visitante esté al principio de la página, **el sistema deberá** mantener la cabecera visible.
-  - **Cuando** el visitante se haya desplazado más de 64 px desde el principio y siga bajando, **el sistema deberá** retirar la cabecera con una transición de entre 150 y 300 ms.
-  - **Cuando** el visitante suba, aunque sea poco, **el sistema deberá** mostrar la cabecera de nuevo con la misma transición.
-  - **El sistema no deberá** retirar la cabecera mientras el foco de teclado esté dentro de ella, mientras su desplegable de navegación esté abierto o mientras el desplegable de idioma esté abierto.
-  - **El sistema no deberá** provocar desplazamiento, salto ni cambio de tamaño del contenido al retirar o mostrar la cabecera.
+  - **Mientras** el visitante esté al principio de la página, **el sistema deberá** mantener la cabecera visible y completa.
+  - **Cuando** el visitante se haya desplazado más de 64 px desde el principio y siga bajando, **el sistema deberá** retirar la cabecera de forma progresiva, en proporción al desplazamiento y hasta un máximo de su propia altura, con una transición suave de entre 150 y 300 ms entre posiciones.
+  - **Cuando** el visitante suba, aunque sea poco, **el sistema deberá** mostrar la cabecera de nuevo por completo, con la misma transición.
+  - **Si** el desplazamiento cambia de sentido menos de 8 px, **entonces el sistema deberá** conservar el sentido anterior, de modo que la cabecera no oscile ni parpadee.
+  - **El sistema no deberá** retirar la cabecera mientras el foco de teclado esté dentro de ella, mientras su desplegable de navegación esté abierto o mientras el desplegable de idioma esté abierto; en esos estados deberá devolverla a su posición completa.
+  - **El sistema deberá** mantener la cabecera en el flujo del documento y retirarla sin provocar desplazamiento, salto ni cambio de tamaño del contenido.
   - **Si** JavaScript no está disponible, **entonces el sistema deberá** mantener la cabecera en su posición sin retirarla.
-  - **Si** el visitante prefiere movimiento reducido, **entonces el sistema deberá** mantener la cabecera visible sin retirarla en ningún momento.
+  - **Si** el visitante prefiere movimiento reducido, **entonces el sistema deberá** mantener la cabecera visible y completa, sin retirarla en ningún momento y sin animación.
 
 ### RF-5 — Destino activo perceptible
 
@@ -85,27 +87,29 @@ Esta funcionalidad **no compone la portada ni escribe contenido**. Crea las secc
   - **El sistema deberá** indicar el destino activo con un recurso no cromático, además del color.
   - **Mientras** el visitante recorra el inicio, **el sistema deberá** marcar como ubicación actual la sección visible, anunciarlo así a la tecnología asistiva y marcar Inicio cuando esté en el principio de la página.
   - **Si** JavaScript no está disponible, **entonces el sistema deberá** marcar Inicio como destino actual en el inicio, sin seguimiento de sección.
-  - **Cuando** el visitante esté en el listado de proyectos o en el detalle de un proyecto, **el sistema deberá** anunciar y marcar Proyectos como la página actual.
+  - **Cuando** el visitante esté en el listado de proyectos o en el detalle de un proyecto, **el sistema deberá** anunciar y marcar Proyectos como el destino actual con `aria-current="true"`, no como página actual, porque el destino es una sección del inicio.
   - **La marca no deberá** depender del tamaño, de la posición ni del movimiento para ser perceptible.
 
 ### RF-6 — Control de tema de tres estados
 
 - Criterios de aceptación (EARS, en español):
-  - **El sistema deberá** ofrecer en la cabecera, desde la carga inicial y sin interacción previa, un control de tema visible y operativo.
+  - **El sistema deberá** ofrecer en la cabecera, desde la carga inicial y sin interacción previa, un control de tema visible y, con JavaScript disponible, operativo.
   - **El sistema deberá** resolver el control con un único botón que, en cada pulsación, avance en el ciclo claro, oscuro, sistema y de nuevo claro.
-  - **El sistema deberá** mostrar en el texto visible del botón el estado activo, con las palabras «claro», «oscuro» o «sistema» en el idioma activo.
-  - **El sistema deberá** comunicar en el nombre accesible el estado activo y la acción disponible, de modo que no dependa de un icono ni de una abreviatura.
-  - **El sistema deberá** mostrar el estado activo correcto ya en el primer pintado, sin cambiar de etiqueta después de cargar.
+  - **El sistema deberá** mostrar en el texto visible del botón la opción elegida, con las palabras «claro», «oscuro» o «sistema» en el idioma activo.
+  - **El sistema deberá** mostrar la opción elegida y no el tema efectivo: con la opción «sistema» y el sistema operativo en oscuro, el texto seguirá diciendo «sistema».
+  - **El sistema deberá** comunicar en el nombre accesible la opción elegida y la acción disponible, como una frase completa, de modo que no dependa de un icono ni de una abreviatura.
+  - **El sistema deberá** mostrar la opción elegida correcta ya en el primer pintado, sin cambiar de etiqueta después de cargar.
   - **Cuando** la opción activa sea sistema, **el sistema deberá** seguir en tiempo real la preferencia del sistema operativo.
   - **El sistema deberá** permitir operar el control con ratón, teclado y lector de pantalla, con foco visible.
-  - **El sistema deberá** mantener el control visible y operativo durante toda la visita y tras recargar la página.
-  - **El sistema deberá** mantener el control operativo y sin cambios visibles cuando el almacenamiento del navegador no esté disponible.
+  - **El sistema deberá** mantener el control visible y, con JavaScript disponible, operativo durante toda la visita y tras recargar la página.
+  - **El sistema deberá** mantener el control operativo y actualizar su etiqueta durante la visita cuando el almacenamiento del navegador no esté disponible, sin errores visibles y sin conservar la preferencia al recargar.
+  - **Si** JavaScript no está disponible, **entonces el sistema deberá** mantener el control visible, con la opción «sistema», sin operar y sin romper el resto de la cabecera.
 
 ### RF-7 — Control de idioma
 
 - Criterios de aceptación (EARS, en español):
-  - **El sistema deberá** ofrecer en la cabecera un control de idioma que, al abrirse, muestre los idiomas soportados y marque el activo de forma perceptible y no solo cromática.
-  - **El sistema deberá** mostrar en el disparador del control el nombre del idioma activo.
+  - **El sistema deberá** ofrecer en la cabecera un control de idioma resuelto con `<details>` y `<summary>` nativos que, al abrirse, muestre los idiomas soportados y marque el activo de forma perceptible y no solo cromática.
+  - **El sistema deberá** mostrar en el disparador del control el nombre del idioma activo y comunicar en el nombre accesible el idioma activo y la acción de cambiarlo.
   - **El sistema deberá** ofrecer cada idioma como un enlace nativo que funcione sin JavaScript.
   - **El sistema deberá** permitir abrir y cerrar el control con ratón, teclado y lector de pantalla, y cerrarlo al elegir un idioma, al pulsar Escape y al hacer clic fuera cuando JavaScript esté disponible.
   - **Cuando** el visitante elija un idioma, **el sistema deberá** llevar cada enlace a la misma página en ese idioma, conservando la ruta equivalente, los parámetros de consulta y el fragmento, y recordar la preferencia, según lo establecido en la 003.
@@ -138,8 +142,8 @@ Esta funcionalidad **no compone la portada ni escribe contenido**. Crea las secc
 
 ## 6. Casos límite
 
-1. **Primera visita con el tema del sistema en oscuro:** la cabecera aparece oscura y el botón muestra «oscuro» desde el primer pintado, sin destello.
-2. **Recarga con un tema ya elegido:** el botón muestra el estado efectivo y la cabecera no cambia de etiqueta tras cargar.
+1. **Primera visita con el tema del sistema en oscuro:** la cabecera aparece oscura, el botón muestra «sistema» desde el primer pintado y no cambia de etiqueta tras cargar.
+2. **Recarga con un tema ya elegido:** el botón muestra la opción elegida desde el primer pintado, aunque el tema efectivo sea otro, y no cambia de etiqueta tras cargar.
 3. **Tema cambiado en otra pestaña:** la cabecera de esta pestaña actualiza su etiqueta sin recargar y sin mover el foco.
 4. **Almacenamiento bloqueado:** el botón sigue operativo y la etiqueta cambia durante la visita, sin errores visibles.
 5. **JavaScript desactivado:** la cabecera permanece visible, la navegación por anclas funciona y los enlaces de idioma llevan a la página equivalente.
@@ -147,7 +151,7 @@ Esta funcionalidad **no compone la portada ni escribe contenido**. Crea las secc
 7. **Movimiento reducido activado después de cargar:** la cabecera deja de retirarse en el momento, sin recargar.
 8. **Foco de teclado dentro de la cabecera mientras se hace scroll:** la cabecera no se retira.
 9. **Desplegable de navegación o de idioma abierto mientras se hace scroll:** la cabecera no se retira.
-10. **Scroll de ida y vuelta rápido:** la cabecera no parpadea ni salta; se aplica el último sentido con un umbral corto.
+10. **Scroll de ida y vuelta rápido:** la cabecera no parpadea ni salta; se conserva el último sentido hasta superar un umbral de 8 px y la retirada no oscila.
 11. **Cambio de ancho de ventana con el desplegable abierto:** al pasar a escritorio el desplegable deja de mostrarse y la navegación vuelve a su forma ancha, sin recargar.
 12. **Salto a una sección con la cabecera visible:** el titular queda debajo de la cabecera y recibe el foco.
 13. **Salto a una sección desde otra página:** el navegador carga el inicio y continúa en la sección con el titular visible.
@@ -157,7 +161,7 @@ Esta funcionalidad **no compone la portada ni escribe contenido**. Crea las secc
 17. **Colores forzados de alto contraste:** la cabecera mantiene bordes, estados y foco visibles.
 18. **Enlace directo a otro idioma:** la cabecera muestra ese idioma y no sobrescribe la preferencia guardada.
 19. **Dos pestañas en idiomas distintos:** cada cabecera muestra el idioma de su URL.
-20. **Listado y detalle de proyecto:** Proyectos aparece marcado como página actual en ambos.
+20. **Listado y detalle de proyecto:** Proyectos aparece marcado como destino actual con `aria-current="true"` en ambos.
 21. **Inicio recién cargado sin scroll:** Inicio aparece marcado como destino actual y ninguna sección se anuncia como ubicación actual.
 22. **Página no encontrada:** no se muestra la cabecera.
 23. **Apertura del desplegable con lector de pantalla:** el estado de apertura se anuncia y el foco no queda atrapado fuera de la cabecera.
@@ -185,11 +189,11 @@ La funcionalidad se considerará terminada cuando:
 - [ ] Existen los cinco destinos, con sus etiquetas en ambos idiomas y «Stack» idéntico en los dos.
 - [ ] Las cuatro secciones del inicio existen con titular, ancla y foco, y el titular queda debajo de la cabecera al saltar.
 - [ ] En pantallas estrechas la navegación se agrupa en un desplegable que funciona con teclado y sin JavaScript, y la marca y los controles quedan en la primera fila.
-- [ ] La cabecera se retira al bajar y vuelve al subir, nunca con el foco dentro ni con un desplegable abierto, y no provoca saltos de contenido.
+- [ ] La cabecera se retira progresivamente al bajar, vuelve completa al subir con un umbral de reversión de 8 px, nunca con el foco dentro ni con un desplegable abierto, y no provoca saltos de contenido.
 - [ ] Sin JavaScript o con movimiento reducido, la cabecera permanece visible.
-- [ ] El destino activo se marca sin depender del color y se anuncia como página actual o ubicación actual.
-- [ ] El control de tema es un único botón que cicla claro, oscuro y sistema, muestra el estado activo desde el primer pintado y anuncia la acción.
-- [ ] El control de idioma es un desplegable de enlaces que muestra el idioma activo, funciona sin JavaScript y lleva a la misma página con la misma ruta, consulta y fragmento.
+- [ ] El destino activo se marca sin depender del color y se anuncia como destino actual o ubicación actual, según corresponda.
+- [ ] El control de tema es un único botón que cicla claro, oscuro y sistema, muestra la opción elegida desde el primer pintado y anuncia la acción.
+- [ ] El control de idioma es un desplegable nativo de enlaces que muestra el idioma activo, funciona sin JavaScript y lleva a la misma página con la misma ruta, consulta y fragmento.
 - [ ] Ningún componente de la cabecera contiene textos propios: todo llega como dato.
 - [ ] La cabecera no produce desplazamiento horizontal a 320 px ni con zoom de texto al 200 %, y mantiene el foco visible y no oculto.
 - [ ] Cada requisito funcional tiene al menos una prueba asociada, escrita antes del código; los flujos de cabecera, navegación, tema e idioma se prueban end-to-end en los cuatro navegadores.
@@ -201,10 +205,10 @@ La funcionalidad se considerará terminada cuando:
 - **Orden de la cabecera.** Marca, navegación, idioma y tema. Se descarta colocar los controles antes de la navegación porque rompe la lectura de identidad → destinos → preferencias.
 - **Marca.** Nombre completo enlazado al inicio del idioma activo. Se descarta el alias corto porque el nombre completo es el dato que un reclutador necesita retener.
 - **Destinos.** Inicio, Experiencia, Proyectos, Stack y Contacto. Experiencia, Proyectos, Stack y Contacto son secciones del inicio, y Proyectos tiene además su listado como página.
-- **Navegación en pantallas estrechas.** Se agrupa en un desplegable nativo; la marca y los controles quedan en la primera fila. Se descarta un menú lateral con captura de foco porque añade superficie de error y no aporta al alcance.
-- **Ocultación al bajar.** La cabecera se retira por transformación y permanece en el flujo, con un umbral corto y guardas de foco y de desplegable abierto. Sin JavaScript o con movimiento reducido, permanece visible.
-- **Destino activo.** Proyectos se anuncia como página actual; en el inicio se marca la sección visible como ubicación actual y, sin JavaScript, Inicio. El indicador no es solo cromático.
-- **Control de tema.** Un único botón que cicla tres estados, con el estado visible en el texto y la acción en el nombre accesible, resuelto ya en el primer pintado. Se descarta un desplegable, iconos y abreviaturas.
-- **Control de idioma.** Desplegable de enlaces nativos que muestra el idioma activo y funciona sin JavaScript. La navegación equivalente y la preferencia se definen en la 003.
+- **Navegación en pantallas estrechas.** Se agrupa en un desplegable nativo de `<details>` y `<summary>`; la marca y los controles quedan en la primera fila. Cerrar al elegir, con Escape y al hacer clic fuera son mejora con JavaScript. Se descarta un menú lateral con captura de foco porque añade superficie de error y no aporta al alcance.
+- **Ocultación al bajar.** La cabecera se retira progresivamente por transformación, en proporción al desplazamiento y hasta su propia altura, y permanece en el flujo. Vuelve completa en cuanto se sube, con un umbral de reversión de 8 px para no oscilar, y con guardas de foco y de desplegable abierto. Sin JavaScript o con movimiento reducido, permanece visible y sin animación. Se descarta el umbral binario porque no libera espacio de forma gradual y produce un salto perceptible.
+- **Destino activo.** Proyectos se anuncia como destino actual con `aria-current="true"`; en el inicio se marca la sección visible como ubicación actual y, sin JavaScript, Inicio. El indicador no es solo cromático.
+- **Control de tema.** Un único botón que cicla tres estados, con la opción elegida visible en el texto y la acción en el nombre accesible, resuelto ya en el primer pintado. Se descarta mostrar el tema efectivo porque la opción «sistema» dejaría de ser identificable. Se descartan también un desplegable, iconos y abreviaturas.
+- **Control de idioma.** Desplegable nativo de `<details>` y `<summary>` con enlaces reales que muestra el idioma activo y funciona sin JavaScript. La navegación equivalente y la preferencia se definen en la 003.
 - **Secciones.** Aquí existen con titular, ancla y foco; la composición y el contenido llegan en la 005.
 - **Accesibilidad.** La cabecera hereda los criterios de la 003 y añade los propios: foco no oculto, objetivos de 24 px, etiquetas que pueden ocupar varias líneas y estados no cromáticos.
