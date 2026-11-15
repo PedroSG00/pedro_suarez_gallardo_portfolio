@@ -14,7 +14,7 @@
 
 RF cubiertos: RF-1 (T1, T2), RF-3 (T2), RF-4 (T4, T5, T6), RF-5 (T3, T6), RF-8 (T1, T6), RNF-4 (T4, T5), RNF-5 (T4, T5), RNF-8 (T2), RNF-9 (T1, T2).
 
-- [ ] **T1 — Claves i18n de la cabecera** (`app/i18n/dictionaries/{en,es}.json`, `dictionary-parity.test.ts`, `dictionaries.test.ts`, `en-dictionary.test.ts`, `es-dictionary.test.ts`)
+- [x] **T1 — Claves i18n de la cabecera** (`app/i18n/dictionaries/{en,es}.json`, `dictionary-parity.test.ts`, `dictionaries.test.ts`, `en-dictionary.test.ts`, `es-dictionary.test.ts`)
   - RF: RF-1, RF-6, RF-7, RF-8, RNF-9
   - Hecho cuando: `pnpm exec vitest run app/i18n/dictionaries` pasa y `pnpm typecheck` está limpio con `nav.*`, `header.label`, `themeToggle.state|aria.*` y `languageMenu.label|aria.*` presentes en ambos idiomas, `nav.stack` idéntico en `en` y `es`, y `themeSelect.*` todavía intacto.
 

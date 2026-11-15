@@ -3,6 +3,18 @@
     "en": "English",
     "es": "Español"
   },
+  "nav": {
+    "home": "Home",
+    "experience": "Experience",
+    "projects": "Projects",
+    "stack": "Stack",
+    "contact": "Contact",
+    "label": "Primary navigation",
+    "menu": "Menu"
+  },
+  "header": {
+    "label": "Site header"
+  },
   "sections": {
     "hero": {
       "title": "Pedro Suárez Gallardo"
@@ -25,6 +37,25 @@
     "notFound": "Page not found",
     "back": "Back",
     "errorCode": "404"
+  },
+  "themeToggle": {
+    "state": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "aria": {
+      "light": "Light theme. Switch to dark theme",
+      "dark": "Dark theme. Switch to system theme",
+      "system": "System theme. Switch to light theme"
+    }
+  },
+  "languageMenu": {
+    "label": "Language",
+    "aria": {
+      "en": "English. Change language",
+      "es": "Español. Change language"
+    }
   },
   "themeSelect": {
     "label": "Theme",

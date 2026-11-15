@@ -45,6 +45,31 @@ describe('es.json — T13', () => {
     expect(es.common.errorCode).toBe('404');
   });
 
+  it('has nav, header, themeToggle and languageMenu sections translated — T1 (RF-1, RF-6, RF-7)', () => {
+    expect(es.nav).toEqual({
+      home: 'Inicio',
+      experience: 'Experiencia',
+      projects: 'Proyectos',
+      stack: 'Stack',
+      contact: 'Contacto',
+      label: 'Navegación principal',
+      menu: 'Menú',
+    });
+    expect(es.header).toEqual({ label: 'Cabecera del sitio' });
+    expect(es.themeToggle).toEqual({
+      state: { light: 'Claro', dark: 'Oscuro', system: 'Sistema' },
+      aria: {
+        light: 'Tema claro. Cambiar a tema oscuro',
+        dark: 'Tema oscuro. Cambiar a tema del sistema',
+        system: 'Tema del sistema. Cambiar a tema claro',
+      },
+    });
+    expect(es.languageMenu).toEqual({
+      label: 'Idioma',
+      aria: { en: 'English. Cambiar idioma', es: 'Español. Cambiar idioma' },
+    });
+  });
+
   it('keeps preexisting themeSelect section', () => {
     expect(es.themeSelect.label).toBe('Tema');
   });

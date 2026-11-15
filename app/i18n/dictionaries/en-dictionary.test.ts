@@ -26,6 +26,31 @@ describe('en.json — T12', () => {
     expect(en.common.errorCode).toBe('404');
   });
 
+  it('has nav, header, themeToggle and languageMenu sections — T1 (RF-1, RF-6, RF-7)', () => {
+    expect(en.nav).toEqual({
+      home: 'Home',
+      experience: 'Experience',
+      projects: 'Projects',
+      stack: 'Stack',
+      contact: 'Contact',
+      label: 'Primary navigation',
+      menu: 'Menu',
+    });
+    expect(en.header).toEqual({ label: 'Site header' });
+    expect(en.themeToggle).toEqual({
+      state: { light: 'Light', dark: 'Dark', system: 'System' },
+      aria: {
+        light: 'Light theme. Switch to dark theme',
+        dark: 'Dark theme. Switch to system theme',
+        system: 'System theme. Switch to light theme',
+      },
+    });
+    expect(en.languageMenu).toEqual({
+      label: 'Language',
+      aria: { en: 'English. Change language', es: 'Español. Change language' },
+    });
+  });
+
   it('keeps preexisting themeSelect section', () => {
     expect(en.themeSelect.label).toBe('Theme');
   });
