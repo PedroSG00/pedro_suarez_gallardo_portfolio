@@ -30,11 +30,11 @@ RF cubiertos: RF-1 (T1, T2), RF-3 (T2), RF-4 (T4, T5, T6), RF-5 (T3, T6), RF-8 (
   - RF: RF-4, RNF-4
   - Hecho cuando: `pnpm exec vitest run app/components/SiteHeader/header-shift.test.ts` pasa con `offset = 0` hasta 64 px, progresión `min(1, (top − 64) / (2 × altura))`, tope de una altura y retorno completo al subir, siempre con `contentShiftPx = 0`.
 
-- [ ] **T5 — Guardas del reductor de retirada** (`app/components/SiteHeader/header-shift.ts` + `header-shift.test.ts`)
+- [x] **T5 — Guardas del reductor de retirada** (`app/components/SiteHeader/header-shift.ts` + `header-shift.test.ts`)
   - RF: RF-4, RNF-4, RNF-5
   - Hecho cuando: el mismo test pasa para foco dentro, panel abierto, `reducedMotionChange` (también sobrevenido), `resize`, `load` sin JavaScript y reversión menor de 8 px, conservando el último sentido y `contentShiftPx = 0`.
 
-- [ ] **T6 — Racha de continuidad de la cabecera** (`tests/lib/header-streak.ts` + `header-streak.test.ts`)
+- [x] **T6 — Racha de continuidad de la cabecera** (`tests/lib/header-streak.ts` + `header-streak.test.ts`)
   - RF: RF-2, RF-3, RF-4, RF-5, RF-8, RNF-4
   - Hecho cuando: `pnpm exec vitest run tests/lib/header-streak.test.ts` pasa con `rachaActual = nº de casos`, `rachaMaxima = rachaActual` y `casosFallidos` vacía, y un caso manipulado a propósito reinicia la racha y nombra su id.
 
@@ -42,7 +42,7 @@ RF cubiertos: RF-1 (T1, T2), RF-3 (T2), RF-4 (T4, T5, T6), RF-5 (T3, T6), RF-8 (
 
 RF cubiertos: RF-6, RNF-4.
 
-- [ ] **T7 — Opción de tema y etiqueta antes del primer pintado** (`app/theme/boot-script.ts`, `app/theme/boot-script.test.ts`, `app/[locale]/layout.tsx`)
+- [x] **T7 — Opción de tema y etiqueta antes del primer pintado** (`app/theme/boot-script.ts`, `app/theme/boot-script.test.ts`, `app/[locale]/layout.tsx`)
   - RF: RF-6, RNF-4
   - Hecho cuando: `pnpm exec vitest run app/theme/boot-script.test.ts` pasa para valor guardado `light|dark|system`, ausente, inválido y almacenamiento bloqueado, y el HTML inicial de `[locale]/layout.tsx` contiene `data-theme-choice` y la etiqueta correspondiente al idioma.
 

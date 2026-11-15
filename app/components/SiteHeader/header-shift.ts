@@ -1,32 +1,42 @@
 /**
- * header-shift.ts — T4 (RF-4, RNF-4)
- * Reductor puro de la retirada progresiva de la cabecera.
+ * header-shift.ts — T4 + T5 (RF-4, RNF-4, RNF-5)
+ * Pure reducer for the progressive withdrawal of the header.
  *
- * Dado un estado y un evento de scroll, devuelve el nuevo estado junto con el
- * desplazamiento de la cabecera (offset). Nunca toca `window`, `document` ni
- * el DOM: es totalmente testeable sin navegador.
+ * Given a state and an event, returns the new state together with the
+ * header offset. It never touches `window`, `document` nor the DOM: it is
+ * fully testable without a browser.
  *
- * Reglas de retirada (plan §3):
- * - top ≤ 0 → offset 0 (cabecera completa en el principio de la página).
- * - Scroll hacia arriba (subiendo) → offset 0: retorno completo al subir,
- *   aunque sea poco.
- * - top > 64 px y bajando → progresión min(1, (top − 64) / (2 × altura)),
- *   con tope de una altura (offset = −altura).
- * - contentShiftPx = 0 siempre: la cabecera se retira sin desplazar el
- *   contenido (Cero CLS).
+ * Withdrawal rules (plan §3):
+ * - top ≤ 0 → offset 0 (full header at the top of the page).
+ * - Scrolling up → offset 0: full return when scrolling up, even slightly.
+ * - top > 64 px and scrolling down → progression
+ *   min(1, (top − 64) / (2 × height)), capped at one height (offset = −height).
+ * - contentShiftPx = 0 always: the header withdraws without shifting content
+ *   (zero CLS).
  *
- * T5 añade las guardas (foco dentro, panel abierto, movimiento reducido,
- * resize, carga sin JavaScript y umbral de reversión de 8 px).
+ * Guards (T5):
+ * - Focus inside the header → offset 0 (no withdrawal).
+ * - Navigation or language panel open → offset 0.
+ * - Reduced motion enabled → offset 0 (withdrawal disabled).
+ * - No JavaScript (no prior `load` event) → offset 0 always.
+ * - 8 px reversal threshold: the last direction is kept until the direction
+ *   change exceeds 8 px, avoiding flicker.
+ * - resize → updates the height and resets offset to 0 without moving content.
+ * - load → activates JavaScript and restores the initial state.
  */
 
-export type ScrollDirection = 'bajando' | 'subiendo';
+export type ScrollDirection = 'down' | 'up';
 
 export type ShiftState = {
   top: number;
-  topPrevio: number;
-  direccion: ScrollDirection;
+  previousTop: number;
+  direction: ScrollDirection;
   offset: number;
   headerHeight: number;
+  focusInside: boolean;
+  panelOpen: boolean;
+  reducedMotion: boolean;
+  jsActive: boolean;
 };
 
 export type ScrollEvent = {
@@ -34,66 +44,141 @@ export type ScrollEvent = {
   top: number;
 };
 
-export type HeaderShiftEvent = ScrollEvent;
+export type FocusInEvent = { type: 'focusin' };
+export type FocusOutEvent = { type: 'focusout' };
+export type OpenPanelEvent = { type: 'openPanel' };
+export type ClosePanelEvent = { type: 'closePanel' };
+export type ReducedMotionChangeEvent = {
+  type: 'reducedMotionChange';
+  value: boolean;
+};
+export type ResizeEvent = {
+  type: 'resize';
+  height: number;
+};
+export type LoadEvent = { type: 'load' };
 
-/** Distancia desde el principio antes de empezar a retirar (px). */
-const UMBRAL_INICIO = 64;
+export type HeaderShiftEvent =
+  | ScrollEvent
+  | FocusInEvent
+  | FocusOutEvent
+  | OpenPanelEvent
+  | ClosePanelEvent
+  | ReducedMotionChangeEvent
+  | ResizeEvent
+  | LoadEvent;
 
-/** Estado inicial: cabecera completa, sin retirada, dirección hacia abajo. */
-export function estadoInicial(headerHeight: number): ShiftState {
+/** Distance from the top before withdrawal starts (px). */
+const SCROLL_START_THRESHOLD = 64;
+
+/** Minimum direction change to reverse direction (px). */
+const REVERSAL_THRESHOLD = 8;
+
+/** Initial state: full header, no withdrawal, no JavaScript active. */
+export function initialState(headerHeight: number): ShiftState {
   return {
     top: 0,
-    topPrevio: 0,
-    direccion: 'bajando',
+    previousTop: 0,
+    direction: 'down',
     offset: 0,
     headerHeight,
+    focusInside: false,
+    panelOpen: false,
+    reducedMotion: false,
+    jsActive: false,
   };
 }
 
 /**
- * Aplica un evento de scroll sobre el estado y devuelve el siguiente estado.
- * Función pura: misma entrada produce siempre la misma salida.
+ * Applies an event over the state and returns the next state.
+ * Pure function: same input always produces the same output.
  */
-export function aplicarEvento(
+export function applyEvent(
   state: ShiftState,
   event: HeaderShiftEvent
 ): ShiftState {
-  const delta = event.top - state.top;
+  switch (event.type) {
+    case 'load':
+      // JavaScript active: restore the initial state with jsActive = true.
+      return { ...initialState(state.headerHeight), jsActive: true };
 
-  // Dirección por signo del delta (T5 refinará con el umbral de reversión de 8 px).
-  const direccion: ScrollDirection = delta > 0 ? 'bajando' : 'subiendo';
+    case 'focusin':
+      return { ...state, focusInside: true, offset: 0 };
 
-  const next: ShiftState = {
-    ...state,
-    topPrevio: state.top,
-    top: event.top,
-    direccion,
-  };
+    case 'focusout':
+      return { ...state, focusInside: false };
 
-  if (event.top <= 0) {
-    // Principio de la página: cabecera completa.
-    next.offset = 0;
-  } else if (direccion === 'subiendo') {
-    // Retorno completo al subir, aunque sea poco (RF-4, caso 7).
-    next.offset = 0;
-  } else if (event.top > UMBRAL_INICIO) {
-    // Retirada progresiva proporcional al scroll, tope de una altura.
-    const recorrido = 2 * state.headerHeight;
-    const progreso = Math.min(1, (event.top - UMBRAL_INICIO) / recorrido);
-    next.offset = -state.headerHeight * progreso;
-  } else {
-    // Entre 0 y 64 px bajando: sin retirada.
-    next.offset = 0;
+    case 'openPanel':
+      return { ...state, panelOpen: true, offset: 0 };
+
+    case 'closePanel':
+      return { ...state, panelOpen: false };
+
+    case 'reducedMotionChange':
+      if (event.value) {
+        // Reduced motion enabled: cancel withdrawal immediately.
+        return { ...state, reducedMotion: true, offset: 0 };
+      }
+      return { ...state, reducedMotion: false };
+
+    case 'resize':
+      // New header height, withdrawal cancelled, no content movement.
+      return { ...state, headerHeight: event.height, offset: 0 };
+
+    case 'scroll': {
+      const delta = event.top - state.top;
+
+      // Direction is only re-evaluated when the change exceeds the reversal
+      // threshold; a smaller delta keeps the last direction (avoids flicker).
+      let direction = state.direction;
+      if (Math.abs(delta) >= REVERSAL_THRESHOLD) {
+        direction = delta > 0 ? 'down' : 'up';
+      }
+
+      const next: ShiftState = {
+        ...state,
+        previousTop: state.top,
+        top: event.top,
+        direction,
+      };
+
+      if (event.top <= 0) {
+        // Top of the page: full header.
+        next.offset = 0;
+      } else if (
+        !state.jsActive ||
+        state.reducedMotion ||
+        state.focusInside ||
+        state.panelOpen
+      ) {
+        // Guards: no JS, reduced motion, focus inside or panel open.
+        next.offset = 0;
+      } else if (direction === 'up') {
+        // Full return when scrolling up, even slightly (RF-4, case 7).
+        next.offset = 0;
+      } else if (event.top > SCROLL_START_THRESHOLD) {
+        // Progressive withdrawal proportional to scroll, capped at one height.
+        const distance = 2 * state.headerHeight;
+        const progress = Math.min(
+          1,
+          (event.top - SCROLL_START_THRESHOLD) / distance
+        );
+        next.offset = -state.headerHeight * progress;
+      } else {
+        // Between 0 and 64 px scrolling down: no withdrawal.
+        next.offset = 0;
+      }
+
+      return next;
+    }
   }
-
-  return next;
 }
 
 /**
- * Lectura observable del estado: desplazamiento, visibilidad y el invariante
- * de cero desplazamiento de contenido.
+ * Observable reading of the state: offset, visibility and the invariant of
+ * zero content shift.
  */
-export function medir(state: ShiftState) {
+export function measure(state: ShiftState) {
   return {
     offset: state.offset,
     visible: state.offset === 0,

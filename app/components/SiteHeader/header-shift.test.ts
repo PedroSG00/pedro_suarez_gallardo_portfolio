@@ -1,75 +1,265 @@
 import { describe, it, expect } from 'vitest';
-import { aplicarEvento, estadoInicial, medir } from './header-shift';
+import { applyEvent, initialState, measure } from './header-shift';
 import casesRaw from '../../../tests/fixtures/header-cases.json';
 
-type HeaderCase = {
+type HeaderEvent =
+  | { type: 'scroll'; top: number }
+  | { type: 'focusin' }
+  | { type: 'focusout' }
+  | { type: 'openPanel' }
+  | { type: 'closePanel' }
+  | { type: 'reducedMotionChange'; value: boolean }
+  | { type: 'resize'; height: number }
+  | { type: 'load' };
+
+type HeaderCaseT5 = {
+  id: string;
+  events: HeaderEvent[];
+  headerHeight: number;
+  expected: { offset: number; visible: boolean; contentShiftPx: number };
+};
+
+// T4 format (existing fixtures): only `tops`, with implicit `load`.
+type HeaderCaseT4 = {
   id: string;
   tops: number[];
   headerHeight: number;
   expected: { offset: number; visible: boolean; contentShiftPx: number };
 };
 
+type HeaderCase = HeaderCaseT5 | HeaderCaseT4;
+
 const cases = casesRaw as unknown as HeaderCase[];
 
-function scrollTo(tops: number[], headerHeight: number) {
-  return tops.reduce(
-    (state, top) => aplicarEvento(state, { type: 'scroll', top }),
-    estadoInicial(headerHeight)
+function applyEvents(events: HeaderEvent[], headerHeight: number) {
+  return events.reduce(
+    (state, ev) => applyEvent(state, ev),
+    initialState(headerHeight)
   );
 }
 
-// T4 (004): Matriz de la racha y retirada progresiva — RF covered: RF-4, RNF-4
-// Done when: offset = 0 hasta 64 px, progresión min(1, (top − 64) / (2 × altura)),
-// tope de una altura y retorno completo al subir, siempre con contentShiftPx = 0.
-describe('header-shift — T4 (RF-4, RNF-4)', () => {
+// T4 helper: sequence of scrolls with JavaScript active (prior `load`).
+function scrollTo(tops: number[], headerHeight: number) {
+  return applyEvents(
+    [
+      { type: 'load' },
+      ...tops.map((top): HeaderEvent => ({ type: 'scroll', top })),
+    ],
+    headerHeight
+  );
+}
+
+// T5 (004): Header withdrawal reducer guards — RF covered: RF-4, RNF-4, RNF-5
+// Done when: focus inside, panel open, reducedMotionChange (also late), resize,
+// load without JavaScript and reversal smaller than 8 px, keeping the last
+// direction and contentShiftPx = 0.
+describe('header-shift — T5 (RF-4, RNF-4, RNF-5)', () => {
   const HEIGHT = 100;
 
-  it('offset = 0 hasta 64 px de scroll hacia abajo', () => {
+  it('without JavaScript (no load) does not withdraw the header: offset 0 always', () => {
+    const state = applyEvents([{ type: 'scroll', top: 500 }], HEIGHT);
+    expect(measure(state).offset).toBe(0);
+    expect(measure(state).visible).toBe(true);
+    expect(measure(state).contentShiftPx).toBe(0);
+  });
+
+  it('with JavaScript active (load) withdraws when scrolling past 64 px', () => {
+    const state = scrollTo([500], HEIGHT);
+    expect(measure(state).offset).toBe(-HEIGHT);
+    expect(measure(state).visible).toBe(false);
+  });
+
+  it('focus inside prevents withdrawal even while scrolling', () => {
+    const state = applyEvents(
+      [
+        { type: 'load' },
+        { type: 'focusin' },
+        { type: 'scroll', top: 500 },
+      ],
+      HEIGHT
+    );
+    expect(measure(state).offset).toBe(0);
+    expect(measure(state).visible).toBe(true);
+    expect(measure(state).contentShiftPx).toBe(0);
+  });
+
+  it('focus outside allows withdrawal again', () => {
+    const state = applyEvents(
+      [
+        { type: 'load' },
+        { type: 'focusin' },
+        { type: 'focusout' },
+        { type: 'scroll', top: 500 },
+      ],
+      HEIGHT
+    );
+    expect(measure(state).offset).toBe(-HEIGHT);
+    expect(measure(state).visible).toBe(false);
+  });
+
+  it('panel open prevents withdrawal even while scrolling', () => {
+    const state = applyEvents(
+      [
+        { type: 'load' },
+        { type: 'openPanel' },
+        { type: 'scroll', top: 500 },
+      ],
+      HEIGHT
+    );
+    expect(measure(state).offset).toBe(0);
+    expect(measure(state).visible).toBe(true);
+  });
+
+  it('panel closed allows withdrawal again', () => {
+    const state = applyEvents(
+      [
+        { type: 'load' },
+        { type: 'openPanel' },
+        { type: 'closePanel' },
+        { type: 'scroll', top: 500 },
+      ],
+      HEIGHT
+    );
+    expect(measure(state).offset).toBe(-HEIGHT);
+    expect(measure(state).visible).toBe(false);
+  });
+
+  it('late reducedMotionChange returns the header to offset 0', () => {
+    const state = applyEvents(
+      [
+        { type: 'load' },
+        { type: 'scroll', top: 500 },
+        { type: 'reducedMotionChange', value: true },
+      ],
+      HEIGHT
+    );
+    expect(measure(state).offset).toBe(0);
+    expect(measure(state).visible).toBe(true);
+  });
+
+  it('reducedMotionChange to false after reducing allows withdrawal again', () => {
+    const state = applyEvents(
+      [
+        { type: 'load' },
+        { type: 'scroll', top: 500 },
+        { type: 'reducedMotionChange', value: true },
+        { type: 'reducedMotionChange', value: false },
+        { type: 'scroll', top: 500 },
+      ],
+      HEIGHT
+    );
+    expect(measure(state).offset).toBe(-HEIGHT);
+    expect(measure(state).visible).toBe(false);
+  });
+
+  it('resize updates the height and returns the header to offset 0', () => {
+    const state = applyEvents(
+      [
+        { type: 'load' },
+        { type: 'scroll', top: 500 },
+        { type: 'resize', height: 120 },
+      ],
+      HEIGHT
+    );
+    expect(measure(state).offset).toBe(0);
+    expect(measure(state).visible).toBe(true);
+  });
+
+  it('reversal smaller than 8 px keeps the last direction (does not return)', () => {
+    const state = applyEvents(
+      [
+        { type: 'load' },
+        { type: 'scroll', top: 500 },
+        { type: 'scroll', top: 495 },
+      ],
+      HEIGHT
+    );
+    expect(measure(state).offset).toBeLessThan(0);
+    expect(measure(state).visible).toBe(false);
+  });
+
+  it('reversal greater than or equal to 8 px changes direction and returns fully', () => {
+    const state = applyEvents(
+      [
+        { type: 'load' },
+        { type: 'scroll', top: 500 },
+        { type: 'scroll', top: 400 },
+      ],
+      HEIGHT
+    );
+    expect(measure(state).offset).toBe(0);
+    expect(measure(state).visible).toBe(true);
+  });
+
+  it('contentShiftPx = 0 always (no content displacement)', () => {
+    const state = applyEvents(
+      [
+        { type: 'load' },
+        { type: 'focusin' },
+        { type: 'scroll', top: 264 },
+        { type: 'focusout' },
+        { type: 'openPanel' },
+        { type: 'scroll', top: 100 },
+        { type: 'closePanel' },
+        { type: 'reducedMotionChange', value: true },
+        { type: 'scroll', top: 500 },
+        { type: 'reducedMotionChange', value: false },
+        { type: 'resize', height: 110 },
+        { type: 'scroll', top: 0 },
+      ],
+      HEIGHT
+    );
+    expect(measure(state).contentShiftPx).toBe(0);
+  });
+
+  // --- T4 backwards compatibility: the original tests still pass ---
+
+  it('offset = 0 up to 64 px of scrolling down', () => {
     for (const top of [0, 1, 32, 63, 64]) {
       const state = scrollTo([top], HEIGHT);
-      expect(medir(state).offset).toBe(0);
-      expect(medir(state).visible).toBe(true);
-      expect(medir(state).contentShiftPx).toBe(0);
+      expect(measure(state).offset).toBe(0);
+      expect(measure(state).visible).toBe(true);
+      expect(measure(state).contentShiftPx).toBe(0);
     }
   });
 
-  it('progresión min(1, (top − 64) / (2 × altura)) al bajar más de 64 px', () => {
-    // top = 64 + 100 → (100)/(200) = 0.5 → offset = -50
-    const medio = scrollTo([64 + 100], HEIGHT);
-    expect(medir(medio).offset).toBe(-50);
-    expect(medir(medio).visible).toBe(false);
+  it('progression min(1, (top − 64) / (2 × height)) when scrolling past 64 px', () => {
+    const mid = scrollTo([64 + 100], HEIGHT);
+    expect(measure(mid).offset).toBe(-50);
+    expect(measure(mid).visible).toBe(false);
 
-    // top = 64 + 200 → 200/200 = 1 → offset = -100 (tope de una altura)
-    const tope = scrollTo([64 + 200], HEIGHT);
-    expect(medir(tope).offset).toBe(-HEIGHT);
-    expect(medir(tope).visible).toBe(false);
+    const cap = scrollTo([64 + 200], HEIGHT);
+    expect(measure(cap).offset).toBe(-HEIGHT);
+    expect(measure(cap).visible).toBe(false);
   });
 
-  it('tope de una altura: offset nunca supera -altura', () => {
-    const pasado = scrollTo([64 + 500], HEIGHT); // progreso > 1, se corta
-    expect(medir(pasado).offset).toBe(-HEIGHT);
-    expect(medir(pasado).contentShiftPx).toBe(0);
+  it('cap at one height: offset never exceeds -height', () => {
+    const past = scrollTo([64 + 500], HEIGHT); // progression > 1, capped
+    expect(measure(past).offset).toBe(-HEIGHT);
+    expect(measure(past).contentShiftPx).toBe(0);
   });
 
-  it('retorno completo al subir: offset vuelve a 0 aunque sea poco', () => {
-    const estado = scrollTo([64 + 200, 200], HEIGHT); // baja al tope, sube un poco
-    expect(medir(estado).offset).toBe(0);
-    expect(medir(estado).visible).toBe(true);
-    expect(medir(estado).contentShiftPx).toBe(0);
+  it('full return when scrolling up: offset returns to 0 even slightly', () => {
+    const state = scrollTo([64 + 200, 200], HEIGHT); // goes down to cap, then up a little
+    expect(measure(state).offset).toBe(0);
+    expect(measure(state).visible).toBe(true);
+    expect(measure(state).contentShiftPx).toBe(0);
   });
 
-  it('contentShiftPx = 0 siempre (sin desplazamiento de contenido)', () => {
-    const estado = scrollTo([0, 64, 164, 264, 100, 0], HEIGHT);
-    expect(medir(estado).contentShiftPx).toBe(0);
-  });
-
-  it('la matriz de fixtures produce exactamente el estado esperado', () => {
+  it('the fixtures matrix produces exactly the expected state', () => {
     for (const c of cases) {
-      const estado = scrollTo(c.tops, c.headerHeight);
-      const observado = medir(estado);
-      expect(observado.offset).toBe(c.expected.offset);
-      expect(observado.visible).toBe(c.expected.visible);
-      expect(observado.contentShiftPx).toBe(c.expected.contentShiftPx);
+      // New format (events) or T4 format (tops, with implicit load).
+      const events: HeaderEvent[] = 'events' in c
+        ? c.events
+        : [
+            { type: 'load' },
+            ...c.tops.map((top): HeaderEvent => ({ type: 'scroll', top })),
+          ];
+      const state = applyEvents(events, c.headerHeight);
+      const observed = measure(state);
+      expect(observed.offset).toBe(c.expected.offset);
+      expect(observed.visible).toBe(c.expected.visible);
+      expect(observed.contentShiftPx).toBe(c.expected.contentShiftPx);
     }
   });
 });
