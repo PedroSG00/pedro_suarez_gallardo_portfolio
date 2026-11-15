@@ -12,7 +12,11 @@
 
 'use client';
 
-import { saveTheme } from '../../../theme/theme';
+import {
+  applyTheme,
+  saveTheme,
+  getThemeFromDocument,
+} from '../../../theme/theme';
 import type { ThemeValue } from '../../../theme/theme';
 
 /** Advances the theme cycle: light → dark → system → light. */
@@ -23,8 +27,6 @@ const NEXT: Record<ThemeValue, ThemeValue> = {
 };
 
 interface ThemeToggleProps {
-  /** Current theme value (read from the document by the parent). */
-  theme: ThemeValue;
   /** Visible text for each theme option, from the dictionary. */
   stateLabels: Record<ThemeValue, string>;
   /** Full-sentence accessible name for each theme option, from the dictionary. */
@@ -32,10 +34,12 @@ interface ThemeToggleProps {
 }
 
 export function ThemeToggle({
-  theme,
   stateLabels,
   ariaLabels,
 }: ThemeToggleProps) {
+  // Read the effective theme from the document (set by the boot script), never
+  // from storage. This keeps the label in sync with what is actually painted.
+  const theme = getThemeFromDocument();
   const next = NEXT[theme];
 
   return (
@@ -44,10 +48,13 @@ export function ThemeToggle({
       onClick={() => {
         try {
           saveTheme(next);
+          // Apply the choice to <html> immediately so the change is visible in
+          // the same tab without a page reload (storage events only fire in
+          // other tabs). ThemeProvider keeps listening for cross-tab changes.
+          applyTheme(next);
         } catch {
-          // Storage blocked or full: the choice is not persisted, but the
-          // button does not crash. The parent re-syncs the theme from the
-          // document on the next render.
+          // Storage blocked or full: the choice is not persisted, and the
+          // document class is left unchanged. The button does not crash.
         }
       }}
     >

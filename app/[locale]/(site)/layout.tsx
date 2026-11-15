@@ -37,7 +37,6 @@ export default async function SiteLayout({ children, params }: SiteLayoutProps) 
         languageLabels={dictionary.languageMenu as { label: string; aria: Record<Locale, string> }}
         languages={dictionary.languages as Record<Locale, string>}
         triggerLabel={(dictionary.languages as Record<Locale, string>)[locale]}
-        theme="system"
         stateLabels={(dictionary.themeToggle as Record<string, unknown>).state as Record<ThemeValue, string>}
         ariaLabels={(dictionary.themeToggle as Record<string, unknown>).aria as Record<ThemeValue, string>}
         headerLabel={dictionary.header.label as string}

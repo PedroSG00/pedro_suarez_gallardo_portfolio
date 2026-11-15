@@ -32,7 +32,7 @@ function checkKeys(enObj, esObj, path) {
 
 checkKeys(en, es, '');
 
-const reserved = ['themeSelect', 'common.notFound', 'common.back'];
+const reserved = ['common.notFound', 'common.back'];
 for (const key of reserved) {
   const [top, nested] = key.split('.');
   if (!(top in en)) {

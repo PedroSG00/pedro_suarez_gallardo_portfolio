@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import React from 'react';
 
@@ -68,17 +68,17 @@ describe('LanguageMenu — T13 (RF-7, RF-8, RNF-7)', () => {
     renderMenu();
     const links = screen.getAllByRole('link');
     expect(links).toHaveLength(2);
-    expect(links.map((l) => l.getAttribute('hreflang'))).toEqual(
-      expect.arrayContaining(['en', 'es'])
-    );
+    expect(
+      links.map((l) => l.getAttribute('hreflang')).sort()
+    ).toEqual(['en', 'es']);
   });
 
-  it('active language is marked with the sign besides styling', () => {
-    renderMenu({ locale: 'en', triggerLabel: 'English' });
-    const english = screen.getByRole('link', { name: /English/ });
-    expect(within(english).getByTestId('active-mark')).toBeInTheDocument();
-    const espanol = screen.getByRole('link', { name: /Español/ });
-    expect(within(espanol).queryByTestId('active-mark')).toBeNull();
+  it('marks the active language with aria-current besides the sign', () => {
+    renderMenu({ locale: 'en' });
+    const active = screen.getByRole('link', { name: /English/ });
+    expect(active).toHaveAttribute('aria-current', 'true');
+    const inactive = screen.getByRole('link', { name: /Español/ });
+    expect(inactive).not.toHaveAttribute('aria-current');
   });
 
   it('links point to the equivalent route in the other language', () => {

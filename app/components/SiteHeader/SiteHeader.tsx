@@ -40,8 +40,6 @@ interface SiteHeaderProps {
   languages: Record<Locale, string>;
   /** Visible name of the active language (endonym). */
   triggerLabel: string;
-  /** Current theme value (read from the document by the parent). */
-  theme: ThemeValue;
   /** Visible text for each theme option, from the dictionary. */
   stateLabels: Record<ThemeValue, string>;
   /** Full-sentence accessible name for each theme option, from the dictionary. */
@@ -61,7 +59,6 @@ export default function SiteHeader({
   languageLabels,
   languages,
   triggerLabel,
-  theme,
   stateLabels,
   ariaLabels,
   headerLabel,
@@ -85,7 +82,6 @@ export default function SiteHeader({
         languages={languages}
       />
       <ThemeToggle
-        theme={theme}
         stateLabels={stateLabels}
         ariaLabels={ariaLabels}
       />

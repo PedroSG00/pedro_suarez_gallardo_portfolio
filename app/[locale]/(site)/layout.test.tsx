@@ -47,7 +47,6 @@ describe('app/[locale]/(site)/layout — T15', () => {
     expect(props.locale).toBe('en');
     expect(props.languages).toEqual({ en: 'English', es: 'Español' });
     expect(props.triggerLabel).toBe('English');
-    expect(props.theme).toBe('system');
   });
 
   it('mounts SiteHeader with dictionary texts on Spanish (/es)', async () => {
