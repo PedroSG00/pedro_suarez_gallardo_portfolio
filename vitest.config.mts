@@ -4,6 +4,10 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
+    include: [
+      'app/**/*.{test,spec}.?(c|m)[jt]s?(x)',
+      'tests/lib/**/*.{test,spec}.?(c|m)[jt]s?(x)',
+    ],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],
