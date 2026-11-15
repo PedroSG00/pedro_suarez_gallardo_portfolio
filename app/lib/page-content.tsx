@@ -26,11 +26,12 @@ export function generatePageMetadata(
     return {
       title: metadata.title,
       description: metadata.description,
-      canonical: `${baseUrl}/${locale}/${pathSuffix}`,
       alternates: {
+        canonical: `${baseUrl}/${locale}/${pathSuffix}`,
         languages: {
           en: `${baseUrl}/en/${pathSuffix}`,
           es: `${baseUrl}/es/${pathSuffix}`,
+          'x-default': `${baseUrl}/en/${pathSuffix}`,
         },
       },
     };
@@ -40,9 +41,10 @@ export function generatePageMetadata(
 export function pageShell(locale: Locale, translationKey: string) {
   const dict = getDictionary(locale) as Record<string, unknown>;
   const t = createT(dict);
+  // The (site) layout provides the <main> landmark; avoid nesting another one.
   return (
-    <main>
+    <div>
       <h1>{t(translationKey)}</h1>
-    </main>
+    </div>
   );
 }

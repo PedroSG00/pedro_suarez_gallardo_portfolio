@@ -10,9 +10,7 @@ vi.mock('next/navigation', () => ({
 }));
 
 vi.mock('../storage/storage', () => ({
-  readStorage: vi.fn(() => null),
-  writeStorage: vi.fn(),
-  readCookie: vi.fn(() => null),
+  migrateLegacyLang: vi.fn(() => null),
   writeCookie: vi.fn(),
 }));
 
@@ -26,14 +24,14 @@ const mockedWriteCookie = vi.mocked(writeCookie);
 // Done when: setLocale validates locale, writes only the cookie (never localStorage),
 // and navigates with router.push preserving path, query and hash.
 describe('useLocale — T18', () => {
-  const dictionary = { nav: { home: 'Home' } };
+  const dictionary = { sections: { hero: { title: 'Pedro' } } };
 
   function Consumer() {
     const { locale, t, setLocale } = useLocale();
     return (
       <div>
         <span data-testid="locale">{locale}</span>
-        <span data-testid="greeting">{t('nav.home')}</span>
+        <span data-testid="greeting">{t('sections.hero.title')}</span>
         <button onClick={() => setLocale('en')}>to en</button>
         <button onClick={() => setLocale('es')}>to es</button>
       </div>
@@ -60,7 +58,7 @@ describe('useLocale — T18', () => {
       </LocaleProvider>
     );
     expect(screen.getByTestId('locale')).toHaveTextContent('en');
-    expect(screen.getByTestId('greeting')).toHaveTextContent('Home');
+    expect(screen.getByTestId('greeting')).toHaveTextContent('Pedro');
   });
 
   it('setLocale writes only the cookie (never localStorage) and navigates with router.push preserving path, query and hash', () => {

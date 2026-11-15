@@ -228,16 +228,16 @@ Esta funcionalidad **no rediseña la interfaz ni añade funcionalidad visible**.
 
 La funcionalidad se considerará terminada cuando:
 
-- [ ] La 001 está corregida en los puntos relativos al control de tema, el revelado y el aviso de JavaScript, y la 002 en el respaldo a inglés y la persistencia dual, con su nota fechada y con el aviso correspondiente en sus planes y tareas.
-- [ ] Los dos diccionarios tienen el mismo juego de claves, comprobado de forma automática, y no queda ninguna clave sin uso.
-- [ ] Ningún componente de presentación contiene textos ni lee diccionarios: recibe todo por props y no existe respaldo de idioma en tiempo de ejecución.
-- [ ] La raíz y las direcciones sin idioma redirigen a la ruta con el idioma resuelto por preferencia, navegador e inglés.
-- [ ] Las variantes de URL y los idiomas no soportados responden como se describe en RF-5, sin cambiar el idioma de un enlace explícito.
-- [ ] El control de idioma navega a la misma página conservando ruta, consulta y fragmento, actualiza la URL, deja entrada en el historial y guarda la preferencia.
-- [ ] El tema se aplica sin recarga, se recuerda entre visitas, se sincroniza entre pestañas y no produce destello.
+- [x] La 001 está corregida en los puntos relativos al control de tema, el revelado y el aviso de JavaScript, y la 002 en el respaldo a inglés y la persistencia dual, con su nota fechada y con el aviso correspondiente en sus planes y tareas.
+- [x] Los dos diccionarios tienen el mismo juego de claves, comprobado de forma automática, y no queda ninguna clave sin uso.
+- [x] Ningún componente de presentación contiene textos ni lee diccionarios: recibe todo por props y no existe respaldo de idioma en tiempo de ejecución.
+- [x] La raíz y las direcciones sin idioma redirigen a la ruta con el idioma resuelto por preferencia, navegador e inglés.
+- [x] Las variantes de URL y los idiomas no soportados responden como se describe en RF-5, sin cambiar el idioma de un enlace explícito.
+- [x] El control de idioma navega a la misma página conservando ruta, consulta y fragmento, actualiza la URL, deja entrada en el historial y guarda la preferencia.
+- [x] El tema se aplica sin recarga, se recuerda entre visitas, se sincroniza entre pestañas y no produce destello.
 - [x] La primera visita sigue la preferencia del sistema; sin preferencia del sistema se muestra claro.
-- [ ] Los fallos de almacenamiento se gestionan sin errores visibles y sin impedir cambiar la preferencia.
-- [ ] La pantalla de página no encontrada es bilingüe, no indexable, no repetitiva de la ruta, sin cabecera, y ofrece volver al inicio y el otro idioma.
+- [x] Los fallos de almacenamiento se gestionan sin errores visibles y sin impedir cambiar la preferencia.
+- [x] La pantalla de página no encontrada es bilingüe, no indexable, no repetitiva de la ruta, sin cabecera, y ofrece volver al inicio y el otro idioma.
 - [x] Cada página existente tiene título y descripción propios por idioma, canónica propia y alternativas de idioma con versión por defecto apuntando a `/en`.
 - [x] El foco es visible y distinguible, con contraste de 3:1 frente al estado sin foco y los colores adyacentes, y nunca queda oculto.
 - [x] Los objetivos interactivos miden al menos 24 por 24 píxeles y el contenido soporta zoom de página y de texto al 200 %.

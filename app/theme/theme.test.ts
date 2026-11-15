@@ -1,65 +1,63 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-import { getSavedTheme, saveTheme, resolveActiveTheme, listenStorageChanges } from './theme';
+import {
+  applyTheme,
+  getThemeFromDocument,
+  saveTheme,
+  listenStorageChanges,
+} from './theme';
 
-// T12: theme.ts — get/save/resolve theme, storage event sync, blocked storage
-// Done when: inválido → 'system'; blocked storage → silent; storage event con valor vacío → 'system'.
+// T12: theme.ts — document class model, persistence and cross-tab sync.
+// The inline boot script is the only storage reader; these helpers never read
+// localStorage on boot.
 describe('theme.ts', () => {
   beforeEach(() => {
-    // Reset localStorage mock
-    let store: Record<string, string> = {};
-    const mockStorage = {
-      getItem: (key: string): string | null => (key in store ? store[key] : null),
-      setItem: (key: string, value: string): void => {
-        store[key] = value;
-      },
-      removeItem: (key: string): void => {
-        delete store[key];
-      },
-      clear: (): void => {
-        store = {};
-      },
-    };
-    Object.defineProperty(globalThis, 'localStorage', {
-      value: mockStorage,
-      writable: true,
-    });
+    document.documentElement.className = '';
+    localStorage.clear();
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it('getSavedTheme returns system for invalid stored value', () => {
-    localStorage.setItem('theme', 'invalid-value');
-    expect(getSavedTheme()).toBe('system');
+  it('getThemeFromDocument defaults to system when no class is set', () => {
+    expect(getThemeFromDocument()).toBe('system');
   });
 
-  it('getSavedTheme returns system when localStorage is blocked (throws)', () => {
-    const originalGetItem = localStorage.getItem.bind(localStorage);
-    const blockingGetItem = (): never => {
-      throw new Error('blocked');
-    };
-    Object.defineProperty(localStorage, 'getItem', {
-      value: blockingGetItem,
-      configurable: true,
-      writable: true,
-    });
-    expect(getSavedTheme()).toBe('system');
-    Object.defineProperty(localStorage, 'getItem', {
-      value: originalGetItem,
-      configurable: true,
-      writable: true,
-    });
+  it('getThemeFromDocument reads the class applied by the boot script', () => {
+    document.documentElement.classList.add('theme-dark');
+    expect(getThemeFromDocument()).toBe('dark');
+  });
+
+  it('applyTheme swaps the theme class without leaving duplicates', () => {
+    document.documentElement.classList.add('theme-light');
+    applyTheme('dark');
+    expect(document.documentElement.classList.contains('theme-dark')).toBe(true);
+    expect(document.documentElement.classList.contains('theme-light')).toBe(
+      false
+    );
+    expect(document.documentElement.classList.contains('theme-system')).toBe(
+      false
+    );
+  });
+
+  it('applyTheme never writes to storage', () => {
+    const setItem = vi.spyOn(Storage.prototype, 'setItem');
+    applyTheme('dark');
+    expect(setItem).not.toHaveBeenCalled();
+  });
+
+  it('saveTheme persists the value', () => {
+    saveTheme('dark');
+    expect(localStorage.getItem('theme')).toBe('dark');
   });
 
   it('saveTheme silently ignores when localStorage is blocked', () => {
     const originalSetItem = localStorage.setItem.bind(localStorage);
-    const blockingSetItem = (): never => {
-      throw new Error('blocked');
-    };
     Object.defineProperty(localStorage, 'setItem', {
-      value: blockingSetItem,
+      value: () => {
+        throw new Error('blocked');
+      },
       configurable: true,
       writable: true,
     });
@@ -71,16 +69,10 @@ describe('theme.ts', () => {
     });
   });
 
-  it('resolveActiveTheme falls back to system for invalid saved value', () => {
-    localStorage.setItem('theme', 'not-a-theme');
-    expect(resolveActiveTheme()).toBe('system');
-  });
-
-  it('listenStorageChanges calls callback with system when newValue is null/empty', () => {
+  it('listenStorageChanges maps newValue null (deletion) to system', () => {
     const callback = vi.fn();
     const unlisten = listenStorageChanges(callback);
 
-    // Dispatch storage event with empty newValue
     window.dispatchEvent(
       new StorageEvent('storage', { key: 'theme', newValue: null })
     );
@@ -89,7 +81,19 @@ describe('theme.ts', () => {
     unlisten();
   });
 
-  it('listenStorageChanges calls callback with valid newValue', () => {
+  it('listenStorageChanges maps invalid values to system', () => {
+    const callback = vi.fn();
+    const unlisten = listenStorageChanges(callback);
+
+    window.dispatchEvent(
+      new StorageEvent('storage', { key: 'theme', newValue: 'purple' })
+    );
+    expect(callback).toHaveBeenCalledWith('system');
+
+    unlisten();
+  });
+
+  it('listenStorageChanges forwards valid values', () => {
     const callback = vi.fn();
     const unlisten = listenStorageChanges(callback);
 

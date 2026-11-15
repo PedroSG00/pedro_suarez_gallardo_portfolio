@@ -227,6 +227,19 @@ test.describe('T10 — No full page reload and window marker', () => {
     expect(storageLang).toBeNull();
   });
 
+  test('preserves query and hash and leaves a single history entry', async ({
+    page,
+  }) => {
+    await page.goto('/es/projects?tab=1#section');
+
+    await page.click('[data-testid="language-selector-en"]');
+    await expect(page).toHaveURL(/.*\/en\/projects\?tab=1#section$/);
+
+    // One back step returns to the previous language, same query and hash.
+    await page.goBack();
+    await expect(page).toHaveURL(/.*\/es\/projects\?tab=1#section$/);
+  });
+
   test('reload after choosing language keeps the language', async ({
     page,
     context,

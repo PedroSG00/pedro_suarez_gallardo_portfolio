@@ -1,33 +1,30 @@
 {
-  "nav": {
-    "home": "Home",
-    "projects": "Projects",
-    "cv": "CV",
-    "contact": "Contact",
-    "language": "Language"
-  },
   "languages": {
     "en": "English",
     "es": "Español"
   },
   "sections": {
-    "hero": { "title": "Pedro Suárez Gallardo", "role": "Web Developer" },
-    "about": { "title": "About me" }
+    "hero": {
+      "title": "Pedro Suárez Gallardo"
+    },
+    "projects": {
+      "title": "Projects"
+    }
   },
   "metadata": {
     "home": {
-      "title": "Pedro Suárez Gallardo — Web Developer",
+      "title": "Pedro Suárez Gallardo - Web Developer",
       "description": "Portfolio and résumé of Pedro Suárez Gallardo, web developer."
     },
     "projects": {
-      "title": "Projects — Pedro Suárez Gallardo",
+      "title": "Projects - Pedro Suárez Gallardo",
       "description": "Selected web development projects by Pedro Suárez Gallardo."
     }
   },
   "common": {
     "notFound": "Page not found",
     "back": "Back",
-    "copyright": "© Pedro Suárez Gallardo"
+    "errorCode": "404"
   },
   "themeSelect": {
     "label": "Theme",

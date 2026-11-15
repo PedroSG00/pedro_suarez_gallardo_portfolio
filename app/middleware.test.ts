@@ -124,6 +124,18 @@ describe('proxy — T13', () => {
       expect(result.status).toBe(200);
       expect(result.headers.get('location')).toBeNull();
     });
+
+    it('forwards the resolved locale to the app via x-locale', async () => {
+      const { proxy } = await import('../proxy');
+      const req = makeRequest('http://localhost:3000/es/projects', {
+        'accept-language': 'en',
+      });
+
+      const result = await proxy(req);
+      expect(
+        result.headers.get('x-middleware-request-x-locale')
+      ).toBe('es');
+    });
   });
 
   describe('technical assets pass untouched (RF-5)', () => {
@@ -182,48 +194,70 @@ describe('proxy — T13', () => {
     });
   });
 
-  describe('invalid variants → 404 (RF-5)', () => {
-    it('uppercase locale in first segment → 404', async () => {
+  describe('invalid variants → localized 404 screen (RF-5, RF-7)', () => {
+    it('uppercase locale in first segment → 404 screen', async () => {
       const { proxy } = await import('../proxy');
       const req = makeRequest('http://localhost:3000/ES', {
         'accept-language': 'es',
       });
 
       const result = await proxy(req);
-      expect(result.status).toBe(404);
+      expect(result.status).toBe(200);
+      expect(result.headers.get('x-middleware-rewrite')).toContain(
+        '/es/__not-found'
+      );
+      expect(result.headers.get('Vary')).toContain('Cookie');
     });
 
-    it('double slash → 404', async () => {
+    it('double slash → 404 screen', async () => {
       const { proxy } = await import('../proxy');
       const req = makeRequest('http://localhost:3000//en/projects', {
         'accept-language': 'en',
       });
 
       const result = await proxy(req);
-      expect(result.status).toBe(404);
+      expect(result.headers.get('x-middleware-rewrite')).toContain(
+        '/en/__not-found'
+      );
     });
 
-    it('unsupported locale → 404', async () => {
+    it('unsupported locale → 404 screen in the resolved locale', async () => {
       const { proxy } = await import('../proxy');
       const req = makeRequest('http://localhost:3000/fr/projects', {
-        'accept-language': 'fr',
+        'accept-language': 'es',
       });
 
       const result = await proxy(req);
-      expect(result.status).toBe(404);
+      expect(result.headers.get('x-middleware-rewrite')).toContain(
+        '/es/__not-found'
+      );
     });
 
-    it('locale not in first segment → 404', async () => {
+    it('locale not in first segment → 404 screen', async () => {
       const { proxy } = await import('../proxy');
       const req = makeRequest('http://localhost:3000/projects/en', {
         'accept-language': 'en',
       });
 
       const result = await proxy(req);
-      expect(result.status).toBe(404);
+      expect(result.headers.get('x-middleware-rewrite')).toContain(
+        '/en/__not-found'
+      );
     });
 
-    it('pathname longer than 2048 chars → 404 (RF-5 case 25)', async () => {
+    it('invalid percent-encoding → 404 screen (RF-5 case 25)', async () => {
+      const { proxy } = await import('../proxy');
+      const req = makeRequest('http://localhost:3000/en/%zz', {
+        'accept-language': 'en',
+      });
+
+      const result = await proxy(req);
+      expect(result.headers.get('x-middleware-rewrite')).toContain(
+        '/en/__not-found'
+      );
+    });
+
+    it('pathname longer than 2048 chars → 404 screen (RF-5 case 25)', async () => {
       const { proxy } = await import('../proxy');
       const longPath = '/a'.repeat(2049);
       const req = makeRequest(`http://localhost:3000${longPath}`, {
@@ -231,10 +265,12 @@ describe('proxy — T13', () => {
       });
 
       const result = await proxy(req);
-      expect(result.status).toBe(404);
+      expect(result.headers.get('x-middleware-rewrite')).toContain(
+        '/en/__not-found'
+      );
     });
 
-    it('segment longer than 255 chars → 404 (RF-5 case 25)', async () => {
+    it('segment longer than 255 chars → 404 screen (RF-5 case 25)', async () => {
       const { proxy } = await import('../proxy');
       const longSegment = 'x'.repeat(256);
       const req = makeRequest(
@@ -243,7 +279,9 @@ describe('proxy — T13', () => {
       );
 
       const result = await proxy(req);
-      expect(result.status).toBe(404);
+      expect(result.headers.get('x-middleware-rewrite')).toContain(
+        '/en/__not-found'
+      );
     });
   });
 });

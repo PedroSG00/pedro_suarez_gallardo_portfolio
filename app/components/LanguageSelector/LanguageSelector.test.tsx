@@ -4,11 +4,14 @@ import '@testing-library/jest-dom/vitest';
 import React from 'react';
 
 vi.mock('next/link', () => {
-  const MockAnchor = React.forwardRef<HTMLAnchorElement, { children?: React.ReactNode; href: string }>(
-    ({ children, href, ...props }, ref) => (
-      <a ref={ref} href={href} {...props}>{children}</a>
-    )
-  );
+  const MockAnchor = React.forwardRef<
+    HTMLAnchorElement,
+    { children?: React.ReactNode; href: string }
+  >(({ children, href, ...props }, ref) => (
+    <a ref={ref} href={href} {...props}>
+      {children}
+    </a>
+  ));
   MockAnchor.displayName = 'MockAnchor';
   return {
     default: MockAnchor,
@@ -17,9 +20,7 @@ vi.mock('next/link', () => {
 });
 
 vi.mock('next/navigation', () => ({
-  useRouter: vi.fn(() => ({ push: vi.fn() })),
   usePathname: vi.fn(() => '/es/projects'),
-  useLocale: vi.fn(),
 }));
 
 vi.mock('../../i18n/provider/use-locale', () => ({
@@ -40,6 +41,8 @@ const mockedWriteStorage = vi.mocked(writeStorage);
 const mockedWriteCookie = vi.mocked(writeCookie);
 const mockedUseLocale = vi.mocked(useLocale);
 
+const LABELS: Record<Locale, string> = { en: 'English', es: 'Español' };
+
 // T18: LanguageSelector.tsx — native links per language; unique writer of lang cookie (RF-4, RF-8)
 // Done when: language change preserves route/query/hash, updates URL, adds history entry,
 // saves preference only via cookie (never localStorage), and is the single write point.
@@ -51,13 +54,7 @@ describe('LanguageSelector — T18', () => {
       setLocale: vi.fn((next: Locale) => {
         writeCookie('lang', next);
       }),
-      t: (key: string) => {
-        const dict: Record<string, string> = {
-          'languages.en': 'English',
-          'languages.es': 'Español',
-        };
-        return dict[key] ?? key;
-      },
+      t: (key: string) => key,
     });
   });
 
@@ -65,20 +62,20 @@ describe('LanguageSelector — T18', () => {
     vi.restoreAllMocks();
   });
 
-  it('renders one link per locale with dictionary labels', () => {
-    render(<LanguageSelector />);
+  it('renders one link per locale with the labels received as props', () => {
+    render(<LanguageSelector locale="en" labels={LABELS} />);
     expect(screen.getByRole('link', { name: 'English' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Español' })).toBeInTheDocument();
   });
 
   it('each link navigates to the same route in the other language', () => {
-    render(<LanguageSelector />);
+    render(<LanguageSelector locale="en" labels={LABELS} />);
     const esLink = screen.getByRole('link', { name: 'Español' });
     expect(esLink).toHaveAttribute('href', '/es/projects');
   });
 
   it('active state carries aria-current', () => {
-    render(<LanguageSelector />);
+    render(<LanguageSelector locale="en" labels={LABELS} />);
     expect(screen.getByRole('link', { name: 'English' })).toHaveAttribute(
       'aria-current',
       'true'
@@ -90,7 +87,7 @@ describe('LanguageSelector — T18', () => {
   });
 
   it('clicking a link calls setLocale (unique writer) and does not write to localStorage', () => {
-    render(<LanguageSelector />);
+    render(<LanguageSelector locale="en" labels={LABELS} />);
     fireEvent.click(screen.getByRole('link', { name: 'Español' }));
     const { setLocale } = mockedUseLocale.mock.results[0]?.value;
     expect(setLocale).toHaveBeenCalledWith('es');
@@ -98,14 +95,14 @@ describe('LanguageSelector — T18', () => {
   });
 
   it('setLocale writes only the cookie (never localStorage)', () => {
-    render(<LanguageSelector />);
+    render(<LanguageSelector locale="en" labels={LABELS} />);
     fireEvent.click(screen.getByRole('link', { name: 'Español' }));
     expect(mockedWriteCookie).toHaveBeenCalledWith('lang', 'es');
     expect(mockedWriteStorage).not.toHaveBeenCalledWith('lang', 'es');
   });
 
   it('exposes a stable test id per locale', () => {
-    render(<LanguageSelector />);
+    render(<LanguageSelector locale="en" labels={LABELS} />);
     expect(screen.getByTestId('language-selector-en')).toBeInTheDocument();
     expect(screen.getByTestId('language-selector-es')).toHaveAttribute(
       'href',

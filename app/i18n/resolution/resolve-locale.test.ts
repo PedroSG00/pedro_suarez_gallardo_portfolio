@@ -138,9 +138,21 @@ describe('resolveLocale — T2', () => {
       );
     });
 
-    it('q greater than 1 is accepted as valid weight', () => {
+    it('q greater than 1 is ignored and the remaining entries are used', () => {
       expect(resolveLocale(undefined, 'es;q=2,en;q=1', locales, defaultLocale)).toBe(
-        'es'
+        'en'
+      );
+    });
+
+    it('q greater than 1 alone → defaultLocale', () => {
+      expect(resolveLocale(undefined, 'es;q=2', locales, defaultLocale)).toBe(
+        defaultLocale
+      );
+    });
+
+    it('negative q alone → defaultLocale', () => {
+      expect(resolveLocale(undefined, 'es;q=-1', locales, defaultLocale)).toBe(
+        defaultLocale
       );
     });
 

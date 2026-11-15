@@ -5,8 +5,8 @@
  * canonical URL and hreflang alternates with x-default → /en.
  */
 
-import { generatePageMetadata, pageShell } from '../lib/page-content';
-import { Locale } from '../i18n/config';
+import { generatePageMetadata, pageShell } from '../../lib/page-content';
+import { Locale } from '../../i18n/config';
 
 export const generateMetadata = generatePageMetadata('home', '');
 

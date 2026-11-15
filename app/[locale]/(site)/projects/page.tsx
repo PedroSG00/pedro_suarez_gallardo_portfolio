@@ -5,8 +5,8 @@
  * canonical URL and hreflang alternates with x-default → /en.
  */
 
-import { generatePageMetadata, pageShell } from '../../lib/page-content';
-import { Locale } from '../../i18n/config';
+import { generatePageMetadata, pageShell } from '../../../lib/page-content';
+import { Locale } from '../../../i18n/config';
 
 export const generateMetadata = generatePageMetadata('projects', 'projects');
 
@@ -16,5 +16,5 @@ export default async function ProjectsPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = (await params) as { locale: Locale };
-  return pageShell(locale, 'nav.projects');
+  return pageShell(locale, 'sections.projects.title');
 }

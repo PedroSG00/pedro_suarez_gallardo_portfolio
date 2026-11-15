@@ -3,29 +3,6 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import React from 'react';
 
-vi.mock('next/font/google', () => ({
-  Geist: () => ({ variable: '--font-geist-sans' }),
-  Geist_Mono: () => ({ variable: '--font-geist-mono' }),
-}));
-
-vi.mock('next/script', () => ({
-  default: function Script({
-    id,
-    children,
-    strategy,
-  }: {
-    id: string;
-    children: string;
-    strategy: string;
-  }) {
-    return React.createElement('script', {
-      id,
-      'data-strategy': strategy,
-      dangerouslySetInnerHTML: { __html: children },
-    });
-  },
-}));
-
 vi.mock('./layout-provider', () => ({
   default: function LayoutProvider({
     children,
@@ -37,24 +14,24 @@ vi.mock('./layout-provider', () => ({
     dictionary: Record<string, unknown>;
   }) {
     return (
-      <div data-testid="locale-provider" data-locale={locale}>
+      <div
+        data-testid="locale-provider"
+        data-locale={locale}
+        data-has-dict={String(Object.keys(dictionary).length > 0)}
+      >
         {children}
       </div>
     );
   },
 }));
 
-vi.mock('../i18n/translation/get-dictionary', () => ({
-  getDictionary: () => ({ common: { notFound: 'Page not found' } }),
-}));
-
-// T14: app/[locale]/layout.tsx — <html lang>, inline theme script, providers without visible controls (RF-1, RF-4, RF-6)
-// Done when: <html lang={locale}>, generateStaticParams per locale,
-// dynamicParams false (invalid locales → 404), inline synchronous theme script
-// in <head>, LayoutProvider without visible controls, no LanguageSelector here.
+// T14: app/[locale]/layout.tsx — static params per locale, dictionary
+// provider, no document shell and no visible controls (RF-1, RF-4, RF-6).
+// Done when: generateStaticParams covers both locales, dynamicParams is false,
+// and children render inside the locale provider.
 describe('app/[locale]/layout — T14', () => {
   beforeEach(() => {
-    document.documentElement.className = '';
+    vi.restoreAllMocks();
   });
 
   afterEach(() => {
@@ -72,52 +49,43 @@ describe('app/[locale]/layout — T14', () => {
     expect(mod.dynamicParams).toBe(false);
   });
 
-  it('sets <html lang={locale}>', async () => {
+  it('passes the locale and dictionary to the provider', async () => {
     const mod = await import('./layout');
-    const { default: Layout } = mod;
     const params = Promise.resolve({ locale: 'es' });
-    const ui = await Layout({ params, children: <div>content</div> });
+    const ui = await mod.default({ params, children: <div>content</div> });
     render(ui);
 
-    await vi.waitFor(() =>
-      expect(document.documentElement).toHaveAttribute('lang', 'es')
-    );
+    const provider = screen.getByTestId('locale-provider');
+    expect(provider).toHaveAttribute('data-locale', 'es');
+    expect(provider).toHaveAttribute('data-has-dict', 'true');
   });
 
-  it('wraps children in LayoutProvider (locale provider)', async () => {
+  it('wraps children through the provider', async () => {
     const mod = await import('./layout');
-    const { default: Layout } = mod;
     const params = Promise.resolve({ locale: 'en' });
-    const ui = await Layout({ params, children: <div>content</div> });
+    const ui = await mod.default({ params, children: <div>content</div> });
     render(ui);
 
-    await vi.waitFor(() =>
-      expect(screen.getByTestId('locale-provider')).toBeInTheDocument()
-    );
+    expect(screen.getByText('content')).toBeInTheDocument();
   });
 
-  it('does not render LanguageSelector in the root layout', async () => {
+  it('does not render visible controls', async () => {
     const mod = await import('./layout');
-    const { default: Layout } = mod;
     const params = Promise.resolve({ locale: 'en' });
-    const ui = await Layout({ params, children: <div>content</div> });
+    const ui = await mod.default({ params, children: <div>content</div> });
     render(ui);
 
-    await vi.waitFor(() =>
-      expect(screen.queryByTestId('language-selector')).not.toBeInTheDocument()
-    );
+    expect(screen.queryByTestId('language-selector')).not.toBeInTheDocument();
+    expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
   });
 
-  it('mounts inline theme script in <head> before interactive', async () => {
+  it('does not own the <html> document (root layout does)', async () => {
     const mod = await import('./layout');
-    const { default: Layout } = mod;
     const params = Promise.resolve({ locale: 'en' });
-    const ui = await Layout({ params, children: <div>content</div> });
+    const ui = await mod.default({ params, children: <div>content</div> });
     render(ui);
 
     // eslint-disable-next-line testing-library/no-node-access
-    const script = document.querySelector('script#theme-init');
-    expect(script).not.toBeNull();
-    expect(script?.getAttribute('data-strategy')).toBe('beforeInteractive');
+    expect(document.querySelector('script#theme-init')).toBeNull();
   });
 });

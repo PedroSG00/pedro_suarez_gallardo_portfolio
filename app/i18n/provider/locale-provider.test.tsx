@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
-import LocaleProvider, { syncOnMount } from './locale-provider';
+import LocaleProvider from './locale-provider';
 import { useLocale } from './use-locale';
 
 vi.mock('next/navigation', () => ({
@@ -10,29 +10,23 @@ vi.mock('next/navigation', () => ({
 }));
 
 vi.mock('../storage/storage', () => ({
-  readStorage: vi.fn(() => null),
-  writeStorage: vi.fn(),
-  readCookie: vi.fn(() => null),
-  writeCookie: vi.fn(),
+  migrateLegacyLang: vi.fn(() => null),
 }));
 
-import { writeStorage, writeCookie, readStorage, readCookie } from '../storage/storage';
+import { migrateLegacyLang } from '../storage/storage';
 
-const mockedWriteStorage = vi.mocked(writeStorage);
-const mockedWriteCookie = vi.mocked(writeCookie);
-const mockedReadStorage = vi.mocked(readStorage);
-const mockedReadCookie = vi.mocked(readCookie);
+const mockedMigrateLegacyLang = vi.mocked(migrateLegacyLang);
 
-// T17: locale-provider.tsx — RF3, RF4, RF5
+// T17: locale-provider.tsx — RF-1, RF-3, RF-4
 describe('LocaleProvider — T17', () => {
-  const dictionary = { nav: { home: 'Home', language: 'Language' } };
+  const dictionary = { sections: { hero: { title: 'Pedro' } } };
 
   function Consumer() {
     const { locale, t, setLocale } = useLocale();
     return (
       <div>
         <span data-testid="locale">{locale}</span>
-        <span data-testid="greeting">{t('nav.home')}</span>
+        <span data-testid="greeting">{t('sections.hero.title')}</span>
         <button onClick={() => setLocale('es')}>to es</button>
         <button onClick={() => setLocale('en')}>to en</button>
       </div>
@@ -41,10 +35,6 @@ describe('LocaleProvider — T17', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    localStorage.clear();
-    document.cookie = 'lang=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
-    mockedReadStorage.mockReturnValue(null);
-    mockedReadCookie.mockReturnValue(null);
   });
 
   afterEach(() => {
@@ -57,7 +47,7 @@ describe('LocaleProvider — T17', () => {
         <Consumer />
       </LocaleProvider>
     );
-    expect(screen.getByTestId('greeting')).toHaveTextContent('Home');
+    expect(screen.getByTestId('greeting')).toHaveTextContent('Pedro');
   });
 
   it('setLocale changes the locale and re-renders (cookie write is use-locale responsibility)', () => {
@@ -81,62 +71,23 @@ describe('LocaleProvider — T17', () => {
     fireEvent.click(screen.getByRole('button', { name: 'to en' }));
     expect(screen.getByTestId('locale')).toHaveTextContent('en');
   });
-});
 
-// ── syncOnMount (pure, testable) ──────────────────────────────────────────
-
-describe('syncOnMount — T17', () => {
-  const locales = ['en', 'es'] as const;
-
-  it('mirrors cookie when cookie is valid and differs from storage', () => {
-    const result = syncOnMount(
-      'en',
-      () => null as string | null,
-      mockedWriteStorage,
-      () => 'es' as string | null,
-      mockedWriteCookie,
-      locales
+  it('runs the one-time legacy migration on mount', () => {
+    render(
+      <LocaleProvider locale="en" dictionary={dictionary}>
+        <Consumer />
+      </LocaleProvider>
     );
-    expect(result).toBe('es');
-    expect(mockedWriteStorage).toHaveBeenCalledWith('lang', 'es');
+    expect(mockedMigrateLegacyLang).toHaveBeenCalledTimes(1);
   });
 
-  it('writes cookie when cookie is invalid but storage is valid', () => {
-    const result = syncOnMount(
-      'en',
-      () => 'es' as string | null,
-      mockedWriteStorage,
-      () => null as string | null,
-      mockedWriteCookie,
-      locales
+  it('keeps the URL locale even when a migrated cookie differs', () => {
+    mockedMigrateLegacyLang.mockReturnValue('es');
+    render(
+      <LocaleProvider locale="en" dictionary={dictionary}>
+        <Consumer />
+      </LocaleProvider>
     );
-    expect(result).toBe('en');
-    expect(mockedWriteCookie).toHaveBeenCalledWith('lang', 'es');
-  });
-
-  it('does not overwrite with URL language; returns urlLocale', () => {
-    const result = syncOnMount(
-      'en',
-      () => 'es' as string | null,
-      mockedWriteStorage,
-      () => null as string | null,
-      mockedWriteCookie,
-      locales
-    );
-    expect(result).toBe('en');
-  });
-
-  it('ignores cookie with unsupported value', () => {
-    const result = syncOnMount(
-      'en',
-      () => null as string | null,
-      mockedWriteStorage,
-      () => 'fr' as string | null,
-      mockedWriteCookie,
-      locales
-    );
-    expect(result).toBe('en');
-    expect(mockedWriteStorage).not.toHaveBeenCalled();
-    expect(mockedWriteCookie).not.toHaveBeenCalled();
+    expect(screen.getByTestId('locale')).toHaveTextContent('en');
   });
 });

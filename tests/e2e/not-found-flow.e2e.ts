@@ -15,8 +15,14 @@ test.describe('Not-found flow (RF-7)', () => {
 
     await expect(page.locator('html')).toHaveAttribute('lang', 'es');
     await expect(page.locator('main h1')).toContainText('Página no encontrada');
-    await expect(page.locator('main a')).toContainText('Volver');
-    await expect(page.locator('main a')).toContainText('/en');
+    await expect(page.getByRole('link', { name: 'Volver' })).toHaveAttribute(
+      'href',
+      '/es',
+    );
+    await expect(page.getByRole('link', { name: 'English' })).toHaveAttribute(
+      'href',
+      '/en',
+    );
     // Does not repeat the requested path
     await expect(page.locator('main')).not.toContainText('/es/nonexistent');
   });
@@ -28,15 +34,20 @@ test.describe('Not-found flow (RF-7)', () => {
 
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
     await expect(page.locator('main h1')).toContainText('Page not found');
-    await expect(page.locator('main a')).toContainText('Back');
-    await expect(page.locator('main a')).toContainText('/es');
+    await expect(page.getByRole('link', { name: 'Back' })).toHaveAttribute(
+      'href',
+      '/en',
+    );
+    await expect(page.getByRole('link', { name: 'Español' })).toHaveAttribute(
+      'href',
+      '/es',
+    );
     await expect(page.locator('main')).not.toContainText('/en/nonexistent');
   });
 
   test('back link goes to home in the active language', async ({ page }) => {
     await page.goto('/es/nonexistent');
-    const backLink = page.locator('main a').first();
-    await backLink.click();
+    await page.getByRole('link', { name: 'Volver' }).click();
     await expect(page).toHaveURL(/.*\/es(\?.*)?$/);
   });
 
@@ -44,14 +55,14 @@ test.describe('Not-found flow (RF-7)', () => {
     page,
   }) => {
     await page.goto('/es/nonexistent');
-    const otherLink = page.locator('main a').last();
-    await otherLink.click();
+    await page.getByRole('link', { name: 'English' }).click();
     await expect(page).toHaveURL(/.*\/en(\?.*)?$/);
   });
 
-  test('non-indexable: robots meta noindex', async ({ page }) => {
+  test('non-indexable: a single robots meta with noindex', async ({ page }) => {
     await page.goto('/es/nonexistent');
     const meta = page.locator('meta[name="robots"]');
+    await expect(meta).toHaveCount(1);
     await expect(meta).toHaveAttribute('content', /noindex/);
   });
 

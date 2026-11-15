@@ -3,12 +3,6 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import React from 'react';
 
-vi.mock('../components/ThemeProvider/ThemeProvider', () => ({
-  default: function ThemeProvider() {
-    return <div data-testid="theme-provider" />;
-  },
-}));
-
 vi.mock('../i18n/provider/locale-provider', () => ({
   default: function LocaleProvider({
     children,
@@ -27,8 +21,8 @@ vi.mock('../i18n/provider/locale-provider', () => ({
 
 import LayoutProvider from './layout-provider';
 
-// T14: layout-provider.tsx — wrapper cliente que monta ThemeProvider + LocaleProvider
-// Done when: renderiza ambos providers con locale y dictionary pasados, y expone children.
+// T14: layout-provider.tsx — client wrapper that mounts LocaleProvider.
+// ThemeProvider is global (root layout), so it is not duplicated here.
 describe('LayoutProvider — T14', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -38,7 +32,7 @@ describe('LayoutProvider — T14', () => {
     vi.restoreAllMocks();
   });
 
-  it('mounts ThemeProvider and LocaleProvider with locale and dictionary', () => {
+  it('mounts LocaleProvider with locale and dictionary', () => {
     const dictionary = { nav: { home: 'Home' } };
     render(
       <LayoutProvider locale="es" dictionary={dictionary}>
@@ -46,10 +40,19 @@ describe('LayoutProvider — T14', () => {
       </LayoutProvider>
     );
 
-    expect(screen.getByTestId('theme-provider')).toBeInTheDocument();
     const localeProvider = screen.getByTestId('locale-provider');
     expect(localeProvider).toHaveAttribute('data-locale', 'es');
     expect(screen.getByTestId('child')).toHaveTextContent('child content');
+  });
+
+  it('does not mount a second ThemeProvider', () => {
+    render(
+      <LayoutProvider locale="en" dictionary={{}}>
+        <p data-testid="inner">inner text</p>
+      </LayoutProvider>
+    );
+
+    expect(screen.queryByTestId('theme-provider')).not.toBeInTheDocument();
   });
 
   it('renders children inside LocaleProvider', () => {

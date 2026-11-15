@@ -18,8 +18,10 @@ export function parseAcceptLanguage(
 
     if (trimmedTag === '*') continue;
 
+    // RFC 9110: q is a weight in [0, 1]. Malformed entries (q > 1, q < 0,
+    // non-numeric q, extra parameters) are ignored and the rest is kept.
     const q = qPart ? Number(qPart) : 1;
-    if (q === 0 || Number.isNaN(q)) continue;
+    if (Number.isNaN(q) || q <= 0 || q > 1) continue;
 
     const base = trimmedTag.toLowerCase().split('-')[0];
     entries.push({ base, q });

@@ -1,9 +1,11 @@
 /**
- * locale-provider.tsx — T17 (RF3, RF4, RF5)
+ * locale-provider.tsx — T17 (RF-1, RF-3, RF-4)
  * "use client" component that provides the i18n context: receives `locale` and
- * the merged `dictionary` from the server, exposes `t` via Context.
- * Uses `useEffect` (not onMount). Extracts `syncOnMount` as a pure,
- * testable function.
+ * the `dictionary` from the server and exposes `t` via Context.
+ *
+ * On mount it runs the one-time legacy migration of `localStorage.lang` into
+ * the `lang` cookie (single source of truth). The URL still wins for the
+ * current view, so the migration never changes what the user is reading.
  */
 
 'use client';
@@ -16,13 +18,8 @@ import {
   type ReactNode,
 } from 'react';
 import { createT } from '../translation/translate';
-import {
-  readStorage,
-  writeStorage,
-  readCookie,
-  writeCookie,
-} from '../storage/storage';
-import { Locale, locales, LOCALE_COOKIE } from '../config';
+import { migrateLegacyLang } from '../storage/storage';
+import { Locale, locales } from '../config';
 
 interface LocaleContextType {
   locale: Locale;
@@ -34,38 +31,6 @@ interface LocaleContextType {
 const LocaleContext = createContext<LocaleContextType | undefined>(undefined);
 
 export { LocaleContext };
-
-/**
- * Synchronizes localStorage and cookie on hydration. Pure function (testable).
- * Never overwrites the preference with the URL language.
- */
-export function syncOnMount(
-  urlLocale: Locale,
-  readStorageFn: (key: string) => string | null,
-  writeStorageFn: (key: string, value: string) => void,
-  readCookieFn: (key: string) => string | null,
-  writeCookieFn: (key: string, value: string, options?: object) => void,
-  localeList: ReadonlyArray<Locale>
-): Locale {
-  const cookie = readCookieFn(LOCALE_COOKIE);
-  const stored = readStorageFn(LOCALE_COOKIE);
-
-  const cookieValid =
-    cookie !== null && localeList.includes(cookie as Locale);
-  const storedValid =
-    stored !== null && localeList.includes(stored as Locale);
-
-  if (cookieValid && stored !== cookie) {
-    writeStorageFn(LOCALE_COOKIE, cookie as Locale);
-    return cookie as Locale;
-  }
-
-  if (!cookieValid && storedValid) {
-    writeCookieFn(LOCALE_COOKIE, stored as Locale);
-  }
-
-  return urlLocale;
-}
 
 export default function LocaleProvider({
   locale,
@@ -88,15 +53,11 @@ export default function LocaleProvider({
   }, []);
 
   useEffect(() => {
-    syncOnMount(
-      locale,
-      readStorage,
-      writeStorage,
-      readCookie,
-      writeCookie,
-      locales
-    );
-  }, [locale]);
+    // One-time legacy migration: reads localStorage.lang once, migrates it to
+    // the cookie when there is no valid cookie yet, and deletes the legacy key.
+    // The cookie is the single source of truth from then on (RF-3, RF-8).
+    migrateLegacyLang();
+  }, []);
 
   const value: LocaleContextType = {
     locale: currentLocale,

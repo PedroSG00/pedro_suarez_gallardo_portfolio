@@ -3,26 +3,26 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import React from 'react';
 
-// T15: app/[locale]/(site)/layout.tsx — visible controls only on real pages (RF-4, RF-6)
-// Done when: renders LanguageSelector and ThemeSelect; wraps children;
-// 404 does not inherit this layout.
+// T15: app/[locale]/(site)/layout.tsx — visible controls only on real pages
+// (RF-1, RF-4, RF-6). Done when: resolves texts on the server, passes them to
+// the controls as props, wraps children, and the 404 does not inherit it.
 vi.mock('../../components/LanguageSelector/LanguageSelector', () => ({
-  default: () => <div data-testid="language-selector">selector</div>,
+  default: ({ labels }: { labels: Record<string, string> }) => (
+    <div data-testid="language-selector">
+      {labels.en}|{labels.es}
+    </div>
+  ),
 }));
 
-vi.mock('../../components/ThemeProvider/ThemeProvider', () => ({
-  default: () => <div data-testid="theme-provider">theme</div>,
-}));
-
-vi.mock('../../i18n/provider/use-locale', () => ({
-  useLocale: vi.fn(() => ({
-    locale: 'en',
-    setLocale: vi.fn(),
-    t: (key: string) => key,
-  })),
+vi.mock('../../components/ThemeSelect/ThemeSelect', () => ({
+  default: ({ labels }: { labels: Record<string, string> }) => (
+    <div data-testid="theme-select">{labels.label}</div>
+  ),
 }));
 
 import { default as SiteLayout } from './layout';
+
+const params = Promise.resolve({ locale: 'en' });
 
 describe('app/[locale]/(site)/layout — T15', () => {
   beforeEach(() => {
@@ -33,24 +33,29 @@ describe('app/[locale]/(site)/layout — T15', () => {
     vi.restoreAllMocks();
   });
 
-  it('renders LanguageSelector', async () => {
-    const ui = await SiteLayout({ children: <div>content</div> });
+  it('renders LanguageSelector with dictionary labels', async () => {
+    const ui = await SiteLayout({ children: <div>content</div>, params });
     render(ui);
 
-    expect(screen.getByTestId('language-selector')).toBeInTheDocument();
+    expect(screen.getByTestId('language-selector')).toHaveTextContent(
+      'English|Español'
+    );
   });
 
-  it('renders ThemeSelect (theme control)', async () => {
-    const ui = await SiteLayout({ children: <div>content</div> });
+  it('renders ThemeSelect with dictionary labels', async () => {
+    const ui = await SiteLayout({ children: <div>content</div>, params });
     render(ui);
 
-    expect(screen.getByRole('combobox')).toBeInTheDocument();
+    expect(screen.getByTestId('theme-select')).toHaveTextContent('Theme');
   });
 
-  it('wraps children', async () => {
-    const ui = await SiteLayout({ children: <div>content</div> });
+  it('wraps children in a main landmark', async () => {
+    const ui = await SiteLayout({ children: <div>content</div>, params });
     render(ui);
 
     expect(screen.getByText('content')).toBeInTheDocument();
+    expect(screen.getByRole('main')).toContainElement(
+      screen.getByText('content')
+    );
   });
 });

@@ -28,7 +28,8 @@ describe('app/[locale]/page — T21 (generateMetadata)', () => {
     const metadata = await mod.generateMetadata({
       params: Promise.resolve({ locale: 'en' }),
     });
-    expect(metadata.canonical).toBe('http://localhost:3000/en/');
+    const alternates = metadata.alternates as { canonical: string };
+    expect(alternates.canonical).toBe('http://localhost:3000/en/');
   });
 
   it('returns canonical own URL for Spanish home page', async () => {
@@ -36,7 +37,8 @@ describe('app/[locale]/page — T21 (generateMetadata)', () => {
     const metadata = await mod.generateMetadata({
       params: Promise.resolve({ locale: 'es' }),
     });
-    expect(metadata.canonical).toBe('http://localhost:3000/es/');
+    const alternates = metadata.alternates as { canonical: string };
+    expect(alternates.canonical).toBe('http://localhost:3000/es/');
   });
 
   it('returns alternates with hreflang for both languages', async () => {
@@ -51,12 +53,17 @@ describe('app/[locale]/page — T21 (generateMetadata)', () => {
     expect(alternates.languages['es']).toBe('http://localhost:3000/es/');
   });
 
-  it('x-default points to /en (canonical serves as x-default)', async () => {
+  it('x-default points to /en', async () => {
     const mod = await import('./page');
     const metadata = await mod.generateMetadata({
       params: Promise.resolve({ locale: 'en' }),
     });
-    expect(metadata.canonical).toBe('http://localhost:3000/en/');
+    const alternates = metadata.alternates as {
+      languages: Record<string, string>;
+    };
+    expect(alternates.languages['x-default']).toBe(
+      'http://localhost:3000/en/'
+    );
   });
 
   it('renders a single h1 with the translated hero title', async () => {

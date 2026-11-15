@@ -1,13 +1,12 @@
 /**
- * app/[locale]/layout-provider.tsx — T14 (RF-1, RF-4, RF-6)
- * Client component wrapper that mounts ThemeProvider (no visible controls)
- * and LocaleProvider with the server-resolved locale and dictionary.
+ * app/[locale]/layout-provider.tsx — T14 (RF-1, RF-4)
+ * Client component wrapper that mounts LocaleProvider with the server-resolved
+ * locale and dictionary. ThemeProvider is global and lives in the root layout.
  */
 
 'use client';
 
 import { ReactNode } from 'react';
-import ThemeProvider from '../components/ThemeProvider/ThemeProvider';
 import LocaleProvider from '../i18n/provider/locale-provider';
 import { Locale } from '../i18n/config';
 
@@ -23,11 +22,8 @@ export default function LayoutProvider({
   children,
 }: LayoutProviderProps) {
   return (
-    <>
-      <ThemeProvider />
-      <LocaleProvider locale={locale} dictionary={dictionary}>
-        {children}
-      </LocaleProvider>
-    </>
+    <LocaleProvider locale={locale} dictionary={dictionary}>
+      {children}
+    </LocaleProvider>
   );
 }
