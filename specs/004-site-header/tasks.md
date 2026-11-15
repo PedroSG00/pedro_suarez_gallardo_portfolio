@@ -22,7 +22,7 @@ RF cubiertos: RF-1 (T1, T2), RF-3 (T2), RF-4 (T4, T5, T6), RF-5 (T3, T6), RF-8 (
   - RF: RF-1, RF-3, RNF-8, RNF-9
   - Hecho cuando: `pnpm exec vitest run app/navigation/destinations.test.ts` pasa y verifica cinco destinos en orden home→contact, ids y `sectionId` únicos, `projects.page === 'projects'`, y cada `labelKey` resoluble en ambos diccionarios.
 
-- [ ] **T3 — Función pura del destino activo** (`app/navigation/active-destination.ts` + `active-destination.test.ts`)
+- [x] **T3 — Función pura del destino activo** (`app/navigation/active-destination.ts` + `active-destination.test.ts`)
   - RF: RF-5
   - Hecho cuando: `pnpm exec vitest run app/navigation/active-destination.test.ts` pasa y, para cada conjunto de métricas (incluidos `top = 0`, secciones solapadas y sección más corta que la cabecera), devuelve exactamente un id y nunca dos.
 
