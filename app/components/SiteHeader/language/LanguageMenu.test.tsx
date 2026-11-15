@@ -3,6 +3,11 @@ import { render, screen, fireEvent, within } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import React from 'react';
 
+const mockSetLocale = vi.fn();
+vi.mock('../../../i18n/provider/use-locale', () => ({
+  useLocale: vi.fn(() => ({ setLocale: mockSetLocale })),
+}));
+
 import { LanguageMenu } from './LanguageMenu';
 import type { Locale } from '../../../i18n/config';
 
@@ -26,9 +31,7 @@ const LANGUAGES: Record<Locale, string> = {
 
 const MARK = '▪';
 
-function renderMenu(
-  props: Partial<Parameters<typeof LanguageMenu>[0]> = {}
-) {
+function renderMenu(props: Partial<Parameters<typeof LanguageMenu>[0]> = {}) {
   const defaultProps = {
     locale: 'en' as Locale,
     pathname: '/en/projects',
@@ -36,7 +39,6 @@ function renderMenu(
     activeMark: MARK,
     labels: LABELS,
     languages: LANGUAGES,
-    setLocale: vi.fn(),
   };
   return render(<LanguageMenu {...defaultProps} {...props} />);
 }
@@ -44,6 +46,7 @@ function renderMenu(
 describe('LanguageMenu — T13 (RF-7, RF-8, RNF-7)', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    mockSetLocale.mockClear();
   });
 
   afterEach(() => {
@@ -85,16 +88,14 @@ describe('LanguageMenu — T13 (RF-7, RF-8, RNF-7)', () => {
   });
 
   it('clicking a link calls setLocale with the other language', () => {
-    const setLocale = vi.fn();
-    renderMenu({ locale: 'en', setLocale });
+    renderMenu({ locale: 'en' });
     const espanol = screen.getByRole('link', { name: /Español/ });
     fireEvent.click(espanol);
-    expect(setLocale).toHaveBeenCalledWith('es');
+    expect(mockSetLocale).toHaveBeenCalledWith('es');
   });
 
   it('closes when selecting a language', () => {
-    const setLocale = vi.fn();
-    renderMenu({ locale: 'en', setLocale });
+    renderMenu({ locale: 'en' });
     const summary = screen.getByTestId('language-trigger');
     fireEvent.click(summary);
     expect(screen.getByTestId('language-menu')).toHaveAttribute('open');
@@ -122,12 +123,11 @@ describe('LanguageMenu — T13 (RF-7, RF-8, RNF-7)', () => {
   });
 
   it('does not change language when opening or closing', () => {
-    const setLocale = vi.fn();
-    renderMenu({ locale: 'en', setLocale });
+    renderMenu({ locale: 'en' });
     const summary = screen.getByTestId('language-trigger');
     fireEvent.click(summary); // open
-    expect(setLocale).not.toHaveBeenCalled();
+    expect(mockSetLocale).not.toHaveBeenCalled();
     fireEvent.keyDown(summary, { key: 'Escape' }); // close
-    expect(setLocale).not.toHaveBeenCalled();
+    expect(mockSetLocale).not.toHaveBeenCalled();
   });
 });

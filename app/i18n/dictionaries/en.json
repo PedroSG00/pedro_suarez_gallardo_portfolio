@@ -56,13 +56,5 @@
       "en": "English. Change language",
       "es": "Español. Change language"
     }
-  },
-  "themeSelect": {
-    "label": "Theme",
-    "option": {
-      "light": "Light",
-      "dark": "Dark",
-      "system": "System"
-    }
   }
 }

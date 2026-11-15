@@ -82,11 +82,11 @@ RF cubiertos: RF-1 (T8, T9, T14), RF-2 (T10, T11), RF-5 (T9), RF-6 (T12), RF-7 (
 
 RF cubiertos: RF-1 (T15), RF-6 (T15, T16), RF-7 (T15, T16), RF-8 (T16), RNF-9 (T16), RNF-10 (T15).
 
-- [ ] **T15 — Montar la cabecera en `(site)`** (`app/[locale]/(site)/layout.tsx`, `app/[locale]/(site)/layout.test.tsx`)
+- [x] **T15 — Montar la cabecera en `(site)`** (`app/[locale]/(site)/layout.tsx`, `app/[locale]/(site)/layout.test.tsx`)
   - RF: RF-1, RF-6, RF-7, RNF-10
   - Hecho cuando: `pnpm exec vitest run "app/[locale]/(site)"` pasa, el inicio y `/projects` renderizan la cabecera con textos del servidor, y la 404 de `app/[locale]/not-found.tsx` no la hereda.
 
-- [ ] **T16 — Retirar `LanguageSelector`, `ThemeSelect` y `themeSelect.*`** (`app/components/LanguageSelector/*`, `app/components/ThemeSelect/*`, diccionarios, `specs/003-base-consolidation/spec.md`)
+- [x] **T16 — Retirar `LanguageSelector`, `ThemeSelect` y `themeSelect.*`** (`app/components/LanguageSelector/*`, `app/components/ThemeSelect/*`, diccionarios, `specs/003-base-consolidation/spec.md`)
   - RF: RF-6, RF-7, RF-8, RNF-9
   - Hecho cuando: ambos componentes y sus tests ya no existen, `themeSelect.*` está ausente de los dos diccionarios, `pnpm exec vitest run app/i18n/dictionaries "app/[locale]"` pasa y la 003 tiene la nota fechada de que la 004 sustituye esa forma provisional.
 

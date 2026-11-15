@@ -56,13 +56,5 @@
       "en": "English. Cambiar idioma",
       "es": "Español. Cambiar idioma"
     }
-  },
-  "themeSelect": {
-    "label": "Tema",
-    "option": {
-      "light": "Claro",
-      "dark": "Oscuro",
-      "system": "Sistema"
-    }
   }
 }

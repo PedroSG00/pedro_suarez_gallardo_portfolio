@@ -6,7 +6,7 @@ import { metadataRoutes } from '../config';
 // T1 (004): Header dictionary contract — RF covered: RF-1, RF-6, RF-7, RF-8, RNF-9
 // Done when: every header key exists in both dictionaries, nav.stack is identical
 // in both languages, accessible names are complete sentences and the provisional
-// themeSelect.* keys are still present (they are removed in T16).
+// themeSelect.* keys have been removed in T16.
 const HEADER_KEY_PATHS = [
   'nav.home',
   'nav.experience',
@@ -91,7 +91,6 @@ describe('header dictionary contract — T1', () => {
 // (`themeSelect.*`, `common.notFound`, `common.back`).
 describe('dictionary parity — T1', () => {
   const RESERVED_KEYS = [
-    'themeSelect',
     'common.notFound',
     'common.back',
   ] as const;

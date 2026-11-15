@@ -13,6 +13,7 @@
 'use client';
 
 import { useDisclosure } from '../hooks/use-disclosure';
+import { useLocale } from '../../../i18n/provider/use-locale';
 import { locales } from '../../../i18n/config';
 import type { Locale } from '../../../i18n/config';
 
@@ -29,8 +30,6 @@ interface LanguageMenuProps {
   labels: { label: string; aria: Record<Locale, string> };
   /** Endonym name of each language, from the dictionary. */
   languages: Record<Locale, string>;
-  /** Changes the language (writes the cookie and navigates). */
-  setLocale: (next: Locale) => void;
 }
 
 /** Builds the equivalent route under another locale prefix. */
@@ -47,9 +46,9 @@ export function LanguageMenu({
   activeMark,
   labels,
   languages,
-  setLocale,
 }: LanguageMenuProps) {
   const { open, openIt, close, containerRef } = useDisclosure();
+  const { setLocale } = useLocale();
 
   return (
     <details

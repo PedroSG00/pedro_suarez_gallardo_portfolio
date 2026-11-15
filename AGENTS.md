@@ -52,7 +52,8 @@ Para iterar rápido, ejecuta solo el test afectado (por ejemplo `pnpm exec vites
 Ejecuta y comprueba que pasan, en este orden:
 1. `pnpm lint`
 2. `pnpm typecheck`
-3. `pnpm test` (y `pnpm test:e2e` si el cambio afecta a flujos de navegación, idioma o tema)
+3. `pnpm test`
+4. `pnpm test:e2e` (obligatorio siempre: ningún cambio se da por terminado sin que los flujos end-to-end pasen en verde)
 
 Si algo falla, corrígelo antes de dar la tarea por terminada o explica claramente por qué no se puede.
 

@@ -3,7 +3,7 @@
  * Locale segment layout: generateStaticParams (SSG per locale), dynamicParams
  * false (invalid locales → 404) and the locale provider with the dictionary.
  * The document (<html>, fonts, theme bootstrap) lives in the root layout.
- * Visible controls (LanguageSelector, ThemeSelect) live in (site)/layout.
+ * Visible controls (SiteHeader) live in (site)/layout.
  */
 
 import type { Metadata } from 'next';

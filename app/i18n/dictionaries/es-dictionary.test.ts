@@ -69,8 +69,4 @@ describe('es.json — T13', () => {
       aria: { en: 'English. Cambiar idioma', es: 'Español. Cambiar idioma' },
     });
   });
-
-  it('keeps preexisting themeSelect section', () => {
-    expect(es.themeSelect.label).toBe('Tema');
-  });
 });

@@ -78,7 +78,6 @@ function renderHeader(props: Partial<Parameters<typeof SiteHeader>[0]> = {}) {
     languageLabels: LANGUAGE_LABELS,
     languages: LANGUAGES,
     triggerLabel: 'English',
-    setLocale: vi.fn(),
     theme: 'system' as ThemeValue,
     stateLabels: STATE_LABELS,
     ariaLabels: ARIA_LABELS,

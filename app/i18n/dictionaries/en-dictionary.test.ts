@@ -50,8 +50,4 @@ describe('en.json — T12', () => {
       aria: { en: 'English. Change language', es: 'Español. Change language' },
     });
   });
-
-  it('keeps preexisting themeSelect section', () => {
-    expect(en.themeSelect.label).toBe('Theme');
-  });
 });
