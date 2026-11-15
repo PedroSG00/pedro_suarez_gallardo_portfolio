@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { calculateHeaderStreak } from './header-streak';
-import type { HeaderShiftEvent } from '../../app/components/SiteHeader/header-shift';
+import type { HeaderShiftEvent } from '../../app/components/SiteHeader/layout/header-shift';
 import type { DestinationId } from '../../app/navigation/destinations';
 
 type Section = { id: DestinationId; top: number };

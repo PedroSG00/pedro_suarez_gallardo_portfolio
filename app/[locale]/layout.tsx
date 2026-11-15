@@ -8,7 +8,7 @@
 
 import type { Metadata } from 'next';
 import { getDictionary } from '../i18n/translation/get-dictionary';
-import LayoutProvider from './layout-provider';
+import LayoutProvider from './providers/layout-provider';
 import { Locale } from '../i18n/config';
 
 export const generateStaticParams = () => {

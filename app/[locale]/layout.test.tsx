@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import React from 'react';
 
-vi.mock('./layout-provider', () => ({
+vi.mock('./providers/layout-provider', () => ({
   default: function LayoutProvider({
     children,
     locale,

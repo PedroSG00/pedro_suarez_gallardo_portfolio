@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import React from 'react';
 
-vi.mock('../i18n/provider/locale-provider', () => ({
+vi.mock('../../i18n/provider/locale-provider', () => ({
   default: function LocaleProvider({
     children,
     locale,

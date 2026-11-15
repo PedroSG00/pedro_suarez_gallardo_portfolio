@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { applyEvent, initialState, measure } from './header-shift';
-import casesRaw from '../../../tests/fixtures/header-cases.json';
+import casesRaw from '../../../../tests/fixtures/header-cases.json';
 
 type HeaderEvent =
   | { type: 'scroll'; top: number }

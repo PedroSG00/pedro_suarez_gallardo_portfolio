@@ -10,9 +10,9 @@
  * tests the real behaviour, not a copy (Constitution 4).
  */
 
-import { applyEvent, initialState, measure } from '../../app/components/SiteHeader/header-shift';
+import { applyEvent, initialState, measure } from '../../app/components/SiteHeader/layout/header-shift';
 import { activeDestination } from '../../app/navigation/active-destination';
-import type { HeaderShiftEvent } from '../../app/components/SiteHeader/header-shift';
+import type { HeaderShiftEvent } from '../../app/components/SiteHeader/layout/header-shift';
 import type { DestinationId } from '../../app/navigation/destinations';
 
 export type Section = {

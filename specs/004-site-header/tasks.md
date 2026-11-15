@@ -50,27 +50,27 @@ RF cubiertos: RF-6, RNF-4.
 
 RF cubiertos: RF-1 (T8, T9, T14), RF-2 (T10, T11), RF-5 (T9), RF-6 (T12), RF-7 (T10, T13), RF-8 (T9–T13), RNF-7 (T12, T13).
 
-- [ ] **T8 — Marca** (`app/components/SiteHeader/Brand.tsx` + `Brand.test.tsx`)
+- [x] **T8 — Marca** (`app/components/SiteHeader/Brand.tsx` + `Brand.test.tsx`)
   - RF: RF-1
   - Hecho cuando: `Brand.test.tsx` pasa y el enlace usa el nombre completo recibido por props y apunta al inicio del idioma activo (`/en` o `/es`), sin cadenas visibles escritas en el componente.
 
-- [ ] **T9 — Navegación ancha y destino activo** (`app/components/SiteHeader/PrimaryNav.tsx` + `PrimaryNav.test.tsx`)
+- [x] **T9 — Navegación ancha y destino activo** (`app/components/SiteHeader/PrimaryNav.tsx` + `PrimaryNav.test.tsx`)
   - RF: RF-1, RF-5, RF-8
   - Hecho cuando: `PrimaryNav.test.tsx` pasa con cinco enlaces en el orden de `DESTINATIONS`, `aria-current="true"` solo en Proyectos cuando la ruta es `/projects` o `/projects/<slug>`, y una marca no cromática (bloque invertido + signo tipográfico) en el destino activo.
 
-- [ ] **T10 — Cierre común de desplegables** (`app/components/SiteHeader/use-disclosure.ts` + `use-disclosure.test.ts`)
+- [x] **T10 — Cierre común de desplegables** (`app/components/SiteHeader/use-disclosure.ts` + `use-disclosure.test.ts`)
   - RF: RF-2, RF-7
   - Hecho cuando: `use-disclosure.test.ts` pasa y demuestra cierre con Escape, clic fuera y selección, sin mover ni atrapar el foco, y sin efectos cuando el `<details>` ya está cerrado.
 
-- [ ] **T11 — Navegación estrecha** (`app/components/SiteHeader/NavDisclosure.tsx` + `NavDisclosure.test.tsx`)
+- [x] **T11 — Navegación estrecha** (`app/components/SiteHeader/nav/NavDisclosure.tsx` + `NavDisclosure.test.tsx`)
   - RF: RF-2, RF-8
   - Hecho cuando: `NavDisclosure.test.tsx` pasa con `<details>` cerrado por defecto, `summary` con la etiqueta del diccionario, cierre con Escape/clic fuera/selección y un único DOM con los mismos enlaces en ancho y estrecho.
 
-- [ ] **T12 — Botón de tema de tres estados** (`app/components/SiteHeader/ThemeToggle.tsx` + `ThemeToggle.test.tsx`)
+- [x] **T12 — Botón de tema de tres estados** (`app/components/SiteHeader/ThemeToggle.tsx` + `ThemeToggle.test.tsx`)
   - RF: RF-6, RF-8, RNF-7
   - Hecho cuando: `ThemeToggle.test.tsx` pasa con el ciclo claro→oscuro→sistema→claro leído de la preferencia, texto visible de la opción elegida, nombre accesible de frase completa, almacenamiento bloqueado sin errores y cambio entre pestañas sin mover el foco.
 
-- [ ] **T13 — Control de idioma** (`app/components/SiteHeader/LanguageMenu.tsx` + `LanguageMenu.test.tsx`)
+- [x] **T13 — Control de idioma** (`app/components/SiteHeader/LanguageMenu.tsx` + `LanguageMenu.test.tsx`)
   - RF: RF-7, RF-8, RNF-7
   - Hecho cuando: `LanguageMenu.test.tsx` pasa con dos enlaces nativos `hreflang` a la ruta equivalente (y, con JavaScript, misma consulta y fragmento), idioma activo marcado con signo además del estilo, disparador con el nombre del idioma y sin cambiar de idioma al abrir o cerrar.
 
