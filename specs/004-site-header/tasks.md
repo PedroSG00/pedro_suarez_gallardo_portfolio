@@ -26,7 +26,7 @@ RF cubiertos: RF-1 (T1, T2), RF-3 (T2), RF-4 (T4, T5, T6), RF-5 (T3, T6), RF-8 (
   - RF: RF-5
   - Hecho cuando: `pnpm exec vitest run app/navigation/active-destination.test.ts` pasa y, para cada conjunto de métricas (incluidos `top = 0`, secciones solapadas y sección más corta que la cabecera), devuelve exactamente un id y nunca dos.
 
-- [ ] **T4 — Matriz de la racha y retirada progresiva** (`tests/fixtures/header-cases.json`, `app/components/SiteHeader/header-shift.ts` + `header-shift.test.ts`)
+- [x] **T4 — Matriz de la racha y retirada progresiva** (`tests/fixtures/header-cases.json`, `app/components/SiteHeader/header-shift.ts` + `header-shift.test.ts`)
   - RF: RF-4, RNF-4
   - Hecho cuando: `pnpm exec vitest run app/components/SiteHeader/header-shift.test.ts` pasa con `offset = 0` hasta 64 px, progresión `min(1, (top − 64) / (2 × altura))`, tope de una altura y retorno completo al subir, siempre con `contentShiftPx = 0`.
 

@@ -1,0 +1,44 @@
+[
+  {
+    "id": "inicio-en-cima",
+    "tops": [0],
+    "headerHeight": 100,
+    "expected": { "offset": 0, "visible": true, "contentShiftPx": 0 }
+  },
+  {
+    "id": "umbral-de-inicio",
+    "tops": [64],
+    "headerHeight": 100,
+    "expected": { "offset": 0, "visible": true, "contentShiftPx": 0 }
+  },
+  {
+    "id": "progresion-a-medio",
+    "tops": [164],
+    "headerHeight": 100,
+    "expected": { "offset": -50, "visible": false, "contentShiftPx": 0 }
+  },
+  {
+    "id": "tope-de-una-altura",
+    "tops": [264],
+    "headerHeight": 100,
+    "expected": { "offset": -100, "visible": false, "contentShiftPx": 0 }
+  },
+  {
+    "id": "por-sobre-el-tope",
+    "tops": [564],
+    "headerHeight": 100,
+    "expected": { "offset": -100, "visible": false, "contentShiftPx": 0 }
+  },
+  {
+    "id": "retorno-al-subir",
+    "tops": [264, 200],
+    "headerHeight": 100,
+    "expected": { "offset": 0, "visible": true, "contentShiftPx": 0 }
+  },
+  {
+    "id": "secuencia-mixta",
+    "tops": [0, 64, 164, 264, 100, 0],
+    "headerHeight": 100,
+    "expected": { "offset": 0, "visible": true, "contentShiftPx": 0 }
+  }
+]
