@@ -12,6 +12,7 @@
  * and only when the route is `/projects` or `/projects/<slug>` (RF-5).
  */
 
+import Link from 'next/link';
 import { DESTINATIONS, type DestinationId } from '../../../navigation/destinations';
 
 interface PrimaryNavProps {
@@ -50,16 +51,30 @@ export function PrimaryNav({
       <ul>
         {DESTINATIONS.map((dest) => {
           const active = dest.id === activeId;
-          const href =
-            dest.id === 'home' ? `/${locale}` : `#${dest.sectionId}`;
+          const ariaCurrent = active ? true : undefined;
+          const isHome = dest.id === 'home';
+          const activeMarkEl = active ? (
+            <span aria-hidden="true" data-testid="active-mark">
+              {activeMark}
+            </span>
+          ) : null;
+
+          if (isHome) {
+            // Next.js <Link> for internal navigation: client-side, no reload.
+            return (
+              <li key={dest.id}>
+                <Link href={`/${locale}`} prefetch={false} aria-current={ariaCurrent}>
+                  {activeMarkEl}
+                  {labels[dest.id]}
+                </Link>
+              </li>
+            );
+          }
+          // Section anchors: native scroll, no page reload.
           return (
             <li key={dest.id}>
-              <a href={href} aria-current={active ? 'true' : undefined}>
-                {active ? (
-                  <span aria-hidden="true" data-testid="active-mark">
-                    {activeMark}
-                  </span>
-                ) : null}
+              <a href={`#${dest.sectionId}`} aria-current={ariaCurrent}>
+                {activeMarkEl}
                 {labels[dest.id]}
               </a>
             </li>

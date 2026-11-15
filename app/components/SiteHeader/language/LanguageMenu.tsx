@@ -68,8 +68,11 @@ export function LanguageMenu({
               key={lang}
               href={equivalentPath(pathname, locale, lang)}
               hrefLang={lang}
-              aria-current={active ? 'true' : undefined}
-              onClick={() => setLocale(lang)}
+              aria-current={active ? true : undefined}
+              onClick={(event) => {
+                event.preventDefault();
+                setLocale(lang);
+              }}
             >
               {active ? (
                 <span aria-hidden="true" data-testid="active-mark">
