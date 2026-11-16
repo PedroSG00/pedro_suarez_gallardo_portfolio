@@ -65,23 +65,46 @@ export default function SiteHeader({
   ariaLabels,
   headerLabel,
 }: SiteHeaderProps) {
-  const headerRef = useRef<HTMLHeadingElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
 
-  const updateHeaderHeight = useCallback(() => {
-    if (headerRef.current) {
-      const height = headerRef.current.getBoundingClientRect().height;
+  /**
+   * Publishes the real header height so anchors use scroll-margin-top equal to
+   * it (RF-3). Rounds up: a fractional height truncated would let the section
+   * title clip under the header. A zero height means layout is not available
+   * yet, so the generous CSS fallback stays in place (RNF-4).
+   */
+  const publishHeaderHeight = useCallback(() => {
+    const header = headerRef.current;
+    if (!header) return;
+
+    const height = Math.ceil(header.getBoundingClientRect().height);
+    if (height > 0) {
       document.documentElement.style.setProperty(
         '--header-height',
-        `${Math.round(height)}px`
+        `${height}px`
       );
     }
   }, []);
 
   useEffect(() => {
-    updateHeaderHeight();
-    window.addEventListener('resize', updateHeaderHeight);
-    return () => window.removeEventListener('resize', updateHeaderHeight);
-  }, [updateHeaderHeight]);
+    const header = headerRef.current;
+    publishHeaderHeight();
+
+    window.addEventListener('resize', publishHeaderHeight);
+
+    // Typography load or label changes can resize the header without a window
+    // resize; keep --header-height honest (RF-3, RNF-4).
+    const observer =
+      header && typeof ResizeObserver === 'function'
+        ? new ResizeObserver(publishHeaderHeight)
+        : null;
+    if (header && observer) observer.observe(header);
+
+    return () => {
+      window.removeEventListener('resize', publishHeaderHeight);
+      observer?.disconnect();
+    };
+  }, [publishHeaderHeight]);
 
   return (
     <header

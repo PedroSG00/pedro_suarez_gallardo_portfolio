@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import React from 'react';
 
@@ -145,6 +145,15 @@ describe('SiteHeader — T14 (RF-1, RF-8)', () => {
 // resize, con un respaldo CSS que deja el titular debajo de la cabecera
 // antes de medir.
 describe('SiteHeader — T20 (RF-3, RF-4, RNF-4)', () => {
+  function mockHeaderHeights(heights: number[]) {
+    let call = 0;
+    const measure = vi.fn(
+      () => ({ height: heights[Math.min(call++, heights.length - 1)] } as unknown as DOMRect)
+    );
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(measure);
+    return measure;
+  }
+
   beforeEach(() => {
     vi.restoreAllMocks();
     document.documentElement.style.removeProperty('--header-height');
@@ -152,24 +161,74 @@ describe('SiteHeader — T20 (RF-3, RF-4, RNF-4)', () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
     document.documentElement.style.removeProperty('--header-height');
   });
 
   it('sets --header-height on document.documentElement after mount', () => {
-    const measure = vi.fn(() => ({ height: 80 } as unknown as DOMRect));
-    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(measure);
+    mockHeaderHeights([80]);
     renderHeader();
     expect(document.documentElement.style.getPropertyValue('--header-height')).toBe('80px');
   });
 
+  it('rounds the measured height up so the title never clips by a subpixel', () => {
+    mockHeaderHeights([80.4]);
+    renderHeader();
+    expect(document.documentElement.style.getPropertyValue('--header-height')).toBe('81px');
+  });
+
+  it('keeps the CSS fallback when the header reports no measurable height', () => {
+    mockHeaderHeights([0]);
+    renderHeader();
+    expect(document.documentElement.style.getPropertyValue('--header-height')).toBe('');
+  });
+
   it('updates --header-height on resize', () => {
-    const measures = [80, 120];
-    let call = 0;
-    const measure = vi.fn(() => ({ height: measures[call++] } as unknown as DOMRect));
-    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(measure);
+    mockHeaderHeights([80, 120]);
     renderHeader();
     expect(document.documentElement.style.getPropertyValue('--header-height')).toBe('80px');
     window.dispatchEvent(new Event('resize'));
     expect(document.documentElement.style.getPropertyValue('--header-height')).toBe('120px');
+  });
+
+  it('re-measures when the header changes size without a window resize', () => {
+    mockHeaderHeights([72, 96]);
+    let resizeObserverCallback: ResizeObserverCallback | undefined;
+    const observe = vi.fn();
+    const disconnect = vi.fn();
+    vi.stubGlobal(
+      'ResizeObserver',
+      class ResizeObserverMock {
+        constructor(callback: ResizeObserverCallback) {
+          resizeObserverCallback = callback;
+        }
+        observe = observe;
+        disconnect = disconnect;
+        unobserve = vi.fn();
+      }
+    );
+
+    const { unmount } = renderHeader();
+    const header = screen.getByTestId('site-header');
+    expect(document.documentElement.style.getPropertyValue('--header-height')).toBe('72px');
+    expect(observe).toHaveBeenCalledWith(header);
+
+    act(() => {
+      resizeObserverCallback?.([], {} as ResizeObserver);
+    });
+    expect(document.documentElement.style.getPropertyValue('--header-height')).toBe('96px');
+
+    unmount();
+    expect(disconnect).toHaveBeenCalled();
+  });
+
+  it('stops measuring after unmount', () => {
+    mockHeaderHeights([80, 120]);
+    const { unmount } = renderHeader();
+    expect(document.documentElement.style.getPropertyValue('--header-height')).toBe('80px');
+
+    unmount();
+    window.dispatchEvent(new Event('resize'));
+    expect(document.documentElement.style.getPropertyValue('--header-height')).toBe('80px');
   });
 });
