@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import React from 'react';
 
@@ -48,10 +48,12 @@ describe('SectionAnchor — T17 (RF-3, RF-8)', () => {
   });
 });
 
-// T21 (004): Foco en el titular al elegir un destino — RF-3, RF-5, RF-8
-// Done when: al activar #experiencia por clic o hashchange, el titular queda
-// como document.activeElement con focus({ preventScroll: true }),
-// sin scrollIntoView, sin control visible y sin duplicar el desplazamiento del ancla.
+// T21 (004): Focus the section title when a destination is chosen — RF-3,
+// RF-5, RF-8.
+// Done when: activating #experiencia by click or hashchange leaves the title
+// as document.activeElement through focus({ preventScroll: true }), without
+// scrollIntoView, without a visible control and without duplicating the
+// anchor's native scroll.
 describe('SectionAnchor — T21 (RF-3, RF-5, RF-8)', () => {
   const scrollIntoViewMock = vi.fn();
   Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
@@ -64,19 +66,32 @@ describe('SectionAnchor — T21 (RF-3, RF-5, RF-8)', () => {
     window.location.hash = hash;
   }
 
+  function clearHash(): void {
+    window.history.replaceState(
+      null,
+      '',
+      window.location.pathname + window.location.search
+    );
+  }
+
+  function mountAnchor(): HTMLHeadingElement {
+    render(<SectionAnchor id="experiencia">Experiencia</SectionAnchor>);
+    return screen.getByRole('heading', { level: 2, name: 'Experiencia' });
+  }
+
   beforeEach(() => {
     scrollIntoViewMock.mockClear();
-    setHash('');
+    clearHash();
   });
 
   afterEach(() => {
     scrollIntoViewMock.mockClear();
-    setHash('');
+    clearHash();
+    vi.restoreAllMocks();
   });
 
-  it('focuses the heading with preventScroll when hash matches its id', () => {
-    render(<SectionAnchor id="experiencia">Experiencia</SectionAnchor>);
-    const heading = screen.getByRole('heading', { level: 2, name: 'Experiencia' });
+  it('focuses the heading with preventScroll when the hash targets it', () => {
+    const heading = mountAnchor();
     const focusSpy = vi.spyOn(heading, 'focus');
 
     setHash('#experiencia');
@@ -85,33 +100,100 @@ describe('SectionAnchor — T21 (RF-3, RF-5, RF-8)', () => {
     expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true });
   });
 
-  it('does not focus when hash does not match its id', () => {
-    render(<SectionAnchor id="experiencia">Experiencia</SectionAnchor>);
+  it('leaves the heading as document.activeElement after hashchange', () => {
+    const heading = mountAnchor();
+
+    setHash('#experiencia');
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+
+    expect(heading).toHaveFocus();
+  });
+
+  it('focuses the heading on mount when the URL already targets it', () => {
+    setHash('#experiencia');
+    const focusSpy = vi.spyOn(HTMLElement.prototype, 'focus');
+
+    const heading = mountAnchor();
+
+    expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true });
+    expect(heading).toHaveFocus();
+  });
+
+  it('focuses the heading when a destination link is clicked', () => {
+    render(
+      <>
+        <a href="#experiencia">Experiencia</a>
+        <SectionAnchor id="experiencia">Experiencia</SectionAnchor>
+      </>
+    );
     const heading = screen.getByRole('heading', { level: 2, name: 'Experiencia' });
+    const link = screen.getByRole('link', { name: 'Experiencia' });
+
+    fireEvent.click(link);
+
+    expect(heading).toHaveFocus();
+  });
+
+  it('keeps the native link navigation intact while focusing the heading', () => {
+    render(
+      <>
+        <a href="#experiencia">Experiencia</a>
+        <SectionAnchor id="experiencia">Experiencia</SectionAnchor>
+      </>
+    );
+    const link = screen.getByRole('link', { name: 'Experiencia' });
+
+    const defaultNotPrevented = fireEvent.click(link);
+
+    expect(defaultNotPrevented).toBe(true);
+    expect(scrollIntoViewMock).not.toHaveBeenCalled();
+  });
+
+  it('does not focus when the hash targets another section', () => {
+    const heading = mountAnchor();
     const focusSpy = vi.spyOn(heading, 'focus');
 
     setHash('#proyectos');
     window.dispatchEvent(new HashChangeEvent('hashchange'));
 
     expect(focusSpy).not.toHaveBeenCalled();
+    expect(heading).not.toHaveFocus();
   });
 
-  it('does not call scrollIntoView', () => {
-    render(<SectionAnchor id="experiencia">Experiencia</SectionAnchor>);
+  it('does not focus when a link targets another section', () => {
+    render(
+      <>
+        <a href="#proyectos">Proyectos</a>
+        <SectionAnchor id="experiencia">Experiencia</SectionAnchor>
+      </>
+    );
+    const heading = screen.getByRole('heading', { level: 2, name: 'Experiencia' });
+    const link = screen.getByRole('link', { name: 'Proyectos' });
+
+    fireEvent.click(link);
+
+    expect(heading).not.toHaveFocus();
+  });
+
+  it('never calls scrollIntoView, so the anchor scroll is not duplicated', () => {
+    const heading = mountAnchor();
 
     setHash('#experiencia');
     window.dispatchEvent(new HashChangeEvent('hashchange'));
 
+    expect(heading).toHaveFocus();
     expect(scrollIntoViewMock).not.toHaveBeenCalled();
   });
 
   it('adds no visible control inside the anchor', () => {
-    render(<SectionAnchor id="experiencia">Experiencia</SectionAnchor>);
+    mountAnchor();
     expect(screen.queryByRole('button')).toBeNull();
     expect(screen.queryByRole('link')).toBeNull();
   });
 
-  it('cleans up the hashchange listener on unmount', () => {
+  it('cleans up the hashchange and click listeners on unmount', () => {
+    render(<a href="#experiencia">Experiencia</a>);
+    const link = screen.getByRole('link', { name: 'Experiencia' });
     const { unmount } = render(<SectionAnchor id="experiencia">Experiencia</SectionAnchor>);
     const heading = screen.getByRole('heading', { level: 2, name: 'Experiencia' });
     const focusSpy = vi.spyOn(heading, 'focus');
@@ -119,6 +201,7 @@ describe('SectionAnchor — T21 (RF-3, RF-5, RF-8)', () => {
 
     setHash('#experiencia');
     window.dispatchEvent(new HashChangeEvent('hashchange'));
+    fireEvent.click(link);
 
     expect(focusSpy).not.toHaveBeenCalled();
   });

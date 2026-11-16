@@ -8,9 +8,12 @@
  * anchor jump, and `scroll-margin-top` so the title lands below the header.
  * No button or link is added inside.
  *
- * T21: listens for hashchange events; when the hash matches its id, focuses
- * the heading with `focus({ preventScroll: true })` so the title becomes
- * `document.activeElement` without duplicating the anchor's scroll.
+ * T21: when a destination targets this heading, the title receives focus with
+ * `focus({ preventScroll: true })` so it becomes `document.activeElement`
+ * without duplicating the anchor's native scroll. Covered paths: a
+ * `hashchange` (selecting the destination), a click on the fragment link
+ * (including re-activating the current hash, which fires no `hashchange`),
+ * and landing directly on the hash from a reload or another page.
  */
 
 'use client';
@@ -29,16 +32,43 @@ export function SectionAnchor({
   const ref = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
+    const heading = ref.current;
+    if (!heading) return;
+
+    const targetHash = `#${id}`;
+
+    /** Focuses the title without scrolling: the browser already jumped (RF-3). */
+    const focusHeading = () => heading.focus({ preventScroll: true });
+
+    // A page loaded straight on the anchor has no `hashchange` to react to,
+    // so the title is focused on mount (RF-3, RF-5).
+    if (window.location.hash === targetHash) focusHeading();
+
     const handleHashChange = () => {
-      if (window.location.hash === `#${id}`) {
-        ref.current?.focus({ preventScroll: true });
+      if (window.location.hash === targetHash) focusHeading();
+    };
+
+    // Destinations are native fragment links, so their click sets the hash
+    // natively. Observing the click also covers selecting the hash that is
+    // already current (no `hashchange`) and never prevents the native
+    // navigation, scroll or history (RF-3, RF-8).
+    const handleClick = (event: MouseEvent) => {
+      if (event.defaultPrevented || event.button !== 0) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+        return;
       }
+
+      const clicked = event.target instanceof Element ? event.target : null;
+      const link = clicked?.closest<HTMLAnchorElement>('a[href]');
+      if (link?.getAttribute('href') === targetHash) focusHeading();
     };
 
     window.addEventListener('hashchange', handleHashChange);
+    document.addEventListener('click', handleClick);
 
     return () => {
       window.removeEventListener('hashchange', handleHashChange);
+      document.removeEventListener('click', handleClick);
     };
   }, [id]);
 
