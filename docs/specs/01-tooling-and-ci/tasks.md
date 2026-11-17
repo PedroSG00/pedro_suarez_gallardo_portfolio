@@ -97,6 +97,8 @@ Resumido del apartado 0 del plan: `app/` en la raíz con un `globals.css` de 0 b
 
 ## T1 — `src/` con Tailwind y alias
 
+**Estado:** hecho (2026-11-17). `pnpm build` en verde; utilidades de `src/app/page.tsx` en el CSS emitido.
+
 **Objetivo:** que el build resuelva `@/styles/globals.css`, Tailwind emita las utilidades
 que ya usa la home y el código viva bajo `src/`.
 
