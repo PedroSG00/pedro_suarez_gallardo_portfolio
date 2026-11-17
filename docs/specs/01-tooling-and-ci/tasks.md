@@ -319,6 +319,13 @@ para satisfacer un peer, se para y se pregunta: §12 es una lista cerrada.
 
 ## T5 — Vitest con umbral y cobertura
 
+**Estado:** hecho (2026-11-17). La suite vacía pasa y genera `coverage/lcov.info` de 0 bytes
+(sin código medible, las cuatro métricas figuran como `Unknown%`, según §15.1). El módulo
+temporal de 200 líneas hizo fallar las cuatro métricas al 0 %; el test temporal del alias `@/`
+pasó (1/1, 100 %). Ambos se eliminaron. `pnpm test:watch --watch` entró en modo `DEV` y no
+creó `coverage/`; como esta shell no es interactiva, se cerró el proceso tras comprobarlo.
+`pnpm lint`, `pnpm typecheck` y `pnpm build` pasan. No quedan tests artificiales.
+
 **Objetivo:** que `pnpm test` corra en jsdom con el setup cargado, recoja solo tests de
 `src/`, genere `text` + `lcov` y falle por debajo del 95 % global en cualquiera de las
 cuatro métricas.
@@ -363,6 +370,12 @@ se instala `vite-tsconfig-paths` sin aprobación.
 ---
 
 ## T6 — e2e contra el build de producción
+
+**Estado:** hecho (2026-11-17). `pnpm test:e2e` construye producción y pasa el único smoke
+en Chromium; también pasó con `PORT=4010`, verificando que `-p 3000` fija el puerto. Las
+negativas de puerto ocupado, timeout de 1 s y `test.only` fallaron como se esperaba; el error
+temporal de tipos bajo `e2e/` fue detectado por `pnpm typecheck`. Se restauraron y eliminaron
+todos los fixtures. `pnpm lint`, `pnpm typecheck`, `pnpm test` y `pnpm build` pasan.
 
 **Objetivo:** que `pnpm test:e2e` construya, levante el servidor de producción en el puerto
 fijo y pase un smoke en Chromium, sin reutilizar servidores ni tolerar `test.only`.

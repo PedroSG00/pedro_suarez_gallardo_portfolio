@@ -9,8 +9,9 @@
     "preinstall": "node check-package-manager.mjs",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "next typegen && tsc --noEmit",
-    "test": "pnpm exec vitest run",
-    "test:e2e": "pnpm exec playwright test"
+    "test": "vitest run --coverage",
+    "test:watch": "vitest",
+    "test:e2e": "pnpm build && playwright test"
   },
   "dependencies": {
     "iconoir-react": "^7.12.2",
