@@ -424,6 +424,16 @@ prohíbe.
 
 ## T7 — CI con los cinco gates locales
 
+**Estado:** hecho (2026-11-17) en lo local. `.github/workflows/ci.yml` creado con los cinco jobs
+`lint`, `typecheck`, `test`, `build` e `e2e` (id == name), `build.yml` borrado, SHA + `# vX.Y.Z` en
+todas las `uses`, sin `continue-on-error`/`|| true`/`paths-ignore`/`pull_request_target`,
+`permissions: contents: read`, concurrency segura, `NEXT_TELEMETRY_DISABLED=1`, timeouts,
+`pnpm install --frozen-lockfile` + script pnpm de la documentación en cada job, artefactos
+`coverage`, `playwright-report` y `playwright-test-results` con retención 7 días, `if: always()` y
+`if-no-files-found: warn`, e `e2e` instala Chromium. La negativa RF-1.6 (`.node-version` = `26`)
+se ejecutó localmente y falló con mensaje explícito y código 1; `.node-version` quedó restaurado a
+`26.12.0`. `pnpm lint`, `pnpm typecheck`, `pnpm test` y `pnpm build` pasan.
+
 **Objetivo:** un workflow «CI» que ejecute lint, typecheck, test, build y e2e en paralelo,
 con permisos mínimos, concurrencia segura, timeouts y artefactos, sustituyendo al
 `build.yml` actual.
