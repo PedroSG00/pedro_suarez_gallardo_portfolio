@@ -494,6 +494,17 @@ antes de seguir.
 
 ## T8 — CI con Sonar y propiedades alineadas
 
+**Estado:** hecho (2026-11-17) en lo local. Job `sonar` añadido a `.github/workflows/ci.yml`
+con checkout `fetch-depth: 0`, paso `Require SONAR_TOKEN` antes de instalar dependencias,
+`pnpm install --frozen-lockfile`, `pnpm test` y `sonarqube-scan-action@… # v8.5.0` con
+`SONAR_TOKEN`. `sonar-project.properties` reescrito: `sonar.sources=src`, `sonar.tests=src`,
+`sonar.test.inclusions=**/*.test.ts,**/*.test.tsx`, `sonar.javascript.lcov.reportPaths=coverage/lcov.info`,
+exclusiones de cobertura idénticas a `vitest.config.mts`, `sonar.cpd.exclusions` solo tests,
+sin `sonar.language` ni `sonar.exclusions`, `sonar.qualitygate.wait=true` y
+`sonar.qualitygate.timeout=300` en el fichero. La negativa sin `SONAR_TOKEN` falla con
+mensaje explícito y código 1 antes del scanner. `pnpm lint`, `pnpm typecheck`, `pnpm test`
+y `pnpm build` pasan.
+
 **Objetivo:** añadir el sexto check, con análisis sobre `src/`, gate «Sonar way» y fallo
 cerrado sin token.
 
