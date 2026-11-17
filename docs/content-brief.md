@@ -1,24 +1,25 @@
 # Brief de contenido — Portfolio de Pedro Suárez Gallardo
 
-Estado: borrador actualizado con las decisiones de Pedro. Textos en EN y ES con el mismo sentido.
+Estado: versión con voz de marca (confianza y seguridad) y sin sección de proyectos. Textos en EN y ES con el mismo sentido.
 Reglas: no publicar nombres de empleadores ni el nombre del bootcamp. Las claves de i18n se escriben en inglés. No inventar cifras ni datos personales.
+Voz: frases cortas y afirmativas, el beneficio antes que la tecnología, cero relleno. Habla de lo que el visitante obtiene, no de un historial.
 
 ---
 
 ## 0. Decisiones confirmadas
 
-- No publicar teléfono ni nombres de empleadores. Mantener las integraciones descritas genéricamente como plataformas de mensajería y CRM.
+- No publicar teléfono ni nombres de empleadores. Integraciones descritas genéricamente como plataformas de mensajería y CRM.
 - LinkedIn: `https://linkedin.com/in/pedro-suarez-gallardo`.
 - No incluir mensajes sobre disponibilidad laboral.
 - No mostrar Madrid ni el nivel de inglés B2.
 - No hay cifras más exactas; conservar las aproximaciones del CV.
 - Foto de perfil: `public/pedro-suarez.png`.
 - Los paneles de monitorización no usaban WebSockets.
-- Rambler es un proyecto placeholder de bootcamp y se quitará cuando haya otro proyecto.
 - Priorizar frontend en el orden del stack. Quitar jQuery y Bootstrap de la lista general.
 - Contacto: email y LinkedIn. GitHub se mantiene como enlace.
-- CVs disponibles: `public/EN_Pedro_Suarez_Gallardo_CV.pdf` y `public/ES_Pedro_Suarez_Gallardo_CV.pdf`. Las capturas de Rambler están pendientes.
-- Las claves de mensajes/i18n deben estar en inglés.
+- CVs disponibles: `public/EN_Pedro_Suarez_Gallardo_CV.pdf` y `public/ES_Pedro_Suarez_Gallardo_CV.pdf`.
+- **Sin sección de proyectos por ahora.** Ni sección, ni ruta, ni enlace en navegación, sitemap o metadatos. Queda como futurible (ver sección 10).
+- **Sin retórica numérica:** nada de "cien reglas" y similares; solo las aproximaciones del CV.
 
 ---
 
@@ -28,114 +29,87 @@ Reglas: no publicar nombres de empleadores ni el nombre del bootcamp. Las claves
 |---|---|---|
 | Nombre | Pedro Suárez Gallardo | Pedro Suárez Gallardo |
 | Rol | Full-stack developer | Desarrollador full-stack |
-| Pitch | I build production web apps with React, TypeScript and Node.js: real-time dashboards, complex workflows and the APIs behind them. | Construyo aplicaciones web en producción con React, TypeScript y Node.js: paneles en tiempo real, flujos complejos y las APIs que los sostienen. |
-| CTA principal | See my work | Ver mi trabajo |
-| CTA secundaria | Get in touch | Contactar |
+| Pitch | I build the web products teams rely on: real-time, data-heavy and made to run in production. | Construyo los productos web en los que los equipos confían: en tiempo real, con muchos datos y hechos para funcionar en producción. |
+| Línea de apoyo | React, TypeScript and Node.js. | React, TypeScript y Node.js. |
+| CTA principal | See what I deliver | Ver lo que entrego |
+| CTA secundaria | Let's talk | Hablemos |
 
-Metadatos pequeños para la retícula (mono, opcionales):
+Metadatos pequeños para la retícula (mono, opcionales): `3+ YEARS / ES · EN` · `3+ AÑOS / ES · EN`
 
-- `3+ YEARS / ES · EN`
-- `3+ AÑOS / ES · EN`
+Momento firma: el nombre ocupa todo el ancho; las líneas suben escalonadas al cargar, con cursor parpadeante. Al hacer scroll pasa a contorno y se desplaza más lento que el resto.
 
 ---
 
-## 2. About
+## 2. About — `01 / ABOUT` · `01 / SOBRE MÍ`
+
+**Frase de afirmación (bloque invertido)**
+
+- **EN:** Complexity is where I'm calmest.
+- **ES:** La complejidad es donde estoy más tranquilo.
 
 **EN**
 
-> I'm a full-stack developer with more than three years of professional experience building and maintaining production web applications with React and TypeScript.
+> Large data sets, live updates, complex forms, state that must never surprise you. That is the work I'm trusted with, and the work I enjoy most.
 >
-> I'm most comfortable where the frontend meets the hard parts: large data sets, real-time updates, complex forms and state that has to stay predictable. I also work on the backend, designing REST APIs in several languages and refactoring existing code for speed and clarity.
+> I have more than three years of professional experience building and maintaining production web apps with React and TypeScript, and I work on the backend too: REST APIs in several languages and refactors for speed and clarity.
 >
-> I work autonomously, pay attention to detail and like to understand a problem before touching it. I use AI tools such as Copilot every day for development and refactoring, and I always review what they generate.
+> I understand the problem before touching it, I pay attention to the details, and I deliver software that stays maintainable. I use AI tools such as Copilot every day to move faster, and I always review what they produce.
 >
 > I started in sound engineering, switched to web development through an intensive bootcamp, and I keep learning. Spanish is my native language.
 
 **ES**
 
-> Soy desarrollador full-stack con más de tres años de experiencia profesional construyendo y manteniendo aplicaciones web en producción con React y TypeScript.
+> Grandes volúmenes de datos, actualizaciones en directo, formularios complejos, un estado que nunca debe sorprender. Ese es el trabajo que me confían y el que más disfruto.
 >
-> Me siento más cómodo donde el frontend se encuentra con lo difícil: grandes volúmenes de datos, actualizaciones en tiempo real, formularios complejos y un estado que tiene que seguir siendo predecible. También trabajo en el backend, diseñando APIs REST en varios lenguajes y refactorizando código existente para ganar velocidad y claridad.
+> Tengo más de tres años de experiencia profesional construyendo y manteniendo aplicaciones web en producción con React y TypeScript, y también trabajo en el backend: APIs REST en varios lenguajes y refactors para ganar velocidad y claridad.
 >
-> Trabajo con autonomía, cuido los detalles y me gusta entender un problema antes de tocarlo. Uso a diario herramientas de IA como Copilot para desarrollar y refactorizar, y reviso siempre lo que generan.
+> Entiendo el problema antes de tocarlo, cuido los detalles y entrego software que sigue siendo mantenible. Uso a diario herramientas de IA como Copilot para avanzar más rápido, y reviso siempre lo que generan.
 >
 > Empecé en ingeniería de sonido, di el salto al desarrollo web con un bootcamp intensivo y sigo aprendiendo. El castellano es mi lengua nativa.
 
-Valores (etiquetas cortas, opcional): *Detail-oriented · Analytical · Autonomous · Teamwork · Continuous learning* / *Detallista · Analítico · Autónomo · Trabajo en equipo · Aprendizaje continuo*
+Valores (etiquetas cortas): *Detail-oriented · Analytical · Autonomous · Teamwork · Continuous learning* / *Detallista · Analítico · Autónomo · Trabajo en equipo · Aprendizaje continuo*
+
+Momento firma: la frase invertida se ilumina palabra a palabra con el scroll.
 
 ---
 
-## 3. Experience
+## 3. Work — `02 / WORK` · `02 / TRABAJO`
 
-Se cuenta a través del trabajo, sin nombres de empleadores ni fechas de empleo. Cinco entradas. Cada una: título, resumen de una o dos frases, qué hice y tecnologías.
+Titular de la sección: **What I deliver.** / **Lo que entrego.**
+Se cuenta a través de resultados, sin nombres de empleadores ni fechas. Cinco entradas: titular de resultado, una frase y tecnologías. Las claves siguen siendo `experience.*`. La mención a IA aparece solo en About.
 
-### 01 · Desktop to web migration / Migración de escritorio a web
-
-- **EN:** I led the migration of two desktop contact-center applications to the web, with a redesigned multilanguage interface. Both are in production and actively maintained.
-- **ES:** Lideré la migración de dos aplicaciones de escritorio de contact center a la web, con una interfaz multidioma rediseñada. Ambas están en producción y en mantenimiento activo.
+### 01
+- **EN:** **Desktop software, now on the web.** I led the migration of two contact-center applications with a redesigned multilanguage interface. Both are in production and actively maintained.
+- **ES:** **Software de escritorio, ahora en la web.** Lideré la migración de dos aplicaciones de contact center con una interfaz multidioma rediseñada. Ambas están en producción y en mantenimiento activo.
 - **Tech:** React, TypeScript
 
-### 02 · Real-time monitoring dashboards / Paneles de monitorización en tiempo real
-
-- **EN:** A supervision application to follow agent activity live, with customizable dashboards and charts over hundreds of thousands of records.
-- **ES:** Una aplicación de supervisión para seguir la actividad de los agentes en directo, con paneles y gráficas personalizables sobre cientos de miles de registros.
+### 02
+- **EN:** **Live data you can trust.** A supervision app that follows agent activity in real time, with customizable dashboards and charts over hundreds of thousands of records.
+- **ES:** **Datos en vivo en los que confiar.** Una aplicación de supervisión que sigue la actividad de los agentes al instante, con paneles y gráficas personalizables sobre cientos de miles de registros.
 - **Tech:** React, TypeScript
 
-### 03 · Administration suite / Suite de administración
-
-- **EN:** Dozens of sections for managing the platform: custom reporting, and complex forms and tables with advanced validation.
-- **ES:** Decenas de secciones para administrar la plataforma: informes a medida, y formularios y tablas complejos con validación avanzada.
+### 03
+- **EN:** **Control at scale.** An administration suite with dozens of sections, custom reporting, and complex forms and tables with advanced validation.
+- **ES:** **Control a escala.** Una suite de administración con decenas de secciones, informes a medida y formularios y tablas complejos con validación avanzada.
 - **Tech:** React, TypeScript
 
-### 04 · Workflow builder and live chat / Editor de flujos y chat en vivo
-
-- **EN:** A workflow system for designing chatbot and voice-menu (IVR) flows, with complex client-side state management, plus the frontend of a real-time live chat.
-- **ES:** Un sistema de flujos para diseñar chatbots y menús de voz (IVR), con gestión compleja del estado en cliente, y el frontend de un chat en vivo en tiempo real.
+### 04
+- **EN:** **Complex flows, made buildable.** A visual workflow system for chatbots and voice menus (IVR), plus the frontend of a real-time live chat.
+- **ES:** **Flujos complejos, al alcance de cualquiera.** Un sistema visual de flujos para chatbots y menús de voz (IVR), y el frontend de un chat en vivo en tiempo real.
 - **Tech:** React, TypeScript, WebSockets
 
-### 05 · Integrations, APIs and performance / Integraciones, APIs y rendimiento
-
-- **EN:** Integrated messaging and CRM platforms through REST APIs and third-party SDKs. Designed REST APIs in Node.js (Express), C# and PHP, wrote Python automation scripts, and refactored backend functions to make them faster and easier to extend.
-- **ES:** Integré plataformas de mensajería y CRM mediante APIs REST y SDKs de terceros. Diseñé APIs REST en Node.js (Express), C# y PHP, escribí scripts de automatización en Python y refactoricé funciones del backend para hacerlas más rápidas y fáciles de ampliar.
+### 05
+- **EN:** **Systems that talk to each other, and run faster.** Messaging and CRM integrations through REST APIs and third-party SDKs, REST APIs in Node.js (Express), C# and PHP, Python automation, and backend refactors for speed and clarity.
+- **ES:** **Sistemas que se hablan entre sí, y van más rápido.** Integraciones de mensajería y CRM mediante APIs REST y SDKs de terceros, APIs REST en Node.js (Express), C# y PHP, automatización en Python y refactors del backend para ganar velocidad y claridad.
 - **Tech:** Node.js, Express, C#, PHP, Python, REST
 
-**Titular de la sección (EN / ES):** `01 / EXPERIENCE` · `01 / EXPERIENCIA`
-La mención al uso de IA aparece solo en About.
+Momento firma: cada fila entra con su número tabular; en hover se invierte (crudo ↔ negro).
 
 ---
 
-## 4. Projects
+## 4. Stack — `03 / STACK`
 
-### Rambler (primer proyecto)
-
-| Campo | Valor |
-|---|---|
-| `slug` | `rambler` |
-| Tipo | Proyecto de bootcamp (sin publicar el nombre del bootcamp); placeholder temporal |
-| Rol | Proyecto full-stack; no especificar tamaño del equipo ni contribución individual |
-| Año | 2022 (según el CV; omitir si no aporta valor al diseño) |
-| Frontend | https://github.com/PedroSG00/rambler-client |
-| Backend | https://github.com/PedroSG00/rambler-server |
-| Demo | No se ha facilitado URL; omitir |
-| Imágenes | Pedro tiene capturas; pendiente añadir los archivos al proyecto |
-
-**Resumen corto (tarjeta de la home)**
-
-- **EN:** A carpooling app with live chat between drivers and passengers.
-- **ES:** Una app de carpooling con chat en vivo entre conductores y pasajeros.
-
-**Descripción larga (página `/projects/rambler`)**
-
-- **EN:** Rambler is a full-stack carpooling application built as a bootcamp project. Drivers publish trips, passengers find and join them, and both can talk in real time through a live chat powered by Socket.IO. Routes and locations are handled with the Google Maps API.
-- **ES:** Rambler es una aplicación full-stack de carpooling creada como proyecto de bootcamp. Los conductores publican viajes, los pasajeros los encuentran y se unen, y ambos pueden hablar en tiempo real mediante un chat en vivo con Socket.IO. Las rutas y ubicaciones se gestionan con la API de Google Maps.
-
-**Stack:** React, Node.js, Express, MongoDB, Socket.IO, Google Maps API, Axios.
-
-Rambler es contenido provisional: se sustituirá cuando haya otro proyecto.
-
----
-
-## 5. Stack
+- **Titular EN:** The tools I trust. / **ES:** Las herramientas en las que confío.
 
 Agrupado como en el CV. Sin niveles ni barras de progreso.
 
@@ -146,15 +120,16 @@ Agrupado como en el CV. Sin niveles ni barras de progreso.
 | Testing / Testing | Vitest, Playwright |
 | Tools / Herramientas | Git, GitHub Copilot, OpenCode |
 
-Ordenar el contenido dando prioridad al frontend (React y TypeScript). No incluir jQuery ni Bootstrap en la lista general.
+Prioridad al frontend (React y TypeScript). Sin jQuery ni Bootstrap en la lista general.
+Momento firma: los grupos entran escalonados; las tecnologías aparecen como etiquetas mono.
 
 ---
 
-## 6. Contact
+## 5. Contact — `04 / CONTACT` · `04 / CONTACTO`
 
-- **Titular EN:** Let's talk. / **ES:** Hablemos.
-- **Texto EN:** The best way to reach me is by email or LinkedIn.
-- **Texto ES:** La mejor forma de contactarme es por email o LinkedIn.
+- **Titular EN:** Let's build something solid. / **ES:** Construyamos algo sólido.
+- **Texto EN:** Tell me what you need. Email or LinkedIn, whichever is easier.
+- **Texto ES:** Cuéntame qué necesitas. Por email o LinkedIn, como te resulte más cómodo.
 
 | Canal | Valor |
 |---|---|
@@ -163,53 +138,69 @@ Ordenar el contenido dando prioridad al frontend (React y TypeScript). No inclui
 | LinkedIn | https://linkedin.com/in/pedro-suarez-gallardo |
 | CV (PDF) | EN: `public/EN_Pedro_Suarez_Gallardo_CV.pdf`; ES: `public/ES_Pedro_Suarez_Gallardo_CV.pdf` |
 
+Momento firma: el titular gigante entra con `clip`; el email es un enlace enorme que se invierte en hover.
+
 ---
 
-## 7. Footer
+## 6. Footer
 
-- Enlaces: GitHub, LinkedIn, email y CV cuando se añadan los archivos.
+- Enlaces: GitHub, LinkedIn, email y CV.
 - Copyright EN: `© 2026 Pedro Suárez Gallardo` / ES: igual.
 
 ---
 
-## 8. Metadatos SEO (por idioma)
+## 7. Metadatos SEO (por idioma, solo home)
 
 | | EN | ES |
 |---|---|---|
-| Título home | Pedro Suárez Gallardo — Full-stack developer | Pedro Suárez Gallardo — Desarrollador full-stack |
-| Descripción home | Full-stack developer specialized in React, TypeScript and Node.js. Portfolio, projects and contact. | Desarrollador full-stack especializado en React, TypeScript y Node.js. Portfolio, proyectos y contacto. |
-| Título Rambler | Rambler — Carpooling app with live chat · Pedro Suárez Gallardo | Rambler — App de carpooling con chat en vivo · Pedro Suárez Gallardo |
-| Descripción Rambler | A full-stack carpooling app built with React, Node.js, MongoDB and Socket.IO. | Una app full-stack de carpooling con React, Node.js, MongoDB y Socket.IO. |
+| Título | Pedro Suárez Gallardo — Full-stack developer | Pedro Suárez Gallardo — Desarrollador full-stack |
+| Descripción | I build real-time, data-heavy web products with React, TypeScript and Node.js. Portfolio and contact. | Construyo productos web en tiempo real y con muchos datos con React, TypeScript y Node.js. Portfolio y contacto. |
 
-**Imagen OG:** propuesta: nombre en tipografía masiva, crudo sobre negro, generada desde el propio diseño. La foto de perfil se incluirá en la web; no se usará en la imagen OG salvo que Pedro lo indique.
+**Imagen OG:** nombre en tipografía masiva, crudo sobre negro, generada desde el propio diseño. La foto de perfil se incluirá en la web; no se usa en la imagen OG salvo que Pedro lo indique.
 
 ---
 
-## 9. Textos de interfaz (Navbar y controles)
+## 8. Textos de interfaz (Navbar y controles)
 
-Las claves de i18n se escribirán en inglés. Ejemplos: `nav.about`, `nav.experience`, `theme.toggle`, `language.change`, `a11y.skipToContent`, `projects.backToProjects`, `projects.viewCode`.
+Las claves de i18n se escriben en inglés: `nav.about`, `nav.experience`, `nav.stack`, `nav.contact`, `theme.toggle`, `language.change`, `a11y.skipToContent`.
 
 | Clave | EN | ES |
 |---|---|---|
 | Nav: about | About | Sobre mí |
-| Nav: experience | Experience | Experiencia |
-| Nav: projects | Projects | Proyectos |
+| Nav: experience | Work | Trabajo |
 | Nav: stack | Stack | Stack |
 | Nav: contact | Contact | Contacto |
 | Cambiar tema | Toggle theme | Cambiar tema |
 | Cambiar idioma | Change language | Cambiar idioma |
 | Saltar al contenido | Skip to content | Saltar al contenido |
-| Volver | Back to projects | Volver a proyectos |
-| Ver código | View code | Ver código |
 
 ---
 
-## 10. Checklist de entrega
+## 9. Movimiento (resumen de contenido)
 
-- [x] Decisiones editoriales de la sección 0 resueltas
+Cada bloque entra al aparecer en pantalla y sale al abandonarla, solo con CSS (ver `AGENTS.md`, "Movimiento"). Con `prefers-reduced-motion` no hay animación y todo es visible. El último bloque de la página no se desvanece.
+
+---
+
+## 10. Futurible: proyectos (aparcado, no publicar)
+
+Cuando haya un proyecto nuevo se recuperará la sección con spec propia (entrada en `content/projects.ts`, ruta `/projects/[slug]`, textos en `messages/`, enlace en navegación, sitemap y metadatos).
+
+**Rambler (placeholder de bootcamp, sin publicar el nombre del bootcamp)**
+
+- Frontend: https://github.com/PedroSG00/rambler-client · Backend: https://github.com/PedroSG00/rambler-server · Sin demo.
+- **EN:** A carpooling app with live chat between drivers and passengers. Built as a full-stack bootcamp project: drivers publish trips, passengers join them and both talk in real time with Socket.IO. Routes and locations use the Google Maps API.
+- **ES:** Una app de carpooling con chat en vivo entre conductores y pasajeros. Proyecto full-stack de bootcamp: los conductores publican viajes, los pasajeros se unen y ambos hablan en tiempo real con Socket.IO. Las rutas y ubicaciones usan la API de Google Maps.
+- Stack: React, Node.js, Express, MongoDB, Socket.IO, Google Maps API, Axios. Capturas pendientes.
+
+---
+
+## 11. Checklist de entrega
+
+- [x] Decisiones editoriales resueltas
 - [x] URL de LinkedIn
-- [x] Cifras exactas: no disponibles; mantener aproximaciones del CV
-- [x] Añadir foto de perfil (`public/pedro-suarez.png`)
-- [ ] Añadir capturas de Rambler
-- [x] Añadir CV en PDF en inglés y castellano a `public/`
+- [x] Cifras: mantener aproximaciones del CV
+- [x] Foto de perfil (`public/pedro-suarez.png`)
+- [x] CV en PDF en inglés y castellano en `public/`
+- [x] Sección de proyectos aparcada
 - [ ] Revisión final de los textos en ambos idiomas
