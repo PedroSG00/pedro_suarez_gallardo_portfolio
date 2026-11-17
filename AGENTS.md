@@ -13,16 +13,16 @@ Minimalista en elementos, espectacular en ejecución: una pieza editorial de alt
 3. La estructura de carpetas y el plan de desarrollo están en el `README.md`. Respétalos.
 
 ## Comandos
-Solo **pnpm** (nada de npm/yarn ni `package-lock.json`).
+Solo **pnpm** (nada de npm/yarn ni `package-lock.json`). La instalación la guarda `check-package-manager.mjs` desde `preinstall`: con npm o yarn, `pnpm install` aborta.
 
 | Comando | Para qué |
 | --- | --- |
 | `pnpm dev` / `pnpm build` / `pnpm start` | Desarrollo, build y servir el build |
-| `pnpm lint` | ESLint |
-| `pnpm typecheck` | `tsc --noEmit` |
-| `pnpm test` | Vitest + RTL con cobertura (umbral 95%) |
+| `pnpm lint` | ESLint sobre js/mjs/ts/tsx, sin permitir warnings |
+| `pnpm typecheck` | `next typegen && tsc --noEmit` |
+| `pnpm test` | Vitest + RTL con cobertura y umbral 95 % global |
 | `pnpm test:watch` | Vitest en modo watch, sin cobertura |
-| `pnpm test:e2e` | Playwright |
+| `pnpm test:e2e` | `pnpm build` + Playwright, solo Chromium |
 
 Para iterar rápido: `pnpm exec vitest run ruta/al/archivo.test.tsx`.
 
@@ -50,7 +50,7 @@ Para iterar rápido: `pnpm exec vitest run ruta/al/archivo.test.tsx`.
 - **Lógica pura** (`lib/`): tests con tabla de casos, incluidos los límites.
 - **Secciones:** `renderWithIntl` (`src/test/`) con los mensajes reales de `en.json`, para que una clave que falte rompa el test.
 - **Cobertura:** mínimo 95% en líneas, funciones, ramas y sentencias, con umbral en la configuración de Vitest. Nunca bajes el umbral ni excluyas código para cumplirlo; si falta cobertura, falta un test con sentido.
-- **e2e (Playwright):** solo flujos críticos: cambio de idioma, cambio de tema, navegación por secciones y movimiento de scroll. Los de navegación e idioma van con `prefers-reduced-motion` activado.
+- **e2e (Playwright):** solo flujos críticos: cambio de idioma, cambio de tema, navegación por secciones y movimiento de scroll. Los de navegación e idioma van con `prefers-reduced-motion` activado. El smoke de la 01 es transitorio (la home responde y sin `pageerror`); los flujos de idioma, tema, navegación y movimiento llegan con las specs 02, 03, 05 y 06.
 - **Movimiento de scroll (garantía):** en cada sección, un bloque `Reveal` tiene `opacity` < 1 al entrar por abajo, `opacity` = 1 centrado y `opacity` < 1 al salir por arriba (estilo computado, nunca clases). Con `prefers-reduced-motion: reduce`, `opacity` = 1 en cualquier posición. El último bloque queda totalmente visible al final. Se prueba en `/en` y `/es`, en tema claro y oscuro (Chromium).
 - Escribe los tests antes que el código.
 
@@ -75,10 +75,10 @@ Para iterar rápido: `pnpm exec vitest run ruta/al/archivo.test.tsx`.
 - Tocar capas transversales: layout raíz, sistema i18n, tema y estilos globales, configuración de Tailwind/TypeScript/ESLint/Vitest.
 - Crear carpetas nuevas en la raíz o en `src/`.
 
-No introduzcas base de datos, backend ni servicios externos.
+No introduzcas base de datos, backend ni servicios externos (SonarQube Cloud es la excepción aprobada: análisis estático y solo en CI).
 
 ## Al terminar una tarea
-Comprueba que pasan, en este orden: `pnpm lint`, `pnpm typecheck`, `pnpm test`. Si has tocado idioma, tema o navegación (o vas a abrir un PR), añade `pnpm test:e2e`. Si algo falla, corrígelo o explica claramente por qué no se puede.
+Comprueba que pasan, en este orden: `pnpm lint`, `pnpm typecheck`, `pnpm test` y `pnpm build`. Si has tocado idioma, tema, navegación o movimiento (o vas a abrir un PR), añade `pnpm test:e2e`. Si algo falla, corrígelo o explica claramente por qué no se puede.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

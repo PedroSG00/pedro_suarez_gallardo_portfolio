@@ -22,12 +22,13 @@ Details live in `AGENTS.md`; each section defines its own "signature moment".
 - Tailwind CSS
 - next-intl for i18n (`en`, `es`)
 - Iconoir for icons
-- Testing: Vitest (v8 coverage), React Testing Library, Playwright
+- Testing: Vitest (v8 coverage), React Testing Library, Playwright (Chromium)
 - Linting: ESLint
+- Static analysis: SonarQube Cloud (CI only, approved exception to "no external services")
 
 ## Getting started
 
-Requirements: Node.js (current LTS) and pnpm.
+Requirements: Node.js 26.12.0 (see `.node-version`) and pnpm 12.16.1 (see `packageManager`). `pnpm install` aborts if you use another Node version, another package manager, or an unreviewed build script.
 
 ```bash
 git clone <repository-url>
@@ -42,54 +43,56 @@ pnpm dev        # http://localhost:3000
 | --- | --- |
 | `pnpm dev` | Development server |
 | `pnpm build` / `pnpm start` | Production build / serve it |
-| `pnpm lint` | ESLint |
-| `pnpm typecheck` | TypeScript, no emit |
-| `pnpm test` | Unit and component tests with coverage (fails under 95%) |
+| `pnpm lint` | ESLint over js/mjs/ts/tsx, zero warnings allowed |
+| `pnpm typecheck` | `next typegen` + `tsc --noEmit` |
+| `pnpm test` | Vitest + Testing Library with coverage (fails under 95 %) |
 | `pnpm test:watch` | Same tests in watch mode, without coverage |
-| `pnpm test:e2e` | End-to-end tests (Playwright) |
+| `pnpm test:e2e` | Production build + Playwright (Chromium only) |
 
-Install the Playwright browsers once with `pnpm exec playwright install`.
+Install the only supported browser once with `pnpm exec playwright install chromium`.
+
+## Continuous integration
+
+`.github/workflows/ci.yml` runs six parallel jobs on every push to `main` and every pull request: `lint`, `typecheck`, `test`, `build`, `e2e` and `sonar`. Node comes from `.node-version`, pnpm from `packageManager`, and a step fails if either does not match. The `test` and `e2e` jobs upload diagnostics (`coverage`, Playwright report and traces) even when they fail. Nothing is silenced: no `continue-on-error`, no lowered thresholds.
+
+## Windows and Linux
+
+Everything runs from the repository root in PowerShell and in bash: `pnpm install`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm test:e2e`. No absolute paths and no encoded separators; `.gitattributes` keeps line endings at LF.
+
+## Definition of done
+
+`pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm build` pass. `pnpm test:e2e` passes when language, theme, navigation or motion is touched, and always before a pull request. In CI, the six checks and the SonarQube Cloud quality gate pass.
 
 ## Project structure
 
 ```text
 .
-├── .github/workflows/ci.yml     # CI: lint, typecheck, test, e2e on every PR
+├── .github/
+│   ├── dependabot.yml            # Dependency updates (not changed by spec 01)
+│   └── workflows/ci.yml          # CI: lint, typecheck, test, build, e2e, sonar
+├── .gitattributes                # LF line endings
+├── .node-version                 # Exact Node version (single source)
+├── check-package-manager.mjs     # preinstall guard: pnpm only
+├── e2e/                          # Playwright specs (Chromium)
+├── messages/                     # en.json / es.json (spec 02)
+├── pnpm-workspace.yaml           # pnpm settings: engineStrict, allowBuilds
+├── public/                       # Static assets (CV PDFs, profile photo, favicon, OG image)
 ├── src/
-│   ├── app/
-│   │   └── [locale]/            # One route tree, prefixed by language (/en, /es)
-│   │       ├── layout.tsx       # Wraps every page with Navbar and Footer
-│   │       └── page.tsx         # Home: composes the sections
-│   ├── components/
-│   │   ├── Navbar/              # Global navigation component
-│   │   │   ├── Navbar.tsx
-│   │   │   └── Navbar.test.tsx
-│   │   ├── Footer/              # Global footer component
-│   │   │   ├── Footer.tsx
-│   │   │   └── Footer.test.tsx
-│   │   ├── ui/                  # Generic pieces, props only (Button, Heading, Tag, Reveal, ThemeToggle...)
-│   │   │   └── Button/
-│   │   │       ├── Button.tsx
-│   │   │       └── Button.test.tsx
-│   │   └── sections/            # Page blocks (Hero, About, Experience, Stack, Contact)
-│   │       └── Hero/
-│   │           ├── Hero.tsx
-│   │           └── Hero.test.tsx
-│   ├── content/                 # Typed, non-translatable data (stack, links)
-│   ├── i18n/                    # next-intl setup, navigation helpers, messages parity test
-│   ├── lib/                     # Small pure helpers (+ their tests)
-│   ├── styles/
-│   │   └── globals.css          # Tailwind entry point, theme and motion tokens (single source of design values)
-│   └── test/                    # Test helpers (renderWithIntl, setup)
-├── messages/
-│   ├── en.json                  # All visible text, English
-│   └── es.json                  # All visible text, Spanish (same keys as en.json)
-├── e2e/                         # Playwright specs: language, theme, navigation, scroll motion
-├── docs/
-│   ├── constitution.md          # Non-negotiable project rules
-│   └── specs/                   # One spec per non-trivial change
-├── public/                      # Static assets (CV PDFs, profile photo, favicon, OG image)
-├── AGENTS.md                    # Instructions for coding agents
+│   ├── app/                      # App Router entries (excluded from coverage)
+│   ├── components/               # ui/ and sections/
+│   ├── content/                  # Typed, non-translatable data (stack, links)
+│   ├── i18n/                     # next-intl setup and helpers (spec 02)
+│   ├── lib/                      # Pure helpers
+│   ├── styles/globals.css        # Tailwind entry, theme and motion tokens
+│   └── test/setup.ts             # jest-dom, cleanup, restoreMocks
+├── docs/                         # constitution.md and specs/
+├── eslint.config.mjs
+├── next.config.ts
+├── playwright.config.ts
+├── sonar-project.properties
+├── tsconfig.json
+├── vitest.config.mts
+├── AGENTS.md
 └── README.md
 ```
 
@@ -106,8 +109,8 @@ Install the Playwright browsers once with `pnpm exec playwright install`.
 ## Testing
 
 * Quality over quantity: tests check user-visible behavior (content, roles, interaction, states, accessibility). No snapshots, no Tailwind class assertions, no tests written only to raise coverage.
-* Coverage ≥ 95% (lines, functions, branches, statements), enforced by the Vitest threshold. Excluded: configuration, `app/` route files (covered by e2e), `content/` and `messages/`.
-* Playwright covers only the critical flows: language, theme, navigation and scroll motion (in/out of each section, checked through computed opacity while scrolling, and fully visible under `prefers-reduced-motion`).
+* Coverage ≥ 95 % globally (lines, functions, branches, statements), enforced by the Vitest threshold. Excluded: configuration, tests, `*.d.ts`, `src/test/`, `src/app/` route files (covered by e2e) and `src/content/`. Nothing outside `src/` is measured.
+* Playwright covers only the critical flows: language, theme, navigation and scroll motion (in/out of each section, checked through computed opacity while scrolling, and fully visible under `prefers-reduced-motion`). Spec 01 ships a transitional smoke test (the home responds without `pageerror`); the critical flows arrive with specs 02, 03, 05 and 06.
 * Tests are written before the code.
 
 ## Internationalization
@@ -135,11 +138,11 @@ Every route is wrapped by the global `Navbar` and `Footer` layout components. Th
 
 ## Development plan
 
-Every phase follows the same loop: spec → tests → code → gates (`lint`, `typecheck`, `test`, and `test:e2e` when it applies). A phase is done only when its gates pass.
+Every phase follows the same loop: spec → tests → code → gates (`lint`, `typecheck`, `test`, `build`, and `test:e2e` when it applies). A phase is done only when its gates pass.
 
 | Phase | Goal | Done when |
 | --- | --- | --- |
-| **0. Foundation** | Tooling (Vitest + coverage threshold, RTL, Playwright, CI), `next-intl` with `/en` and `/es`, theme tokens, mono font, light/dark theme | Empty localized page builds, theme and language switch work, e2e green |
+| **0. Foundation** | Tooling (Vitest + coverage threshold, RTL, Playwright, CI), `next-intl` with `/en` and `/es`, theme tokens, mono font, light/dark theme | Tooling gates green (lint, typecheck, test, build, e2e) and the six CI checks pass on a placeholder page |
 | **1. Atoms** | `ui/` pieces: Button/Link, Heading, Tag, Section wrapper, grid lines, ThemeToggle, LanguageSwitch | Each atom tested and reusable, no section-specific code inside |
 | **2. Shell and Hero** | Global layout components (`Navbar`, `Footer`) and the `Hero` section with the site's signature moment | Memorable at first glance in both themes and both languages; navigation works |
 | **3. About and Work** | Confident, benefit-led sections composed from atoms | Same standard as previous phases; content only from `messages/` and `content/` |
@@ -147,6 +150,8 @@ Every phase follows the same loop: spec → tests → code → gates (`lint`, `t
 | **5. Stack and Contact** | Grouped stack and contact block | Links verified, no duplicated markup between groups |
 | **6. Polish** | Per-language metadata, sitemap, robots, OG image, accessibility pass, performance pass, reduced-motion check, Safari and Firefox motion fallback check | Lighthouse 95+ in all categories, AA contrast, full keyboard navigation |
 | **7. Launch** | Static deploy and domain | Live site and README links filled in |
+
+`docs/roadmap.md` orders scroll motion (spec 05) before Shell and Hero (06); the rows above are updated when that spec is executed.
 
 ## Conventions
 
@@ -156,7 +161,7 @@ Every phase follows the same loop: spec → tests → code → gates (`lint`, `t
 * Before opening a pull request:
 
 ```bash
-pnpm lint && pnpm typecheck && pnpm test && pnpm test:e2e
+pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm test:e2e
 ```
 
 ## AI agents
