@@ -61,20 +61,17 @@ Tareas pequeñas y ordenadas (T1 → T11). Cada tarea tiene objetivo, RF que cub
 
 ---
 
-## T4 — Normalización de ruta (RF-2)
-
-**Objetivo:** Crear la función pura `normalizePath(pathname: string): string` que convierta a minúsculas y elimine el trailing slash excepto en la raíz (`/`).
+## ~~T4 — Normalización de ruta~~ ✅ COMPLETADA
 
 **RF que cubre:** RF-2
 
-**Tests a escribir primero:**
-- Test de unidad: `/EN` → `/en`.
-- Test de unidad: `/es/` → `/es`.
-- Test de unidad: `/` → `/`.
-- Test de unidad: `/ES/About` → `/es/about`.
-
-**Criterio de hecho:**
-- `normalizePath` implementada y todos los casos de normalización pasan sus tests unitarios.
+**Resultado:**
+- `src/lib/normalize-path.ts` implementado como función pura `normalizePath(pathname: string): string`.
+- Convierte a minúsculas y elimina el trailing slash excepto en la raíz (`/`).
+- Tests: `src/lib/normalize-path.test.ts` (4 casos: `/EN` → `/en`, `/es/` → `/es`, `/` → `/`, `/ES/About` → `/es/about`).
+- `pnpm exec vitest run --coverage`: 5 test files, 30 tests passed, cobertura 100% (statements, branches, functions, lines).
+- `pnpm lint`: limpio (sin errores ni warnings).
+- La función es pura, no depende de Next.js ni del DOM.
 
 ---
 
