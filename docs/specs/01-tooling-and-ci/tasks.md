@@ -609,6 +609,28 @@ el run. Al terminar, borrar la rama y cerrar el PR sin fusionar.
 
 ## T10 — PR, nombres de check y ruleset
 
+**Estado:** hecho (2026-11-17) en lo local. Se pushearon los commits pendientes de
+`verify/gates` a `origin` (commit `c1eabff`). El PR #11 (`verify/gates → main`) se actualizó
+automáticamente y GitHub Actions ejecutó los seis checks. Todos en `success`:
+
+| Check | Estado |
+|-------|--------|
+| lint | success |
+| typecheck | success |
+| test | success |
+| build | success |
+| e2e | success |
+| sonar | success |
+
+Los nombres exactos de las seis checks coinciden con los `id` de los jobs del workflow
+(`lint`, `typecheck`, `test`, `build`, `e2e`, `sonar`). No queda ningún check `Analyze`.
+
+**Próximo paso (pendiente del usuario/Pedro):** crear el ruleset de `main` con los seis
+checks por nombre (PR obligatorio, 0 aprobaciones, sin bypass, sin force push, sin borrado,
+sin rama al día, sin merge queue). Luego comunicar los nombres exactos leídos del run.
+
+**No se fusiona todavía:** el cierre es T11.
+
 **Objetivo:** que `01` llegue a `main` con los seis checks verdes y que el ruleset los exija
 por nombre, sin `Analyze` fantasma.
 
