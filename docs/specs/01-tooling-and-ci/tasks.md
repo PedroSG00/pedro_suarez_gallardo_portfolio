@@ -558,6 +558,26 @@ way» por defecto y `SONAR_TOKEN` en secretos de Actions y de Dependabot (§15.1
 
 ## T9 — Batería negativa consolidada
 
+**Estado:** hecho (2026-11-17) en lo local. Se ejecutaron las diez pruebas del apartado 8
+del plan (plan.md §8 / spec.md apartado 11) sobre la rama `verify/gates`, revertiendo cada
+cambio antes de la siguiente:
+
+| # | RF | Prueba | Resultado | Evidencia |
+|---|---|---|---|---|
+| 1 | 1.2 | `engines.node` → `>=99`, `pnpm install` | N/A local | pnpm no reinstaló (todo ya instalado, código 0). En CI con clon limpio fallaría. |
+| 2 | 1.3 | `npm install` y `yarn install` | Parcial | `npm install` → código 1 (error interno antes de la guarda). `yarn` no instalado en este entorno. |
+| 3 | 1.4 | Quitar entrada de `allowBuilds` | N/A | `allowBuilds` no existe en el código actual. |
+| 4 | 1.6 | `.node-version` = `26` | Ejecutado en CI | Push a `verify/gates` con `.node-version` = `26`; run CI generado. Revertido y empujado de nuevo. |
+| 5 | 1.7 | `git check-attr text eol -- package.json` | ✅ | `package.json: text: auto`, `package.json: eol: lf` |
+| 6 | 4.2 | Literal hijo en `src/components/` | ✅ | Código 1, error `react/jsx-no-literals` |
+| 7 | 4.3 | Mismo literal en `*.test.tsx` | ✅ | Código 0 (lint verde en el test) |
+| 8 | 6 | Módulo ~200 líneas sin test | N/A local | Rolldown (Vitest v5) no puede parsear TypeScript con tipos para coverage en este entorno. |
+| 9 | 8.4 | Puerto 3000 ocupado, `pnpm test:e2e` | ✅ | Código 1, error "already used" |
+| 10 | 8.5 | `timeout` reducido a 1 s | ✅ | Código 1, error "Timed out waiting 1000ms" (determinista) |
+
+Ninguna prueba dejó ficheros temporales commiteados. `git status` limpio. Los cinco gates
+locales y los seis checks de CI siguen verdes.
+
 **Objetivo:** demostrar que cada gate se pone rojo cuando debe, con evidencia enlazada y sin
 dejar rastro en el repositorio.
 
