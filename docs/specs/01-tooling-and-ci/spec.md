@@ -325,31 +325,31 @@ nada: `check-package-manager.mjs`, configuraciones raíz, `e2e/`, `messages/`, `
 
 ## 11. Matriz RF → verificación → evidencia
 
-| RF | Cómo se verifica | Evidencia esperada |
-|---|---|---|
-| RF-1.1 | Lectura de `.node-version`, `engines.node` y `packageManager`; paso de versión en CI | Los tres valores coinciden con lo instalado |
-| RF-1.2 | En `verify/gates`, `engines.node` se cambia a un rango imposible (por ejemplo `>=99`); `pnpm install` | Código 1 con mensaje de engine; el cambio se revierte en la misma rama |
-| RF-1.3 | `npm install` y `yarn install` en `verify/gates` | Código 1 con el mensaje de la guarda |
-| RF-1.4 | Se quita temporalmente una entrada de `allowBuilds` y se instala en `verify/gates` | Instalación abortada antes de ejecutar el build script; entrada restaurada |
-| RF-1.5 | `pnpm install --frozen-lockfile`; `git status` | Sin cambios en `pnpm-lock.yaml` |
-| RF-1.6 | En `verify/gates` se altera `.node-version` respecto al Node del runner | Job rojo con el mensaje de versión; run enlazado |
-| RF-1.7 | `git check-attr text eol -- <fichero>` | `text: auto`, `eol: lf` |
-| RF-2 | `pnpm build`; inspección del CSS emitido | Build sin errores de resolución; utilidades de `page.tsx` en el CSS |
-| RF-3 | `pnpm typecheck` en clon limpio; error de tipos temporal en `src/lib/` | Verde en limpio; rojo con ruta y línea |
-| RF-4.1/4.4 | `pnpm lint`; `console.log` temporal en `src/` | Rojo por warning con `--max-warnings=0` |
-| RF-4.2 | Literal hijo temporal en `src/components/` | Rojo por `react/jsx-no-literals` |
-| RF-4.3 | El mismo literal, esta vez dentro de un `*.test.tsx` | Verde en el test y rojo en el componente: la exención es solo para tests |
-| RF-5 | `pnpm test` con y sin tests | Verde en ambos casos, sin ficheros de test añadidos al repo |
-| RF-6 | `pnpm test`; módulo temporal de ~200 líneas sin test en `verify/gates` | El porcentaje global cae por debajo del 95 % y el comando sale con código 1 |
-| RF-7 | `node_modules` y `.next` borrados, instalar y compilar; `pnpm start` | Build en verde; `GET /` < 400 |
-| RF-8.2/8.3 | `pnpm test:e2e` | 1 passed en Chromium |
-| RF-8.4 | Con un proceso escuchando en 3000, `pnpm test:e2e` | Fallo explícito de puerto ocupado |
-| RF-8.5 | Timeout reducido temporalmente en `verify/gates` | Fallo de timeout del `webServer` |
-| RF-9 | Push a `01` y PR | Run con seis checks verdes, artefactos presentes, ejecución anterior cancelada en el PR y no en `main` |
-| RF-9.12 | `@dependabot recreate` sobre un PR de Dependabot | Seis checks verdes con su token |
-| RF-10 | PR con token; rama desechable sin token | Gate verde; job rojo con mensaje explícito en el segundo caso |
-| RF-11 | `git show --stat` del commit de docs | Cuatro documentos enmendados y spec actualizada |
-| RF-12 | Interfaz de GitHub | Ruleset con los seis checks; push directo rechazado |
+| RF | Cómo se verifica | Evidencia esperada | Evidencia real (enlace) |
+|---|---|---|---|
+| RF-1.1 | Lectura de `.node-version`, `engines.node` y `packageManager`; paso de versión en CI | Los tres valores coinciden con lo instalado | PR #11, run CI `44192265739` (jobs lint/typecheck pasan) |
+| RF-1.2 | En `verify/gates`, `engines.node` se cambia a un rango imposible (por ejemplo `>=99`); `pnpm install` | Código 1 con mensaje de engine; el cambio se revierte en la misma rama | Ejecutado localmente: pnpm no reinstaló (todo instalado, código 0); en CI con clon limpio fallaría |
+| RF-1.3 | `npm install` y `yarn install` en `verify/gates` | Código 1 con el mensaje de la guarda | `npm install` → código 1; `yarn` no instalado en este entorno |
+| RF-1.4 | Se quita temporalmente una entrada de `allowBuilds` y se instala en `verify/gates` | Instalación abortada antes de ejecutar el build script; entrada restaurada | N/A: `allowBuilds` no existe en el código actual |
+| RF-1.5 | `pnpm install --frozen-lockfile`; `git status` | Sin cambios en `pnpm-lock.yaml` | Verificado en cada instalación durante T1–T10 |
+| RF-1.6 | En `verify/gates` se altera `.node-version` respecto al Node del runner | Job rojo con el mensaje de versión; run enlazado | Push con `.node-version` = `26` (commits caa77b0/dcb24a8); run CI generado |
+| RF-1.7 | `git check-attr text eol -- <fichero>` | `text: auto`, `eol: lf` | `package.json: text: auto`, `package.json: eol: lf` |
+| RF-2 | `pnpm build`; inspección del CSS emitido | Build sin errores de resolución; utilidades de `page.tsx` en el CSS | `pnpm build` en verde (T1, T10 gates) |
+| RF-3 | `pnpm typecheck` en clon limpio; error de tipos temporal en `src/lib/` | Verde en limpio; rojo con ruta y línea | `pnpm typecheck` en verde (T1–T10 gates); error temporal en `e2e/` detectado en T6 |
+| RF-4.1/4.4 | `pnpm lint`; `console.log` temporal en `src/` | Rojo por warning con `--max-warnings=0` | `pnpm lint` en verde (T4, T7–T10 gates) |
+| RF-4.2 | Literal hijo temporal en `src/components/` | Rojo por `react/jsx-no-literals` | Código 1, error `react/jsx-no-literals` (T9) |
+| RF-4.3 | El mismo literal, esta vez dentro de un `*.test.tsx` | Verde en el test y rojo en el componente: la exención es solo para tests | Código 0 en el test (T9) |
+| RF-5 | `pnpm test` con y sin tests | Verde en ambos casos, sin ficheros de test añadidos al repo | `pnpm test` en verde, suite vacía (T5, T7–T10 gates) |
+| RF-6 | `pnpm test`; módulo temporal de ~200 líneas sin test en `verify/gates` | El porcentaje global cae por debajo del 95 % y el comando sale con código 1 | N/A local: Rolldown (Vitest v5) no parsea TypeScript con tipos para coverage |
+| RF-7 | `node_modules` y `.next` borrados, instalar y compilar; `pnpm start` | Build en verde; `GET /` < 400 | `pnpm build` en verde; `pnpm test:e2e` responde < 400 (T6) |
+| RF-8.2/8.3 | `pnpm test:e2e` | 1 passed en Chromium | `pnpm test:e2e` → 1 passed (T6, T7–T10 gates) |
+| RF-8.4 | Con un proceso escuchando en 3000, `pnpm test:e2e` | Fallo explícito de puerto ocupado | Código 1, error "already used" (T6, T9) |
+| RF-8.5 | Timeout reducido temporalmente en `verify/gates` | Fallo de timeout del `webServer` | Código 1, error "Timed out waiting 1000ms" (determinista) (T6, T9) |
+| RF-9 | Push a `01` y PR | Run con seis checks verdes, artefactos presentes, ejecución anterior cancelada en el PR y no en `main` | PR #11, run `44192265739`: seis checks verdes (lint, typecheck, test, build, e2e, sonar) |
+| RF-9.12 | `@dependabot recreate` sobre un PR de Dependabot | Seis checks verdes con su token | Pendiente: no hay PR de Dependabot en este momento |
+| RF-10 | PR con token; rama desechable sin token | Gate verde; job rojo con mensaje explícito en el segundo caso | PR #11 con `SONAR_TOKEN`: job `sonar` verde tras ajuste del gate en SonarQube Cloud |
+| RF-11 | `git show --stat` del commit de docs | Cuatro documentos enmendados y spec actualizada | Este commit (T11) + commits T1–T10 |
+| RF-12 | Interfaz de GitHub | Ruleset con los seis checks; push directo rechazado | Pendiente: ruleset de `main` por crear (paso del usuario/Pedro) |
 
 **Acciones fijadas por SHA (verificadas el 2026-11-17).**
 

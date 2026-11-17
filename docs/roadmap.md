@@ -8,7 +8,7 @@ Fuera de alcance por ahora: sección de proyectos y ruta `/projects/[slug]` (fut
 
 ## Estado
 
-- [ ] 01 Tooling y CI
+- [x] 01 Tooling y CI
 - [ ] 02 i18n y rutas
 - [ ] 03 Tema y tokens
 - [ ] 04 Átomos de UI
