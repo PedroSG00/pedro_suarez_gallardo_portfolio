@@ -35,21 +35,16 @@ Tareas pequeñas y ordenadas (T1 → T11). Cada tarea tiene objetivo, RF que cub
 
 ---
 
-## T2 — Helpers de cookie de preferencia (RF-1)
-
-**Objetivo:** Crear `src/lib/cookie-locale.ts` con funciones puras `getLocaleCookie(request): Locale | null` y `setLocaleCookie(response, locale: Locale): void`. La cookie debe ser `HttpOnly`, `SameSite=Lax`, `Path=/`, `Max-Age=31536000` (1 año).
+## ~~T2 — Helpers de cookie de preferencia~~ ✅ COMPLETADA
 
 **RF que cubre:** RF-1
 
-**Tests a escribir primero:**
-- Test de unidad: `getLocaleCookie` devuelve `"en"` o `"es"` cuando existe una cookie válida.
-- Test de unidad: `getLocaleCookie` devuelve `null` cuando no existe cookie o cuando la cookie tiene un valor inválido.
-- Test de unidad: `setLocaleCookie` establece la cabecera `Set-Cookie` con el locale, los atributos correctos y expiración de 1 año.
-
-**Criterio de hecho:**
-- `src/lib/cookie-locale.ts` implementado con las dos funciones puras.
-- Los tests de unidad pasan y no dependen de Next.js ni del DOM.
-- Si no se puede escribir la cookie (cookies bloqueadas), la función no lanza error y el flujo continúa.
+**Resultado:**
+- `src/lib/cookie-locale.ts` implementado con `getLocaleCookie(request): Locale | null` y `setLocaleCookie(response, locale: Locale): void`.
+- Cookie: `psg_locale`, `HttpOnly`, `SameSite=Lax`, `Path=/`, `Max-Age=31536000` (1 año).
+- Tests: `src/lib/cookie-locale.test.ts` (11 casos: 7 para getLocaleCookie, 4 para setLocaleCookie).
+- `pnpm exec vitest run --coverage`: 3 test files, 15 tests passed, cobertura 100% (statements, branches, functions, lines).
+- Las funciones son puras, no dependen de Next.js ni del DOM. `setLocaleCookie` no lanza error cuando `response` no tiene `headers`.
 
 ---
 
