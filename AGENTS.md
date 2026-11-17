@@ -1,61 +1,76 @@
 # AGENTS.md — pedro-suarez-cv
 
 ## Proyecto
-Web de currículum/portfolio de Pedro Suárez Gallardo, desarrollador web. Está pensada sobre todo para reclutadores y, en menor medida, para clientes potenciales de sus servicios. Es un sitio estático y bilingüe (inglés y castellano), sin base de datos ni backend propio.
+Web portfolio de Pedro Suárez Gallardo, desarrollador web full-stack. Pensada para reclutadores y, en menor medida, clientes potenciales. Sitio estático y bilingüe (`en`, `es`), sin base de datos ni backend. Home de una sola página (Navbar, Hero, About, Experience, Projects, Stack, Contact, Footer) más una página por proyecto en `/projects/[slug]`.
 
-Diseño **minimalista pero visualmente espectacular**: sobrio en cantidad de elementos, ambicioso en ejecución. Debe sentirse como una pieza editorial de alto impacto, no como una plantilla genérica:
-- Paleta: crudo y negro, con modo oscuro. Sin color de acento: el impacto nace del contraste extremo, la escala y la composición.
-- Tipografía: monoespaciada y elegante, con escala editorial (titulares grandes que actúan como elemento gráfico y cuerpo contenido y legible).
-- Composición: espacio negativo generoso, retícula visible, asimetría controlada, bloques invertidos y detalles tipográficos. Cada página debe tener al menos un momento visual memorable.
+Minimalista en elementos, espectacular en ejecución: una pieza editorial de alto impacto, nunca una plantilla. Stack: Next.js (App Router), React, TypeScript, Tailwind, `next-intl`, Iconoir (solo iconos).
 
-Stack: Next.js (App Router), React, TypeScript, Tailwind CSS e i18n para los idiomas `en` y `es`.
+## Antes de tocar código
+1. Lee `docs/constitution.md` y la spec activa en `docs/specs/`. Si no existen, no las inventes: pregunta.
+2. Next.js 16 tiene cambios incompatibles: lee la guía relevante en `node_modules/next/dist/docs/` antes de escribir código.
+3. La estructura de carpetas y el plan de desarrollo están en el `README.md`. Respétalos.
 
 ## Comandos
-Gestor de paquetes: **pnpm**. No uses npm ni yarn, y no generes `package-lock.json` ni `yarn.lock`.
+Solo **pnpm** (nada de npm/yarn ni `package-lock.json`).
 
-- Instalar dependencias: `pnpm install`
-- Ejecutar en local: `pnpm dev`
-- Build de producción: `pnpm build`
-- Servir el build: `pnpm start`
-- Tests unitarios y de componentes (Vitest + React Testing Library): `pnpm test` **(por añadir)**
-- Tests en modo watch: `pnpm test:watch` **(por añadir)**
-- Tests end-to-end (Playwright): `pnpm test:e2e` **(por añadir)**
-- Typecheck: `pnpm typecheck` (`tsc --noEmit`) **(por añadir)**
-- Lint: `pnpm lint` (ESLint)
+| Comando | Para qué |
+| --- | --- |
+| `pnpm dev` / `pnpm build` / `pnpm start` | Desarrollo, build y servir el build |
+| `pnpm lint` | ESLint |
+| `pnpm typecheck` | `tsc --noEmit` |
+| `pnpm test` | Vitest + RTL con cobertura (umbral 95%) |
+| `pnpm test:watch` | Vitest en modo watch, sin cobertura |
+| `pnpm test:e2e` | Playwright |
 
-Para iterar rápido, ejecuta solo el test afectado (por ejemplo `pnpm exec vitest run ruta/al/archivo.test.tsx`) en lugar de toda la suite.
+Para iterar rápido: `pnpm exec vitest run ruta/al/archivo.test.tsx`.
 
-## Estilo y convenciones
-- Next.js 16.4.3, React 19.3.0, TypeScript. Tailwind para estilos.
-- Código y comentarios en inglés.
-- Nombres en `camelCase`; constantes en `SCREAMING_SNAKE_CASE`.
-- Commits en inglés siguiendo Conventional Commits (`feat:`, `fix:`, `chore:`, `docs:`, `test:`, `refactor:`...).
-- Todos los textos visibles para el usuario van en los diccionarios i18n (inglés y castellano), nunca escritos directamente en los componentes. Cualquier texto nuevo debe añadirse en ambos idiomas.
-- Respetar siempre la identidad visual: minimalista pero de alto impacto visual, crudo y negro, fuente monoespaciada, y que modo claro y oscuro se vean igual de cuidados. Ninguna página debe verse plana o genérica: como mínimo, cada una debe tener un momento visual deliberado (titular a gran escala, bloque invertido, retícula, composición asimétrica o revelado contenido).
-- SEO: todo contenido nuevo debe tener metadatos propios por idioma (Metadata API), estructura semántica de encabezados y renderizado en servidor o estático. Sigue el principio de SEO de `docs/constitution.md`.
-- Animaciones: contenidas pero expresivas, siempre al servicio del impacto visual (transiciones de tema, hover, entradas escalonadas y revelados al hacer scroll). Las transiciones de estado duran 150-400 ms; los revelados de entrada pueden llegar a 600 ms, con easing suave y sin bloquear la lectura. Respeta siempre `prefers-reduced-motion`: con movimiento reducido, el impacto debe mantenerse mediante composición y tipografía estáticas. No uses librerías de animación sin preguntar; prefiere transiciones CSS/Tailwind.
-- Componentes: la UI se construye con componentes pequeños, de una sola responsabilidad y reutilizables. Antes de crear un componente, busca si ya existe uno que sirva y reutilízalo o extiéndelo mediante props. Si un bloque de JSX se repite o un componente crece demasiado, divídelo.
-- Los componentes de presentación no contienen textos ni datos: reciben todo por props o desde los diccionarios i18n.
-- Cada componente reutilizable tiene tipado explícito de sus props y un test (Vitest + React Testing Library).
-
-## Reglas
-- Si existen `docs/constitution.md` y una spec activa, léelos antes de tocar código. Si no existen, no los inventes: pregunta antes de empezar cualquier cambio no trivial.
-- Puedes modificar cualquier parte del proyecto, pero **pregunta antes de**:
-  - Añadir dependencias nuevas (`pnpm add`), incluida la librería de i18n.
-  - Hacer cambios sustanciales en el código existente.
-  - Modificar capas de abstracción muy transversales (layout raíz, sistema de i18n, configuración de tema y estilos globales, configuración de Tailwind/TypeScript/ESLint...).
-- No introduzcas base de datos, backend ni servicios externos.
+## Convenciones
+- Código, comentarios y commits en inglés. `camelCase`; constantes en `SCREAMING_SNAKE_CASE`; componentes en `PascalCase`. Conventional Commits.
+- Imports con el alias `@/` (apunta a `src/`); sin rutas relativas que suban niveles (`../../`).
+- Sin repetición: antes de escribir algo, busca si ya existe. Si lo vas a repetir, extráelo.
+- Estilos solo con los tokens del tema de `globals.css`; sin valores mágicos repetidos.
 - Cambios pequeños y enfocados: no mezcles refactors con funcionalidades nuevas.
-- Atomizar no significa abstraer en exceso: no crees hooks, contextos ni wrappers genéricos "por si acaso". Extrae un componente cuando hay repetición real o una responsabilidad claramente separable.
 
-## Al terminar cualquier tarea
-Ejecuta y comprueba que pasan, en este orden:
-1. `pnpm lint`
-2. `pnpm typecheck`
-3. `pnpm test`
-4. `pnpm test:e2e` (obligatorio siempre: ningún cambio se da por terminado sin que los flujos end-to-end pasen en verde)
+## Componentes
+- Carpeta `Nombre/` con `Nombre.tsx` y `Nombre.test.tsx`, en `components/ui/` (genéricos, solo props) o `components/sections/` (bloques de la página).
+- Una responsabilidad, props con tipos explícitos, unas 100 líneas como máximo. Las secciones se componen con piezas de `ui/`.
+- Extiende un componente existente mediante props antes de crear otro. No crees hooks, contextos ni wrappers genéricos "por si acaso".
+- Un proyecto nuevo es solo datos: una entrada en `content/projects.ts` y sus textos en `messages/`. No crees componentes nuevos para ello.
+- Las secciones son componentes síncronos que usan `useTranslations` (así se pueden testear). Los datos asíncronos, solo en `page.tsx`.
 
-Si algo falla, corrígelo antes de dar la tarea por terminada o explica claramente por qué no se puede.
+## i18n y SEO
+- Textos en `messages/en.json` y `messages/es.json`, mismas claves, siempre los dos idiomas en el mismo cambio. `src/i18n/messages.test.ts` comprueba que coinciden.
+- `setRequestLocale` en layouts y páginas para mantener el renderizado estático. Navegación con los helpers de `src/i18n/navigation.ts`.
+- Metadatos por idioma (Metadata API), también en cada página de proyecto (`generateStaticParams` + `generateMetadata`), encabezados semánticos, `hreflang`, sitemap y renderizado estático.
+
+## Tests
+- **Qué testear:** comportamiento visible: contenido mostrado, roles y etiquetas accesibles, variantes, interacción (`userEvent`), estados. Consulta por rol/texto/etiqueta, nunca por clases ni estructura interna.
+- **Qué no:** snapshots, clases de Tailwind, detalles internos, ni el comportamiento de Next, `next-intl` o Iconoir. No escribas un test solo para subir la cobertura.
+- **Lógica pura** (`lib/`): tests con tabla de casos, incluidos los límites.
+- **Secciones:** `renderWithIntl` (`src/test/`) con los mensajes reales de `en.json`, para que una clave que falte rompa el test.
+- **Cobertura:** mínimo 95% en líneas, funciones, ramas y sentencias, con umbral en la configuración de Vitest. Nunca bajes el umbral ni excluyas código para cumplirlo; si falta cobertura, falta un test con sentido.
+- **e2e (Playwright):** solo flujos críticos: cambio de idioma, cambio de tema, navegación por secciones. Con `prefers-reduced-motion` activado.
+- Escribe los tests antes que el código.
+
+## Dirección visual
+- Crudo y negro; modo oscuro diseñado, no invertido (crudo sobre negro puro). Una familia monoespaciada (`next/font`), máximo dos pesos. Sin color de acento.
+- Escala extrema: titulares masivos y fluidos (`clamp`) como elemento gráfico frente a cuerpo pequeño y legible. El nombre del hero ocupa el ancho de la pantalla.
+- Retícula visible con líneas de 1 px, secciones numeradas (`01 / EXPERIENCE`), metadatos pequeños en mono, bloques invertidos, asimetría y mucho espacio negativo.
+- Detalles tipográficos: texto contorneado (`-webkit-text-stroke`), cifras tabulares, cursor parpadeante tipo terminal, inversión de color en hover.
+- Movimiento solo con CSS: revelados al hacer scroll (`animation-timeline: view()` con fallback visible), entradas escalonadas, transición de tema con View Transitions. Estados 150–400 ms, revelados hasta 600 ms. Sin librerías de animación.
+- Con `prefers-reduced-motion`, el impacto debe mantenerse con composición y tipografía estáticas.
+- Cada sección tiene su "momento firma" definido en su spec.
+
+## Pregunta antes de
+- Añadir dependencias (`pnpm add`).
+- Hacer cambios grandes en código existente.
+- Tocar capas transversales: layout raíz, sistema i18n, tema y estilos globales, configuración de Tailwind/TypeScript/ESLint/Vitest.
+- Crear carpetas nuevas en la raíz o en `src/`.
+
+No introduzcas base de datos, backend ni servicios externos.
+
+## Al terminar una tarea
+Comprueba que pasan, en este orden: `pnpm lint`, `pnpm typecheck`, `pnpm test`. Si has tocado idioma, tema o navegación (o vas a abrir un PR), añade `pnpm test:e2e`. Si algo falla, corrígelo o explica claramente por qué no se puede.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

@@ -15,6 +15,10 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'chrome',
       use: { ...devices['Desktop Chrome'], channel: 'chrome' },
     },
     {
@@ -24,10 +28,6 @@ export default defineConfig({
     {
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
-    },
-    {
-      name: 'edge',
-      use: { ...devices['Desktop Chrome'], channel: 'msedge' },
     },
     {
       name: 'mobile-chromium',

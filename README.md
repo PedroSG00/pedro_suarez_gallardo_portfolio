@@ -1,139 +1,187 @@
-# pedro-suarez-cv
+```markdown
+# pedro_suarez_gallardo_portfolio
 
-Personal résumé and portfolio website of **Pedro Suárez Gallardo**, web developer.
+Personal portfolio website of Pedro Suárez Gallardo, full-stack developer.
 
-It is aimed mainly at recruiters and, occasionally, at potential clients. The site is static and bilingual (English and Spanish), with no database or custom backend.
+Aimed mainly at recruiters and, occasionally, at potential clients. Static and bilingual (English and Spanish), with no database or custom backend.
 
-<!-- Add a screenshot here once the design is ready:
-![Portfolio screenshot](./docs/screenshot.png)
--->
-
-**Live site:** <!-- https://your-domain.com -->
 
 ## Design
 
-- Minimalist, "tech" look with a distinctive personality.
-- Off-white (cream) and black palette, with dark mode.
-- Elegant monospaced typography.
+Minimal in elements, spectacular in execution: an editorial, high-impact piece, not a template.
+
+- Cream and black palette with a designed (not merely inverted) dark mode. No accent color.
+- Monospaced typography at extreme scale: massive fluid headlines against small, readable body text.
+- Visible grid, numbered sections, inverted blocks, asymmetry and generous negative space.
+- CSS-only motion: scroll reveals, staggered entrances, themed transitions. Fully respects `prefers-reduced-motion`.
+
+Details live in `AGENTS.md`; each section defines its own "signature moment" in its spec.
 
 ## Tech stack
 
-- [Next.js](https://nextjs.org/) 16 (App Router)
-- [React](https://react.dev/) 19
-- [TypeScript](https://www.typescriptlang.org/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- i18n for English (`en`) and Spanish (`es`)
-- Testing: [Vitest](https://vitest.dev/), [React Testing Library](https://testing-library.com/react) and [Playwright](https://playwright.dev/)
-- Linting: [ESLint](https://eslint.org/)
+- Next.js 16 (App Router), React 19, TypeScript
+- Tailwind CSS
+- next-intl for i18n (`en`, `es`)
+- Iconoir for icons
+- Testing: Vitest (v8 coverage), React Testing Library, Playwright
+- Linting: ESLint
 
 ## Getting started
 
-### Prerequisites
-
-- [Node.js](https://nodejs.org/) (current LTS recommended)
-- [pnpm](https://pnpm.io/installation)
-
-### Installation
+Requirements: Node.js (current LTS) and pnpm.
 
 ```bash
 git clone <repository-url>
 cd <repository-folder>
 pnpm install
+pnpm dev        # http://localhost:3000
+
 ```
+
+## Scripts
+
+| Command | Description |
+| --- | --- |
+| `pnpm dev` | Development server |
+| `pnpm build` / `pnpm start` | Production build / serve it |
+| `pnpm lint` | ESLint |
+| `pnpm typecheck` | TypeScript, no emit |
+| `pnpm test` | Unit and component tests with coverage (fails under 95%) |
+| `pnpm test:watch` | Same tests in watch mode, without coverage |
+| `pnpm test:e2e` | End-to-end tests (Playwright) |
+
+Install the Playwright browsers once with `pnpm exec playwright install`.
+
 ## Project structure
 
 ```text
 .
-├── app/                    # Next.js App Router
-│   ├── favicon.ico
-│   ├── globals.css         # Global styles and Tailwind entry point
-│   ├── layout.tsx          # Root layout
-│   └── page.tsx            # Home page
-├── public/                 # Static assets served as-is
-├── AGENTS.md               # Instructions for coding agents
-├── eslint.config.mjs       # ESLint configuration
-├── next.config.ts          # Next.js configuration
-├── package.json
-├── pnpm-lock.yaml
-├── pnpm-workspace.yaml
-├── README.md
-└── tsconfig.json           # TypeScript configuration
+├── .github/workflows/ci.yml     # CI: lint, typecheck, test, e2e on every PR
+├── src/
+│   ├── app/
+│   │   └── [locale]/            # One route tree, prefixed by language (/en, /es)
+│   │       ├── layout.tsx       # Wraps every page with Navbar and Footer
+│   │       ├── page.tsx         # Home: composes the sections
+│   │       └── projects/
+│   │           └── [slug]/
+│   │               └── page.tsx # One page per project, generated from content/projects.ts
+│   ├── components/
+│   │   ├── Navbar/              # Global navigation component
+│   │   │   ├── Navbar.tsx
+│   │   │   └── Navbar.test.tsx
+│   │   ├── Footer/              # Global footer component
+│   │   │   ├── Footer.tsx
+│   │   │   └── Footer.test.tsx
+│   │   ├── ui/                  # Generic pieces, props only (Button, Heading, Tag, ThemeToggle...)
+│   │   │   └── Button/
+│   │   │       ├── Button.tsx
+│   │   │       └── Button.test.tsx
+│   │   └── sections/            # Page blocks (Hero, About, Experience, Projects, Stack, Contact, ProjectDetail)
+│   │       └── Hero/
+│   │           ├── Hero.tsx
+│   │           └── Hero.test.tsx
+│   ├── content/                 # Typed, non-translatable data (projects, stack, links)
+│   ├── i18n/                    # next-intl setup, navigation helpers, messages parity test
+│   ├── lib/                     # Small pure helpers (+ their tests)
+│   ├── styles/
+│   │   └── globals.css          # Tailwind entry point and theme tokens (single source of design values)
+│   └── test/                    # Test helpers (renderWithIntl, setup)
+├── messages/
+│   ├── en.json                  # All visible text, English
+│   └── es.json                  # All visible text, Spanish (same keys as en.json)
+├── e2e/                         # Playwright specs: language, theme, navigation
+├── docs/
+│   ├── constitution.md          # Non-negotiable project rules
+│   └── specs/                   # One spec per non-trivial change
+├── public/                      # Static assets (CV PDF, favicon, OG image)
+├── AGENTS.md                    # Instructions for coding agents
+└── README.md
+
 ```
 
-> The structure is still minimal and will grow as the project does (i18n routing, components, dictionaries, tests, `docs/`...). Keep this section up to date when it changes.
+## Rules that keep it maintainable
 
-### Run locally
+* One component = one folder with its file and its test: `Name/Name.tsx` + `Name/Name.test.tsx`.
+* Component organization: `ui/` (generic, props only, knows nothing about portfolio content), `sections/` (page blocks that compose `ui/` pieces and read `messages/` and `content/`), and top-level layout components (`Navbar/`, `Footer/`) used in `layout.tsx`. No deeper nesting.
+* Atomic and reusable: one responsibility each, around 100 lines at most. A block repeated twice with the same intent gets extracted.
+* No duplicated values: colors, spacing and type scale come only from the theme tokens in `globals.css`.
+* No barrel files (`index.ts`); import with the `@/` alias (maps to `src/`).
+* Adding a project is data, not code: one entry in `content/projects.ts` plus its texts in `messages/`. The list and the detail page render from it, so no new component is needed.
+* No new top-level folders without a reason written in a spec.
+* Things used by one component live next to it; they move to `ui/` or `lib/` only when a second consumer appears.
 
-```bash
-pnpm dev
-```
+## Testing
 
-The site will be available at [http://localhost:3000](http://localhost:3000).
-
-## Available scripts
-
-| Command | Description |
-| --- | --- |
-| `pnpm dev` | Start the development server |
-| `pnpm build` | Create a production build |
-| `pnpm start` | Serve the production build |
-| `pnpm lint` | Run ESLint |
-| `pnpm typecheck` | Run the TypeScript compiler without emitting files |
-| `pnpm test` | Run unit and component tests (Vitest + React Testing Library) |
-| `pnpm test:watch` | Run unit and component tests in watch mode |
-| `pnpm test:e2e` | Run end-to-end tests (Playwright) |
-
-### Running the tests
-
-Unit and component tests:
-
-```bash
-pnpm test
-```
-
-End-to-end tests require the Playwright browsers. Install them once:
-
-```bash
-pnpm exec playwright install
-```
-
-Then run:
-
-```bash
-pnpm test:e2e
-```
+* Quality over quantity: tests check user-visible behavior (content, roles, interaction, states, accessibility). No snapshots, no Tailwind class assertions, no tests written only to raise coverage.
+* Coverage ≥ 95% (lines, functions, branches, statements), enforced by the Vitest threshold. Excluded: configuration, `app/` route files (covered by e2e), `content/` and `messages/`.
+* Playwright covers only the critical flows: language, theme and navigation.
+* Tests are written before the code.
 
 ## Internationalization
 
-The site is available in English and Spanish. All user-facing text lives in the i18n dictionaries and never directly in components, so any new text must be added in both languages.
+Handled by `next-intl` with locale-prefixed routes (`/en`, `/es`) and static rendering. All visible text lives in `messages/en.json` and `messages/es.json`, organized by section (`hero.title`, `experience.items`...). Every new text is added to both files in the same change; a test verifies that both have the same keys. Each page defines its own metadata per language.
+
+## Page structure
+
+Every route is wrapped by the global `Navbar` and `Footer` layout components. The home page is a single scroll with anchors; each project also has its own page (`/en/projects/<slug>`, `/es/projects/<slug>`), statically generated with its own metadata.
+
+**Layout components:**
+
+
+
+**Home page sections:**
+1. **Navbar**: section links, language and theme switches.
+2. **Hero**: name, role, short pitch. Home of the site's signature moment.
+3. **About**: who I am and how I work, in a personal voice.
+4. **Experience**: what I have built and led, told through the work (real-time dashboards, web migrations, workflow tools, integrations, performance), with no company names.
+5. **Projects**: summary of each project, each linking to its own page. Rambler is the first.
+6. **Stack**: the technologies I work with, grouped.
+7. **Contact**: how to reach me.
+8. **Footer**: links, language and copyright.
+
+## Development plan
+
+Every phase follows the same loop: spec → tests → code → gates (`lint`, `typecheck`, `test`, and `test:e2e` when it applies). A phase is done only when its gates pass.
+
+| Phase | Goal | Done when |
+| --- | --- | --- |
+| **0. Foundation** | Tooling (Vitest + coverage threshold, RTL, Playwright, CI), `next-intl` with `/en` and `/es`, theme tokens, mono font, light/dark theme | Empty localized page builds, theme and language switch work, e2e green |
+| **1. Atoms** | `ui/` pieces: Button/Link, Heading, Tag, Section wrapper, grid lines, ThemeToggle, LanguageSwitch | Each atom tested and reusable, no section-specific code inside |
+| **2. Shell and Hero** | Global layout components (`Navbar`, `Footer`) and the `Hero` section with the site's signature moment | Memorable at first glance in both themes and both languages; navigation works |
+| **3. About and Experience** | Personal narrative sections, composed from atoms | Same standard as previous phases; content only from `messages/` and `content/` |
+| **4. Projects** | Projects summary section and the dynamic project page (`[slug]`) | Rambler live in both languages; adding a project needs only data |
+| **5. Stack and Contact** | Grouped stack and contact block | Links verified, no duplicated markup between groups |
+| **6. Polish** | Per-language metadata, sitemap, robots, OG image, accessibility pass, performance pass, reduced-motion check | Lighthouse 95+ in all categories, AA contrast, full keyboard navigation |
+| **7. Launch** | Static deploy and domain | Live site and README links filled in |
 
 ## Conventions
 
-- Code and comments in English.
-- `camelCase` for names and `SCREAMING_SNAKE_CASE` for constants.
-- Commits follow [Conventional Commits](https://www.conventionalcommits.org/) (e.g. `feat: add contact section`).
-
-Before opening a pull request or finishing a task, make sure these pass:
-
+* Code, comments and commits in English; `camelCase` for names, `SCREAMING_SNAKE_CASE` for constants, `PascalCase` for components.
+* Conventional Commits (e.g. `feat: add contact section`).
+* Non-trivial changes start with a spec in `docs/specs/`. See `docs/constitution.md`.
+* Before opening a pull request:
 ```bash
-pnpm lint
-pnpm typecheck
-pnpm test
+pnpm lint && pnpm typecheck && pnpm test && pnpm test:e2e
+
 ```
+
+
 
 ## AI agents
 
-This repository includes an [`AGENTS.md`](./AGENTS.md) file with the instructions and rules that coding agents must follow when working on the project.
+`AGENTS.md` holds the instructions coding agents must follow in this repository.
 
 ## License
 
-<!-- Choose a license (e.g. MIT) and add a LICENSE file, or state that all rights are reserved. -->
-
 ## Contact
 
-**Pedro Suárez Gallardo**
+Pedro Suárez Gallardo
 
-- Website: <!-- https://your-domain.com -->
-- GitHub: <!-- https://github.com/your-user -->
-- LinkedIn: <!-- https://linkedin.com/in/your-user -->
-- Email: <!-- your@email.com -->
+* Website: 
+* GitHub: 
+* LinkedIn: 
+* Email: 
+
+```
+
+```
