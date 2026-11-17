@@ -4,7 +4,20 @@ Tareas pequeñas y ordenadas (T1 → T11). Cada tarea tiene objetivo, RF que cub
 
 ---
 
-## T1 — Archivos de mensajes y tipo Locale
+## ~~T1 — Archivos de mensajes y tipo Locale~~ ✅ COMPLETADA
+
+**RF cubiertos:** RF-6, RF-7
+
+**Resultado:**
+- `messages/en.json` y `messages/es.json` creados en la raíz del proyecto con textos agrupados por sección (shared, hero, about, work, stack, contact, footer, notFound).
+- `src/lib/locale.ts` con `export type Locale = "en" | "es"`.
+- `src/lib/i18n-parity.ts` con `validateParity` y `flattenKeys`.
+- Tests: `src/lib/i18n-parity.test.ts` (4 casos) y `src/lib/locale.test.ts` (1 caso).
+- `pnpm exec vitest run --coverage`: 2 test files, 4 tests passed, cobertura 100% (statements, branches, functions, lines).
+
+---
+
+## T2 — Helpers de cookie de preferencia (RF-1)
 
 **Objetivo:** Crear `messages/en.json` y `messages/es.json` en la raíz del proyecto con textos agrupados por sección (shared, hero, about, work, stack, contact, footer, notFound), y definir el tipo `Locale = "en" | "es"`. Ambos archivos deben tener las mismas claves.
 

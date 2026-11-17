@@ -1,0 +1,44 @@
+{
+  "shared": {
+    "nav": {
+      "home": "Inicio",
+      "about": "Sobre mí",
+      "experience": "Experiencia",
+      "stack": "Stack",
+      "contact": "Contacto"
+    },
+    "langSwitch": {
+      "en": "English",
+      "es": "Español"
+    },
+    "notFound": {
+      "title": "No encontrado",
+      "message": "Esta página no existe."
+    }
+  },
+  "hero": {
+    "title": "Portfolio web",
+    "subtitle": "Desarrollador full-stack"
+  },
+  "about": {
+    "intro": "Sobre mí",
+    "values": "Valores"
+  },
+  "work": {
+    "intro": "Experiencia",
+    "results": "Resultados"
+  },
+  "stack": {
+    "intro": "Stack"
+  },
+  "contact": {
+    "intro": "Contacto",
+    "email": "Email",
+    "linkedin": "LinkedIn",
+    "github": "GitHub",
+    "cv": "CV"
+  },
+  "footer": {
+    "text": "Pedro Suárez Gallardo"
+  }
+}
