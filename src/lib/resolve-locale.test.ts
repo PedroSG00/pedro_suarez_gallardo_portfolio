@@ -1,6 +1,5 @@
 import { describe, expect, test } from 'vitest';
 import { resolveLocaleForRoot } from './resolve-locale';
-import type { Locale } from './locale';
 
 describe('resolveLocaleForRoot', () => {
   const request = (acceptLanguage?: string) => ({

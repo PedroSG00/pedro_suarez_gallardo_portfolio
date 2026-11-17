@@ -1,6 +1,5 @@
 import { describe, expect, test } from 'vitest';
 import { getLocaleCookie, setLocaleCookie } from './cookie-locale';
-import type { Locale } from './locale';
 
 describe('getLocaleCookie', () => {
   test('returns "en" when cookie contains valid locale en', () => {
