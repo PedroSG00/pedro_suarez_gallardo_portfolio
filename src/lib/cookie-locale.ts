@@ -5,7 +5,7 @@ const COOKIE_MAX_AGE = 31536000; // 1 año en segundos
 
 function parseCookieValue(cookieHeader?: string): string | undefined {
   if (!cookieHeader) return undefined;
-  const match = cookieHeader.match(/(?:^|; *)psg_locale=([^;]+)/);
+  const match = cookieHeader.match(new RegExp('(?:^|; *)psg_locale=([^;]+)'));
   return match?.[1];
 }
 
