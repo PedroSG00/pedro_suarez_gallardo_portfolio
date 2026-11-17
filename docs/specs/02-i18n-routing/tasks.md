@@ -48,22 +48,16 @@ Tareas pequeñas y ordenadas (T1 → T11). Cada tarea tiene objetivo, RF que cub
 
 ---
 
-## T3 — Resolución de locale para `/` (RF-1)
-
-**Objetivo:** Crear la función pura `resolveLocaleForRoot(request, cookieStore)` que resuelva el idioma de la portada sin prefijo: 1) cookie previa si es válida, 2) `Accept-Language` del navegador respetando el orden y normalizando subtags regionales (`es-ES → es`, `en-US → en`), 3) fallback a inglés.
+## ~~T3 — Resolución de locale para `/`~~ ✅ COMPLETADA
 
 **RF que cubre:** RF-1
 
-**Tests a escribir primero:**
-- Test de unidad: cuando existe cookie válida, se devuelve el idioma de la cookie (prioridad sobre el navegador).
-- Test de unidad: sin cookie, se devuelve el primer idioma compatible del `Accept-Language` en orden.
-- Test de unidad: `es-ES` se normaliza a `es`; `en-US` se normaliza a `en`.
-- Test de unidad: si el navegador no indica un idioma compatible, se devuelve `"en"`.
-- Test de unidad: si no se puede leer la cookie (modo incógnito/bloqueadas), se usa el navegador y, como alternativa, inglés.
-
-**Criterio de hecho:**
-- `resolveLocaleForRoot` implementada como función pura en `src/lib/`.
-- Todos los casos límite de resolución de `/` están cubiertos por tests unitarios que pasan.
+**Resultado:**
+- `src/lib/resolve-locale.ts` implementado como función pura `resolveLocaleForRoot(request, cookieStore)`.
+- Lógica: 1) cookie previa válida (`psg_locale`) con prioridad, 2) `Accept-Language` del navegador respetando orden y normalizando subtags regionales (`es-ES → es`, `en-US → en`), 3) fallback a inglés.
+- Tests: `src/lib/resolve-locale.test.ts` (11 casos: cookie prioritaria, orden Accept-Language, normalización de subtags, fallback inglés, cookie inválida/vacía, sin cookieStore).
+- `pnpm exec vitest run --coverage`: 4 test files, 26 tests passed, cobertura 100% (statements, branches, functions, lines).
+- La función es pura, no depende de Next.js ni del DOM.
 
 ---
 
