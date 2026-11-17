@@ -75,20 +75,17 @@ Tareas pequeñas y ordenadas (T1 → T11). Cada tarea tiene objetivo, RF que cub
 
 ---
 
-## T5 — Helper de cambio de idioma (RF-3)
-
-**Objetivo:** Crear la función pura `buildLocalizedHref(currentUrl: URL, targetLocale: Locale): string` que construya la URL localizada cambiando solo el primer segmento del path, conservando `hash` y `search` tal cual. Desde una ruta inexistente (`/en/unknown`), cambiar a español debe dar `/es/unknown`.
+## ~~T5 — Helper de cambio de idioma~~ ✅ COMPLETADA
 
 **RF que cubre:** RF-3
 
-**Tests a escribir primero:**
-- Test de unidad: cambiar de `/es#contact` a inglés devuelve `/en#contact` (fragmento conservado aunque no exista en destino).
-- Test de unidad: cambiar de `/en?utm_source=linkedin` a español devuelve `/es?utm_source=linkedin` (query conservada tal cual).
-- Test de unidad: cambiar de `/en/unknown` a español devuelve `/es/unknown` (path conservado bajo el nuevo idioma).
-- Test de unidad: no se mezclan idiomas; solo cambia el primer segmento del path.
-
-**Criterio de hecho:**
-- `buildLocalizedHref` implementada y todos los casos de conservación de `hash`, `search` y path pasan sus tests unitarios.
+**Resultado:**
+- `src/lib/build-localized-href.ts` implementado como función pura `buildLocalizedHref(currentUrl: URL, targetLocale: Locale): string`.
+- Cambia solo el primer segmento del path con el locale destino; conserva `hash` y `search` tal cual.
+- Tests: `src/lib/build-localized-href.test.ts` (6 casos: fragmento conservado, query conservada, path inexistente conservado, solo primer segmento cambiado, path raíz, hash y query juntos).
+- `pnpm exec vitest run --coverage`: 6 test files, 36 tests passed, cobertura 100% (statements, branches, functions, lines).
+- `pnpm lint`: limpio (sin errores ni warnings).
+- La función es pura, no depende de Next.js ni del DOM.
 
 ---
 
