@@ -667,6 +667,13 @@ el ruleset; nunca se crea un ruleset con checks inexistentes.
 
 ## T11 — Cierre documental y verificación de Dependabot
 
+**Estado:** hecho (2026-11-17). PR #11 (`verify/gates → main`) fusionado en `main` con los seis
+checks verdes (`lint`, `typecheck`, `test`, `build`, `e2e`, `sonar`). Commit de cierre
+`docs(01): mark the tooling spec as done` (44f3679) con la casilla de la 01 marcada en
+`docs/roadmap.md`, la matriz del apartado 11 rellenada con enlaces reales de T7–T10, y
+lectura cruzada de `README.md`/`AGENTS.md` contra `package.json` (comandos idénticos).
+`main` tiene un run de CI en verde (run `44193960633`).
+
 **Objetivo:** cerrar la spec con la documentación y el roadmap alineados, la matriz con
 evidencias reales y el PR de Dependabot verificado o marcado como pendiente.
 
