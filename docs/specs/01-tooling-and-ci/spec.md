@@ -81,10 +81,11 @@ infraestructura (caídas de Actions, disco lleno, caché corrupta, tokens caduca
   `README.md` y `AGENTS.md` y elimina la ambigüedad del `app/` raíz.
 - **D4. `next typegen` antes de `tsc`.** Es la única forma de tener los tipos de ruta en un clon limpio
   sin compilar la app.
-- **D5. `react/jsx-no-literals` con `{ noStrings: true }`.** Con cero opciones la regla queda inerte
-  (verificado en el código instalado de `eslint-plugin-react`); `noStrings` marca el texto hijo y deja
-  los atributos para la spec 02. `--max-warnings=0` convierte cualquier aviso en fallo, que es lo único
-  verificable por código de salida.
+- **D5. `react/jsx-no-literals` con `{ noStrings: true, ignoreProps: true }`.** Con cero opciones la
+  regla queda inerte (verificado en el código instalado de `eslint-plugin-react`); `noStrings` también
+  marca valores de atributos, por lo que `ignoreProps` los excluye y deja la regla limitada al texto
+  hijo. `--max-warnings=0` convierte cualquier aviso en fallo, que es lo único verificable por código
+  de salida.
 - **D6. Alias en Vitest sin plugin extra.** Vite 8.3.5 resuelve `paths` con `resolve.tsconfigPaths`;
   añadir `vite-tsconfig-paths` sería duplicar una capacidad ya presente.
 - **D7. Umbral global, no `perFile`.** El 95 % lo impone Vitest sobre el total; Sonar no lo duplica y

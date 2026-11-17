@@ -135,6 +135,12 @@ emitido con las utilidades.
 
 ## T2 — Entorno reproducible y guarda de gestor
 
+**Estado:** hecho (2026-11-17). `pnpm install --frozen-lockfile` pasó sin modificar
+`pnpm-lock.yaml`; las negativas de engine, gestor y build script abortaron como se esperaba;
+`git check-attr` y `pnpm build` pasaron. `pnpm test` aún falla porque Vitest no encuentra
+tests; la suite se añade en T5. Yarn 1 abortó primero por el campo `packageManager`; la
+guarda se verificó ejecutando `preinstall` con su *user agent*.
+
 **Objetivo:** que un clon limpio instale con pnpm en las versiones declaradas y que
 cualquier otro gestor, Node fuera de rango o build script no revisado aborte la
 instalación.
@@ -188,6 +194,12 @@ incompatible (riesgo 1 de la spec), que se documenta y se decide, sin apagar `en
 
 ## T3 — Typecheck con tipos de ruta
 
+**Estado:** hecho (2026-11-17). `pnpm typecheck` pasa desde un árbol sin `.next/` ni
+`next-env.d.ts`; `next typegen` genera los tipos antes de `tsc`. El error temporal se detectó
+con ruta y línea, y se retiró. La comprobación limpia previa al cambio ya pasaba porque el
+código aún no consume helpers de ruta. `pnpm build` pasa; `pnpm test` sigue sin encontrar
+tests, que se incorporan en T5.
+
 **Objetivo:** que `pnpm typecheck` funcione en un clon sin `.next/` ni `next-env.d.ts` y
 que un error de tipos en `src/` o en una configuración tipada lo ponga rojo.
 
@@ -226,6 +238,15 @@ antes lo que rompe el build, no se relaja el typecheck.
 ---
 
 ## T4 — Dependencias aprobadas y lint real
+
+**Estado:** hecho (2026-11-17). Se instalaron las cuatro dependencias aprobadas y se quitaron
+`@types/jest` y `eslint-plugin-vitest`; `pnpm install --frozen-lockfile`, `pnpm lint`,
+`pnpm typecheck` y `pnpm build` pasan. Los fixtures temporales confirmaron texto hijo rojo,
+literal en test verde y aviso `no-console` (activado como `warn` solo en el fixture `.mjs`)
+rojo por `--max-warnings=0`; se eliminaron. `src/app/page.tsx` pasó sin cambios. La primera
+ejecución confirmó que `noStrings` también marcaba atributos, por lo que se añadió
+`ignoreProps: true` y se actualizó D5 en la spec. `pnpm test` todavía no encuentra suites; se
+configura en T5.
 
 **Objetivo:** tener instaladas exactamente las cuatro altas netas del apartado 12 y ninguna
 de las dos bajas, y que `pnpm lint` falle con cualquier aviso, prohíba texto hijo literal en
