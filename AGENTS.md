@@ -1,7 +1,9 @@
 # AGENTS.md — pedro-suarez-cv
 
 ## Proyecto
-Web portfolio de Pedro Suárez Gallardo, desarrollador web full-stack. Pensada para reclutadores y, en menor medida, clientes potenciales. Sitio estático y bilingüe (`en`, `es`), sin base de datos ni backend. Home de una sola página (Navbar, Hero, About, Experience, Projects, Stack, Contact, Footer) más una página por proyecto en `/projects/[slug]`.
+Web portfolio de Pedro Suárez Gallardo, desarrollador web full-stack. Pensada para reclutadores y, en menor medida, clientes potenciales. Sitio estático y bilingüe (`en`, `es`), sin base de datos ni backend. Home de una sola página (Navbar, Hero, About, Experience, Stack, Contact, Footer). La sección de proyectos y la ruta `/projects/[slug]` están **aparcadas**: no las construyas ni las enlaces hasta que exista una spec.
+
+No es un CV: transmite seguridad y confianza y habla de lo que el visitante obtiene. Voz: frases cortas y afirmativas, beneficio antes que tecnología. Los textos salen del brief de contenido; no inventes cifras.
 
 Minimalista en elementos, espectacular en ejecución: una pieza editorial de alto impacto, nunca una plantilla. Stack: Next.js (App Router), React, TypeScript, Tailwind, `next-intl`, Iconoir (solo iconos).
 
@@ -11,16 +13,16 @@ Minimalista en elementos, espectacular en ejecución: una pieza editorial de alt
 3. La estructura de carpetas y el plan de desarrollo están en el `README.md`. Respétalos.
 
 ## Comandos
-Solo **pnpm** (nada de npm/yarn ni `package-lock.json`).
+Solo **pnpm** (nada de npm/yarn ni `package-lock.json`). La instalación la guarda `check-package-manager.mjs` desde `preinstall`: con npm o yarn, `pnpm install` aborta.
 
 | Comando | Para qué |
 | --- | --- |
 | `pnpm dev` / `pnpm build` / `pnpm start` | Desarrollo, build y servir el build |
-| `pnpm lint` | ESLint |
-| `pnpm typecheck` | `tsc --noEmit` |
-| `pnpm test` | Vitest + RTL con cobertura (umbral 95%) |
+| `pnpm lint` | ESLint sobre js/mjs/ts/tsx, sin permitir warnings |
+| `pnpm typecheck` | `next typegen && tsc --noEmit` |
+| `pnpm test` | Vitest + RTL con cobertura y umbral 95 % global |
 | `pnpm test:watch` | Vitest en modo watch, sin cobertura |
-| `pnpm test:e2e` | Playwright |
+| `pnpm test:e2e` | `pnpm build` + Playwright, solo Chromium |
 
 Para iterar rápido: `pnpm exec vitest run ruta/al/archivo.test.tsx`.
 
@@ -35,13 +37,12 @@ Para iterar rápido: `pnpm exec vitest run ruta/al/archivo.test.tsx`.
 - Carpeta `Nombre/` con `Nombre.tsx` y `Nombre.test.tsx`, en `components/ui/` (genéricos, solo props) o `components/sections/` (bloques de la página).
 - Una responsabilidad, props con tipos explícitos, unas 100 líneas como máximo. Las secciones se componen con piezas de `ui/`.
 - Extiende un componente existente mediante props antes de crear otro. No crees hooks, contextos ni wrappers genéricos "por si acaso".
-- Un proyecto nuevo es solo datos: una entrada en `content/projects.ts` y sus textos en `messages/`. No crees componentes nuevos para ello.
 - Las secciones son componentes síncronos que usan `useTranslations` (así se pueden testear). Los datos asíncronos, solo en `page.tsx`.
 
 ## i18n y SEO
 - Textos en `messages/en.json` y `messages/es.json`, mismas claves, siempre los dos idiomas en el mismo cambio. `src/i18n/messages.test.ts` comprueba que coinciden.
 - `setRequestLocale` en layouts y páginas para mantener el renderizado estático. Navegación con los helpers de `src/i18n/navigation.ts`.
-- Metadatos por idioma (Metadata API), también en cada página de proyecto (`generateStaticParams` + `generateMetadata`), encabezados semánticos, `hreflang`, sitemap y renderizado estático.
+- Metadatos por idioma (Metadata API) en la home, encabezados semánticos, `hreflang`, sitemap y renderizado estático.
 
 ## Tests
 - **Qué testear:** comportamiento visible: contenido mostrado, roles y etiquetas accesibles, variantes, interacción (`userEvent`), estados. Consulta por rol/texto/etiqueta, nunca por clases ni estructura interna.
@@ -49,7 +50,8 @@ Para iterar rápido: `pnpm exec vitest run ruta/al/archivo.test.tsx`.
 - **Lógica pura** (`lib/`): tests con tabla de casos, incluidos los límites.
 - **Secciones:** `renderWithIntl` (`src/test/`) con los mensajes reales de `en.json`, para que una clave que falte rompa el test.
 - **Cobertura:** mínimo 95% en líneas, funciones, ramas y sentencias, con umbral en la configuración de Vitest. Nunca bajes el umbral ni excluyas código para cumplirlo; si falta cobertura, falta un test con sentido.
-- **e2e (Playwright):** solo flujos críticos: cambio de idioma, cambio de tema, navegación por secciones. Con `prefers-reduced-motion` activado.
+- **e2e (Playwright):** solo flujos críticos: cambio de idioma, cambio de tema, navegación por secciones y movimiento de scroll. Los de navegación e idioma van con `prefers-reduced-motion` activado. El smoke de la 01 es transitorio (la home responde y sin `pageerror`); los flujos de idioma, tema, navegación y movimiento llegan con las specs 02, 03, 05 y 06.
+- **Movimiento de scroll (garantía):** en cada sección, un bloque `Reveal` tiene `opacity` < 1 al entrar por abajo, `opacity` = 1 centrado y `opacity` < 1 al salir por arriba (estilo computado, nunca clases). Con `prefers-reduced-motion: reduce`, `opacity` = 1 en cualquier posición. El último bloque queda totalmente visible al final. Se prueba en `/en` y `/es`, en tema claro y oscuro (Chromium).
 - Escribe los tests antes que el código.
 
 ## Dirección visual
@@ -57,9 +59,15 @@ Para iterar rápido: `pnpm exec vitest run ruta/al/archivo.test.tsx`.
 - Escala extrema: titulares masivos y fluidos (`clamp`) como elemento gráfico frente a cuerpo pequeño y legible. El nombre del hero ocupa el ancho de la pantalla.
 - Retícula visible con líneas de 1 px, secciones numeradas (`01 / EXPERIENCE`), metadatos pequeños en mono, bloques invertidos, asimetría y mucho espacio negativo.
 - Detalles tipográficos: texto contorneado (`-webkit-text-stroke`), cifras tabulares, cursor parpadeante tipo terminal, inversión de color en hover.
-- Movimiento solo con CSS: revelados al hacer scroll (`animation-timeline: view()` con fallback visible), entradas escalonadas, transición de tema con View Transitions. Estados 150–400 ms, revelados hasta 600 ms. Sin librerías de animación.
+- Movimiento solo con CSS, sin librerías de animación. Estados 150–400 ms, revelados hasta 600 ms; duraciones y distancias salen de tokens de `globals.css`. Entradas escalonadas y transición de tema con View Transitions.
+- Cada bloque **entra y sale** con el scroll (ver «Movimiento»).
 - Con `prefers-reduced-motion`, el impacto debe mantenerse con composición y tipografía estáticas.
-- Cada sección tiene su "momento firma" definido en su spec.
+- Cada sección tiene su "momento firma" definido en su spec. Base: Hero (nombre a todo el ancho, líneas escalonadas, cursor parpadeante; al hacer scroll pasa a contorno y se mueve más lento), About (frase invertida que se ilumina palabra a palabra), Experience (filas con número tabular que se invierten en hover), Stack (grupos escalonados con etiquetas mono), Contact (titular gigante con `clip` y email enorme que se invierte en hover).
+
+## Movimiento
+- Un único componente `ui/Reveal` (props: `children`, `variant`: `rise | clip | fade`, `delay` opcional). Una sola animación con entrada y salida mediante `animation-timeline: view()` y `animation-range: cover`: entra en ~0–25 %, estable en ~25–75 %, sale en ~75–100 % (opacidad 1→0 y desplazamiento hacia arriba). Sin JS ni librerías.
+- Seguridad: `@supports not (animation-timeline: view())` → sin animación y todo visible. `prefers-reduced-motion: reduce` → sin animación y todo visible; el impacto se sostiene con tipografía y composición estáticas. El contenido nunca depende de JS para verse. La última sección no tiene salida.
+- Antes de cerrar la fase de pulido, comprueba el soporte actual de Safari y Firefox y confirma el fallback.
 
 ## Pregunta antes de
 - Añadir dependencias (`pnpm add`).
@@ -67,10 +75,10 @@ Para iterar rápido: `pnpm exec vitest run ruta/al/archivo.test.tsx`.
 - Tocar capas transversales: layout raíz, sistema i18n, tema y estilos globales, configuración de Tailwind/TypeScript/ESLint/Vitest.
 - Crear carpetas nuevas en la raíz o en `src/`.
 
-No introduzcas base de datos, backend ni servicios externos.
+No introduzcas base de datos, backend ni servicios externos (SonarQube Cloud es la excepción aprobada: análisis estático y solo en CI).
 
 ## Al terminar una tarea
-Comprueba que pasan, en este orden: `pnpm lint`, `pnpm typecheck`, `pnpm test`. Si has tocado idioma, tema o navegación (o vas a abrir un PR), añade `pnpm test:e2e`. Si algo falla, corrígelo o explica claramente por qué no se puede.
+Comprueba que pasan, en este orden: `pnpm lint`, `pnpm typecheck`, `pnpm test` y `pnpm build`. Si has tocado idioma, tema, navegación o movimiento (o vas a abrir un PR), añade `pnpm test:e2e`. Si algo falla, corrígelo o explica claramente por qué no se puede.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

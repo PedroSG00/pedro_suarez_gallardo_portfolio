@@ -1,39 +1,34 @@
+import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
+  plugins: [react()],
+  resolve: { tsconfigPaths: true },
   test: {
     environment: 'jsdom',
-    globals: true,
-    include: [
-      'app/**/*.{test,spec}.?(c|m)[jt]s?(x)',
-      'tests/lib/**/*.{test,spec}.?(c|m)[jt]s?(x)',
-    ],
+    passWithNoTests: true,
+    setupFiles: ['src/test/setup.ts'],
+    include: ['src/**/*.test.{ts,tsx}'],
+    restoreMocks: true,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],
-      include: ['app/**/*.{ts,tsx}', 'middleware/**/*.ts', 'proxy.ts'],
+      include: ['src/**/*.{ts,tsx}'],
+      // Keep in sync with sonar.coverage.exclusions in sonar-project.properties.
       exclude: [
-        'node_modules/',
-        'tests/',
-        '**/*.test.ts',
-        '**/*.test.tsx',
-        '**/*.e2e.ts',
-        '.next/',
-        'out/',
-        'build/',
-        'coverage/',
-        'scripts/',
-        'specs/',
-        'docs/',
-        'public/',
-        'vitest.config.mts',
-        'playwright.config.ts',
-        'playwright.config.test.ts',
-        'next.config.ts',
-        'tsconfig.json',
-        'eslint.config.mjs',
-        'next-env.d.ts',
+        'src/**/*.test.{ts,tsx}',
+        'src/**/*.d.ts',
+        'src/app/**',
+        'src/test/**',
+        'src/content/**',
       ],
+      reportOnFailure: true,
+      thresholds: {
+        lines: 95,
+        functions: 95,
+        branches: 95,
+        statements: 95,
+      },
     },
   },
 });
