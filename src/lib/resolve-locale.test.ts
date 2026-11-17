@@ -6,61 +6,61 @@ describe('resolveLocaleForRoot', () => {
     headers: acceptLanguage ? { 'accept-language': acceptLanguage } : {},
   });
 
-  test('devuelve el idioma de la cookie válida con prioridad sobre el navegador', () => {
+  test('returns the cookie locale with priority over the browser', () => {
     const cookieStore = { cookies: { psg_locale: 'es' } };
     const result = resolveLocaleForRoot(request('en'), cookieStore);
     expect(result).toBe('es');
   });
 
-  test('devuelve el idioma de la cookie "en" con prioridad sobre el navegador', () => {
+  test('returns cookie locale "en" with priority over the browser', () => {
     const cookieStore = { cookies: { psg_locale: 'en' } };
     const result = resolveLocaleForRoot(request('es'), cookieStore);
     expect(result).toBe('en');
   });
 
-  test('sin cookie devuelve el primer idioma compatible de Accept-Language en orden', () => {
+  test('without cookie returns the first compatible language from Accept-Language in order', () => {
     const result = resolveLocaleForRoot(request('es,en;q=0.9'));
     expect(result).toBe('es');
   });
 
-  test('sin cookie devuelve "en" cuando es el primero en Accept-Language', () => {
+  test('without cookie returns "en" when it is the first in Accept-Language', () => {
     const result = resolveLocaleForRoot(request('en,es;q=0.9'));
     expect(result).toBe('en');
   });
 
-  test('normaliza subtag regional es-ES a es', () => {
+  test('normalizes regional subtag es-ES to es', () => {
     const result = resolveLocaleForRoot(request('es-ES'));
     expect(result).toBe('es');
   });
 
-  test('normaliza subtag regional en-US a en', () => {
+  test('normalizes regional subtag en-US to en', () => {
     const result = resolveLocaleForRoot(request('en-US'));
     expect(result).toBe('en');
   });
 
-  test('devuelve "en" cuando el navegador no indica un idioma compatible', () => {
+  test('returns "en" when the browser does not indicate a compatible language', () => {
     const result = resolveLocaleForRoot(request('fr,de;q=0.8'));
     expect(result).toBe('en');
   });
 
-  test('devuelve "en" cuando no hay Accept-Language ni cookie', () => {
+  test('returns "en" when there is no Accept-Language nor cookie', () => {
     const result = resolveLocaleForRoot(request());
     expect(result).toBe('en');
   });
 
-  test('ignora cookie inválida y usa el navegador', () => {
+  test('ignores invalid cookie and uses the browser', () => {
     const cookieStore = { cookies: { psg_locale: 'fr' } };
     const result = resolveLocaleForRoot(request('es'), cookieStore);
     expect(result).toBe('es');
   });
 
-  test('ignora cookie vacía y usa el navegador', () => {
+  test('ignores empty cookie and uses the browser', () => {
     const cookieStore = { cookies: { psg_locale: '' } };
     const result = resolveLocaleForRoot(request('es'), cookieStore);
     expect(result).toBe('es');
   });
 
-  test('sin cookieStore usa el navegador y fallback a inglés', () => {
+  test('without cookieStore uses the browser and fallback to English', () => {
     const result = resolveLocaleForRoot(request('fr'));
     expect(result).toBe('en');
   });
