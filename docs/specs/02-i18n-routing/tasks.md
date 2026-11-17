@@ -89,20 +89,17 @@ Tareas pequeñas y ordenadas (T1 → T11). Cada tarea tiene objetivo, RF que cub
 
 ---
 
-## T6 — Validación de paridad de traducciones (RF-7)
-
-**Objetivo:** Crear `src/lib/i18n-parity.ts` con `validateParity(enMessages, esMessages)` que compruebe que ambos archivos de mensajes tienen las mismas claves hojas. Debe fallar si falta una clave en un idioma o sobra respecto al otro.
+## ~~T6 — Validación de paridad de traducciones~~ ✅ COMPLETADA
 
 **RF que cubre:** RF-7
 
-**Tests a escribir primero:**
-- Test de unidad: `validateParity` devuelve `valid: true` cuando `messages/en.json` y `messages/es.json` tienen las mismas claves.
-- Test de unidad: `validateParity` devuelve `valid: false` y lista las claves faltantes si se elimina una clave de `es.json`.
-- Test de unidad: `validateParity` devuelve `valid: false` y lista las claves sobrantes si se añade una clave solo en `en.json`.
-
-**Criterio de hecho:**
-- `validateParity` implementada y los tests usan los mensajes reales de `messages/en.json` y `messages/es.json` (una clave faltante rompe el test).
-- Cualquier adición o modificación de claves debe ir en ambos idiomas en el mismo cambio.
+**Resultado:**
+- `src/lib/i18n-parity.ts` implementado con `validateParity(enMessages, esMessages)` y `flattenKeys` (creado en T1).
+- `src/lib/i18n-parity.test.ts` con 4 tests: paridad válida entre `messages/en.json` y `messages/es.json`, clave faltante en es, clave sobrante en es.
+- Los tests usan los mensajes reales de `messages/en.json` y `messages/es.json` (una clave faltante rompe el test).
+- `pnpm exec vitest run --coverage`: 6 test files, 36 tests passed, cobertura 100% (statements, branches, functions, lines).
+- `pnpm lint`: limpio (sin errores ni warnings).
+- Cualquier adición o modificación de claves va en ambos idiomas en el mismo cambio.
 
 ---
 
