@@ -35,7 +35,10 @@ export function middleware(request: NextRequest) {
   if (segments.length >= 1 && !isLocale(segments[0])) {
     return new NextResponse(
       '<html><body><h1>Not found</h1><p>This page does not exist.</p></body></html>',
-      { status: 404, headers: { 'content-type': 'text/html' } }
+      {
+        status: 404,
+        headers: { 'content-type': 'text/html; charset=utf-8' },
+      }
     );
   }
 
@@ -60,6 +63,19 @@ export function middleware(request: NextRequest) {
     }
 
     return NextResponse.redirect(new URL('/en', request.url));
+  }
+
+  // Valid locale prefix with extra segments (e.g. /en/unknown) → 404 localized
+  if (segments.length > 1 && isLocale(segments[0])) {
+    const locale = segments[0];
+    const isSpanish = locale === 'es';
+    return new NextResponse(
+      `<html><body><h1>${isSpanish ? 'No encontrado' : 'Not found'}</h1><p>${isSpanish ? 'Esta página no existe.' : 'This page does not exist.'}</p></body></html>`,
+      {
+        status: 404,
+        headers: { 'content-type': 'text/html; charset=utf-8' },
+      }
+    );
   }
 
   // Valid locale prefix → let Next.js handle the route

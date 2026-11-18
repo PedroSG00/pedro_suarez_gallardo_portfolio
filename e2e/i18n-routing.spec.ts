@@ -125,4 +125,27 @@ test.describe('i18n routing', () => {
     await expect(page.locator('body')).toContainText('Portfolio web');
     await expect(page.locator('body')).not.toContainText('Web portfolio');
   });
+
+  test('visiting /en/unknown shows 404 in English', async ({ page }) => {
+    const response = await page.goto('/en/unknown');
+    expect(response?.status()).toBe(404);
+    expect(page.url()).toContain('/en/unknown');
+    await expect(page.locator('body')).toContainText('Not found');
+    await expect(page.locator('body')).toContainText('This page does not exist.');
+  });
+
+  test('visiting /es/unknown shows 404 in Spanish', async ({ page }) => {
+    const response = await page.goto('/es/unknown');
+    expect(response?.status()).toBe(404);
+    expect(page.url()).toContain('/es/unknown');
+    await expect(page.locator('body')).toContainText('No encontrado');
+    await expect(page.locator('body')).toContainText('Esta página no existe.');
+  });
+
+  test('no redirect from inexistent route to home', async ({ page }) => {
+    const response = await page.goto('/en/unknown');
+    expect(response?.status()).toBe(404);
+    expect(page.url()).toContain('/en/unknown');
+    expect(page.url()).not.toBe('http://127.0.0.1:3000/en');
+  });
 });
