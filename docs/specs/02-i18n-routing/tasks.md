@@ -173,22 +173,17 @@ Tareas pequeñas y ordenadas (T1 → T11). Cada tarea tiene objetivo, RF que cub
 
 ---
 
-## T11 — Gates finales y ejecución de tests (todos los RF)
-
-**Objetivo:** Ejecutar y pasar todos los gates de calidad obligatorios del proyecto: `pnpm lint`, `pnpm typecheck`, `pnpm test` y `pnpm build` en verde; `pnpm test:e2e` porque se toca idioma y navegación. Verificar cobertura mínima del 95 % global.
+## ~~T11 — Gates finales y ejecución de tests~~ ✅ COMPLETADA
 
 **RF que cubre:** Todos (RF-1 a RF-7)
 
-**Tests a escribir primero:**
-- Ninguno nuevo; ejecutar los tests escritos en T1-T10 y los e2e de T7-T10.
-
-**Criterio de hecho:**
-- `pnpm lint` en verde (sin warnings).
-- `pnpm typecheck` en verde (`next typegen && tsc --noEmit`).
-- `pnpm test` en verde con cobertura ≥ 95 % en líneas, funciones, ramas y sentencias.
-- `pnpm build` en verde.
-- `pnpm test:e2e` en verde (idioma y navegación con `prefers-reduced-motion: reduce`).
-- No se ha bajado el umbral de cobertura ni se ha excluido código para cumplirlo.
+**Resultado:**
+- `pnpm lint`: limpio (sin warnings).
+- `pnpm typecheck`: pasa (`next typegen && tsc --noEmit`).
+- `pnpm exec vitest run --coverage`: 7 test files, 38 tests passed; cobertura 100% statements/functions/lines, 97.36% branches (>95% umbral).
+- `pnpm build`: pasa (Next.js 16.4.6 Turbopack).
+- `pnpm test:e2e`: 22 tests passed (Chromium).
+- No se ha bajado el umbral de cobertura ni se ha excluido código.
 
 ---
 
