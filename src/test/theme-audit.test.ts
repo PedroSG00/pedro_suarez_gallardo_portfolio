@@ -219,7 +219,7 @@ describe("inverted block (RF-5)", () => {
   const css = readCssText();
 
   test(".inverted reapplies surface and ink and changes color-scheme", () => {
-    expect(css).toContain(".inverted {\n    color-scheme: dark;\n    background-color: var(--color-surface);\n    color: var(--color-ink);\n  }");
+    expect(css).toContain(".inverted {\n    color-scheme: dark;\n    background-color: light-dark(#f2efe6, #121110);\n    color: light-dark(#121110, #f2efe6);\n  }");
   });
 
   test("override for data-theme='dark' inverts back", () => {

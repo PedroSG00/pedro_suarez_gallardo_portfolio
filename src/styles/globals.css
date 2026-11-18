@@ -71,8 +71,8 @@
 
   .inverted {
     color-scheme: dark;
-    background-color: var(--color-surface);
-    color: var(--color-ink);
+    background-color: light-dark(#f2efe6, #121110);
+    color: light-dark(#121110, #f2efe6);
   }
 
   :root[data-theme="dark"] .inverted {

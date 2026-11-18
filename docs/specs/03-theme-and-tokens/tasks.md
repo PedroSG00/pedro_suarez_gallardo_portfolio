@@ -388,6 +388,14 @@ Además, se corrigió `src/app/[locale]/layout.tsx`: el script de tema se auto-i
 
 ## T14 — e2e de bloque invertido, movimiento reducido, sin JavaScript y `pageshow`
 
+**Estado:** completada. `e2e/theme.spec.ts` ampliado con 4 casos nuevos contra el build de producción, todos en verde:
+- Bloque invertido inyectado en los 4 estados (data-theme claro/oscuro, sin atributo con sistema claro/oscuro): el par fondo/texto del bloque es el contrario del de la página, el hijo hereda el par invertido y la línea conserva su tono.
+- Movimiento reducido: `--duration-state` y `--duration-theme` devuelven `0ms`.
+- Sin JavaScript (`javaScriptEnabled: false`, `colorScheme: dark`): no hay `data-theme`, el fondo computado es el oscuro y el `h1` localizado sigue visible.
+- `pageshow` persistido: tras cambiar `localStorage` y despachar `pageshow` con `persisted: true`, el atributo se actualiza o se retira.
+
+**Nota de implementación:** durante T14 se descubrió que `.inverted` en `globals.css` usaba `var(--color-surface)`/`var(--color-ink)`, pero `light-dark()` dentro de un `var()` **no se re-resuelve** según el `color-scheme` del elemento en Chromium, por lo que el bloque no invertía realmente. Se corrigió `.inverted` para usar `light-dark(...)` directamente (se sigue re-aplicando los mismos tokens surface/ink, sin colores nuevos) y se actualizó la aserción correspondiente en `src/test/theme-audit.test.ts`.
+
 **Objetivo:** cerrar los estados que dependen del contexto (invertido), de la preferencia de movimiento, de la ausencia de JavaScript y de la restauración desde caché.
 
 **RF:** RF-1, RF-3, RF-4, RF-5, RF-7, RF-11.
