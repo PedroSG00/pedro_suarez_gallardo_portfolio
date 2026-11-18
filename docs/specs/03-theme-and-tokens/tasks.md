@@ -150,7 +150,7 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7 → T8 → T9 → T10 → T11 → T
 
 ## T5 — Escala fluida
 
-**Objetivo:** parsear `clamp(min, preferido, max)` y calcular el tamaño de cada rol en un ancho dado.
+**Estado:** completada. `src/test/type-scale.ts` con `parseClamp` y `sizeAt`; `src/test/type-scale.test.ts` con 11 casos, fixtures CSS inline, sin leer todavía `globals.css`.
 
 **RF:** RF-9.
 
