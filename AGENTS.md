@@ -41,7 +41,7 @@ Para iterar rápido: `pnpm exec vitest run ruta/al/archivo.test.tsx`.
 
 ## i18n y SEO
 - Textos en `messages/en.json` y `messages/es.json`, mismas claves, siempre los dos idiomas en el mismo cambio. `src/i18n/messages.test.ts` comprueba que coinciden.
-- `setRequestLocale` en layouts y páginas para mantener el renderizado estático. Navegación con los helpers de `src/i18n/navigation.ts`.
+- `next/root-params` en layouts y páginas para mantener el renderizado estático. Navegación con los helpers de `src/i18n/navigation.ts`.
 - Metadatos por idioma (Metadata API) en la home, encabezados semánticos, `hreflang`, sitemap y renderizado estático.
 
 ## Tests
