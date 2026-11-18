@@ -1,1 +1,138 @@
 @import "tailwindcss";
+
+@theme static {
+  /* Remove Tailwind defaults for the namespaces this project owns. */
+  --color-*: initial;
+  --font-*: initial;
+  --text-*: initial;
+  --font-weight-*: initial;
+  --leading-*: initial;
+  --tracking-*: initial;
+
+  --color-surface: light-dark(#f2efe6, #121110);
+  --color-ink: light-dark(#121110, #f2efe6);
+  --color-ink-muted: light-dark(#5a574f, #a9a49a);
+  --color-line: #7c776c;
+
+  --text-display: clamp(4rem, 1.6667rem + 10.37vw, 11rem);
+  --text-display--line-height: 0.9;
+  --text-display--letter-spacing: -0.02em;
+  --text-display--font-weight: 700;
+
+  --text-title-lg: clamp(2.5rem, 1.3333rem + 5.185vw, 6rem);
+  --text-title-lg--line-height: 0.95;
+  --text-title-lg--letter-spacing: -0.015em;
+  --text-title-lg--font-weight: 700;
+
+  --text-title: clamp(1.5rem, 1rem + 2.222vw, 3rem);
+  --text-title--line-height: 1;
+  --text-title--letter-spacing: -0.01em;
+  --text-title--font-weight: 700;
+
+  --text-body: clamp(1rem, 0.9167rem + 0.37vw, 1.25rem);
+  --text-body--line-height: 1.5;
+  --text-body--letter-spacing: 0em;
+  --text-body--font-weight: 400;
+
+  --text-meta: clamp(0.75rem, 0.7083rem + 0.185vw, 0.875rem);
+  --text-meta--line-height: 1.4;
+  --text-meta--letter-spacing: 0.02em;
+  --text-meta--font-weight: 400;
+
+  --font-weight-regular: 400;
+  --font-weight-emphasis: 700;
+
+  --spacing: 0.25rem;
+  --line-width: 1px;
+  --motion-distance: 1.5rem;
+
+  --duration-state: 200ms;
+  --duration-theme: 400ms;
+  --duration-reveal: 600ms;
+}
+
+@theme static inline {
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+  --color-focus: var(--color-ink);
+}
+
+@layer base {
+  :root {
+    color-scheme: light dark;
+  }
+
+  :root[data-theme="light"] {
+    color-scheme: light;
+  }
+
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+  }
+
+  .inverted {
+    color-scheme: dark;
+    background-color: light-dark(#f2efe6, #121110);
+    color: light-dark(#121110, #f2efe6);
+  }
+
+  :root[data-theme="dark"] .inverted {
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) .inverted {
+      color-scheme: light;
+    }
+  }
+
+  html {
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+    font-family: var(--font-mono);
+    font-weight: var(--font-weight-regular);
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    min-height: 100dvh;
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+  }
+
+  *,
+  ::before,
+  ::after {
+    border-color: var(--color-line);
+  }
+
+  ::selection {
+    background-color: var(--color-ink);
+    color: var(--color-surface);
+  }
+
+  :focus-visible {
+    outline: calc(var(--line-width) * 2) solid var(--color-focus);
+    outline-offset: calc(var(--spacing) / 2);
+  }
+}
+
+::view-transition-group(root),
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--duration-theme);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-state: 0ms;
+    --duration-theme: 0ms;
+    --duration-reveal: 0ms;
+  }
+
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
