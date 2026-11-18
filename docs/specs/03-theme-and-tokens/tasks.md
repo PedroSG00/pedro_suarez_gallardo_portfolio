@@ -196,7 +196,7 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7 → T8 → T9 → T10 → T11 → T
 
 ## T7 — Tokens en `globals.css`
 
-**Objetivo:** declarar una sola vez todo el sistema en `@theme static` + `@theme static inline`, con los namespaces propios vaciados, y activar la auditoría contra el archivo real.
+**Estado:** completada. `src/styles/globals.css` declara `@theme static` + `@theme static inline` con todos los tokens (colores, tipografía, espaciado, línea, movimiento), namespaces propios vaciados; `src/test/theme-audit.test.ts` + `src/test/theme.ts` + `src/test/raw.d.ts` auditan el archivo real (33 tokens, paleta, sub-tokens, duraciones, 16 parejas de contraste, jerarquía tipográfica).
 
 **RF:** RF-5, RF-8, RF-9, RF-10, RF-11, RF-12.
 
