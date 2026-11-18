@@ -81,6 +81,8 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7 → T8 → T9 → T10 → T11 → T
 
 ## T2 — Modelo de tema
 
+**Estado:** completada. `src/lib/theme.ts` con `Theme`, `StoredTheme`, `THEME_STORAGE_KEY = "psg-theme"`, `isTheme` y `resolveTheme`, sin DOM ni React.
+
 **Objetivo:** tener un módulo puro con el tipo de tema, la clave de almacenamiento y la resolución elección/sistema, sin DOM.
 
 **RF:** RF-1.
