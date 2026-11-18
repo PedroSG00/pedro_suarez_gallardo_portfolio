@@ -55,7 +55,7 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7 → T8 → T9 → T10 → T11 → T
 
 ## T1 — Prerrequisito estructural: un solo `<html>` y rutas estáticas
 
-**Estado:** bloqueada. Necesita aprobación del plan §10.2 y §10.4 y confirmar dónde vive la 02 (plan §0.3.4: figura integrada en el PR #12, pero `src/i18n/` no está en la rama). No es producto de la 03: es el paso 0 de plan §6.5.
+**Estado:** completada. Un solo `<html>` en `src/app/[locale]/layout.tsx` (root layout con `next/root-params` y `generateStaticParams` → `/en` y `/es` prerenderizados, sin `ƒ /[locale]`). `src/app/layout.tsx` y `src/app/page.tsx` retirados.
 
 **Objetivo:** que exista un único punto de montaje del documento (`<html>`/`<body>`) con el locale conocido, y que `/en` y `/es` se prerendericen en vez de servirse como `ƒ /[locale]`.
 

@@ -216,6 +216,28 @@ test.describe('i18n routing', () => {
     await expect(page.locator('body')).toContainText('Web portfolio');
   });
 
+  test('served HTML of /en has exactly one <html> and one <body> with lang en', async ({ page }) => {
+    const response = await page.goto('/en');
+    expect(response, 'navigation should return a response').not.toBeNull();
+    expect(response?.status()).toBeLessThan(400);
+
+    const html = await response!.text();
+    expect((html.match(/<html/g) || []).length).toBe(1);
+    expect((html.match(/<body/g) || []).length).toBe(1);
+    await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+  });
+
+  test('served HTML of /es has exactly one <html> and one <body> with lang es', async ({ page }) => {
+    const response = await page.goto('/es');
+    expect(response, 'navigation should return a response').not.toBeNull();
+    expect(response?.status()).toBeLessThan(400);
+
+    const html = await response!.text();
+    expect((html.match(/<html/g) || []).length).toBe(1);
+    expect((html.match(/<body/g) || []).length).toBe(1);
+    await expect(page.locator('html')).toHaveAttribute('lang', 'es');
+  });
+
   test('normalization redirect preserves query string (/EN?utm_source=x -> /en?utm_source=x)', async ({ page }) => {
     const response = await page.goto('/EN?utm_source=x');
     expect(response?.status()).toBeLessThan(400);
