@@ -255,7 +255,7 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7 → T8 → T9 → T10 → T11 → T
 
 ## T9 — Script de primer pintado
 
-**Objetivo:** una función pura que genere el script inline mínimo que fija `data-theme` desde el almacenamiento y registra `pageshow`.
+**Estado:** completada. `src/lib/theme-script.ts` con `themeScript` (función pura que genera el script inline autocontenido que recibe `w/d/ls`, fija `data-theme` una sola vez con una elección válida y registra `pageshow` con dos lecturas independientes de almacenamiento); `src/lib/theme-script.test.ts` con 9 casos escritos primero (mocks de w/d/ls para aislar el realm de new Function); `src/test/theme.ts` con `runThemeScript` + `ThemeScriptDeps`.
 
 **RF:** RF-1, RF-3, RF-7.
 
