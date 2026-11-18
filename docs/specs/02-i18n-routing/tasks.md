@@ -103,24 +103,20 @@ Tareas pequeñas y ordenadas (T1 → T11). Cada tarea tiene objetivo, RF que cub
 
 ---
 
-## T7 — Middleware de localización (RF-1, RF-2, RF-4, RF-5)
-
-**Objetivo:** Implementar `src/middleware.ts` con next-intl que: redirija `/` según cookie o `Accept-Language` (resolución de portada), normalice rutas (minúsculas, sin trailing slash), devuelva 404 para locales no admitidos (`/fr`, `/fr/about`) y para doble prefijo (`/en/es`), y no redirija rutas inexistentes bajo `/en` o `/es`.
+## ~~T7 — Middleware de localización~~ ✅ COMPLETADA
 
 **RF que cubre:** RF-1, RF-2, RF-4, RF-5
 
-**Tests a escribir primero (e2e Playwright, Chromium):**
-- Visitar `/` con cookie de español → redirige a `/es`.
-- Visitar `/` sin cookie y con `Accept-Language: es` → redirige a `/es`.
-- Visitar `/` con `Accept-Language: fr` (no compatible) → redirige a `/en`.
-- Visitar `/fr` → 404 con mensaje en inglés, sin redirección.
-- Visitar `/fr/about` → 404 con mensaje en inglés, sin redirección.
-- Visitar `/en/es` → 404 (doble prefijo).
-- Visitar `/EN` → normaliza a `/en` y muestra inglés.
-- Visitar `/es/` → normaliza a `/es` y muestra español.
-
-**Criterio de hecho:**
-- Middleware implementado y los flujos críticos de idioma, navegación y 404 pasan en e2e con `prefers-reduced-motion: reduce`.
+**Resultado:**
+- `src/middleware.ts` implementado con normalización de rutas (minúsculas, sin trailing slash), 404 para doble prefijo (`/en/es`) y locale no admitido (`/fr`), resolución de `/` por cookie (`psg_locale`) > `Accept-Language` > inglés, y paso a Next.js para rutas con prefijo de locale válido.
+- `src/app/[locale]/layout.tsx` y `src/app/[locale]/page.tsx` creados como páginas mínimas para permitir que los e2e verifiquen las redirecciones y el contenido localizado.
+- `vitest.config.mts` actualizado para excluir `src/middleware.ts` de la cobertura (archivo de ruta cubierto por e2e, igual que `src/app/**` per constitución punto 9).
+- Tests e2e: `e2e/i18n-routing.spec.ts` con 10 tests (redirecciones por cookie y Accept-Language, 404 para locale no admitido y doble prefijo, normalización de mayúsculas y trailing slash).
+- `pnpm exec vitest run --coverage`: 6 test files, 36 tests passed, cobertura 100%.
+- `pnpm lint`: limpio.
+- `pnpm typecheck`: pasa.
+- `pnpm build`: pasa.
+- `npx playwright test`: 11 tests passed (10 de i18n-routing + 1 de home).
 
 ---
 
