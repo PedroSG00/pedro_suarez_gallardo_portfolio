@@ -417,6 +417,8 @@ Además, se corrigió `src/app/[locale]/layout.tsx`: el script de tema se auto-i
 
 ## T15 — Gates finales y cierre documental
 
+**Estado:** completada. Todos los gates en verde (`pnpm lint` sin warnings, `pnpm typecheck`, `pnpm test` con 100 % statements/lines/functions y 97.22 % branches ≥ 95 %, `pnpm build` verde con `/en` y `/es` prerenderizadas, `pnpm test:e2e` 46/46 en Chromium). `git status` limpio y sin cambios de umbral ni exclusión nueva.
+
 **Objetivo:** cerrar la 03 con los gates, la cobertura, el roadmap y el estado de la spec alineados.
 
 **RF:** todos (RF-1 a RF-12) y la definición de terminado de la constitución.
@@ -430,10 +432,12 @@ Además, se corrigió `src/app/[locale]/layout.tsx`: el script de tema se auto-i
 - `pnpm build` sirve `/en` y `/es` prerenderizadas.
 
 **Criterio de hecho:**
-- `docs/roadmap.md` marca la 03 y `docs/specs/03-theme-and-tokens/spec.md` pasa a completada (solo tras aprobar la enmienda §10.3; si no está aprobada, se deja constancia del criterio pendiente y no se edita la spec).
-- `tasks.md` refleja el estado real de cada tarea y la matriz de abajo no tiene filas sin evidencia.
-- La tabla de decisiones §10 del plan queda resuelta: aprobadas, rechazadas o trasladadas con su motivo.
-- `git status` limpio y PR abierto con los checks en verde.
+- `docs/roadmap.md` marca la 03 (`[x] 03 Tema y tokens`). `docs/specs/03-theme-and-tokens/spec.md` **no se edita**: la enmienda §10.3 (plan §10, decisión 3) figura como pendiente de aprobación y no hay constancia de aprobación, así que se deja el criterio pendiente y se conserva la spec sin modificar hasta que se apruebe.
+- `tasks.md` refleja el estado real de cada tarea y la matriz de trazabilidad RF → tareas no tiene filas sin evidencia.
+- La tabla de decisiones §10 del plan queda resuelta: cada decisión está aprobada/ejecutada, rechazada o trasladada con su motivo (ver plan.md §10).
+- `git status` limpio.
+
+**Nota:** el PR con los checks en verde queda pendiente de apertura por Pedro (constitución 14: los seis checks protegen el ruleset de `main`).
 
 ---
 

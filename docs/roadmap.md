@@ -10,7 +10,7 @@ Fuera de alcance por ahora: sección de proyectos y ruta `/projects/[slug]` (fut
 
 - [x] 01 Tooling y CI
 - [x] 02 i18n y rutas
-- [ ] 03 Tema y tokens
+- [x] 03 Tema y tokens
 - [ ] 04 Átomos de UI
 - [ ] 05 Movimiento de scroll (`Reveal`)
 - [ ] 06 Shell y Hero
