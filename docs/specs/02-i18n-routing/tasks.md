@@ -122,13 +122,13 @@ Tareas pequeñas y ordenadas (T1 → T11). Cada tarea tiene objetivo, RF que cub
 
 ## ~~T8 — Layout y página localizados~~ ✅ COMPLETADA
 
-**Objetivo:** Crear `src/app/[locale]/layout.tsx` con `setRequestLocale` para renderizado estático por locale, metadatos por idioma (Metadata API) y la navbar con selector de idioma funcional. Crear `src/app/[locale]/page.tsx` que renderice la home en el locale de la ruta. La ruta explícita (`/en` o `/es`) debe tener prioridad sobre la cookie guardada.
+**Objetivo:** Crear `src/app/[locale]/layout.tsx` con `next/root-params` (`await params`) para renderizado estático por locale, metadatos por idioma (Metadata API) y la navbar con selector de idioma funcional. Crear `src/app/[locale]/page.tsx` que renderice la home en el locale de la ruta. La ruta explícita (`/en` o `/es`) debe tener prioridad sobre la cookie guardada.
 
 **RF que cubre:** RF-1, RF-2, RF-6
 
 **Resultado:**
-- `src/app/[locale]/layout.tsx` implementado con `setRequestLocale(locale)` para renderizado estático por locale, metadatos por idioma (Metadata API), y navbar con `LanguageSwitch`.
-- `src/app/[locale]/page.tsx` implementado con `setRequestLocale(locale)`, leyendo textos de `messages/en.json` y `messages/es.json` sin hardcodeo.
+- `src/app/[locale]/layout.tsx` implementado con `next/root-params` (`await params`) para renderizado estático por locale, metadatos por idioma (Metadata API), y navbar con `LanguageSwitch`.
+- `src/app/[locale]/page.tsx` implementado con `next/root-params` (`await params`), leyendo textos de `messages/en.json` y `messages/es.json` sin hardcodeo.
 - `src/components/ui/LanguageSwitch/LanguageSwitch.tsx` creado como componente de UI con enlace al otro idioma.
 - `src/components/ui/LanguageSwitch/LanguageSwitch.test.tsx` con 2 tests RTL.
 - Tests e2e añadidos a `e2e/i18n-routing.spec.ts`: /en directo muestra inglés, /es directo muestra español, cookie ignorada al entrar directamente a /en o /es, no hay mezcla de idiomas.

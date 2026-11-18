@@ -12,8 +12,8 @@ Los módulos se ubican dentro de la estructura existente de Next.js App Router. 
 | Helpers de navegación localizada | `src/i18n/routing.ts` | Construcción de `href` al cambiar de idioma conservando `pathname`, `hash` y `search`; prioridad de ruta explícita sobre cookie. | RF-2, RF-3, RF-5 |
 | Persistencia de preferencia | `src/lib/cookie-locale.ts` | Lectura y escritura de cookie de cliente (expiración larga) con el locale elegido. | RF-1 |
 | Validación de paridad | `src/lib/i18n-parity.ts` | Comparación de claves entre `messages/en.json` y `messages/es.json`; falla si faltan o sobran claves. | RF-6, RF-7 |
-| Layout localizado | `src/app/[locale]/layout.tsx` | `setRequestLocale` para renderizado estático por locale; metadatos por idioma (Metadata API); navbar con selector de idioma. | RF-1, RF-2, RF-6 |
-| Página de inicio | `src/app/[locale]/page.tsx` | `setRequestLocale`; render de la home en el locale de la ruta. | RF-1, RF-2 |
+| Layout localizado | `src/app/[locale]/layout.tsx` | `next/root-params` (`await params`) para renderizado estático por locale; metadatos por idioma (Metadata API); navbar con selector de idioma. | RF-1, RF-2, RF-6 |
+| Página de inicio | `src/app/[locale]/page.tsx` | `next/root-params` (`await params`); render de la home en el locale de la ruta. | RF-1, RF-2 |
 | Página 404 | `src/app/[locale]/not-found.tsx` | 404 con código HTTP real y mensaje visible en el idioma de la ruta (inglés si no se infiere). | RF-4, RF-5 |
 
 Notas de estructura:
@@ -222,7 +222,7 @@ FUNCTION validateParity(enMessages, esMessages):
 
 | Decisión | Justificación | Alternativa descartada | RF |
 |----------|---------------|------------------------|-----|
-| Cookie del cliente (`psg_locale`) para recordar elección | `setRequestLocale` se ejecuta en servidor; la cookie es legible allí y evita hydration mismatch. Expiración larga para persistencia entre visitas. | `localStorage`: solo disponible en cliente; causaría mismatch de hidratación al no estar disponible en el render del servidor. | RF-1 |
+| Cookie del cliente (`psg_locale`) para recordar elección | La cookie se lee en servidor mediante `next/root-params` (`await params`) y evita hydration mismatch. Expiración larga para persistencia entre visitas. | `localStorage`: solo disponible en cliente; causaría mismatch de hidratación al no estar disponible en el render del servidor. | RF-1 |
 | `next-intl` middleware para detección y redirección | Stack aprobado (constitución punto 1). Maneja nativamente `Accept-Language`, redirección de `/` y 404 para locales no admitidos. | Middleware custom: requeriría reimplementar detección de locale, redirección y manejo de 404; más código y mayor riesgo de error. | RF-1, RF-2, RF-4 |
 | Rutas `[locale]` en App Router | Permite renderizado estático por locale y es el patrón estándar de next-intl. Cada URL tiene un solo idioma. | Rutas estáticas duplicadas (`/en`, `/es` como carpetas separadas sin parámetro): menos escalable y no idiomático de next-intl. | RF-2 |
 | Normalización de ruta (minúsculas, sin trailing slash) en middleware | Se aplica globalmente antes de llegar a la página; evita duplicación de contenido y rutas inconsistentes. | Normalizar solo en la página: las rutas `/EN` y `/en` coexistirían hasta llegar al componente, generando confusión y posible duplicación de contenido. | RF-2 |
