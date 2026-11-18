@@ -303,6 +303,8 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7 → T8 → T9 → T10 → T11 → T
 
 ## T11 — Cambio de tema y View Transitions
 
+**Estado:** completada. `src/lib/theme-dom.ts` amplía con `setTheme(theme, deps?)` (contrato plan §4.7): persiste en almacenamiento, aplica `data-theme` una sola vez (`applyOnce`), usa View Transitions solo si hay soporte y sin movimiento reducido, absorbe errores de almacenamiento y API sin propagarlos; `ThemeDeps = { root?, storage?, reducedMotion?, startViewTransition? }` documentado para que el control de la 04 lo llame sin dependencias. `src/lib/theme-dom.test.ts` ampliado con 11 casos escritos primero (mocks de root/storage/startViewTransition + jsdom real): persiste y escribe una vez, almacenamiento que lanza no rompe, `reducedMotion` salta la API, sin API aplica directo, API llama callback una vez, `applyOnce` evita escrituras duplicadas, API que lanza se absorbe, `readStoredTheme` refleja el nuevo valor, llamada sin dependencias con document/localStorage reales.
+
 **Objetivo:** persistir y aplicar el cambio con una sola escritura, usando View Transitions solo si hay soporte y no hay movimiento reducido.
 
 **RF:** RF-2, RF-4, RF-7.
