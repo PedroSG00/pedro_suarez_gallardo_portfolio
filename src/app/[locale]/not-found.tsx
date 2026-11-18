@@ -1,12 +1,12 @@
+'use client';
+
+import { usePathname } from 'next/navigation';
 import enMessages from '../../../messages/en.json';
 import esMessages from '../../../messages/es.json';
 
-export default async function NotFound({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
-  const { locale } = await params;
+export default function NotFound() {
+  const pathname = usePathname();
+  const locale = (pathname.split('/')[1] ?? 'en') as 'en' | 'es';
   const messages = locale === 'es' ? esMessages : enMessages;
   return (
     <main>

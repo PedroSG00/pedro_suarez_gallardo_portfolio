@@ -164,12 +164,15 @@ Tareas pequeñas y ordenadas (T1 → T11). Cada tarea tiene objetivo, RF que cub
 - `src/components/ui/LanguageSwitch/LanguageSwitch.tsx` actualizado para ser un componente de cliente (`'use client'`) que usa `usePathname()`, `useSearchParams()` y `buildLocalizedHref()` para cambiar de idioma conservando `pathname`, `hash` y `search`.
 - `src/app/[locale]/layout.tsx` actualizado: `locale` tipado como `Locale` con cast en el prop de `LanguageSwitch`.
 - `src/components/ui/LanguageSwitch/LanguageSwitch.test.tsx` actualizado con mock de `next/navigation` y 2 tests RTL.
-- Tests e2e en `e2e/i18n-routing.spec.ts`: cambio de idioma preservando fragmento (`/es#contact` → `/en#contact`), preservando query (`/en?utm_source=linkedin` → `/es?utm_source=linkedin`), sin mezcla de idiomas.
+- `src/app/[locale]/[...slug]/page.tsx` creado: llama a `notFound()` para que las rutas inexistentes bajo un locale admitido lleguen al not-found localizado.
+- `src/app/[locale]/not-found.tsx` reescrito como cliente (`'use client'`) que lee el locale de la URL vía `usePathname()` y muestra el mensaje 404 traducido (inglés/español).
+- `src/middleware.ts` actualizado: deja pasar `/en/*` y `/es/*` a Next.js para que rendericen el not-found localizado; mantiene 404 raw solo para `/fr`, `/fr/about` (RF-4) y `/en/es` (doble prefijo).
+- Tests e2e en `e2e/i18n-routing.spec.ts`: cambio de idioma preservando fragmento (`/es#contact` → `/en#contact`), preservando query (`/en?utm_source=linkedin` → `/es?utm_source=linkedin`), sin mezcla de idiomas, cambio de idioma desde ruta 404 (`/en/unknown` → `/es/unknown`, `/es/unknown` → `/en/unknown`), conservación de query y fragmento desde ruta 404, LanguageSwitch visible en página 404.
 - `pnpm exec vitest run --coverage`: 7 test files, 38 tests passed, cobertura 100% statements/lines/functions, 97.36% branches (sobre umbral 95%).
 - `pnpm lint`: limpio.
 - `pnpm typecheck`: pasa.
 - `pnpm build`: pasa.
-- `npx playwright test`: 22 tests passed.
+- `npx playwright test`: 27 tests passed.
 
 ---
 
@@ -182,8 +185,45 @@ Tareas pequeñas y ordenadas (T1 → T11). Cada tarea tiene objetivo, RF que cub
 - `pnpm typecheck`: pasa (`next typegen && tsc --noEmit`).
 - `pnpm exec vitest run --coverage`: 7 test files, 38 tests passed; cobertura 100% statements/functions/lines, 97.36% branches (>95% umbral).
 - `pnpm build`: pasa (Next.js 16.4.6 Turbopack).
-- `pnpm test:e2e`: 22 tests passed (Chromium).
+- `pnpm test:e2e`: 27 tests passed (Chromium).
 - No se ha bajado el umbral de cobertura ni se ha excluido código.
+
+---
+
+## Trazabilidad RF → Tests
+
+| RF | Criterio | Test que lo cubre | Estado |
+|----|----------|-------------------|--------|
+| RF-1 | Cookie previa → portada de ese idioma | e2e `visiting / with Spanish cookie redirects to /es` | ✅ |
+| RF-1 | / sin cookie, Accept-Language es → /es | e2e `visiting / without cookie and Accept-Language es redirects to /es` | ✅ |
+| RF-1 | / sin cookie, Accept-Language en → /en | e2e `visiting / without cookie and Accept-Language en redirects to /en` | ✅ |
+| RF-1 | Accept-Language no compatible → inglés | e2e `visiting / with Accept-Language fr redirects to /en` | ✅ |
+| RF-1 | Cookie ignorada al entrar directamente | e2e `Spanish cookie is ignored when entering /en directly`, `English cookie is ignored when entering /es directly` | ✅ |
+| RF-1 | Cookies bloqueadas / incógnito → inglés sin bloquear | e2e `cookies blocked / incognito falls back to English without blocking` | ✅ |
+| RF-1 | Lógica pura: resolución y cookie | unit `src/lib/resolve-locale.test.ts`, `src/lib/cookie-locale.test.ts` | ✅ |
+| RF-2 | /en muestra inglés, /es muestra español | e2e `visiting /en directly shows English content`, `visiting /es directly shows Spanish content` | ✅ |
+| RF-2 | Ruta directa prioritaria sobre cookie | e2e pruebas "cookie ignored" | ✅ |
+| RF-2 | Normalización minúsculas sin trailing slash | e2e `visiting /EN normalizes to /en...`, `visiting /es/ normalizes to /es...` | ✅ |
+| RF-2 | Lógica pura: normalización | unit `src/lib/normalize-path.test.ts` | ✅ |
+| RF-2 | Doble prefijo `/en/es` → 404 | e2e `visiting /en/es shows 404 (double prefix)` | ✅ |
+| RF-3 | Cambiar idioma desde una sección | e2e `changing language does not mix English and Spanish` | ✅ |
+| RF-3 | Fragmento conservado al cambiar idioma | e2e `changing language from /es#contact preserves fragment` | ✅ |
+| RF-3 | Query conservada al cambiar idioma | e2e `changing language from /en?utm_source=linkedin preserves query` | ✅ |
+| RF-3 | No mezclar inglés y español | e2e `changing language does not mix English and Spanish` | ✅ |
+| RF-3 | Cambiar desde ruta inexistente conserva path | e2e `changing language from /en/unknown preserves path to Spanish`, `changing language from /es/unknown preserves path to English` | ✅ |
+| RF-3 | Conservar query y fragmento desde 404 | e2e `changing language from /en/unknown preserves query and fragment` | ✅ |
+| RF-3 | LanguageSwitch visible en página 404 | e2e `visiting /en/unknown shows 404 in English with LanguageSwitch visible` | ✅ |
+| RF-3 | Lógica pura: href localizado | unit `src/lib/build-localized-href.test.ts` (incluye ruta inexistente), `LanguageSwitch.test.tsx` | ✅ |
+| RF-4 | `/fr`, `/fr/about` → 404 en inglés, sin redirect | e2e `visiting /fr shows 404 in English without redirect`, `visiting /fr/about shows 404 in English without redirect` | ✅ |
+| RF-4 | Código HTTP 404 real + mensaje visible | e2e pruebas RF-4 (verifican `status() === 404`) | ✅ |
+| RF-5 | `/en/unknown`, `/es/unknown` → 404 en idioma de ruta | e2e `visiting /en/unknown shows 404 in English`, `visiting /es/unknown shows 404 in Spanish` | ✅ |
+| RF-5 | Sin redirección a portada desde 404 | e2e `no redirect from inexistent route to home` | ✅ |
+| RF-5 | Código HTTP 404 real + mensaje visible | e2e pruebas RF-5 (verifican `status() === 404`) | ✅ |
+| RF-6 | Textos agrupados por parte | unit `src/lib/i18n-parity.test.ts`, archivos `messages/en.json` y `messages/es.json` en raíz | ✅ |
+| RF-6 | Sin proyectos (aparcado) | Fuera de alcance | N/A |
+| RF-7 | Mismas claves en en y es | unit `src/lib/i18n-parity.test.ts` | ✅ |
+| RF-7 | Falta/sobra clave → validación falla | unit `src/lib/i18n-parity.test.ts` | ✅ |
+
 
 ---
 

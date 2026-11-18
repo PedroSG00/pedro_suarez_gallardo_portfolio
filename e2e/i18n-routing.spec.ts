@@ -170,4 +170,49 @@ test.describe('i18n routing', () => {
     await expect(page.locator('body')).toContainText('Portfolio web');
     await expect(page.locator('body')).not.toContainText('Web portfolio');
   });
+
+  test('visiting /en/unknown shows 404 in English with LanguageSwitch visible', async ({ page }) => {
+    const response = await page.goto('/en/unknown');
+    expect(response?.status()).toBe(404);
+    expect(page.url()).toContain('/en/unknown');
+    await expect(page.locator('body')).toContainText('Not found');
+    await expect(page.locator('body')).toContainText('This page does not exist.');
+    await expect(page.getByRole('link', { name: 'ES' })).toBeVisible();
+  });
+
+  test('changing language from /en/unknown preserves path to Spanish', async ({ page }) => {
+    const response = await page.goto('/en/unknown');
+    expect(response?.status()).toBe(404);
+    await page.getByRole('link', { name: 'ES' }).click();
+    await expect(page).toHaveURL(/es\/unknown/);
+    expect(page.url()).toContain('/es/unknown');
+    expect(response?.status()).toBe(404);
+    await expect(page.locator('body')).toContainText('No encontrado');
+    await expect(page.locator('body')).toContainText('Esta página no existe.');
+  });
+
+  test('changing language from /es/unknown preserves path to English', async ({ page }) => {
+    const response = await page.goto('/es/unknown');
+    expect(response?.status()).toBe(404);
+    await page.getByRole('link', { name: 'EN' }).click();
+    await expect(page).toHaveURL(/en\/unknown/);
+    expect(page.url()).toContain('/en/unknown');
+    await expect(page.locator('body')).toContainText('Not found');
+    await expect(page.locator('body')).toContainText('This page does not exist.');
+  });
+
+  test('changing language from /en/unknown preserves query and fragment', async ({ page }) => {
+    await page.goto('/en/unknown?utm_source=x#y');
+    await page.getByRole('link', { name: 'ES' }).click();
+    await expect(page).toHaveURL(/es\/unknown\?utm_source=x#y/);
+    expect(page.url()).toContain('/es/unknown?utm_source=x#y');
+  });
+
+  test('cookies blocked / incognito falls back to English without blocking', async ({ page, context }) => {
+    await context.clearCookies();
+    const response = await page.goto('/');
+    expect(response?.status()).toBeLessThan(400);
+    expect(page.url()).toContain('/en');
+    await expect(page.locator('body')).toContainText('Web portfolio');
+  });
 });
