@@ -1,4 +1,3 @@
-import { setRequestLocale } from 'next-intl/server';
 import { Metadata } from 'next';
 import LanguageSwitch from '@/components/ui/LanguageSwitch/LanguageSwitch';
 
@@ -14,7 +13,6 @@ export default async function LocaleLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  setRequestLocale(locale);
   return (
     <html lang={locale}>
       <body>

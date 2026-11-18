@@ -1,4 +1,3 @@
-import { setRequestLocale } from 'next-intl/server';
 import enMessages from '../../../messages/en.json';
 import esMessages from '../../../messages/es.json';
 
@@ -8,7 +7,6 @@ export default async function LocalePage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  setRequestLocale(locale);
   const messages = locale === 'es' ? esMessages : enMessages;
   return (
     <main>
