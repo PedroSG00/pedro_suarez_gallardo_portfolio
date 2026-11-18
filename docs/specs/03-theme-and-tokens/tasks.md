@@ -332,6 +332,8 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7 → T8 → T9 → T10 → T11 → T
 
 ## T12 — Layout único monta el tema, la fuente y el script
 
+**Estado:** completada. `src/app/[locale]/layout.tsx` es el único root layout: emite `lang` (vía `locale()` de `next/root-params`), la clase de la fuente mono variable (`geistMono.variable`), `suppressHydrationWarning` en `<html>`, e inserta el script de tema (`themeScript(THEME_STORAGE_KEY)` con `dangerouslySetInnerHTML`) en `<head>`; el servidor no emite `data-theme`. `e2e/theme.spec.ts` (4 casos, contra el build de producción) verifica que el script de tema está en `<head>` (único script inline con `psg-theme`/`dataset.theme`), que no hay `data-theme` en el servidor, que `<html>` lleva `lang` y la clase de fuente mono, que no hay peticiones a Google Fonts y que no hay errores de hidratación. Nota: Next.js inyecta sus propios `<meta>`/`<link>`/`<script src>` al principio de `<head>`, por lo que el script de tema no puede ser el primer hijo literal del `<head>`; el test verifica lo equivalente y significativo (único script inline del head con el contenido del tema).
+
 **Objetivo:** un solo root layout que emite `lang`, la clase de la fuente mono variable y el script de tema como primer hijo del `<head>`, con `suppressHydrationWarning`.
 
 **RF:** RF-3, RF-8.

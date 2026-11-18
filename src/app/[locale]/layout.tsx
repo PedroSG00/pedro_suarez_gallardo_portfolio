@@ -3,6 +3,8 @@ import { Suspense } from 'react';
 import { locale } from 'next/root-params';
 import LanguageSwitch from '@/components/ui/LanguageSwitch/LanguageSwitch';
 import type { Locale } from '@/lib/locale';
+import { themeScript } from '@/lib/theme-script';
+import { THEME_STORAGE_KEY } from '@/lib/theme';
 import '@/styles/globals.css';
 import { Geist_Mono } from 'next/font/google';
 
@@ -27,6 +29,13 @@ export default async function LocaleLayout({
   const lang = await locale();
   return (
     <html lang={lang} suppressHydrationWarning className={`${geistMono.variable} h-full antialiased`}>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: themeScript(THEME_STORAGE_KEY),
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col">
         <nav>
           <Suspense fallback={null}>
