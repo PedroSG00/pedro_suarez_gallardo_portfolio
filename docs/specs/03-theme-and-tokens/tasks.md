@@ -280,6 +280,8 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7 → T8 → T9 → T10 → T11 → T
 
 ## T10 — Lectura y aplicación en el DOM
 
+**Estado:** completada. `src/lib/theme-dom.ts` con `readStoredTheme`, `currentTheme` y `applyTheme` (contratos plan §4.3, 4.5 y 4.6, sin DOM/React al importarse salvo `window.localStorage` por defecto); `src/lib/theme-dom.test.ts` con 13 casos escritos primero en jsdom: `applyTheme` escribe solo `data-theme` sin clases ni otros atributos; `readStoredTheme` devuelve `"light"`/`"dark"` válidos, `null` sin valor/inválido/lanzamiento/`null` y lee `localStorage` sin argumento sin propagar errores; `currentTheme` prefiere el atributo válido y cae al sistema.
+
 **Objetivo:** leer la elección guardada sin lanzar, conocer el tema efectivo y escribir el atributo una sola vez.
 
 **RF:** RF-1, RF-2, RF-7.
