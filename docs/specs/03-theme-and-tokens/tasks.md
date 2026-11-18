@@ -103,7 +103,7 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7 → T8 → T9 → T10 → T11 → T
 
 ## T3 — Lector de tokens
 
-**Objetivo:** un módulo de auditoría que lea **solo** bloques `@theme` con una regex genérica y devuelva el inventario crudo más los colores clasificados en `pair`, `alias` o `solid`.
+**Estado:** completada. `src/test/theme-tokens.ts` con `parseTokenSheet`, `REQUIRED_TOKENS` (33 nombres) y clasificación de colores `pair`/`alias`/`solid`; `src/test/theme-tokens.test.ts` con 11 casos, fixtures CSS inline, sin leer todavía `globals.css`.
 
 **RF:** RF-5, RF-12.
 
