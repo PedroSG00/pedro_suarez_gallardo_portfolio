@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 
 test.describe('theme first paint', () => {
   test.beforeEach(async ({ context }) => {
@@ -79,5 +79,102 @@ test.describe('theme first paint', () => {
     expect(response?.status()).toBeLessThan(400);
     expect(pageErrors).toEqual([]);
     expect(hydrateConsoleErrors).toEqual([]);
+  });
+
+  async function surfaceColor(page: Page): Promise<string> {
+    return page.evaluate(() => {
+      const probe = document.createElement('div');
+      probe.style.backgroundColor = 'var(--color-surface)';
+      document.documentElement.appendChild(probe);
+      const cs = getComputedStyle(probe).backgroundColor;
+      document.documentElement.removeChild(probe);
+      return cs;
+    });
+  }
+
+  test('elección sembrada oscura se aplica antes del primer pintado en /en con sistema claro', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'light' });
+    const first = await page.goto('/en');
+    expect(first?.status()).toBeLessThan(400);
+    await expect(page.locator('html')).not.toHaveAttribute('data-theme');
+    await page.evaluate(() => localStorage.setItem('psg-theme', 'dark'));
+    const second = await page.goto('/en');
+    expect(second?.status()).toBeLessThan(400);
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    const htmlBg = await page.evaluate(() =>
+      getComputedStyle(document.documentElement).backgroundColor
+    );
+    const probeBg = await surfaceColor(page);
+    expect(htmlBg).toBe(probeBg);
+  });
+
+  test('elección sembrada clara se aplica antes del primer pintado en /es con sistema oscuro', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark' });
+    const first = await page.goto('/es');
+    expect(first?.status()).toBeLessThan(400);
+    await expect(page.locator('html')).not.toHaveAttribute('data-theme');
+    await page.evaluate(() => localStorage.setItem('psg-theme', 'light'));
+    const second = await page.goto('/es');
+    expect(second?.status()).toBeLessThan(400);
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+    const htmlBg = await page.evaluate(() =>
+      getComputedStyle(document.documentElement).backgroundColor
+    );
+    const probeBg = await surfaceColor(page);
+    expect(htmlBg).toBe(probeBg);
+  });
+
+  test('persistencia: tras navegación el tema sigue aplicado y localStorage conserva el valor', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'light' });
+    const first = await page.goto('/en');
+    expect(first?.status()).toBeLessThan(400);
+    await page.evaluate(() => localStorage.setItem('psg-theme', 'dark'));
+    const second = await page.goto('/en');
+    expect(second?.status()).toBeLessThan(400);
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    const value = await page.evaluate(() => localStorage.getItem('psg-theme'));
+    expect(value).toBe('dark');
+  });
+
+  test('sin fotograma contrario: data-theme se aplica una vez durante el parseo y no cambia tras load', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'light' });
+
+    // Primera carga sin tema: no hay data-theme
+    const first = await page.goto('/en');
+    expect(first?.status()).toBeLessThan(400);
+    await expect(page.locator('html')).not.toHaveAttribute('data-theme');
+
+    // Sembrar localStorage y navegar de nuevo: el script inline establece
+    // data-theme durante el parseo (antes del primer pintado).
+    await page.evaluate(() => localStorage.setItem('psg-theme', 'dark'));
+    const second = await page.goto('/en');
+    expect(second?.status()).toBeLessThan(400);
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+
+    // Tras load y dos frames de animación, data-theme no cambia: no hay
+    // fotograma con el tema contrario ni mutaciones posteriores.
+    await page.waitForLoadState('load');
+    await page.evaluate(() => {
+      return new Promise<void>((resolve) => {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            resolve();
+          });
+        });
+      });
+    });
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  });
+
+  test('sistema sin preferencia: se pinta en claro y sin data-theme', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'no-preference' });
+    const response = await page.goto('/en');
+    expect(response?.status()).toBeLessThan(400);
+    await expect(page.locator('html')).not.toHaveAttribute('data-theme');
+    const htmlBg = await page.evaluate(() =>
+      getComputedStyle(document.documentElement).backgroundColor
+    );
+    const probeBg = await surfaceColor(page);
+    expect(htmlBg).toBe(probeBg);
   });
 });

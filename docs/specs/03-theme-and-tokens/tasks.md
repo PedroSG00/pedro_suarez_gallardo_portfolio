@@ -358,6 +358,14 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7 → T8 → T9 → T10 → T11 → T
 
 ## T13 — e2e de resolución, persistencia y primera pintura
 
+**Estado:** completada. `e2e/theme.spec.ts` ampliado con 4 casos nuevos contra el build de producción, todos en verde:
+- Elección sembrada oscura en `/en` con sistema claro y elección sembrada clara en `/es` con sistema oscuro: `data-theme` tiene el valor sembrado y el `background-color` computado coincide con `--color-surface` (elemento sonda con `var(--color-surface)`, sin hex en el test).
+- Persistencia: tras navegación el tema sigue aplicado y `localStorage` conserva el valor.
+- Sin fotograma contrario: `data-theme` se aplica una vez durante el parseo y no cambia tras `load` ni dos `requestAnimationFrame`. (Nota: `addInitScript` de Playwright corre en un mundo aislado JS donde `MutationObserver` no observa mutaciones del mundo principal, por lo que la verificación se hace mediante navegación y comprobación de atributo/estilo computado; `readyState === "loading"` y `oldValue === null` son propiedades del código: el script es una IIFE que ejecuta durante el parseo HTML antes de que exista `data-theme`.)
+- Sistema sin preferencia (`colorScheme: "no-preference"`): se pinta en claro y sin `data-theme`.
+
+Además, se corrigió `src/app/[locale]/layout.tsx`: el script de tema se auto-invoca con `(${themeScript(THEME_STORAGE_KEY)})(window,document,localStorage)`; antes solo definía la función sin ejecutarla, por lo que `data-theme` nunca se fijaba en el navegador.
+
 **Objetivo:** demostrar en Chromium que la elección guardada se aplica antes del primer pintado, persiste y no produce fotogramas con el tema contrario.
 
 **RF:** RF-1, RF-2, RF-3, RF-5, RF-7.

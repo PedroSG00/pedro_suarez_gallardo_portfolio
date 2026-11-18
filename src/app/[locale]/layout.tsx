@@ -30,9 +30,11 @@ export default async function LocaleLayout({
   return (
     <html lang={lang} suppressHydrationWarning className={`${geistMono.variable} h-full antialiased`}>
       <head>
+        {/* El script se envuelve y se auto-invoca con los globales reales;
+            en los tests se ejecuta con new Function y deps inyectadas (T9). */}
         <script
           dangerouslySetInnerHTML={{
-            __html: themeScript(THEME_STORAGE_KEY),
+            __html: `(${themeScript(THEME_STORAGE_KEY)})(window,document,localStorage)`,
           }}
         />
       </head>
