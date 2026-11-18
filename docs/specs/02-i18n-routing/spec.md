@@ -1,5 +1,7 @@
 # 02 — i18n y rutas
 
+**Estado:** Completada y aprobada. La implementación se integró en el PR #12.
+
 ## Contexto y objetivo
 
 El portfolio debe poder consultarse en inglés y español desde rutas identificables y compartibles. La experiencia debe mantener un solo idioma por página y facilitar el cambio de idioma sin perder la sección que se está leyendo.

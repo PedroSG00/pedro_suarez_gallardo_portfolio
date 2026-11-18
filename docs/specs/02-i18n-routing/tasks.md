@@ -1,5 +1,7 @@
 # Tasks — 02 i18n y rutas
 
+**Estado general:** T1–T11 completadas; spec integrada en el PR #12.
+
 Tareas pequeñas y ordenadas (T1 → T11). Cada tarea tiene objetivo, RF que cubre, tests a escribir primero y criterio de hecho. Cada tarea debe poder implementarse y verificarse por separado antes de pasar a la siguiente.
 
 ---
@@ -185,7 +187,7 @@ Tareas pequeñas y ordenadas (T1 → T11). Cada tarea tiene objetivo, RF que cub
 - `pnpm typecheck`: pasa (`next typegen && tsc --noEmit`).
 - `pnpm exec vitest run --coverage`: 7 test files, 38 tests passed; cobertura 100% statements/functions/lines, 97.36% branches (>95% umbral).
 - `pnpm build`: pasa (Next.js 16.4.6 Turbopack).
-- `pnpm test:e2e`: 27 tests passed (Chromium).
+- `pnpm test:e2e`: 28 tests passed (Chromium; última verificación tras añadir conservación de query en la normalización).
 - No se ha bajado el umbral de cobertura ni se ha excluido código.
 
 ---
