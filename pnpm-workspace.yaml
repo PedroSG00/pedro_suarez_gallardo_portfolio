@@ -1,5 +1,7 @@
 engineStrict: true
 allowBuilds:
+  '@parcel/watcher': true
+  '@swc/core': true
   # Use the shipped platform-specific optional binaries; no local native build is needed.
   sharp: false
   # The platform-specific N-API binding is an optional dependency; skip its postinstall.
