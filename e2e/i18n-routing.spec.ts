@@ -215,4 +215,11 @@ test.describe('i18n routing', () => {
     expect(page.url()).toContain('/en');
     await expect(page.locator('body')).toContainText('Web portfolio');
   });
+
+  test('normalization redirect preserves query string (/EN?utm_source=x -> /en?utm_source=x)', async ({ page }) => {
+    const response = await page.goto('/EN?utm_source=x');
+    expect(response?.status()).toBeLessThan(400);
+    expect(page.url()).toContain('/en?utm_source=x');
+    await expect(page.locator('body')).toContainText('Web portfolio');
+  });
 });

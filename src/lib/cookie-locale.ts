@@ -1,6 +1,6 @@
 import type { Locale } from './locale';
 
-const COOKIE_NAME = 'psg_locale';
+export const COOKIE_NAME = 'psg_locale';
 const COOKIE_MAX_AGE = 31536000; // 1 año en segundos
 
 function parseCookieValue(cookieHeader?: string): string | undefined {

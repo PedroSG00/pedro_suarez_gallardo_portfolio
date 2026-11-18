@@ -1,27 +1,22 @@
 import { NextResponse, type NextRequest } from 'next/server';
-
-const LOCALES = ['en', 'es'] as const;
-type Locale = (typeof LOCALES)[number];
+import type { Locale } from '@/lib/locale';
+import { normalizePath } from '@/lib/normalize-path';
+import { COOKIE_NAME } from '@/lib/cookie-locale';
+import { resolveLocaleForRoot } from '@/lib/resolve-locale';
 
 function isLocale(segment: string): segment is Locale {
-  return LOCALES.includes(segment as Locale);
-}
-
-function normalizePathname(pathname: string): string {
-  let normalized = pathname.toLowerCase();
-  if (normalized !== '/' && normalized.endsWith('/')) {
-    normalized = normalized.slice(0, -1);
-  }
-  return normalized;
+  return (['en', 'es'] as Locale[]).includes(segment as Locale);
 }
 
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  const normalized = normalizePathname(pathname);
+  const normalized = normalizePath(pathname);
 
   // Redirect if normalization changed the path (e.g. /EN → /en, /es/ → /es)
   if (normalized !== pathname) {
-    return NextResponse.redirect(new URL(normalized, request.url));
+    const url = new URL(normalized, request.url);
+    url.search = request.nextUrl.search;
+    return NextResponse.redirect(url);
   }
 
   const segments = normalized.split('/').filter(Boolean);
@@ -35,40 +30,19 @@ export function middleware(request: NextRequest) {
   if (segments.length >= 1 && !isLocale(segments[0])) {
     return new NextResponse(
       '<html><body><h1>Not found</h1><p>This page does not exist.</p></body></html>',
-      {
-        status: 404,
-        headers: { 'content-type': 'text/html; charset=utf-8' },
-      }
+      { status: 404, headers: { 'content-type': 'text/html; charset=utf-8' } }
     );
   }
 
   // Root path → resolve locale (cookie > Accept-Language > English fallback)
   if (normalized === '/') {
-    const cookieLocale = request.cookies.get('psg_locale')?.value;
-    if (cookieLocale && isLocale(cookieLocale)) {
-      return NextResponse.redirect(new URL(`/${cookieLocale}`, request.url));
-    }
-
-    const acceptLanguage = request.headers.get('accept-language');
-    if (acceptLanguage) {
-      const preferred = acceptLanguage
-        .split(',')
-        .map((part) => part.split(';')[0].trim().toLowerCase())
-        .map((tag) => tag.split('-')[0])
-        .find((tag) => isLocale(tag));
-
-      if (preferred) {
-        return NextResponse.redirect(new URL(`/${preferred}`, request.url));
-      }
-    }
-
-    return NextResponse.redirect(new URL('/en', request.url));
-  }
-
-  // Valid locale prefix with extra segments (e.g. /en/unknown) → let Next.js render
-  // the localized not-found page so the LanguageSwitch is available.
-  if (segments.length > 1 && isLocale(segments[0])) {
-    return NextResponse.next();
+    const cookieValue = request.cookies.get(COOKIE_NAME)?.value;
+    const cookieStore = cookieValue ? { cookies: { [COOKIE_NAME]: cookieValue } } : undefined;
+    const locale = resolveLocaleForRoot(
+      { headers: { 'accept-language': request.headers.get('accept-language') ?? undefined } },
+      cookieStore
+    );
+    return NextResponse.redirect(new URL(`/${locale}`, request.url));
   }
 
   // Valid locale prefix → let Next.js handle the route
