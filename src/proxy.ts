@@ -8,7 +8,7 @@ function isLocale(segment: string): segment is Locale {
   return (['en', 'es'] as Locale[]).includes(segment as Locale);
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const normalized = normalizePath(pathname);
 
