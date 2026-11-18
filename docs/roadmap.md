@@ -2,14 +2,14 @@
 
 Hoja de ruta de specs, en orden de ejecución. Cada spec sigue el mismo bucle: **spec → tests → código → gates** (`pnpm lint`, `pnpm typecheck`, `pnpm test`, y `pnpm test:e2e` cuando toca idioma, tema, navegación o movimiento). Una spec está terminada solo cuando sus gates pasan.
 
-Las specs 01, 02 y 03 tocan capas transversales (tooling, i18n, tema y estilos globales): requieren aprobación explícita de Pedro antes de ejecutarse (ver `AGENTS.md`). La 01 está aprobada y se cierra en el PR de la rama `01`.
+Las specs 01, 02 y 03 tocan capas transversales (tooling, i18n, tema y estilos globales): requieren aprobación explícita de Pedro antes de ejecutarse (ver `AGENTS.md`). Las specs 01 y 02 están aprobadas y completadas; la spec 02 se integró en el PR #12. La 03 sigue pendiente de aprobación.
 
 Fuera de alcance por ahora: sección de proyectos y ruta `/projects/[slug]` (futurible, ver `content-brief.md`, sección 10).
 
 ## Estado
 
 - [x] 01 Tooling y CI
-- [ ] 02 i18n y rutas
+- [x] 02 i18n y rutas
 - [ ] 03 Tema y tokens
 - [ ] 04 Átomos de UI
 - [ ] 05 Movimiento de scroll (`Reveal`)
@@ -27,7 +27,7 @@ Fuera de alcance por ahora: sección de proyectos y ruta `/projects/[slug]` (fut
 | # | Spec (`docs/specs/`) | Qué decide | Depende de | Hecho cuando |
 |---|---|---|---|---|
 | 01 | `01-tooling-and-ci` | pnpm, ESLint, Vitest con umbral del 95 % global, RTL, Playwright (Chromium), `src/test/setup.ts`, CI de seis checks y gate de Sonar | — | CI en verde con seis checks y Sonar sobre una página vacía; ruleset de `main` con los seis |
-| 02 | `02-i18n-routing` | `next-intl`, rutas `/en` y `/es`, `next/root-params` (`await params`) para renderizado estático, esquema de claves de `messages/` por sección, test de paridad de claves y `renderWithIntl` en `src/test/` | 01 | `/en` y `/es` se construyen estáticas; el test de paridad rompe si falta una clave |
+| 02 | `02-i18n-routing` | `next-intl`, rutas `/en` y `/es`, `next/root-params` (`await params`) para renderizado estático, esquema de claves de `messages/` por sección, test de paridad de claves y `renderWithIntl` en `src/test/` | 01 | ✅ Completada: RF-1–RF-7, gates y paridad verificados; integrada en el PR #12 |
 | 03 | `03-theme-and-tokens` | Paleta crema/negro, modo oscuro diseñado (no invertido), fuente mono con máximo dos pesos, escala tipográfica con `clamp`, espaciados, **tokens de movimiento** (duraciones y distancias), View Transitions para el tema | 01 | Cambio de tema sin parpadeo; contraste AA verificado en ambos modos |
 | 04 | `04-ui-atoms` | `Button/Link`, `Heading`, `Tag`, `Section` (con numeración `01 / ABOUT`), líneas de retícula, `ThemeToggle`, `LanguageSwitch` | 02, 03 | Cada átomo testado por rol y comportamiento, sin contenido de portfolio dentro |
 | 05 | `05-scroll-motion-reveal` | `ui/Reveal` (`rise`, `clip`, `fade`, `delay`); una sola animación de entrada y salida con `animation-timeline: view()`; fallback visible; `prefers-reduced-motion`; la última sección no sale | 03, 04 | e2e de opacidad al entrar, centrado y al salir, en ambos idiomas y temas |
