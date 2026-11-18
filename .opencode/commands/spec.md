@@ -4,7 +4,7 @@ description: '/spec <carpeta> "<idea>" · Redacta spec.md con preguntas de una e
 NO escribas código en ningún momento. Vamos a redactar la especificación de la
 funcionalidad de specs/$1. Lee docs/constitution.md.
 
-Idea inicial: $2
+Idea inicial: La idea que recibe el número del nombre de la spec en el roadmap.
 
 Tu trabajo:
 1. Hazme preguntas de UNA en UNA para eliminar ambigüedades (casos límite,
