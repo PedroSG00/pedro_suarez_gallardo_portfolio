@@ -8,7 +8,7 @@ Los módulos se ubican dentro de la estructura existente de Next.js App Router. 
 
 | Módulo | Ruta | Responsabilidad | RF cubiertos |
 |--------|------|-----------------|--------------|
-| Middleware de localización | `src/middleware.ts` | Detección de locale, normalización de ruta (minúsculas, sin trailing slash), redirección de `/` según cookie o `Accept-Language`, 404 para locale no admitido y doble prefijo (`/en/es`). | RF-1, RF-2, RF-4 |
+| Middleware de localización | `src/proxy.ts` | Detección de locale, normalización de ruta (minúsculas, sin trailing slash), redirección de `/` según cookie o `Accept-Language`, 404 para locale no admitido y doble prefijo (`/en/es`). | RF-1, RF-2, RF-4 |
 | Helpers de navegación localizada | `src/i18n/routing.ts` | Construcción de `href` al cambiar de idioma conservando `pathname`, `hash` y `search`; prioridad de ruta explícita sobre cookie. | RF-2, RF-3, RF-5 |
 | Persistencia de preferencia | `src/lib/cookie-locale.ts` | Lectura y escritura de cookie de cliente (expiración larga) con el locale elegido. | RF-1 |
 | Validación de paridad | `src/lib/i18n-parity.ts` | Comparación de claves entre `messages/en.json` y `messages/es.json`; falla si faltan o sobran claves. | RF-6, RF-7 |
@@ -204,7 +204,7 @@ FUNCTION validateParity(enMessages, esMessages):
 - Errores: ninguno; lanza error solo si los argumentos no son objetos.
 - RF: RF-7.
 
-### 4.7 Middleware de next-intl (`src/middleware.ts`)
+### 4.7 Proxy de localización (`src/proxy.ts`)
 
 - Entrada: request de Next.js.
 - Salida: `NextResponse.next()`, `NextResponse.redirect()`, o `NextResponse.rewrite()` a 404.

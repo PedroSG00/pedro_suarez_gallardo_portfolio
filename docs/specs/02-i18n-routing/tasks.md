@@ -108,9 +108,9 @@ Tareas pequeñas y ordenadas (T1 → T11). Cada tarea tiene objetivo, RF que cub
 **RF que cubre:** RF-1, RF-2, RF-4, RF-5
 
 **Resultado:**
-- `src/middleware.ts` implementado con normalización de rutas (minúsculas, sin trailing slash), 404 para doble prefijo (`/en/es`) y locale no admitido (`/fr`), resolución de `/` por cookie (`psg_locale`) > `Accept-Language` > inglés, y paso a Next.js para rutas con prefijo de locale válido.
+- `src/proxy.ts` implementado con normalización de rutas (minúsculas, sin trailing slash), 404 para doble prefijo (`/en/es`) y locale no admitido (`/fr`), resolución de `/` por cookie (`psg_locale`) > `Accept-Language` > inglés, y paso a Next.js para rutas con prefijo de locale válido.
 - `src/app/[locale]/layout.tsx` y `src/app/[locale]/page.tsx` creados como páginas mínimas para permitir que los e2e verifiquen las redirecciones y el contenido localizado.
-- `vitest.config.mts` actualizado para excluir `src/middleware.ts` de la cobertura (archivo de ruta cubierto por e2e, igual que `src/app/**` per constitución punto 9).
+- `vitest.config.mts` actualizado para excluir `src/proxy.ts` de la cobertura (archivo de ruta cubierto por e2e, igual que `src/app/**` per constitución punto 9).
 - Tests e2e: `e2e/i18n-routing.spec.ts` con 10 tests (redirecciones por cookie y Accept-Language, 404 para locale no admitido y doble prefijo, normalización de mayúsculas y trailing slash).
 - `pnpm exec vitest run --coverage`: 6 test files, 36 tests passed, cobertura 100%.
 - `pnpm lint`: limpio.
@@ -145,7 +145,7 @@ Tareas pequeñas y ordenadas (T1 → T11). Cada tarea tiene objetivo, RF que cub
 **RF que cubre:** RF-4, RF-5
 
 **Resultado:**
-- `src/middleware.ts` actualizado: devuelve 404 con código HTTP real y mensaje visible localizado para rutas desconocidas bajo `/en/` o `/es/` (ej. `/en/unknown` → inglés, `/es/unknown` → español). También maneja `/fr` y `/fr/about` (idioma no admitido → inglés) y doble prefijo (`/en/es`).
+- `src/proxy.ts` actualizado: devuelve 404 con código HTTP real y mensaje visible localizado para rutas desconocidas bajo `/en/` o `/es/` (ej. `/en/unknown` → inglés, `/es/unknown` → español). También maneja `/fr` y `/fr/about` (idioma no admitido → inglés) y doble prefijo (`/en/es`).
 - `src/app/[locale]/not-found.tsx` existe pero no se alcanza en la práctica (middleware captura todos los 404 de rutas inexistentes bajo locales admitidos).
 - Tests e2e en `e2e/i18n-routing.spec.ts`: /en/unknown → 404 inglés, /es/unknown → 404 español, /fr/about → 404 inglés, sin redirección a portada desde ruta inexistente.
 - `pnpm exec vitest run --coverage`: 7 test files, 38 tests passed, cobertura 100%.
@@ -166,7 +166,7 @@ Tareas pequeñas y ordenadas (T1 → T11). Cada tarea tiene objetivo, RF que cub
 - `src/components/ui/LanguageSwitch/LanguageSwitch.test.tsx` actualizado con mock de `next/navigation` y 2 tests RTL.
 - `src/app/[locale]/[...slug]/page.tsx` creado: llama a `notFound()` para que las rutas inexistentes bajo un locale admitido lleguen al not-found localizado.
 - `src/app/[locale]/not-found.tsx` reescrito como cliente (`'use client'`) que lee el locale de la URL vía `usePathname()` y muestra el mensaje 404 traducido (inglés/español).
-- `src/middleware.ts` actualizado: deja pasar `/en/*` y `/es/*` a Next.js para que rendericen el not-found localizado; mantiene 404 raw solo para `/fr`, `/fr/about` (RF-4) y `/en/es` (doble prefijo).
+- `src/proxy.ts` actualizado: deja pasar `/en/*` y `/es/*` a Next.js para que rendericen el not-found localizado; mantiene 404 raw solo para `/fr`, `/fr/about` (RF-4) y `/en/es` (doble prefijo).
 - Tests e2e en `e2e/i18n-routing.spec.ts`: cambio de idioma preservando fragmento (`/es#contact` → `/en#contact`), preservando query (`/en?utm_source=linkedin` → `/es?utm_source=linkedin`), sin mezcla de idiomas, cambio de idioma desde ruta 404 (`/en/unknown` → `/es/unknown`, `/es/unknown` → `/en/unknown`), conservación de query y fragmento desde ruta 404, LanguageSwitch visible en página 404.
 - `pnpm exec vitest run --coverage`: 7 test files, 38 tests passed, cobertura 100% statements/lines/functions, 97.36% branches (sobre umbral 95%).
 - `pnpm lint`: limpio.
