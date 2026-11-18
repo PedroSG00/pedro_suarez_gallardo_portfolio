@@ -127,7 +127,7 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7 → T8 → T9 → T10 → T11 → T
 
 ## T4 — Contraste y parejas alcanzables
 
-**Objetivo:** lógica pura de hex a RGB, luminancia relativa, ratio y umbral WCAG por tamaño y peso, más la resolución de color por modo y contexto.
+**Estado:** completada. `src/test/theme-contrast.ts` con `parseColor`, `relativeLuminance`, `contrastRatio`, `requiredContrast`, `resolveColor`, `tokenValue` y `reachablePairs`; `src/test/theme-contrast.test.ts` con 27 casos, fixtures CSS inline, sin leer todavía `globals.css`.
 
 **RF:** RF-5, RF-6, RF-12.
 
