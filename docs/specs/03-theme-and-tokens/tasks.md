@@ -174,7 +174,7 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7 → T8 → T9 → T10 → T11 → T
 
 ## T6 — Barrido de fuente
 
-**Objetivo:** un barrido que impida, sobre `src/**/*.{ts,tsx,css}`, hex fuera de `globals.css`, familias fuera del token, `dark:` de Tailwind, espaciados arbitrarios y fracciones de medio.
+**Estado:** completada. `src/test/source.ts` con `scanSource` y `src/test/theme-source.test.ts` con 29 casos (sintéticos + barrido del árbol real verde tras T1).
 
 **RF:** RF-10, RF-12.
 
