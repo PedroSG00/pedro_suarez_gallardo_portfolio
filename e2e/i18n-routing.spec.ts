@@ -72,13 +72,57 @@ test.describe('i18n routing', () => {
     const response = await page.goto('/EN');
     expect(response?.status()).toBeLessThan(400);
     expect(page.url()).toContain('/en');
-    await expect(page.locator('body')).toContainText('en');
+    await expect(page.locator('body')).toContainText('Web portfolio');
   });
 
   test('visiting /es/ normalizes to /es and shows Spanish', async ({ page }) => {
     const response = await page.goto('/es/');
     expect(response?.status()).toBeLessThan(400);
     expect(page.url()).toContain('/es');
-    await expect(page.locator('body')).toContainText('es');
+    await expect(page.locator('body')).toContainText('Portfolio web');
+  });
+
+  test('visiting /en directly shows English content', async ({ page }) => {
+    const response = await page.goto('/en');
+    expect(response?.status()).toBeLessThan(400);
+    expect(page.url()).toContain('/en');
+    await expect(page.locator('body')).toContainText('Web portfolio');
+  });
+
+  test('visiting /es directly shows Spanish content', async ({ page }) => {
+    const response = await page.goto('/es');
+    expect(response?.status()).toBeLessThan(400);
+    expect(page.url()).toContain('/es');
+    await expect(page.locator('body')).toContainText('Portfolio web');
+  });
+
+  test('Spanish cookie is ignored when entering /en directly', async ({ page, context }) => {
+    await context.addCookies([
+      { name: 'psg_locale', value: 'es', url: 'http://127.0.0.1:3000' },
+    ]);
+    const response = await page.goto('/en');
+    expect(response?.status()).toBeLessThan(400);
+    expect(page.url()).toContain('/en');
+    await expect(page.locator('body')).toContainText('Web portfolio');
+  });
+
+  test('English cookie is ignored when entering /es directly', async ({ page, context }) => {
+    await context.addCookies([
+      { name: 'psg_locale', value: 'en', url: 'http://127.0.0.1:3000' },
+    ]);
+    const response = await page.goto('/es');
+    expect(response?.status()).toBeLessThan(400);
+    expect(page.url()).toContain('/es');
+    await expect(page.locator('body')).toContainText('Portfolio web');
+  });
+
+  test('page does not mix English and Spanish text', async ({ page }) => {
+    await page.goto('/en');
+    await expect(page.locator('body')).toContainText('Web portfolio');
+    await expect(page.locator('body')).not.toContainText('Portfolio web');
+
+    await page.goto('/es');
+    await expect(page.locator('body')).toContainText('Portfolio web');
+    await expect(page.locator('body')).not.toContainText('Web portfolio');
   });
 });
