@@ -148,4 +148,26 @@ test.describe('i18n routing', () => {
     expect(page.url()).toContain('/en/unknown');
     expect(page.url()).not.toBe('http://127.0.0.1:3000/en');
   });
+
+  test('changing language from /es#contact preserves fragment', async ({ page }) => {
+    await page.goto('/es#contact');
+    await page.getByRole('link', { name: 'EN' }).click();
+    await expect(page).toHaveURL(/en#contact/);
+    await expect(page.locator('body')).toContainText('Web portfolio');
+  });
+
+  test('changing language from /en?utm_source=linkedin preserves query', async ({ page }) => {
+    await page.goto('/en?utm_source=linkedin');
+    await page.getByRole('link', { name: 'ES' }).click();
+    await expect(page).toHaveURL(/es\?utm_source=linkedin/);
+    await expect(page.locator('body')).toContainText('Portfolio web');
+  });
+
+  test('changing language does not mix English and Spanish', async ({ page }) => {
+    await page.goto('/en');
+    await expect(page.locator('body')).toContainText('Web portfolio');
+    await page.getByRole('link', { name: 'ES' }).click();
+    await expect(page.locator('body')).toContainText('Portfolio web');
+    await expect(page.locator('body')).not.toContainText('Web portfolio');
+  });
 });

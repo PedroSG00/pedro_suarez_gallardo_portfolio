@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import LanguageSwitch from '@/components/ui/LanguageSwitch/LanguageSwitch';
+import type { Locale } from '@/lib/locale';
 
 export const metadata: Metadata = {
   title: 'Portfolio',
@@ -17,7 +18,7 @@ export default async function LocaleLayout({
     <html lang={locale}>
       <body>
         <nav>
-          <LanguageSwitch locale={locale} />
+          <LanguageSwitch locale={locale as Locale} />
         </nav>
         {children}
       </body>

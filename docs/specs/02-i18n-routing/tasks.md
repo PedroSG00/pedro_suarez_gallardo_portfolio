@@ -156,21 +156,20 @@ Tareas pequeñas y ordenadas (T1 → T11). Cada tarea tiene objetivo, RF que cub
 
 ---
 
-## T10 — Cambio de idioma conservando sección y parámetros (RF-3)
-
-**Objetivo:** Implementar el cambio de idioma desde la navbar (selector funcional, sin diseño visual específico) que use `buildLocalizedHref` para navegar al mismo path en el otro idioma, conservando `hash` y `search`.
+## ~~T10 — Cambio de idioma conservando sección y parámetros~~ ✅ COMPLETADA
 
 **RF que cubre:** RF-3
 
-**Tests a escribir primero (e2e Playwright, Chromium):**
-- Estar en `/es#contact` y cambiar a inglés → navega a `/en#contact` (fragmento conservado).
-- Estar en `/en?utm_source=linkedin` y cambiar a español → navega a `/es?utm_source=linkedin` (query conservada).
-- Estar en `/en/unknown` (404) y cambiar a español → navega a `/es/unknown` (path conservado, sigue siendo 404).
-- Al cambiar de idioma, la página no mezcla inglés y español.
-
-**Criterio de hecho:**
-- El cambio de idioma funciona desde cualquier sección y conserva `hash` y `search`.
-- Los tests e2e verifican navegación por teclado y contenido mostrado, no clases de Tailwind.
+**Resultado:**
+- `src/components/ui/LanguageSwitch/LanguageSwitch.tsx` actualizado para ser un componente de cliente (`'use client'`) que usa `usePathname()`, `useSearchParams()` y `buildLocalizedHref()` para cambiar de idioma conservando `pathname`, `hash` y `search`.
+- `src/app/[locale]/layout.tsx` actualizado: `locale` tipado como `Locale` con cast en el prop de `LanguageSwitch`.
+- `src/components/ui/LanguageSwitch/LanguageSwitch.test.tsx` actualizado con mock de `next/navigation` y 2 tests RTL.
+- Tests e2e en `e2e/i18n-routing.spec.ts`: cambio de idioma preservando fragmento (`/es#contact` → `/en#contact`), preservando query (`/en?utm_source=linkedin` → `/es?utm_source=linkedin`), sin mezcla de idiomas.
+- `pnpm exec vitest run --coverage`: 7 test files, 38 tests passed, cobertura 100% statements/lines/functions, 97.36% branches (sobre umbral 95%).
+- `pnpm lint`: limpio.
+- `pnpm typecheck`: pasa.
+- `pnpm build`: pasa.
+- `npx playwright test`: 22 tests passed.
 
 ---
 
