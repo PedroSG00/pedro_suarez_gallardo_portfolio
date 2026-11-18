@@ -5,7 +5,7 @@ import {
   reachablePairs,
 } from "./theme-contrast";
 import { parseClamp, sizeAt } from "./type-scale";
-import { readTokenSheet } from "./theme";
+import { readTokenSheet, readCssText } from "./theme";
 
 describe("readTokenSheet (real globals.css)", () => {
   test("parseTokenSheet does not throw on the real file: all 33 required tokens exist", () => {
@@ -192,5 +192,103 @@ describe("type scale with real clamp values (RF-9)", () => {
         expect(sizeAt(specs[role], w)).toBeGreaterThanOrEqual(12 - 1e-6);
       }
     }
+  });
+});
+
+describe("color-scheme rules (RF-5, RF-7)", () => {
+  const css = readCssText();
+
+  test(":root declares color-scheme: light dark", () => {
+    expect(css).toContain(":root {\n    color-scheme: light dark;\n  }");
+  });
+
+  test(":root[data-theme='light'] declares color-scheme: light", () => {
+    expect(css).toContain(
+      ':root[data-theme="light"] {\n    color-scheme: light;\n  }'
+    );
+  });
+
+  test(":root[data-theme='dark'] declares color-scheme: dark", () => {
+    expect(css).toContain(
+      ':root[data-theme="dark"] {\n    color-scheme: dark;\n  }'
+    );
+  });
+});
+
+describe("inverted block (RF-5)", () => {
+  const css = readCssText();
+
+  test(".inverted reapplies surface and ink and changes color-scheme", () => {
+    expect(css).toContain(".inverted {\n    color-scheme: dark;\n    background-color: var(--color-surface);\n    color: var(--color-ink);\n  }");
+  });
+
+  test("override for data-theme='dark' inverts back", () => {
+    expect(css).toContain(
+      ':root[data-theme="dark"] .inverted {\n    color-scheme: light;\n  }'
+    );
+  });
+
+  test("override for system dark without attribute", () => {
+    expect(css).toContain(
+      "@media (prefers-color-scheme: dark) {\n    :root:not([data-theme]) .inverted {\n      color-scheme: light;\n    }\n  }"
+    );
+  });
+
+  test("line does not change inside the inverted block", () => {
+    expect(css).not.toContain(".inverted { --color-line:");
+    expect(css).not.toContain(".inverted { border-color:");
+  });
+});
+
+describe("base rules, focus and selection (RF-4, RF-5, RF-11)", () => {
+  const css = readCssText();
+
+  test("html applies surface, ink, font-mono, regular weight and tabular-nums", () => {
+    expect(css).toContain("html {\n    background-color: var(--color-surface);\n    color: var(--color-ink);\n    font-family: var(--font-mono);\n    font-weight: var(--font-weight-regular);\n    font-variant-numeric: tabular-nums;\n    -webkit-font-smoothing: antialiased;\n  }");
+  });
+
+  test("body applies surface, ink and min-height", () => {
+    expect(css).toContain(
+      "body {\n    min-height: 100dvh;\n    background-color: var(--color-surface);\n    color: var(--color-ink);\n  }"
+    );
+  });
+
+  test("*, ::before, ::after take border-color from line token", () => {
+    expect(css).toContain(
+      "*,\n  ::before,\n  ::after {\n    border-color: var(--color-line);\n  }"
+    );
+  });
+
+  test("::selection uses the ink/surface inverted pair", () => {
+    expect(css).toContain(
+      "::selection {\n    background-color: var(--color-ink);\n    color: var(--color-surface);\n  }"
+    );
+  });
+
+  test(":focus-visible uses focus token with line-width and spacing", () => {
+    expect(css).toContain(
+      ":focus-visible {\n    outline: calc(var(--line-width) * 2) solid var(--color-focus);\n    outline-offset: calc(var(--spacing) / 2);\n  }"
+    );
+  });
+
+  test("no transition in html nor body", () => {
+    const htmlBlock = css.match(/html\s*\{[\s\S]*?\}/)?.[0] ?? "";
+    const bodyBlock = css.match(/body\s*\{[\s\S]*?\}/)?.[0] ?? "";
+    expect(htmlBlock).not.toMatch(/transition/);
+    expect(bodyBlock).not.toMatch(/transition/);
+  });
+
+  test("::view-transition-* use duration-theme token", () => {
+    expect(css).toContain(
+      "::view-transition-group(root),\n::view-transition-old(root),\n::view-transition-new(root) {\n  animation-duration: var(--duration-theme);\n}"
+    );
+  });
+});
+
+describe("prefers-reduced-motion (RF-4, RF-11)", () => {
+  const css = readCssText();
+
+  test("the reduce block has no @layer and sets durations to 0ms", () => {
+    expect(css).toContain("@media (prefers-reduced-motion: reduce) {\n  :root {\n    --duration-state: 0ms;\n    --duration-theme: 0ms;\n    --duration-reveal: 0ms;\n  }\n\n  ::view-transition-group(*),\n  ::view-transition-old(*),\n  ::view-transition-new(*) {\n    animation: none !important;\n  }\n}");
   });
 });

@@ -226,7 +226,7 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7 → T8 → T9 → T10 → T11 → T
 
 ## T8 — Modos, bloque invertido y reglas base
 
-**Objetivo:** que el tema se resuelva por `color-scheme`, que `.inverted` invierta de verdad y que la base, el foco, la selección y el movimiento reducido queden declarados.
+**Estado:** completada. `src/styles/globals.css` declara `color-scheme` (`:root`, `data-theme="light"`, `data-theme="dark"`), `.inverted` (reaplica `surface`/`ink` y cambia `color-scheme` con overrides para modo oscuro y sistema oscuro), reglas base (`html`, `body`, `border-color`, `::selection`, `:focus-visible`), `::view-transition-*` con `--duration-theme` y el bloque `prefers-reduced-motion` sin `@layer` a 0ms con `animation: none`. `src/test/theme-audit.test.ts` ampliado con 13 tests de auditoría del archivo real.
 
 **RF:** RF-4, RF-5, RF-7, RF-11, RF-12.
 
