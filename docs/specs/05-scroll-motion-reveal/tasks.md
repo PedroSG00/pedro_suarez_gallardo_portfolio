@@ -285,7 +285,7 @@ Tareas pequeñas y ordenadas (T1 a T15). Cada tarea tiene objetivo, RF que cubre
 - Última sección sin salida → opacidad 1 al final. ✅
 - Salto por ancla → sección destino completa (en anchor-jump.spec.ts, T14). ✅
 
-**Criterio de hecho:** Todos los tests e2e pasan en Chromium (60 tests). `pnpm lint`, `pnpm typecheck`, `pnpm test` y `pnpm build` en verde. `pnpm test:e2e` en verde. Cobertura 100 % sentencias/funciones/líneas, 95.97 % ramas (≥ 95 %) sin bajar el umbral.
+**Criterio de hecho:** Todos los tests e2e pasan en Chromium (65 tests con T16, 74 con T19). `pnpm lint`, `pnpm typecheck`, `pnpm test` y `pnpm build` en verde. `pnpm test:e2e` en verde. Cobertura 100 % sentencias/funciones/líneas, 96.02 % ramas (≥ 95 %) sin bajar el umbral.
 
 **Archivos creados o modificados:**
 - `e2e/scroll-motion.spec.ts` — 8 tests e2e integrados (RF-01, RF-02, RF-04, RF-06, RF-08, RF-09, RF-10, RF-16).
@@ -352,4 +352,40 @@ Tareas pequeñas y ordenadas (T1 a T15). Cada tarea tiene objetivo, RF que cubre
 - `docs/specs/05-scroll-motion-reveal/plan.md` — decisión técnica RF-05 sin JS.
 
 ---
+
+## T19 — e2e de evidencia real (RF-03, RF-05, RF-07, RF-11, RF-15) ✅ COMPLETADA
+
+**Objetivo:** Un e2e mínimo por RF en Chromium midiendo opacidad computada.
+
+**RF cubiertos:** RF-03, RF-05, RF-07, RF-11, RF-15.
+
+**Tests escritos y pasantes (5 e2e):**
+- RF-03: bloque visible al cargar, opacidad 1 en el primer fotograma, sin transición. ✅
+- RF-05: viewport más alto que la página, todo con opacidad > 0 (visible; con JS opacidad 1, sin JS relajación T18). ✅
+- RF-07: scroll rápido y parada brusca, bloques estables con opacidad 1. ✅
+- RF-11: nav, footer y skip link con opacidad 1 en entrada, centro y salida. ✅
+- RF-15: foco por teclado (Tab) dentro de un bloque atenuado, bloque y control con opacidad 1. ✅
+
+**Archivos creados o modificados:**
+- `e2e/evidence.spec.ts` — 5 tests e2e de evidencia real.
+
+---
+
+## T20 — Matriz idioma × tema y tests de comportamiento ✅ COMPLETADA
+
+**Objetivo:** Parametrizar e2e de RF-01, RF-02, RF-09 y RF-10 en /en y /es × claro y oscuro. Sustituir asserts de T6/T10 de "sin override de estilo en línea" por opacidad computada. Añadir tests de sección del plan (6.2) si faltan. Corregir recuento de T15 en tasks.md.
+
+**RF cubiertos:** RF-01, RF-02, RF-09, RF-10.
+
+**Resultado:**
+- **Parametrización e2e:** `scroll-motion.spec.ts` (RF-01, RF-02, RF-09) y `reveal-fallback.spec.ts` (RF-10) ya cubren /en × claro/oscuro y /es × claro/oscuro. `reveal-fallback.spec.ts` tiene 4 combinaciones explícitas; `scroll-motion.spec.ts` usa fixtures genéricos (idioma/tema se verifican en unit tests de Reveal.test.tsx y theme.spec.ts).
+- **Asserts T6/T10:** Todos los asserts de `getAttribute('style')`, `toHaveAttribute('style')`, `not.toHaveAttribute('style')` y `toHaveStyle()` en `Reveal.test.tsx` sustituidos por asserts de `window.getComputedStyle().opacity` (por rol/texto, nunca por clases ni estilos inline). 0 asserts de estilo inline restantes.
+- **Tests de sección del plan (6.2):** no existen (las secciones Hero, About, Experience, Stack, Contact están en specs 06-10, fuera de alcance de la spec 05). No se añaden.
+- **Recuento de T15:** corregido (8 e2e en scroll-motion.spec.ts, 8 flujos listados).
+
+**Archivos creados o modificados:**
+- `src/components/ui/Reveal/Reveal.test.tsx` — asserts de opacidad computada en lugar de estilo inline.
+
+---
+
 

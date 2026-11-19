@@ -1,0 +1,11 @@
+[WebServer] $ next start -p 3000
+
+Running 5 tests using 5 workers
+
+  ok 5 [chromium] ÔÇ║ e2e\evidence.spec.ts:61:3 ÔÇ║ T19: evidencia real por RF ÔÇ║ RF-03: bloque visible al cargar, opacidad 1 en el primer fotograma (486ms)
+  ok 2 [chromium] ÔÇ║ e2e\evidence.spec.ts:120:3 ÔÇ║ T19: evidencia real por RF ÔÇ║ RF-07: scroll r├ípido y parada brusca, bloques estables opacidad 1 (652ms)
+  ok 4 [chromium] ÔÇ║ e2e\evidence.spec.ts:175:3 ÔÇ║ T19: evidencia real por RF ÔÇ║ RF-15: foco por teclado (Tab) dentro de un bloque atenuado (620ms)
+  ok 3 [chromium] ÔÇ║ e2e\evidence.spec.ts:84:3 ÔÇ║ T19: evidencia real por RF ÔÇ║ RF-05: viewport m├ís alto que la p├ígina, todo con opacidad 1 (678ms)
+  ok 1 [chromium] ÔÇ║ e2e\evidence.spec.ts:146:3 ÔÇ║ T19: evidencia real por RF ÔÇ║ RF-11: nav, footer y skip link con opacidad 1 en todas las fases (813ms)
+
+  5 passed (3.2s)

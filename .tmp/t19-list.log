@@ -1,0 +1,94 @@
+[WebServer] $ next start -p 3000
+
+Running 5 tests using 5 workers
+
+  ok 5 [chromium] ÔÇ║ e2e\evidence.spec.ts:178:3 ÔÇ║ T19: evidencia real por RF ÔÇ║ RF-15: foco por teclado (Tab) dentro de un bloque atenuado (424ms)
+  ok 1 [chromium] ÔÇ║ e2e\evidence.spec.ts:83:3 ÔÇ║ T19: evidencia real por RF ÔÇ║ RF-05: viewport m├ís alto que la p├ígina, todo con opacidad 1 (553ms)
+  x  4 [chromium] ÔÇ║ e2e\evidence.spec.ts:60:3 ÔÇ║ T19: evidencia real por RF ÔÇ║ RF-03: bloque visible al cargar, opacidad 1 en el primer fotograma (479ms)
+  x  2 [chromium] ÔÇ║ e2e\evidence.spec.ts:145:3 ÔÇ║ T19: evidencia real por RF ÔÇ║ RF-11: nav, footer y skip link con opacidad 1 en todas las fases (634ms)
+  x  3 [chromium] ÔÇ║ e2e\evidence.spec.ts:119:3 ÔÇ║ T19: evidencia real por RF ÔÇ║ RF-07: scroll r├ípido y parada brusca, bloques estables opacidad 1 (647ms)
+
+
+  1) [chromium] ÔÇ║ e2e\evidence.spec.ts:60:3 ÔÇ║ T19: evidencia real por RF ÔÇ║ RF-03: bloque visible al cargar, opacidad 1 en el primer fotograma 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: 0
+
+      77 |     const transformY = await computedTransformY(page, '[aria-label="Bloque visible"]');
+      78 |
+    > 79 |     expect(opacity).toBe(1);
+         |                     ^
+      80 |     expect(transformY).toBe(0);
+      81 |   });
+      82 |
+        at C:\Users\jeday\Desktop\projects\pedro_suarez_gallardo_portfolio\e2e\evidence.spec.ts:79:21
+
+    Error Context: test-results\evidence-T19-evidencia-rea-c7b11-ad-1-en-el-primer-fotograma-chromium\error-context.md
+
+    attachment #2: trace (application/zip) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\evidence-T19-evidencia-rea-c7b11-ad-1-en-el-primer-fotograma-chromium\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\evidence-T19-evidencia-rea-c7b11-ad-1-en-el-primer-fotograma-chromium\trace.zip
+
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+  2) [chromium] ÔÇ║ e2e\evidence.spec.ts:119:3 ÔÇ║ T19: evidencia real por RF ÔÇ║ RF-07: scroll r├ípido y parada brusca, bloques estables opacidad 1 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: 0.87975
+
+      139 |     const transformY = await computedTransformY(page, '[aria-label="Bloque estable"]');
+      140 |
+    > 141 |     expect(opacity).toBe(1);
+          |                     ^
+      142 |     expect(transformY).toBe(0);
+      143 |   });
+      144 |
+        at C:\Users\jeday\Desktop\projects\pedro_suarez_gallardo_portfolio\e2e\evidence.spec.ts:141:21
+
+    Error Context: test-results\evidence-T19-evidencia-rea-46dde-bloques-estables-opacidad-1-chromium\error-context.md
+
+    attachment #2: trace (application/zip) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\evidence-T19-evidencia-rea-46dde-bloques-estables-opacidad-1-chromium\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\evidence-T19-evidencia-rea-46dde-bloques-estables-opacidad-1-chromium\trace.zip
+
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+  3) [chromium] ÔÇ║ e2e\evidence.spec.ts:145:3 ÔÇ║ T19: evidencia real por RF ÔÇ║ RF-11: nav, footer y skip link con opacidad 1 en todas las fases 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: 0
+
+      171 |       const footerOpacity = await computedOpacity(page, '[aria-label="Footer excluido"]');
+      172 |
+    > 173 |       expect(navOpacity).toBe(1);
+          |                          ^
+      174 |       expect(footerOpacity).toBe(1);
+      175 |     }
+      176 |   });
+        at C:\Users\jeday\Desktop\projects\pedro_suarez_gallardo_portfolio\e2e\evidence.spec.ts:173:26
+
+    Error Context: test-results\evidence-T19-evidencia-rea-cb148-acidad-1-en-todas-las-fases-chromium\error-context.md
+
+    attachment #2: trace (application/zip) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\evidence-T19-evidencia-rea-cb148-acidad-1-en-todas-las-fases-chromium\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\evidence-T19-evidencia-rea-cb148-acidad-1-en-todas-las-fases-chromium\trace.zip
+
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+  3 failed
+    [chromium] ÔÇ║ e2e\evidence.spec.ts:60:3 ÔÇ║ T19: evidencia real por RF ÔÇ║ RF-03: bloque visible al cargar, opacidad 1 en el primer fotograma 
+    [chromium] ÔÇ║ e2e\evidence.spec.ts:119:3 ÔÇ║ T19: evidencia real por RF ÔÇ║ RF-07: scroll r├ípido y parada brusca, bloques estables opacidad 1 
+    [chromium] ÔÇ║ e2e\evidence.spec.ts:145:3 ÔÇ║ T19: evidencia real por RF ÔÇ║ RF-11: nav, footer y skip link con opacidad 1 en todas las fases 
+  2 passed (2.7s)

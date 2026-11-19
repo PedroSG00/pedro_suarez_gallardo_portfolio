@@ -1,0 +1,194 @@
+[WebServer] $ next start -p 3000
+
+Running 78 tests using 8 workers
+
+  ok  2 [chromium] ÔÇ║ e2e\anchor-jump.spec.ts:82:3 ÔÇ║ Anchor jump: destination section complete (RF-12) ÔÇ║ no destination block appears half-revealed after an anchor jump (653ms)
+  ok  1 [chromium] ÔÇ║ e2e\anchor-jump.spec.ts:69:3 ÔÇ║ Anchor jump: destination section complete (RF-12) ÔÇ║ all destination blocks have computed opacity 1 when arriving by anchor (632ms)
+  ok  3 [chromium] ÔÇ║ e2e\evidence.spec.ts:84:3 ÔÇ║ T19: evidencia real por RF ÔÇ║ RF-05: viewport m├ís alto que la p├ígina, todo con opacidad 1 (678ms)
+  ok  4 [chromium] ÔÇ║ e2e\evidence.spec.ts:61:3 ÔÇ║ T19: evidencia real por RF ÔÇ║ RF-03: bloque visible al cargar, opacidad 1 en el primer fotograma (689ms)
+  ok  7 [chromium] ÔÇ║ e2e\evidence.spec.ts:120:3 ÔÇ║ T19: evidencia real por RF ÔÇ║ RF-07: scroll r├ípido y parada brusca, bloques estables opacidad 1 (816ms)
+  ok  5 [chromium] ÔÇ║ e2e\evidence.spec.ts:146:3 ÔÇ║ T19: evidencia real por RF ÔÇ║ RF-11: nav, footer y skip link con opacidad 1 en todas las fases (802ms)
+  ok 14 [chromium] ÔÇ║ e2e\i18n-routing.spec.ts:52:3 ÔÇ║ i18n routing ÔÇ║ visiting /fr shows 404 in English without redirect (334ms)
+  ok  8 [chromium] ÔÇ║ e2e\evidence.spec.ts:175:3 ÔÇ║ T19: evidencia real por RF ÔÇ║ RF-15: foco por teclado (Tab) dentro de un bloque atenuado (543ms)
+  ok 15 [chromium] ÔÇ║ e2e\i18n-routing.spec.ts:59:3 ÔÇ║ i18n routing ÔÇ║ visiting /fr/about shows 404 in English without redirect (259ms)
+  ok  6 [chromium] ÔÇ║ e2e\home.spec.ts:3:1 ÔÇ║ the home responds without page errors (1.3s)
+  ok 16 [chromium] ÔÇ║ e2e\i18n-routing.spec.ts:66:3 ÔÇ║ i18n routing ÔÇ║ visiting /en/es shows 404 (double prefix) (234ms)
+  ok 13 [chromium] ÔÇ║ e2e\i18n-routing.spec.ts:45:3 ÔÇ║ i18n routing ÔÇ║ visiting / with Accept-Language fr redirects to /en (702ms)
+  ok 12 [chromium] ÔÇ║ e2e\i18n-routing.spec.ts:38:3 ÔÇ║ i18n routing ÔÇ║ visiting / without cookie and Accept-Language en redirects to /en (1.0s)
+  ok 10 [chromium] ÔÇ║ e2e\i18n-routing.spec.ts:18:3 ÔÇ║ i18n routing ÔÇ║ visiting / with English cookie redirects to /en (1.1s)
+  ok  9 [chromium] ÔÇ║ e2e\i18n-routing.spec.ts:9:3 ÔÇ║ i18n routing ÔÇ║ visiting / with Spanish cookie redirects to /es (1.4s)
+  ok 11 [chromium] ÔÇ║ e2e\i18n-routing.spec.ts:27:3 ÔÇ║ i18n routing ÔÇ║ visiting / without cookie and Accept-Language es redirects to /es (1.4s)
+  ok 19 [chromium] ÔÇ║ e2e\i18n-routing.spec.ts:85:3 ÔÇ║ i18n routing ÔÇ║ visiting /en directly shows English content (602ms)
+  ok 17 [chromium] ÔÇ║ e2e\i18n-routing.spec.ts:71:3 ÔÇ║ i18n routing ÔÇ║ visiting /EN normalizes to /en and shows English (655ms)
+  ok 20 [chromium] ÔÇ║ e2e\i18n-routing.spec.ts:92:3 ÔÇ║ i18n routing ÔÇ║ visiting /es directly shows Spanish content (581ms)
+  ok 21 [chromium] ÔÇ║ e2e\i18n-routing.spec.ts:99:3 ÔÇ║ i18n routing ÔÇ║ Spanish cookie is ignored when entering /en directly (610ms)
+  ok 22 [chromium] ÔÇ║ e2e\i18n-routing.spec.ts:109:3 ÔÇ║ i18n routing ÔÇ║ English cookie is ignored when entering /es directly (608ms)
+  ok 18 [chromium] ÔÇ║ e2e\i18n-routing.spec.ts:78:3 ÔÇ║ i18n routing ÔÇ║ visiting /es/ normalizes to /es and shows Spanish (690ms)
+  ok 26 [chromium] ÔÇ║ e2e\i18n-routing.spec.ts:145:3 ÔÇ║ i18n routing ÔÇ║ no redirect from inexistent route to home (701ms)
+  ok 24 [chromium] ÔÇ║ e2e\i18n-routing.spec.ts:129:3 ÔÇ║ i18n routing ÔÇ║ visiting /en/unknown shows 404 in English (967ms)
+  ok 28 [chromium] ÔÇ║ e2e\i18n-routing.spec.ts:159:3 ÔÇ║ i18n routing ÔÇ║ changing language from /en?utm_source=linkedin preserves query (849ms)
+  ok 25 [chromium] ÔÇ║ e2e\i18n-routing.spec.ts:137:3 ÔÇ║ i18n routing ÔÇ║ visiting /es/unknown shows 404 in Spanish (897ms)
+  ok 29 [chromium] ÔÇ║ e2e\i18n-routing.spec.ts:166:3 ÔÇ║ i18n routing ÔÇ║ changing language does not mix English and Spanish (868ms)
+  ok 27 [chromium] ÔÇ║ e2e\i18n-routing.spec.ts:152:3 ÔÇ║ i18n routing ÔÇ║ changing language from /es#contact preserves fragment (887ms)
+  ok 30 [chromium] ÔÇ║ e2e\i18n-routing.spec.ts:174:3 ÔÇ║ i18n routing ÔÇ║ visiting /en/unknown shows 404 in English with LanguageSwitch visible (859ms)
+  ok 23 [chromium] ÔÇ║ e2e\i18n-routing.spec.ts:119:3 ÔÇ║ i18n routing ÔÇ║ page does not mix English and Spanish text (1.3s)
+  ok 38 [chromium] ÔÇ║ e2e\no-js.spec.ts:83:3 ÔÇ║ T18: JS desactivado ÔÇö RF-04 Contact al final ÔÇ║ en claro / en: opacidad 1 al llegar al final (385ms)
+  ok 31 [chromium] ÔÇ║ e2e\i18n-routing.spec.ts:183:3 ÔÇ║ i18n routing ÔÇ║ changing language from /en/unknown preserves path to Spanish (716ms)
+  ok 34 [chromium] ÔÇ║ e2e\i18n-routing.spec.ts:219:3 ÔÇ║ i18n routing ÔÇ║ served HTML of /en has exactly one <html> and one <body> with lang en (574ms)
+  ok 37 [chromium] ÔÇ║ e2e\i18n-routing.spec.ts:241:3 ÔÇ║ i18n routing ÔÇ║ normalization redirect preserves query string (/EN?utm_source=x -> /en?utm_source=x) (668ms)
+  ok 36 [chromium] ÔÇ║ e2e\i18n-routing.spec.ts:211:3 ÔÇ║ i18n routing ÔÇ║ cookies blocked / incognito falls back to English without blocking (670ms)
+  ok 35 [chromium] ÔÇ║ e2e\i18n-routing.spec.ts:230:3 ÔÇ║ i18n routing ÔÇ║ served HTML of /es has exactly one <html> and one <body> with lang es (721ms)
+  ok 33 [chromium] ÔÇ║ e2e\i18n-routing.spec.ts:204:3 ÔÇ║ i18n routing ÔÇ║ changing language from /en/unknown preserves query and fragment (845ms)
+  ok 39 [chromium] ÔÇ║ e2e\no-js.spec.ts:90:3 ÔÇ║ T18: JS desactivado ÔÇö RF-04 Contact al final ÔÇ║ en oscuro / en: opacidad 1 al llegar al final (370ms)
+  ok 32 [chromium] ÔÇ║ e2e\i18n-routing.spec.ts:194:3 ÔÇ║ i18n routing ÔÇ║ changing language from /es/unknown preserves path to English (974ms)
+  ok 40 [chromium] ÔÇ║ e2e\no-js.spec.ts:97:3 ÔÇ║ T18: JS desactivado ÔÇö RF-04 Contact al final ÔÇ║ en claro / es: opacidad 1 al llegar al final (384ms)
+  ok 41 [chromium] ÔÇ║ e2e\no-js.spec.ts:104:3 ÔÇ║ T18: JS desactivado ÔÇö RF-04 Contact al final ÔÇ║ en oscuro / es: opacidad 1 al llegar al final (388ms)
+  ok 49 [chromium] ÔÇ║ e2e\reveal-fallback.spec.ts:106:3 ÔÇ║ RF-10: fallback sin animation-timeline ÔÇ║ en claro / es (350ms)
+  ok 47 [chromium] ÔÇ║ e2e\reveal-fallback.spec.ts:101:3 ÔÇ║ RF-10: fallback sin animation-timeline ÔÇ║ en oscuro / en (405ms)
+  ok 48 [chromium] ÔÇ║ e2e\reveal-fallback.spec.ts:111:3 ÔÇ║ RF-10: fallback sin animation-timeline ÔÇ║ en oscuro / es (389ms)
+  ok 46 [chromium] ÔÇ║ e2e\reveal-fallback.spec.ts:96:3 ÔÇ║ RF-10: fallback sin animation-timeline ÔÇ║ en claro / en (447ms)
+  ok 50 [chromium] ÔÇ║ e2e\reveal-fallback.spec.ts:116:3 ÔÇ║ RF-10: fallback sin animation-timeline ÔÇ║ SIN fallback: al menos un bloque queda atenuado (opacidad < 1) (265ms)
+  x  43 [chromium] ÔÇ║ e2e\no-js.spec.ts:113:3 ÔÇ║ T18: JS desactivado ÔÇö RF-05 p├ígina m├ís corta que el viewport ÔÇ║ en claro / en: todos los bloques opacidad 1 (623ms)
+  x  44 [chromium] ÔÇ║ e2e\no-js.spec.ts:127:3 ÔÇ║ T18: JS desactivado ÔÇö RF-05 p├ígina m├ís corta que el viewport ÔÇ║ en claro / es: todos los bloques opacidad 1 (583ms)
+  ok 51 [chromium] ÔÇ║ e2e\reveal.spec.ts:60:3 ÔÇ║ Reveal edge-based opacity ÔÇ║ has opacity below one as its top edge enters the lower 15% of the viewport (317ms)
+  ok 52 [chromium] ÔÇ║ e2e\reveal.spec.ts:74:3 ÔÇ║ Reveal edge-based opacity ÔÇ║ has opacity one in the stable region between the edge margins (333ms)
+  ok 53 [chromium] ÔÇ║ e2e\reveal.spec.ts:86:3 ÔÇ║ Reveal edge-based opacity ÔÇ║ has opacity below one as its bottom edge enters the upper 15% of the viewport (337ms)
+  x  45 [chromium] ÔÇ║ e2e\no-js.spec.ts:134:3 ÔÇ║ T18: JS desactivado ÔÇö RF-05 p├ígina m├ís corta que el viewport ÔÇ║ en oscuro / es: todos los bloques opacidad 1 (605ms)
+  x  42 [chromium] ÔÇ║ e2e\no-js.spec.ts:120:3 ÔÇ║ T18: JS desactivado ÔÇö RF-05 p├ígina m├ís corta que el viewport ÔÇ║ en oscuro / en: todos los bloques opacidad 1 (675ms)
+  ok 55 [chromium] ÔÇ║ e2e\scroll-motion.spec.ts:82:3 ÔÇ║ Scroll motion reveal (RF-01, RF-02, RF-06) ÔÇ║ has opacity below one as its bottom edge enters the upper 15% of the viewport (340ms)
+  ok 57 [chromium] ÔÇ║ e2e\scroll-motion.spec.ts:168:3 ÔÇ║ Print mode (RF-16) ÔÇ║ shows all blocks at opacity 1 with no displacement in print (349ms)
+  ok 56 [chromium] ÔÇ║ e2e\scroll-motion.spec.ts:121:3 ÔÇ║ Reduced motion (RF-10) ÔÇ║ shows all blocks fully visible with no animation (389ms)
+  ok 58 [chromium] ÔÇ║ e2e\scroll-motion.spec.ts:329:3 ÔÇ║ Last section without exit (RF-04) ÔÇ║ shows opacity 1 at the end of the page with no exit phase (428ms)
+  ok 59 [chromium] ÔÇ║ e2e\theme.spec.ts:8:3 ÔÇ║ theme first paint ÔÇ║ HTML of /en brings theme <script> in <head> without data-theme on the server (381ms)
+  ok 54 [chromium] ÔÇ║ e2e\reveal.spec.ts:100:3 ÔÇ║ Reveal edge-based opacity ÔÇ║ changes continuously and monotonically through entry and exit margins (966ms)
+  ok 60 [chromium] ÔÇ║ e2e\theme.spec.ts:24:3 ÔÇ║ theme first paint ÔÇ║ HTML of /es brings theme <script> in <head> without data-theme on the server (505ms)
+  ok 61 [chromium] ÔÇ║ e2e\theme.spec.ts:68:3 ÔÇ║ theme first paint ÔÇ║ no reduced motion and no seeded choice, loads /en without hydration errors (337ms)
+  ok 62 [chromium] ÔÇ║ e2e\theme.spec.ts:40:3 ÔÇ║ theme first paint ÔÇ║ <html> carries mono font class and correct lang, without Google Fonts requests (396ms)
+  ok 63 [chromium] ÔÇ║ e2e\theme.spec.ts:95:3 ÔÇ║ theme first paint ÔÇ║ seeded dark choice applies before first paint on /en with light system (616ms)
+  ok 64 [chromium] ÔÇ║ e2e\theme.spec.ts:111:3 ÔÇ║ theme first paint ÔÇ║ seeded light choice applies before first paint on /es with dark system (609ms)
+  ok 65 [chromium] ÔÇ║ e2e\theme.spec.ts:127:3 ÔÇ║ theme first paint ÔÇ║ persistence: theme stays applied after navigation and localStorage keeps the value (499ms)
+  ok 66 [chromium] ÔÇ║ e2e\theme.spec.ts:139:3 ÔÇ║ theme first paint ÔÇ║ no contrary frame: data-theme is applied once during parsing and does not change after load (717ms)
+  ok 68 [chromium] ÔÇ║ e2e\theme.spec.ts:169:3 ÔÇ║ theme first paint ÔÇ║ no system preference: paints light without data-theme (434ms)
+  ok 67 [chromium] ÔÇ║ e2e\scroll-motion.spec.ts:60:3 ÔÇ║ Scroll motion reveal (RF-01, RF-02, RF-06) ÔÇ║ has opacity below one as its top edge enters the lower 15% of the viewport (575ms)
+  ok 69 [chromium] ÔÇ║ e2e\theme.spec.ts:228:3 ÔÇ║ theme first paint ÔÇ║ inverted block: light data-theme, light system (736ms)
+  ok 70 [chromium] ÔÇ║ e2e\scroll-motion.spec.ts:70:3 ÔÇ║ Scroll motion reveal (RF-01, RF-02, RF-06) ÔÇ║ has opacity one in the stable region between the edge margins (465ms)
+  ok 73 [chromium] ÔÇ║ e2e\theme.spec.ts:248:3 ÔÇ║ theme first paint ÔÇ║ inverted block: no attribute, light system (599ms)
+  ok 71 [chromium] ÔÇ║ e2e\theme.spec.ts:238:3 ÔÇ║ theme first paint ÔÇ║ inverted block: dark data-theme, light system (931ms)
+  ok 74 [chromium] ÔÇ║ e2e\theme.spec.ts:264:3 ÔÇ║ theme first paint ÔÇ║ reduced motion: state and theme durations in 0ms (598ms)
+  ok 72 [chromium] ÔÇ║ e2e\theme.spec.ts:256:3 ÔÇ║ theme first paint ÔÇ║ inverted block: no attribute, dark system (845ms)
+  ok 75 [chromium] ÔÇ║ e2e\theme.spec.ts:282:3 ÔÇ║ theme first paint ÔÇ║ no JavaScript: system theme without data-theme and visible content (797ms)
+  ok 76 [chromium] ÔÇ║ e2e\theme.spec.ts:306:3 ÔÇ║ theme first paint ÔÇ║ pageshow persisted: changing localStorage updates the attribute (764ms)
+  ok 77 [chromium] ÔÇ║ e2e\scroll-motion.spec.ts:214:3 ÔÇ║ Resize and rotation (RF-08) ÔÇ║ keeps stable blocks at opacity 1 after resize and rotation (609ms)
+  ok 78 [chromium] ÔÇ║ e2e\scroll-motion.spec.ts:276:3 ÔÇ║ Language and theme change (RF-09) ÔÇ║ keeps blocks at opacity 1 after language and theme change (445ms)
+
+
+  1) [chromium] ÔÇ║ e2e\no-js.spec.ts:113:3 ÔÇ║ T18: JS desactivado ÔÇö RF-05 p├ígina m├ís corta que el viewport ÔÇ║ en claro / en: todos los bloques opacidad 1 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: 0.8
+
+      114 |     await mountNoJsFixture(page, 'en', 'light', true, false, '0px');
+      115 |     await scrollToEnd(page);
+    > 116 |     expect(await computedOpacity(page, '[aria-label="Contact block"]')).toBe(1);
+          |                                                                         ^
+      117 |     expect(await computedTransformY(page, '[aria-label="Contact block"]')).toBe(0);
+      118 |   });
+      119 |
+        at C:\Users\jeday\Desktop\projects\pedro_suarez_gallardo_portfolio\e2e\no-js.spec.ts:116:73
+
+    Error Context: test-results\no-js-T18-JS-desactivado-ÔÇö-08f9b-odos-los-bloques-opacidad-1-chromium\error-context.md
+
+    attachment #2: trace (application/zip) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\no-js-T18-JS-desactivado-ÔÇö-08f9b-odos-los-bloques-opacidad-1-chromium\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\no-js-T18-JS-desactivado-ÔÇö-08f9b-odos-los-bloques-opacidad-1-chromium\trace.zip
+
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+  2) [chromium] ÔÇ║ e2e\no-js.spec.ts:120:3 ÔÇ║ T18: JS desactivado ÔÇö RF-05 p├ígina m├ís corta que el viewport ÔÇ║ en oscuro / en: todos los bloques opacidad 1 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: 0.8
+
+      121 |     await mountNoJsFixture(page, 'en', 'dark', true, false, '0px');
+      122 |     await scrollToEnd(page);
+    > 123 |     expect(await computedOpacity(page, '[aria-label="Contact block"]')).toBe(1);
+          |                                                                         ^
+      124 |     expect(await computedTransformY(page, '[aria-label="Contact block"]')).toBe(0);
+      125 |   });
+      126 |
+        at C:\Users\jeday\Desktop\projects\pedro_suarez_gallardo_portfolio\e2e\no-js.spec.ts:123:73
+
+    Error Context: test-results\no-js-T18-JS-desactivado-ÔÇö-bf2c5-odos-los-bloques-opacidad-1-chromium\error-context.md
+
+    attachment #2: trace (application/zip) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\no-js-T18-JS-desactivado-ÔÇö-bf2c5-odos-los-bloques-opacidad-1-chromium\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\no-js-T18-JS-desactivado-ÔÇö-bf2c5-odos-los-bloques-opacidad-1-chromium\trace.zip
+
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+  3) [chromium] ÔÇ║ e2e\no-js.spec.ts:127:3 ÔÇ║ T18: JS desactivado ÔÇö RF-05 p├ígina m├ís corta que el viewport ÔÇ║ en claro / es: todos los bloques opacidad 1 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: 0.8
+
+      128 |     await mountNoJsFixture(page, 'es', 'light', true, false, '0px');
+      129 |     await scrollToEnd(page);
+    > 130 |     expect(await computedOpacity(page, '[aria-label="Contact block"]')).toBe(1);
+          |                                                                         ^
+      131 |     expect(await computedTransformY(page, '[aria-label="Contact block"]')).toBe(0);
+      132 |   });
+      133 |
+        at C:\Users\jeday\Desktop\projects\pedro_suarez_gallardo_portfolio\e2e\no-js.spec.ts:130:73
+
+    Error Context: test-results\no-js-T18-JS-desactivado-ÔÇö-6af30-odos-los-bloques-opacidad-1-chromium\error-context.md
+
+    attachment #2: trace (application/zip) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\no-js-T18-JS-desactivado-ÔÇö-6af30-odos-los-bloques-opacidad-1-chromium\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\no-js-T18-JS-desactivado-ÔÇö-6af30-odos-los-bloques-opacidad-1-chromium\trace.zip
+
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+  4) [chromium] ÔÇ║ e2e\no-js.spec.ts:134:3 ÔÇ║ T18: JS desactivado ÔÇö RF-05 p├ígina m├ís corta que el viewport ÔÇ║ en oscuro / es: todos los bloques opacidad 1 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: 0.8
+
+      135 |     await mountNoJsFixture(page, 'es', 'dark', true, false, '0px');
+      136 |     await scrollToEnd(page);
+    > 137 |     expect(await computedOpacity(page, '[aria-label="Contact block"]')).toBe(1);
+          |                                                                         ^
+      138 |     expect(await computedTransformY(page, '[aria-label="Contact block"]')).toBe(0);
+      139 |   });
+      140 | });
+        at C:\Users\jeday\Desktop\projects\pedro_suarez_gallardo_portfolio\e2e\no-js.spec.ts:137:73
+
+    Error Context: test-results\no-js-T18-JS-desactivado-ÔÇö-7fc0e-odos-los-bloques-opacidad-1-chromium\error-context.md
+
+    attachment #2: trace (application/zip) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\no-js-T18-JS-desactivado-ÔÇö-7fc0e-odos-los-bloques-opacidad-1-chromium\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\no-js-T18-JS-desactivado-ÔÇö-7fc0e-odos-los-bloques-opacidad-1-chromium\trace.zip
+
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+  4 failed
+    [chromium] ÔÇ║ e2e\no-js.spec.ts:113:3 ÔÇ║ T18: JS desactivado ÔÇö RF-05 p├ígina m├ís corta que el viewport ÔÇ║ en claro / en: todos los bloques opacidad 1 
+    [chromium] ÔÇ║ e2e\no-js.spec.ts:120:3 ÔÇ║ T18: JS desactivado ÔÇö RF-05 p├ígina m├ís corta que el viewport ÔÇ║ en oscuro / en: todos los bloques opacidad 1 
+    [chromium] ÔÇ║ e2e\no-js.spec.ts:127:3 ÔÇ║ T18: JS desactivado ÔÇö RF-05 p├ígina m├ís corta que el viewport ÔÇ║ en claro / es: todos los bloques opacidad 1 
+    [chromium] ÔÇ║ e2e\no-js.spec.ts:134:3 ÔÇ║ T18: JS desactivado ÔÇö RF-05 p├ígina m├ís corta que el viewport ÔÇ║ en oscuro / es: todos los bloques opacidad 1 
+  74 passed (11.3s)
