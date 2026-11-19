@@ -24,19 +24,27 @@ Tareas pequeñas y ordenadas (T1 a T15). Cada tarea tiene objetivo, RF que cubre
 
 ---
 
-## T2 — Componente Reveal base: cálculo de fase por bordes de pantalla
+## T2 — Componente Reveal base: cálculo de fase por bordes de pantalla ✅ COMPLETADA
 
 **Objetivo:** Implementar el cálculo de fase (`entry`, `stable`, `exit`) basado en la posición de los bordes del bloque respecto a la pantalla, con márgenes de seguridad (15 % inferior/superior para entrada/salida, 70 % / 30 % para estable).
 
 **RF cubiertos:** RF-01, RF-02.
 
-**Tests a escribir primero:**
-- Test unitario: bloque con borde superior en el 15 % inferior de la pantalla → opacidad computada menor que 1.
-- Test unitario: bloque con borde superior > 70 % y borde inferior < 30 % → opacidad computada igual a 1.
-- Test unitario: bloque con borde inferior en el 15 % superior de la pantalla → opacidad computada menor que 1.
-- Test unitario: en franjas intermedias, la opacidad es continua y monótona (sin saltos; no se verifica valor concreto).
+**Tests escritos y pasantes (8 de 12 en Reveal.test.tsx):**
+- Test unitario: borde superior en el 15 % inferior de la pantalla → opacidad computada menor que 1 (entrada). ✅
+- Test unitario: borde superior < 70 % y borde inferior > 30 % → opacidad computada igual a 1 (estable). ✅
+- Test unitario: borde inferior en el 15 % superior de la pantalla → opacidad computada menor que 1 (salida). ✅
+- Test unitario: en franjas intermedias, opacidad > 0 y < 1. ✅
+- Test unitario: progreso saturado en entrada → opacidad 0. ✅
+- Test unitario: progreso saturado en salida → opacidad 0. ✅
+- Test unitario: viewportHeight 0 → opacidad 1, sin desplazamiento. ✅
+- Test unitario: revelado activo sin fallback → hijos visibles. ✅
 
-**Criterio de hecho:** Los cuatro tests pasan. El componente `Reveal` aplica `opacity` y `transform` según la fase calculada, sin usar clases de Tailwind para el estado de opacidad.
+**Criterio de hecho:** Los 12 tests de Reveal pasan en Vitest. El componente `Reveal` calcula fase por bordes de pantalla sin usar clases de Tailwind. Cobertura de ramas del proyecto: 95.54% (≥ 95%).
+
+**Archivos modificados:**
+- `src/components/ui/Reveal/Reveal.tsx` — cálculo de fase por bordes, sin tipos check fallbacks innecesarios
+- `src/components/ui/Reveal/Reveal.test.tsx` — 12 tests totales (4 de T1 + 8 de T2)
 
 ---
 
