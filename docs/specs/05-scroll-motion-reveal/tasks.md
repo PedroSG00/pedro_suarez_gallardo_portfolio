@@ -10,41 +10,33 @@ Tareas pequeñas y ordenadas (T1 a T15). Cada tarea tiene objetivo, RF que cubre
 
 **RF cubiertos:** RF-10 (fallo seguro), RF-16 (impresión base).
 
-**Tests escritos y pasantes (4):**
-- Test unitario: sin soporte de scroll timeline → opacidad computada 1 y transform none (vía `getComputedStyle`). ✅
-- Test unitario: con `prefers-reduced-motion: reduce` → opacidad computada 1 y transform none. ✅
-- Test unitario: en modo `@media print` → opacidad computada 1 y transform none. ✅
-- Test unitario: revelado activo sin fallback → hijos visibles (opacidad computada 1, sin desplazamiento). ✅
+**Tests escritos y pasantes (3):**
+- Sin soporte de scroll timeline → opacidad computada 1 y `transform: none`. ✅
+- Con `prefers-reduced-motion: reduce` → opacidad computada 1 y `transform: none`. ✅
+- En modo impresión → opacidad computada 1 y `transform: none`. ✅
 
-**Criterio de hecho:** Los 4 tests pasan en Vitest verificando opacidad computada (no estilos en línea, per constitución punto 8). El componente `Reveal` renderiza cualquier hijo con opacidad 1 y sin desplazamiento cuando el revelado está inactivo. Cobertura de ramas del proyecto: 95.36% (≥ 95%).
+**Criterio de hecho:** Los 3 tests pasan en Vitest. El componente `Reveal` renderiza cualquier hijo con opacidad 1 y sin desplazamiento cuando el revelado está inactivo.
 
 **Archivos creados:**
 - `src/components/ui/Reveal/Reveal.tsx`
 - `src/components/ui/Reveal/Reveal.test.tsx`
+- `src/components/ui/Reveal/Reveal.module.css`
 
 ---
 
-## T2 — Componente Reveal base: cálculo de fase por bordes de pantalla ✅ COMPLETADA
+## T2 — Componente Reveal base: cálculo de fase por bordes de pantalla
 
 **Objetivo:** Implementar el cálculo de fase (`entry`, `stable`, `exit`) basado en la posición de los bordes del bloque respecto a la pantalla, con márgenes de seguridad (15 % inferior/superior para entrada/salida, 70 % / 30 % para estable).
 
 **RF cubiertos:** RF-01, RF-02.
 
-**Tests escritos y pasantes (8 de 12 en Reveal.test.tsx):**
-- Test unitario: borde superior en el 15 % inferior de la pantalla → opacidad computada menor que 1 (entrada). ✅
-- Test unitario: borde superior < 70 % y borde inferior > 30 % → opacidad computada igual a 1 (estable). ✅
-- Test unitario: borde inferior en el 15 % superior de la pantalla → opacidad computada menor que 1 (salida). ✅
-- Test unitario: en franjas intermedias, opacidad > 0 y < 1. ✅
-- Test unitario: progreso saturado en entrada → opacidad 0. ✅
-- Test unitario: progreso saturado en salida → opacidad 0. ✅
-- Test unitario: viewportHeight 0 → opacidad 1, sin desplazamiento. ✅
-- Test unitario: revelado activo sin fallback → hijos visibles. ✅
+**Tests a escribir primero:**
+- Test unitario: bloque con borde superior en el 15 % inferior de la pantalla → opacidad computada menor que 1.
+- Test unitario: bloque con borde superior > 70 % y borde inferior < 30 % → opacidad computada igual a 1.
+- Test unitario: bloque con borde inferior en el 15 % superior de la pantalla → opacidad computada menor que 1.
+- Test unitario: en franjas intermedias, la opacidad es continua y monótona (sin saltos; no se verifica valor concreto).
 
-**Criterio de hecho:** Los 12 tests de Reveal pasan en Vitest. El componente `Reveal` calcula fase por bordes de pantalla sin usar clases de Tailwind. Cobertura de ramas del proyecto: 95.54% (≥ 95%).
-
-**Archivos modificados:**
-- `src/components/ui/Reveal/Reveal.tsx` — cálculo de fase por bordes, sin tipos check fallbacks innecesarios
-- `src/components/ui/Reveal/Reveal.test.tsx` — 12 tests totales (4 de T1 + 8 de T2)
+**Criterio de hecho:** Los cuatro tests pasan. El componente `Reveal` aplica `opacity` y `transform` según la fase calculada, sin usar clases de Tailwind para el estado de opacidad.
 
 ---
 

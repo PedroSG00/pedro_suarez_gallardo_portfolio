@@ -1,0 +1,28 @@
+.reveal {
+  opacity: 1;
+  transform: none;
+}
+
+@supports not (animation-timeline: view()) {
+  .reveal {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media print {
+  .reveal {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
