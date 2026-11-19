@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import type { Locale } from '@/lib/locale';
 
@@ -42,7 +43,7 @@ export default function LanguageSwitch({
 
   return (
     <div role="group" aria-label="Idioma / Language">
-      <a
+      <Link
         href={hrefFor('en')}
         onClick={handleClick('en')}
         aria-label={ariaLabelEn}
@@ -50,8 +51,8 @@ export default function LanguageSwitch({
         className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[var(--color-surface)] text-[var(--color-ink)] border [var(--line-width)] solid [var(--color-line)] transition-colors duration-[var(--duration-state)] aria-current:bg-[var(--color-ink)] aria-current:text-[var(--color-surface)]"
       >
         {GLOBE}
-      </a>
-      <a
+      </Link>
+      <Link
         href={hrefFor('es')}
         onClick={handleClick('es')}
         aria-label={ariaLabelEs}
@@ -59,7 +60,7 @@ export default function LanguageSwitch({
         className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[var(--color-surface)] text-[var(--color-ink)] border [var(--line-width)] solid [var(--color-line)] transition-colors duration-[var(--duration-state)] aria-current:bg-[var(--color-ink)] aria-current:text-[var(--color-surface)]"
       >
         {GLOBE}
-      </a>
+      </Link>
     </div>
   );
 }

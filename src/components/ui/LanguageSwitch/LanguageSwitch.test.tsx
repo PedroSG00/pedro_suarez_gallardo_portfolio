@@ -10,6 +10,15 @@ vi.mock('next/navigation', () => ({
   useRouter: () => ({ replace: mockReplace }),
 }));
 
+vi.mock('next/link', () => {
+  const Link = ({ href, children, ...rest }: { href: string; children: React.ReactNode; [key: string]: unknown }) => (
+    <a data-testid="mock-language-link" href={href} {...rest}>
+      {children}
+    </a>
+  );
+  return { default: Link };
+});
+
 function setLocation(url: string) {
   const parsed = new URL(url, 'http://localhost');
   Object.defineProperty(window, 'location', {
