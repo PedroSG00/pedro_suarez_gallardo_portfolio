@@ -1,8 +1,0 @@
-[WebServer] $ next start -p 3000
-
-Running 2 tests using 2 workers
-
-  ok 1 [chromium] ÔÇ║ e2e\anchor-jump.spec.ts:82:3 ÔÇ║ Anchor jump: destination section complete (RF-12) ÔÇ║ no destination block appears half-revealed after an anchor jump (597ms)
-  ok 2 [chromium] ÔÇ║ e2e\anchor-jump.spec.ts:69:3 ÔÇ║ Anchor jump: destination section complete (RF-12) ÔÇ║ all destination blocks have computed opacity 1 when arriving by anchor (680ms)
-
-  2 passed (2.9s)
