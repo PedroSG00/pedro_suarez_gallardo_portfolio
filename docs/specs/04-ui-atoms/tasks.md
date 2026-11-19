@@ -1,10 +1,10 @@
 # Tareas — 04 Átomos de UI
 
-Estado: pendiente de ejecución. Cada tarea es pequeña, ordenada e implementable y verificable por separado. Se siguen los gates de la constitución: `pnpm lint`, `pnpm typecheck`, `pnpm test` y `pnpm build`. Los tests se escriben antes que el código (regla 8 de la constitución).
+Estado: T1 completado (Button, RF-1). T2–T8 pendientes. Cada tarea es pequeña, ordenada e implementable y verificable por separado. Se siguen los gates de la constitución: `pnpm lint`, `pnpm typecheck`, `pnpm test` y `pnpm build`. Los tests se escriben antes que el código (regla 8 de la constitución).
 
 ---
 
-## T1 — Button
+## T1 — Button ✅ (completado)
 
 **Objetivo:** Implementar el átomo Button con acción, hover (inversión de color), foco por teclado y estado deshabilitado, todo recibido por prop.
 
