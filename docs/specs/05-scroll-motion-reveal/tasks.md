@@ -59,16 +59,21 @@ Tareas pequeñas y ordenadas (T1 a T15). Cada tarea tiene objetivo, RF que cubre
 
 ---
 
-## T4 — Pantalla sin scroll suficiente
+## T4 — Pantalla sin scroll suficiente ✅ COMPLETADA
 
 **Objetivo:** Cuando el alto total de la página es menor o igual al alto del viewport, todo el contenido es visible (opacidad 1) sin necesidad de scroll.
 
 **RF cubiertos:** RF-05.
 
-**Tests a escribir primero:**
-- Test unitario: `pageHeight <= viewportHeight` → todos los bloques muestran opacidad computada igual a 1 sin scroll.
+**Tests escritos y pasantes (2 unitarios):**
+- Página con alto menor que el viewport → opacidad computada igual a 1 sin scroll. ✅
+- Página con alto igual al viewport → opacidad computada igual a 1 sin scroll. ✅
 
-**Criterio de hecho:** El test pasa. El cálculo de fase devuelve `stable` con opacidad 1 para todos los bloques cuando no hay scroll suficiente.
+**Criterio de hecho:** Los 2 tests pasan en Vitest. `Reveal` detecta con `useEffect` si `document.documentElement.scrollHeight <= window.innerHeight` y, al ser cierto, aplica `opacity: 1` y `transform: none` mediante estilo en línea, sobrescribiendo cualquier fase de animación por scroll.
+
+**Archivos modificados:**
+- `src/components/ui/Reveal/Reveal.tsx` — añade `'use client'`, `useState`/`useEffect` para detectar página corta y aplicar estilo estático de visibilidad total.
+- `src/components/ui/Reveal/Reveal.test.tsx` — 2 pruebas unitarias de RF-05.
 
 ---
 

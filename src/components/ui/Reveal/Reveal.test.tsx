@@ -136,6 +136,95 @@ describe('Reveal initial load (RF-03)', () => {
   });
 });
 
+describe('Reveal short page (RF-05)', () => {
+  let restoreScrollHeight: (() => void) | null = null;
+  let restoreInnerHeight: (() => void) | null = null;
+
+  afterEach(() => {
+    if (restoreScrollHeight) {
+      restoreScrollHeight();
+      restoreScrollHeight = null;
+    }
+    if (restoreInnerHeight) {
+      restoreInnerHeight();
+      restoreInnerHeight = null;
+    }
+  });
+
+  function setPageGeometry({
+    viewportHeight,
+    pageHeight,
+  }: {
+    viewportHeight: number;
+    pageHeight: number;
+  }): void {
+    restoreInnerHeight = defineWindowInnerHeight(viewportHeight);
+    restoreScrollHeight = defineDocumentScrollHeight(pageHeight);
+  }
+
+  function defineWindowInnerHeight(value: number): () => void {
+    const original = window.innerHeight;
+    Object.defineProperty(window, 'innerHeight', {
+      writable: true,
+      configurable: true,
+      value,
+    });
+    return () => {
+      Object.defineProperty(window, 'innerHeight', {
+        writable: true,
+        configurable: true,
+        value: original,
+      });
+    };
+  }
+
+  function defineDocumentScrollHeight(value: number): () => void {
+    const original = document.documentElement.scrollHeight;
+    Object.defineProperty(document.documentElement, 'scrollHeight', {
+      writable: true,
+      configurable: true,
+      value,
+    });
+    return () => {
+      Object.defineProperty(document.documentElement, 'scrollHeight', {
+        writable: true,
+        configurable: true,
+        value: original,
+      });
+    };
+  }
+
+  test('shows computed opacity 1 when page height is less than viewport height', () => {
+    setMotionPreferences({
+      supportsScrollTimeline: true,
+      reducedMotion: false,
+      printing: false,
+    });
+    setPageGeometry({ viewportHeight: 900, pageHeight: 500 });
+
+    const revealRegion = getRevealRegion();
+    const styles = window.getComputedStyle(revealRegion);
+
+    expect(styles.opacity).toBe('1');
+    expect(styles.transform).toBe('none');
+  });
+
+  test('shows computed opacity 1 when page height equals viewport height', () => {
+    setMotionPreferences({
+      supportsScrollTimeline: true,
+      reducedMotion: false,
+      printing: false,
+    });
+    setPageGeometry({ viewportHeight: 900, pageHeight: 900 });
+
+    const revealRegion = getRevealRegion();
+    const styles = window.getComputedStyle(revealRegion);
+
+    expect(styles.opacity).toBe('1');
+    expect(styles.transform).toBe('none');
+  });
+});
+
 describe('Reveal safe baseline', () => {
   test('keeps content fully visible when scroll timelines are unsupported', () => {
     setMotionPreferences({
