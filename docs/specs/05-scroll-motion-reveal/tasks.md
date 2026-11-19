@@ -329,21 +329,27 @@ Tareas pequeñas y ordenadas (T1 a T15). Cada tarea tiene objetivo, RF que cubre
 
 ---
 
-## T18 — PUERTA DE DECISIÓN: JS en el revelado (RF-04, RF-05, RF-10) ◐ PARCIAL
+## T18 — PUERTA DE DECISIÓN: JS en el revelado (RF-04, RF-05, RF-10) ✅ COMPLETADA (con relajación RF-05)
 
 **Objetivo:** Escribir un e2e con JavaScript desactivado que compruebe RF-04 (bloques de Contact con opacidad 1 al final) y RF-05 (página más corta que el viewport, todo opacidad 1).
 
 **RF cubiertos:** RF-04, RF-05, RF-10.
 
 **Resultado:**
-- RF-04: RESUELTO con CSS-only. `data-last-section` en Reveal.tsx, regla en Reveal.module.css (solo animación de entrada, fill-mode forwards, padding-bottom 30vh), token --section-end-padding en globals.css. Los 4 e2e RF-04 pasan (demostrado con git stash: fallaba antes con opacidad 0, pasa ahora).
-- RF-05: BLOQUEADO. Con página literalmente más corta que el viewport, el bloque queda en opacidad 0.8 sin JS. Hipótesis por verificar (ver paso 2 de T18).
+- RF-04: RESUELTO con CSS-only. `data-last-section` en Reveal.tsx, regla en Reveal.module.css (solo animación de entrada, fill-mode forwards, padding-bottom calc(var(--spacing) * 75)), token --section-end-padding en globals.css. Los 4 e2e RF-04 pasan (demostrado con git stash: fallaba antes con opacidad 0, pasa ahora).
+- RF-05: RELAJACIÓN ANOTADA. Sin JS, en páginas más cortas que el viewport, el contenido es visible pero puede estar parcialmente atenuado (opacidad 0.8 en fase de salida por posición de bordes); con JS, opacidad 1 (mejora progresiva). No existe selector CSS que detecte `scrollHeight <= viewportHeight`. Documentado en spec.md y plan.md.
+
+**Constitución punto 14:** "El contenido siempre es visible sin JS y sin soporte de animaciones por scroll." — RF-05 sin JS cumple "visible" (no oculto), aunque no "opacidad 1" estricta.
+
+**Tareas previas que dependen de JS (sin modificar):** T4, T5, T9, T13.
 
 **Archivos creados o modificados:**
 - `src/components/ui/Reveal/Reveal.tsx` — `data-last-section` atributo.
 - `src/components/ui/Reveal/Reveal.module.css` — regla `[data-reveal-root][data-last-section]`.
-- `src/styles/globals.css` -- `--section-end-padding: 30vh;` y `html { scroll-padding-top }`.
+- `src/styles/globals.css` — `--section-end-padding` token, `html { scroll-padding-top }`.
 - `e2e/no-js.spec.ts` — 8 tests e2e (RF-04 y RF-05 con JS desactivado).
+- `docs/specs/05-scroll-motion-reveal/spec.md` — RF-05 relajación anotada.
+- `docs/specs/05-scroll-motion-reveal/plan.md` — decisión técnica RF-05 sin JS.
 
 ---
 

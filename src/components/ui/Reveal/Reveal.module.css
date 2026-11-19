@@ -129,7 +129,7 @@
    se quedan en opacity 1 al terminar (fill-mode forwards) y tienen padding
    inferior para alcanzar la zona estable al final de la página. */
 [data-reveal-root][data-last-section] {
-  padding-bottom: var(--section-end-padding);
+  padding-bottom: calc(var(--spacing) * 75);
   animation: reveal-enter auto linear both;
   animation-timeline: --reveal-entry;
   animation-range: cover var(--psg-reveal-entry-start, 0%) cover 25%;

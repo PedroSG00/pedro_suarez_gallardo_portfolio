@@ -1,0 +1,212 @@
+$ vitest run --coverage
+
+ RUN  v5.1.0 C:/Users/jeday/Desktop/projects/pedro_suarez_gallardo_portfolio
+      Coverage enabled with v8
+
+Not implemented: Window's open() method
+Not implemented: navigation to another Document
+ ÔØ» src/test/theme-audit.test.ts (30 tests | 1 failed) 64ms
+   ÔØ» color-scheme rules (RF-5, RF-7) (3)
+     ├ù :root declares color-scheme: light dark 28ms
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ» Failed Tests 1 ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»
+
+ FAIL  src/test/theme-audit.test.ts > color-scheme rules (RF-5, RF-7) > :root declares color-scheme: light dark
+AssertionError: expected '@import "tailwindcss";\n\n@theme statÔÇª' to contain ':root {\n    color-scheme: light darkÔÇª'
+
+- Expected
++ Received
+
+- :root {
++ @import "tailwindcss";
++
++ @theme static {
++   /* Remove Tailwind defaults for the namespaces this project owns. */
++   --color-*: initial;
++   --font-*: initial;
++   --text-*: initial;
++   --font-weight-*: initial;
++   --leading-*: initial;
++   --tracking-*: initial;
++
++   --color-surface: light-dark(#f2efe6, #121110);
++   --color-ink: light-dark(#121110, #f2efe6);
++   --color-ink-muted: light-dark(#5a574f, #a9a49a);
++   --color-line: #7c776c;
++
++   --text-display: clamp(4rem, 1.6667rem + 10.37vw, 11rem);
++   --text-display--line-height: 0.9;
++   --text-display--letter-spacing: -0.02em;
++   --text-display--font-weight: 700;
++
++   --text-title-lg: clamp(2.5rem, 1.3333rem + 5.185vw, 6rem);
++   --text-title-lg--line-height: 0.95;
++   --text-title-lg--letter-spacing: -0.015em;
++   --text-title-lg--font-weight: 700;
++
++   --text-title: clamp(1.5rem, 1rem + 2.222vw, 3rem);
++   --text-title--line-height: 1;
++   --text-title--letter-spacing: -0.01em;
++   --text-title--font-weight: 700;
++
++   --text-body: clamp(1rem, 0.9167rem + 0.37vw, 1.25rem);
++   --text-body--line-height: 1.5;
++   --text-body--letter-spacing: 0em;
++   --text-body--font-weight: 400;
++
++   --text-meta: clamp(0.75rem, 0.7083rem + 0.185vw, 0.875rem);
++   --text-meta--line-height: 1.4;
++   --text-meta--letter-spacing: 0.02em;
++   --text-meta--font-weight: 400;
++
++   --font-weight-regular: 400;
++   --font-weight-emphasis: 700;
++
++   --spacing: 0.25rem;
++   --line-width: 1px;
++   --motion-distance: 1.5rem;
++
++   --duration-state: 200ms;
++   --duration-theme: 400ms;
++   --duration-reveal: 600ms;
++ }
++
++ @theme static inline {
++   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
++   --color-focus: var(--color-ink);
++ }
++
++ @layer base {
++   :root {
+      color-scheme: light dark;
++     /* RF-04: padding inferior de la ├║ltima secci├│n para que el ├║ltimo bloque
++        alcance la zona estable al final de la p├ígina. (30vh = 75 * 0.25rem) */
++     --section-end-padding: calc(var(--spacing) * 75);
++   }
++
++   :root[data-theme="light"] {
++     color-scheme: light;
++   }
++
++   :root[data-theme="dark"] {
++     color-scheme: dark;
++   }
++
++   /* RF-12: al llegar por ancla a una secci├│n, el objetivo se sit├║a en la banda
++      estable del revelado en vez de en el borde superior, donde quedar├¡a
++      atenuado por la fase de salida. Relajaci├│n contemplada en spec.md RF-12. */
++   html {
++     scroll-padding-top: calc(var(--spacing) * 75);
++   }
++
++   .inverted {
++     color-scheme: dark;
++     background-color: light-dark(#f2efe6, #121110);
++     color: light-dark(#121110, #f2efe6);
++   }
++
++   :root[data-theme="dark"] .inverted {
++     color-scheme: light;
++   }
++
++   @media (prefers-color-scheme: dark) {
++     :root:not([data-theme]) .inverted {
++       color-scheme: light;
++     }
+    }
++
++   html {
++     background-color: var(--color-surface);
++     color: var(--color-ink);
++     font-family: var(--font-mono);
++     font-weight: var(--font-weight-regular);
++     font-variant-numeric: tabular-nums;
++     -webkit-font-smoothing: antialiased;
++   }
++
++   body {
++     min-height: 100dvh;
++     background-color: var(--color-surface);
++     color: var(--color-ink);
++   }
++
++   *,
++   ::before,
++   ::after {
++     border-color: var(--color-line);
++   }
++
++   ::selection {
++     background-color: var(--color-ink);
++     color: var(--color-surface);
++   }
++
++   :focus-visible {
++     outline: calc(var(--line-width) * 2) solid var(--color-focus);
++     outline-offset: calc(var(--spacing) / 2);
++   }
++ }
++
++ ::view-transition-group(root),
++ ::view-transition-old(root),
++ ::view-transition-new(root) {
++   animation-duration: var(--duration-theme);
++ }
++
++ @media (prefers-reduced-motion: reduce) {
++   :root {
++     --duration-state: 0ms;
++     --duration-theme: 0ms;
++     --duration-reveal: 0ms;
++   }
++
++   ::view-transition-group(*),
++   ::view-transition-old(*),
++   ::view-transition-new(*) {
++     animation: none !important;
++   }
++ }
++
+
+ ÔØ» src/test/theme-audit.test.ts:202:17
+    200|
+    201|   test(":root declares color-scheme: light dark", () => {
+    202|     expect(css).toContain(":root {\n    color-scheme: light dark;\n  }ÔÇª
+       |                 ^
+    203|   });
+    204|
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»[1/1]ÔÄ»
+
+
+ Test Files  1 failed | 23 passed (24)
+      Tests  1 failed | 289 passed (290)
+   Start at  22:12:06
+   Duration  7.83s (environment 67%, setup 24%, tests 6%, worker 3%, transform 1%, import 1%)
+
+Environment  jsdom was created 24 times ┬À 58.94s total, 67% of tracked time
+             create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
+             learn more: https://vitest.dev/guide/improving-performance#test-environments
+
+[34m % [39m[2mCoverage report from [22m[33mv8[39m
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |     100 |    96.02 |     100 |     100 |                   
+ ...LanguageSwitch |     100 |    82.35 |     100 |     100 |                   
+  ...ageSwitch.tsx |     100 |    82.35 |     100 |     100 | 34-35,46          
+ ...onents/ui/Logo |     100 |    86.66 |     100 |     100 |                   
+  Logo.tsx         |     100 |    86.66 |     100 |     100 | 25,29             
+ ...ui/ThemeToggle |     100 |     90.9 |     100 |     100 |                   
+  ThemeToggle.tsx  |     100 |     90.9 |     100 |     100 | 37                
+ lib               |     100 |    98.52 |     100 |     100 |                   
+  theme-dom.ts     |     100 |    96.29 |     100 |     100 | 71                
+-------------------|---------|----------|---------|---------|-------------------
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 215/215 )
+Branches     : 96.02% ( 169/176 )
+Functions    : 100% ( 50/50 )
+Lines        : 100% ( 210/210 )
+================================================================================
+[ELIFECYCLE] Test failed. See above for more details.

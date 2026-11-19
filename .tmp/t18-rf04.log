@@ -1,0 +1,10 @@
+[WebServer] $ next start -p 3000
+
+Running 4 tests using 4 workers
+
+  ok 4 [chromium] ÔÇ║ e2e\no-js.spec.ts:97:3 ÔÇ║ T18: JS desactivado ÔÇö RF-04 Contact al final ÔÇ║ en claro / es: opacidad 1 al llegar al final (311ms)
+  ok 3 [chromium] ÔÇ║ e2e\no-js.spec.ts:83:3 ÔÇ║ T18: JS desactivado ÔÇö RF-04 Contact al final ÔÇ║ en claro / en: opacidad 1 al llegar al final (337ms)
+  ok 1 [chromium] ÔÇ║ e2e\no-js.spec.ts:90:3 ÔÇ║ T18: JS desactivado ÔÇö RF-04 Contact al final ÔÇ║ en oscuro / en: opacidad 1 al llegar al final (378ms)
+  ok 2 [chromium] ÔÇ║ e2e\no-js.spec.ts:104:3 ÔÇ║ T18: JS desactivado ÔÇö RF-04 Contact al final ÔÇ║ en oscuro / es: opacidad 1 al llegar al final (392ms)
+
+  4 passed (2.3s)

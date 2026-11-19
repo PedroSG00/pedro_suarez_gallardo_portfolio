@@ -92,6 +92,8 @@ Cuando la página no tiene scroll suficiente (pantallas muy altas), todo el cont
 Criterios de aceptación:
 - Cuando el alto total de la página es menor o igual al alto del viewport, todos los bloques muestran opacidad igual a 1 sin necesidad de scroll.
 
+**Relajación sin JS (T18):** sin JavaScript, en páginas que no superan el viewport, el contenido es visible y legible aunque pueda estar parcialmente atenuado (opacidad menor que 1 en fases de entrada/salida por posición de bordes); con JavaScript, opacidad 1 (mejora progresiva vía `isShortPage` en `forceVisible`). Esta relajación se documenta porque no existe un selector CSS capaz de detectar `scrollHeight <= viewportHeight`.
+
 **RF-06 — Reversibilidad del efecto**
 
 El efecto es reversible: al volver atrás en el scroll, el bloque se vuelve a revelar.

@@ -1,0 +1,119 @@
+[WebServer] $ next start -p 3000
+
+Running 4 tests using 4 workers
+
+  x  4 [chromium] ÔÇ║ e2e\no-js.spec.ts:97:3 ÔÇ║ T18: JS desactivado ÔÇö RF-04 Contact al final ÔÇ║ en claro / es: opacidad 1 al llegar al final (395ms)
+  x  1 [chromium] ÔÇ║ e2e\no-js.spec.ts:83:3 ÔÇ║ T18: JS desactivado ÔÇö RF-04 Contact al final ÔÇ║ en claro / en: opacidad 1 al llegar al final (451ms)
+  x  3 [chromium] ÔÇ║ e2e\no-js.spec.ts:104:3 ÔÇ║ T18: JS desactivado ÔÇö RF-04 Contact al final ÔÇ║ en oscuro / es: opacidad 1 al llegar al final (422ms)
+  x  2 [chromium] ÔÇ║ e2e\no-js.spec.ts:90:3 ÔÇ║ T18: JS desactivado ÔÇö RF-04 Contact al final ÔÇ║ en oscuro / en: opacidad 1 al llegar al final (480ms)
+
+
+  1) [chromium] ÔÇ║ e2e\no-js.spec.ts:83:3 ÔÇ║ T18: JS desactivado ÔÇö RF-04 Contact al final ÔÇ║ en claro / en: opacidad 1 al llegar al final 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: 0
+
+      84 |     await mountNoJsFixture(page, 'en', 'light', false, true);
+      85 |     await scrollToEnd(page);
+    > 86 |     expect(await computedOpacity(page, '[aria-label="Contact block"]')).toBe(1);
+         |                                                                         ^
+      87 |     expect(await computedTransformY(page, '[aria-label="Contact block"]')).toBe(0);
+      88 |   });
+      89 |
+        at C:\Users\jeday\Desktop\projects\pedro_suarez_gallardo_portfolio\e2e\no-js.spec.ts:86:73
+
+    Error Context: test-results\no-js-T18-JS-desactivado-ÔÇö-db2c2-acidad-1-al-llegar-al-final-chromium\error-context.md
+
+    attachment #2: trace (application/zip) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\no-js-T18-JS-desactivado-ÔÇö-db2c2-acidad-1-al-llegar-al-final-chromium\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\no-js-T18-JS-desactivado-ÔÇö-db2c2-acidad-1-al-llegar-al-final-chromium\trace.zip
+
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+  2) [chromium] ÔÇ║ e2e\no-js.spec.ts:90:3 ÔÇ║ T18: JS desactivado ÔÇö RF-04 Contact al final ÔÇ║ en oscuro / en: opacidad 1 al llegar al final 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: 0
+
+      91 |     await mountNoJsFixture(page, 'en', 'dark', false, true);
+      92 |     await scrollToEnd(page);
+    > 93 |     expect(await computedOpacity(page, '[aria-label="Contact block"]')).toBe(1);
+         |                                                                         ^
+      94 |     expect(await computedTransformY(page, '[aria-label="Contact block"]')).toBe(0);
+      95 |   });
+      96 |
+        at C:\Users\jeday\Desktop\projects\pedro_suarez_gallardo_portfolio\e2e\no-js.spec.ts:93:73
+
+    Error Context: test-results\no-js-T18-JS-desactivado-ÔÇö-27833-acidad-1-al-llegar-al-final-chromium\error-context.md
+
+    attachment #2: trace (application/zip) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\no-js-T18-JS-desactivado-ÔÇö-27833-acidad-1-al-llegar-al-final-chromium\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\no-js-T18-JS-desactivado-ÔÇö-27833-acidad-1-al-llegar-al-final-chromium\trace.zip
+
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+  3) [chromium] ÔÇ║ e2e\no-js.spec.ts:97:3 ÔÇ║ T18: JS desactivado ÔÇö RF-04 Contact al final ÔÇ║ en claro / es: opacidad 1 al llegar al final 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: 0
+
+       98 |     await mountNoJsFixture(page, 'es', 'light', false, true);
+       99 |     await scrollToEnd(page);
+    > 100 |     expect(await computedOpacity(page, '[aria-label="Contact block"]')).toBe(1);
+          |                                                                         ^
+      101 |     expect(await computedTransformY(page, '[aria-label="Contact block"]')).toBe(0);
+      102 |   });
+      103 |
+        at C:\Users\jeday\Desktop\projects\pedro_suarez_gallardo_portfolio\e2e\no-js.spec.ts:100:73
+
+    Error Context: test-results\no-js-T18-JS-desactivado-ÔÇö-3a258-acidad-1-al-llegar-al-final-chromium\error-context.md
+
+    attachment #2: trace (application/zip) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\no-js-T18-JS-desactivado-ÔÇö-3a258-acidad-1-al-llegar-al-final-chromium\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\no-js-T18-JS-desactivado-ÔÇö-3a258-acidad-1-al-llegar-al-final-chromium\trace.zip
+
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+  4) [chromium] ÔÇ║ e2e\no-js.spec.ts:104:3 ÔÇ║ T18: JS desactivado ÔÇö RF-04 Contact al final ÔÇ║ en oscuro / es: opacidad 1 al llegar al final 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: 0
+
+      105 |     await mountNoJsFixture(page, 'es', 'dark', false, true);
+      106 |     await scrollToEnd(page);
+    > 107 |     expect(await computedOpacity(page, '[aria-label="Contact block"]')).toBe(1);
+          |                                                                         ^
+      108 |     expect(await computedTransformY(page, '[aria-label="Contact block"]')).toBe(0);
+      109 |   });
+      110 | });
+        at C:\Users\jeday\Desktop\projects\pedro_suarez_gallardo_portfolio\e2e\no-js.spec.ts:107:73
+
+    Error Context: test-results\no-js-T18-JS-desactivado-ÔÇö-21f6a-acidad-1-al-llegar-al-final-chromium\error-context.md
+
+    attachment #2: trace (application/zip) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\no-js-T18-JS-desactivado-ÔÇö-21f6a-acidad-1-al-llegar-al-final-chromium\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\no-js-T18-JS-desactivado-ÔÇö-21f6a-acidad-1-al-llegar-al-final-chromium\trace.zip
+
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+  4 failed
+    [chromium] ÔÇ║ e2e\no-js.spec.ts:83:3 ÔÇ║ T18: JS desactivado ÔÇö RF-04 Contact al final ÔÇ║ en claro / en: opacidad 1 al llegar al final 
+    [chromium] ÔÇ║ e2e\no-js.spec.ts:90:3 ÔÇ║ T18: JS desactivado ÔÇö RF-04 Contact al final ÔÇ║ en oscuro / en: opacidad 1 al llegar al final 
+    [chromium] ÔÇ║ e2e\no-js.spec.ts:97:3 ÔÇ║ T18: JS desactivado ÔÇö RF-04 Contact al final ÔÇ║ en claro / es: opacidad 1 al llegar al final 
+    [chromium] ÔÇ║ e2e\no-js.spec.ts:104:3 ÔÇ║ T18: JS desactivado ÔÇö RF-04 Contact al final ÔÇ║ en oscuro / es: opacidad 1 al llegar al final 

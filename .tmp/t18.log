@@ -1,0 +1,10 @@
+[WebServer] $ next start -p 3000
+
+Running 2 tests using 2 workers
+
+RF-04 style: null
+  ok 1 [chromium] ÔÇ║ e2e\no-js.spec.ts:56:3 ÔÇ║ T18: JavaScript desactivado (RF-04, RF-05) ÔÇ║ RF-04: bloque de Contact al final - style attribute (146ms)
+RF-05 style: null
+  ok 2 [chromium] ÔÇ║ e2e\no-js.spec.ts:68:3 ÔÇ║ T18: JavaScript desactivado (RF-04, RF-05) ÔÇ║ RF-05: p├ígina m├ís corta que el viewport - style attribute (151ms)
+
+  2 passed (2.0s)

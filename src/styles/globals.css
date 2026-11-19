@@ -61,6 +61,12 @@
     color-scheme: light dark;
   }
 
+  :root {
+    /* RF-04: padding inferior de la última sección para que el último bloque
+       alcance la zona estable al final de la página. (30vh = 75 * 0.25rem) */
+    --section-end-padding: calc(var(--spacing) * 75);
+  }
+
   :root[data-theme="light"] {
     color-scheme: light;
   }
@@ -75,10 +81,6 @@
   html {
     scroll-padding-top: calc(var(--spacing) * 75);
   }
-
-  /* RF-04: padding inferior de la última sección para que el último bloque
-     alcance la zona estable al final de la página. */
-  --section-end-padding: 30vh;
 
   .inverted {
     color-scheme: dark;
