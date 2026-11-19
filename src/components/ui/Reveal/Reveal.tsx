@@ -43,6 +43,7 @@ export default function Reveal({
   offsetPoints,
 }: RevealProps) {
   const revealRef = useRef<HTMLDivElement>(null);
+  const [hasFocus, setHasFocus] = useState(false);
   const [isShortPage, setIsShortPage] = useState(false);
   const [hasFixedOrStickyDescendant, setHasFixedOrStickyDescendant] = useState(false);
   const [geometry, setGeometry] = useState({ isInExitPhase: false, isAtPageEnd: false });
@@ -98,6 +99,7 @@ export default function Reveal({
 
   const forceVisible =
     isExcluded ||
+    hasFocus ||
     hasFixedOrStickyDescendant ||
     isShortPage ||
     (isLastSection && (geometry.isInExitPhase || geometry.isAtPageEnd));
@@ -117,6 +119,11 @@ export default function Reveal({
       role={role}
       aria-label={ariaLabel}
       style={inlineStyle}
+      onFocus={() => setHasFocus(true)}
+      onBlur={(event) => {
+        // Focus moving between two controls of the block keeps the override.
+        setHasFocus(event.currentTarget.contains(event.relatedTarget as Node | null));
+      }}
     >
       {!isExcluded && (
         <>

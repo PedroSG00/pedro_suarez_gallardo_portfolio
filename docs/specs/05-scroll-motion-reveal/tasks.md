@@ -233,17 +233,21 @@ Tareas pequeñas y ordenadas (T1 a T15). Cada tarea tiene objetivo, RF que cubre
 
 ---
 
-## T13 — Foco por teclado (RF-15)
+## T13 — Foco por teclado (RF-15) ✅ COMPLETADA
 
 **Objetivo:** Mientras un bloque contiene el elemento enfocado, su opacidad es 1. El foco nunca puede dejar un control atenuado u oculto.
 
 **RF cubiertos:** RF-15.
 
-**Tests a escribir primero:**
-- Test unitario: cuando un elemento dentro de un bloque recibe el foco por teclado, la opacidad computada de ese bloque es 1.
-- Test unitario: ningún control enfocado queda con opacidad menor que 1.
+**Tests escritos y pasantes (2 unitarios):**
+- Cuando un elemento dentro de un bloque recibe el foco por teclado, la opacidad computada de ese bloque es 1 y su desplazamiento es `none`. Al perder el foco vuelve a la fase de scroll. ✅
+- Ningún control enfocado queda con opacidad menor que 1: al enfocar cada control de un bloque atenuado, tanto el control como su bloque muestran opacidad 1. ✅
 
-**Criterio de hecho:** Los dos tests pasan. El estado `hasFocus` prevalece sobre la fase de scroll.
+**Criterio de hecho:** Los dos tests pasan. El estado `hasFocus` prevalece sobre la fase de scroll: el bloque escucha `focus`/`blur` y mantiene la visibilidad forzada mientras el foco siga dentro (al pasar de un control a otro del mismo bloque no se pierde el override).
+
+**Archivos creados o modificados:**
+- `src/components/ui/Reveal/Reveal.tsx` — estado `hasFocus`, manejadores `onFocus`/`onBlur` con comprobación de `relatedTarget` y prioridad sobre la fase de scroll.
+- `src/components/ui/Reveal/Reveal.test.tsx` — 2 tests de foco por teclado.
 
 ---
 

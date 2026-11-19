@@ -1104,3 +1104,108 @@ describe('Reveal variants (RF-14)', () => {
     expect(block).toHaveAttribute('data-reveal-variant', 'rise');
   });
 });
+
+// jsdom does not run scroll-driven animations, so this probe stands in for the
+// dimmed entry and exit phases the block goes through while scrolling.
+function simulateDimmedScrollPhase(): () => void {
+  const styleElement = document.createElement('style');
+  styleElement.textContent =
+    '[role="group"] { opacity: 0.35; transform: translateY(12px); }';
+  document.head.append(styleElement);
+
+  return () => styleElement.remove();
+}
+
+describe('Reveal keyboard focus (RF-15)', () => {
+  let restoreScrollPhase: (() => void) | null = null;
+  let scrollEnvironment: ScrollEnvironment | null = null;
+
+  afterEach(() => {
+    if (restoreScrollPhase) {
+      restoreScrollPhase();
+      restoreScrollPhase = null;
+    }
+    if (scrollEnvironment) {
+      scrollEnvironment.restore();
+      scrollEnvironment = null;
+    }
+  });
+
+  test('shows computed opacity 1 when a control inside the block receives focus', () => {
+    setMotionPreferences({
+      supportsScrollTimeline: true,
+      reducedMotion: false,
+      printing: false,
+    });
+    // A block in the middle of a long page: no short-page override, so only
+    // focus or the scroll phase decide its visibility.
+    scrollEnvironment = setScrollEnvironment({
+      viewportHeight: 900,
+      pageHeight: 3000,
+      scrollY: 300,
+      rectTop: 400,
+      rectBottom: 600,
+    });
+    restoreScrollPhase = simulateDimmedScrollPhase();
+
+    render(
+      <Reveal role="group" aria-label="Reveal content">
+        <a href="#contact">Contact</a>
+      </Reveal>,
+    );
+
+    const block = screen.getByRole('group', { name: 'Reveal content' });
+    const link = screen.getByRole('link', { name: 'Contact' });
+
+    expect(window.getComputedStyle(block).opacity).toBe('0.35');
+
+    act(() => link.focus());
+
+    const focusedStyles = window.getComputedStyle(block);
+
+    expect(link).toHaveFocus();
+    expect(focusedStyles.opacity).toBe('1');
+    expect(focusedStyles.transform).toBe('none');
+
+    act(() => link.blur());
+
+    expect(window.getComputedStyle(block).opacity).toBe('0.35');
+  });
+
+  test('never leaves a focused control dimmed', () => {
+    setMotionPreferences({
+      supportsScrollTimeline: true,
+      reducedMotion: false,
+      printing: false,
+    });
+    scrollEnvironment = setScrollEnvironment({
+      viewportHeight: 900,
+      pageHeight: 3000,
+      scrollY: 300,
+      rectTop: 400,
+      rectBottom: 600,
+    });
+    restoreScrollPhase = simulateDimmedScrollPhase();
+
+    render(
+      <Reveal role="group" aria-label="Reveal content">
+        <button type="button">First action</button>
+        <button type="button">Second action</button>
+      </Reveal>,
+    );
+
+    const block = screen.getByRole('group', { name: 'Reveal content' });
+
+    expect(window.getComputedStyle(block).opacity).toBe('0.35');
+
+    for (const name of ['First action', 'Second action']) {
+      const control = screen.getByRole('button', { name });
+
+      act(() => control.focus());
+
+      expect(control).toHaveFocus();
+      expect(window.getComputedStyle(control).opacity).toBe('1');
+      expect(window.getComputedStyle(block).opacity).toBe('1');
+    }
+  });
+});
