@@ -1,6 +1,6 @@
 # Tareas — 04 Átomos de UI
 
-Estado: T1 completado (Button, RF-1), T2 completado (Link, RF-2), T3 completado (Heading, RF-3), T4 completado (Tag, RF-4), T5 completado (Section, RF-5) y T6 completado (ThemeToggle, RF-6). T7–T8 pendientes. Cada tarea es pequeña, ordenada e implementable y verificable por separado. Se siguen los gates de la constitución: `pnpm lint`, `pnpm typecheck`, `pnpm test` y `pnpm build`. Los tests se escriben antes que el código (regla 8 de la constitución).
+Estado: T1 completado (Button, RF-1), T2 completado (Link, RF-2), T3 completado (Heading, RF-3), T4 completado (Tag, RF-4), T5 completado (Section, RF-5), T6 completado (ThemeToggle, RF-6) y T7 completado (LanguageSwitch, RF-7). T8 pendiente. Cada tarea es pequeña, ordenada e implementable y verificable por separado. Se siguen los gates de la constitución: `pnpm lint`, `pnpm typecheck`, `pnpm test` y `pnpm build`. Los tests se escriben antes que el código (regla 8 de la constitución).
 
 ---
 
@@ -122,7 +122,7 @@ Estado: T1 completado (Button, RF-1), T2 completado (Link, RF-2), T3 completado 
 
 ---
 
-## T7 — LanguageSwitch
+## T7 — LanguageSwitch ✅ (completado)
 
 **Objetivo:** Implementar el cambiador de idioma como símbolo sin texto, con `aria-label` / `aria-pressed` recibidos por prop y emisión de evento al activar.
 
