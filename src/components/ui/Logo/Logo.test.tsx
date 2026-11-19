@@ -1,6 +1,30 @@
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import Logo from './Logo';
+
+vi.mock('next/image', () => ({
+  default: function MockImage({
+    src,
+    alt,
+    width,
+    height,
+  }: {
+    src: string;
+    alt: string;
+    width: number;
+    height: number;
+  }) {
+    return (
+      <div
+        data-testid="mock-image"
+        data-src={src}
+        data-alt={alt}
+        data-width={width}
+        data-height={height}
+      />
+    );
+  },
+}));
 
 describe('Logo', () => {
   test('renders the letter D from the symbol id="d" of logo.svg', () => {
@@ -36,7 +60,7 @@ describe('Logo', () => {
 
   test('renders image when src is provided', () => {
     render(<Logo href="/en" src="/logo.svg" alt="Logo" />);
-    expect(screen.getByAltText('Logo')).toBeInTheDocument();
+    expect(screen.getByTestId('mock-image')).toBeInTheDocument();
   });
 
   test('renders null when href is missing', () => {

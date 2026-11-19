@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import type { ReactNode } from 'react';
 
 type Props = {
@@ -20,8 +21,7 @@ export default function Logo({ href, src, alt, children }: Props) {
 
   let content: ReactNode;
   if (src) {
-    // eslint-disable-next-line @next/next/no-img-element
-    content = <img src={src} alt={alt ?? ''} width={64} height={64} />;
+    content = <Image src={src} alt={alt ?? ''} width={64} height={64} />;
   } else if (children) {
     content = children;
   } else {
