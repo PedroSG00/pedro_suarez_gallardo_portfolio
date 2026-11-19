@@ -123,6 +123,14 @@
       )
     );
   }
+}
+
+/* RF-12: al llegar por ancla a una sección, el objetivo se sitúa en la banda
+   estable del revelado en vez de en el borde superior, donde quedaría
+   atenuado por la fase de salida. Relajación contemplada en spec.md RF-12. */
+:global(html) {
+  scroll-padding-top: calc(var(--spacing) * 75);
+}
 
   /* Variant "clip": the block is uncovered by a bottom inset, no displacement. */
   [data-reveal-root][data-reveal-variant="clip"] {

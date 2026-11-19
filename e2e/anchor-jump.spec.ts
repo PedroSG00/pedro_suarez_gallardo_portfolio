@@ -25,10 +25,10 @@ async function mountAnchorFixture(page: Page): Promise<void> {
       body { min-height: 3000px; }
       [data-reveal-root] { height: ${BLOCK_HEIGHT}px; }
       .spacer { height: 1400px; }
-      /* RF-12: shifts anchor targets into the reveal stable band so that, on
-         anchor jump, the destination block arrives complete (opacity 1)
-         instead of dimmed by the exit phase. */
-      html { scroll-padding-top: ${VIEWPORT_HEIGHT * 0.4}px; }
+        /* RF-12: shifts anchor targets into the reveal stable band so that, on
+           anchor jump, the destination block arrives complete (opacity 1)
+           instead of dimmed by the exit phase. */
+        html { scroll-padding-top: ${VIEWPORT_HEIGHT * 0.4}px; }
     </style>
     <main>
       <a href="#destino" class="anchor-link">Go to destination</a>

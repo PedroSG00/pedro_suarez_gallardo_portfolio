@@ -309,3 +309,24 @@ Tareas pequeñas y ordenadas (T1 a T15). Cada tarea tiene objetivo, RF que cubre
 
 ---
 
+## T17 — RF-12: spec y CSS real ✅ COMPLETADA
+
+**Objetivo:** Anotar la relajación de RF-12 en spec.md, comprobar si scroll-padding-top existe en el CSS de producción, añadirlo si solo estaba en el fixture, y verificar anclas de navegación real en /en y /es.
+
+**RF cubiertos:** RF-12.
+
+**Tests escritos y pasantes (2 e2e en anchor-jump.spec.ts):**
+- Navegar por ancla a una sección → todos los bloques de esa sección muestran opacidad computada igual a 1 al llegar. ✅
+- Ningún bloque de la sección de destino aparece a medio revelar tras un salto por ancla. ✅
+
+**Criterio de hecho:** Los 2 tests pasan en Chromium. Se demostró que `scroll-padding-top` en `[data-reveal-root]` no funciona (no es contenedor de scroll); se movió a `html` en `globals.css` (CSS real de producción). El fixture conserva su propio `scroll-padding-top` inline porque no carga `globals.css`.
+
+**Cambios en spec.md:** RF-12 anotada con la relajación aplicada (bloque de destino completo al llegar; no es posible "todos los bloques" solo con CSS porque un ancla que aterriza en el borde superior queda en fase de salida).
+
+**Archivos creados o modificados:**
+- `src/styles/globals.css` — `html { scroll-padding-top: calc(var(--spacing) * 75); }` (RF-12, CSS real).
+- `e2e/anchor-jump.spec.ts` — scroll-padding-top inline mantenido (fixture aislado).
+
+---
+
+

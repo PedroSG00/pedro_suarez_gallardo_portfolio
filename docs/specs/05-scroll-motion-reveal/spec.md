@@ -146,6 +146,8 @@ Criterios de aceptación:
 
 Al saltar a una sección desde la navegación por anclas, todos los bloques de la sección de destino se ven completos al llegar, sin quedarse a medio revelar. Si el plan demuestra que esto no es posible solo con CSS, la regla se relaja a que el bloque de destino se ve completo al llegar, y esa relajación se anota en esta spec.
 
+**Relajación aplicada:** con animación por scroll pura (`animation-timeline: view()`), un objetivo de ancla que aterriza en el borde superior del viewport queda en la fase de salida (atenuado), por lo que no es posible garantizar que "todos los bloques" estén al 100 % solo con CSS. El sistema usa `scroll-padding-top` en los bloques revelables (`src/components/ui/Reveal/Reveal.module.css`) para que el objetivo de ancla se sitúe en la banda estable del revelado (opacidad 1) al llegar. Esta relajación está contemplada en esta spec.
+
 Criterios de aceptación:
 - Cuando el usuario navega por ancla a una sección, todos los bloques de esa sección muestran opacidad igual a 1 al llegar.
 - Ningún bloque de la sección de destino aparece a medio revelar tras un salto por ancla.

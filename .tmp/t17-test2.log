@@ -1,0 +1,38 @@
+$ vitest run --coverage
+
+ RUN  v5.1.0 C:/Users/jeday/Desktop/projects/pedro_suarez_gallardo_portfolio
+      Coverage enabled with v8
+
+Not implemented: Window's open() method
+Not implemented: navigation to another Document
+
+ Test Files  24 passed (24)
+      Tests  290 passed (290)
+   Start at  21:43:09
+   Duration  8.31s (environment 72%, setup 20%, tests 4%, worker 2%, transform 2%)
+
+Environment  jsdom was created 24 times ┬À 68.33s total, 72% of tracked time
+             create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
+             learn more: https://vitest.dev/guide/improving-performance#test-environments
+
+[34m % [39m[2mCoverage report from [22m[33mv8[39m
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |     100 |    95.97 |     100 |     100 |                   
+ ...LanguageSwitch |     100 |    82.35 |     100 |     100 |                   
+  ...ageSwitch.tsx |     100 |    82.35 |     100 |     100 | 34-35,46          
+ ...onents/ui/Logo |     100 |    86.66 |     100 |     100 |                   
+  Logo.tsx         |     100 |    86.66 |     100 |     100 | 25,29             
+ ...ui/ThemeToggle |     100 |     90.9 |     100 |     100 |                   
+  ThemeToggle.tsx  |     100 |     90.9 |     100 |     100 | 37                
+ lib               |     100 |    98.52 |     100 |     100 |                   
+  theme-dom.ts     |     100 |    96.29 |     100 |     100 | 71                
+-------------------|---------|----------|---------|---------|-------------------
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 215/215 )
+Branches     : 95.97% ( 167/174 )
+Functions    : 100% ( 50/50 )
+Lines        : 100% ( 210/210 )
+================================================================================
