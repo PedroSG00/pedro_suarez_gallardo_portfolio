@@ -1,6 +1,6 @@
 # Tareas — 04 Átomos de UI
 
-Estado: T1 completado (Button, RF-1), T2 completado (Link, RF-2), T3 completado (Heading, RF-3) y T4 completado (Tag, RF-4). T5–T8 pendientes. Cada tarea es pequeña, ordenada e implementable y verificable por separado. Se siguen los gates de la constitución: `pnpm lint`, `pnpm typecheck`, `pnpm test` y `pnpm build`. Los tests se escriben antes que el código (regla 8 de la constitución).
+Estado: T1 completado (Button, RF-1), T2 completado (Link, RF-2), T3 completado (Heading, RF-3), T4 completado (Tag, RF-4) y T5 completado (Section, RF-5). T6–T8 pendientes. Cada tarea es pequeña, ordenada e implementable y verificable por separado. Se siguen los gates de la constitución: `pnpm lint`, `pnpm typecheck`, `pnpm test` y `pnpm build`. Los tests se escriben antes que el código (regla 8 de la constitución).
 
 ---
 
@@ -83,7 +83,7 @@ Estado: T1 completado (Button, RF-1), T2 completado (Link, RF-2), T3 completado 
 
 ---
 
-## T5 — Section (contenedor de sección y retícula)
+## T5 — Section (contenedor de sección y retícula) ✅ (completado)
 
 **Objetivo:** Implementar el contenedor de sección con retícula visible de 1 px y contenedor de hijos, todo recibido por prop.
 
