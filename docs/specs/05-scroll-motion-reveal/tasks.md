@@ -329,4 +329,21 @@ Tareas pequeñas y ordenadas (T1 a T15). Cada tarea tiene objetivo, RF que cubre
 
 ---
 
+## T18 — PUERTA DE DECISIÓN: JS en el revelado (RF-04, RF-05, RF-10) ◐ PARCIAL
+
+**Objetivo:** Escribir un e2e con JavaScript desactivado que compruebe RF-04 (bloques de Contact con opacidad 1 al final) y RF-05 (página más corta que el viewport, todo opacidad 1).
+
+**RF cubiertos:** RF-04, RF-05, RF-10.
+
+**Resultado:**
+- RF-04: RESUELTO con CSS-only. `data-last-section` en Reveal.tsx, regla en Reveal.module.css (solo animación de entrada, fill-mode forwards, padding-bottom 30vh), token --section-end-padding en globals.css. Los 4 e2e RF-04 pasan (demostrado con git stash: fallaba antes con opacidad 0, pasa ahora).
+- RF-05: BLOQUEADO. Con página literalmente más corta que el viewport, el bloque queda en opacidad 0.8 sin JS. Hipótesis por verificar (ver paso 2 de T18).
+
+**Archivos creados o modificados:**
+- `src/components/ui/Reveal/Reveal.tsx` — `data-last-section` atributo.
+- `src/components/ui/Reveal/Reveal.module.css` — regla `[data-reveal-root][data-last-section]`.
+- `src/styles/globals.css` -- `--section-end-padding: 30vh;` y `html { scroll-padding-top }`.
+- `e2e/no-js.spec.ts` — 8 tests e2e (RF-04 y RF-05 con JS desactivado).
+
+---
 

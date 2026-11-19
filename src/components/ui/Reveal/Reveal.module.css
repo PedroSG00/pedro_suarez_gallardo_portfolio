@@ -125,14 +125,20 @@
   }
 }
 
-/* RF-12: al llegar por ancla a una sección, el objetivo se sitúa en la banda
-   estable del revelado en vez de en el borde superior, donde quedaría
-   atenuado por la fase de salida. Relajación contemplada en spec.md RF-12. */
-:global(html) {
-  scroll-padding-top: calc(var(--spacing) * 75);
+/* RF-04: bloques de la última sección solo animan la entrada (sin salida),
+   se quedan en opacity 1 al terminar (fill-mode forwards) y tienen padding
+   inferior para alcanzar la zona estable al final de la página. */
+[data-reveal-root][data-last-section] {
+  padding-bottom: var(--section-end-padding);
+  animation: reveal-enter auto linear both;
+  animation-timeline: --reveal-entry;
+  animation-range: cover var(--psg-reveal-entry-start, 0%) cover 25%;
+  animation-fill-mode: forwards;
+  opacity: var(--psg-reveal-entry-opacity);
+  transform: translateY(var(--psg-reveal-entry-offset));
 }
 
-  /* Variant "clip": the block is uncovered by a bottom inset, no displacement. */
+/* Variant "clip": the block is uncovered by a bottom inset, no displacement. */
   [data-reveal-root][data-reveal-variant="clip"] {
     transform: none;
     clip-path: inset(

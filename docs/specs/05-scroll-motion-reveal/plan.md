@@ -306,6 +306,7 @@ CSS @media print:
 | **Desfase total ≤ 5 puntos del recorrido** | El conjunto del grupo completa su revelado dentro del recorrido visible. Los valores exactos van en tokens del tema. | Desfase total mayor a 5 puntos o basado en tiempo. | RF-13 |
 | **Precedencia RF-10 > RF-11 > RF-03 > RF-05 > RF-04 sobre RF-01** | Las excepciones (fallo seguro, exclusiones, visible al cargar, sin scroll, última sección) deben prevalecer sobre la regla general de revelado progresivo. | Aplicar RF-01 a todos los bloques sin excepción. | RF-01, RF-03, RF-04, RF-05, RF-10, RF-11 |
 | **Última sección (Contact) sin salida** | Constitución punto 12: "la última sección no tiene salida". El último bloque queda plenamente visible al final. | Aplicar salida a todos los bloques incluyendo el último. | RF-04 |
+| **Última sección sin salida vía CSS (RF-04)** | Los bloques con `data-last-section` solo aplican la animación de entrada (`reveal-enter`), sin keyframes ni rango de salida, con `animation-fill-mode: forwards` para quedarse en opacity 1, y `padding-bottom: var(--section-end-padding)` (≥ 30vh) para alcanzar la zona estable al final. No requiere JS. | Forzar salida en la última sección (descartado: viola RF-04). | RF-04 |
 | **Opacidad computada como única métrica de verificación** | Constitución punto 8: tests por comportamiento visible, nunca por clases ni estructura interna. | Verificar clases de Tailwind o snapshot DOM. | RF-01, RF-02, RF-04, RF-06, RF-07, RF-08, RF-09, RF-15, RF-16 |
 
 ---
