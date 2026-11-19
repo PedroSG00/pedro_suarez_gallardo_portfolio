@@ -1,6 +1,6 @@
 # Tareas — 04 Átomos de UI
 
-Estado: T1 completado (Button, RF-1), T2 completado (Link, RF-2) y T3 completado (Heading, RF-3). T4–T8 pendientes. Cada tarea es pequeña, ordenada e implementable y verificable por separado. Se siguen los gates de la constitución: `pnpm lint`, `pnpm typecheck`, `pnpm test` y `pnpm build`. Los tests se escriben antes que el código (regla 8 de la constitución).
+Estado: T1 completado (Button, RF-1), T2 completado (Link, RF-2), T3 completado (Heading, RF-3) y T4 completado (Tag, RF-4). T5–T8 pendientes. Cada tarea es pequeña, ordenada e implementable y verificable por separado. Se siguen los gates de la constitución: `pnpm lint`, `pnpm typecheck`, `pnpm test` y `pnpm build`. Los tests se escriben antes que el código (regla 8 de la constitución).
 
 ---
 
@@ -65,7 +65,7 @@ Estado: T1 completado (Button, RF-1), T2 completado (Link, RF-2) y T3 completado
 
 ---
 
-## T4 — Tag
+## T4 — Tag ✅ (completado)
 
 **Objetivo:** Implementar el átomo Tag para etiquetar elementos con texto corto monoespaciado, todo recibido por prop.
 
