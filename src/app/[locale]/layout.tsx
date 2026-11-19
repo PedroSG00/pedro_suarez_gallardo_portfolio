@@ -41,7 +41,11 @@ export default async function LocaleLayout({
       <body className="min-h-full flex flex-col">
         <nav>
           <Suspense fallback={null}>
-            <LanguageSwitch locale={lang as Locale} />
+            <LanguageSwitch
+              locale={lang as Locale}
+              ariaLabelEn="Switch to English"
+              ariaLabelEs="Cambiar a español"
+            />
           </Suspense>
         </nav>
         {children}
