@@ -151,14 +151,14 @@ test.describe('i18n routing', () => {
 
   test('changing language from /es#contact preserves fragment', async ({ page }) => {
     await page.goto('/es#contact');
-    await page.getByRole('link', { name: 'EN' }).click();
+    await page.getByRole('button', { name: 'Switch to English' }).click();
     await expect(page).toHaveURL(/en#contact/);
     await expect(page.locator('body')).toContainText('Web portfolio');
   });
 
   test('changing language from /en?utm_source=linkedin preserves query', async ({ page }) => {
     await page.goto('/en?utm_source=linkedin');
-    await page.getByRole('link', { name: 'ES' }).click();
+    await page.getByRole('button', { name: 'Cambiar a español' }).click();
     await expect(page).toHaveURL(/es\?utm_source=linkedin/);
     await expect(page.locator('body')).toContainText('Portfolio web');
   });
@@ -166,7 +166,7 @@ test.describe('i18n routing', () => {
   test('changing language does not mix English and Spanish', async ({ page }) => {
     await page.goto('/en');
     await expect(page.locator('body')).toContainText('Web portfolio');
-    await page.getByRole('link', { name: 'ES' }).click();
+    await page.getByRole('button', { name: 'Cambiar a español' }).click();
     await expect(page.locator('body')).toContainText('Portfolio web');
     await expect(page.locator('body')).not.toContainText('Web portfolio');
   });
@@ -177,13 +177,13 @@ test.describe('i18n routing', () => {
     expect(page.url()).toContain('/en/unknown');
     await expect(page.locator('body')).toContainText('Not found');
     await expect(page.locator('body')).toContainText('This page does not exist.');
-    await expect(page.getByRole('link', { name: 'ES' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Cambiar a español' })).toBeVisible();
   });
 
   test('changing language from /en/unknown preserves path to Spanish', async ({ page }) => {
     const response = await page.goto('/en/unknown');
     expect(response?.status()).toBe(404);
-    await page.getByRole('link', { name: 'ES' }).click();
+    await page.getByRole('button', { name: 'Cambiar a español' }).click();
     await expect(page).toHaveURL(/es\/unknown/);
     expect(page.url()).toContain('/es/unknown');
     expect(response?.status()).toBe(404);
@@ -194,7 +194,7 @@ test.describe('i18n routing', () => {
   test('changing language from /es/unknown preserves path to English', async ({ page }) => {
     const response = await page.goto('/es/unknown');
     expect(response?.status()).toBe(404);
-    await page.getByRole('link', { name: 'EN' }).click();
+    await page.getByRole('button', { name: 'Switch to English' }).click();
     await expect(page).toHaveURL(/en\/unknown/);
     expect(page.url()).toContain('/en/unknown');
     await expect(page.locator('body')).toContainText('Not found');
@@ -203,7 +203,7 @@ test.describe('i18n routing', () => {
 
   test('changing language from /en/unknown preserves query and fragment', async ({ page }) => {
     await page.goto('/en/unknown?utm_source=x#y');
-    await page.getByRole('link', { name: 'ES' }).click();
+    await page.getByRole('button', { name: 'Cambiar a español' }).click();
     await expect(page).toHaveURL(/es\/unknown\?utm_source=x#y/);
     expect(page.url()).toContain('/es/unknown?utm_source=x#y');
   });

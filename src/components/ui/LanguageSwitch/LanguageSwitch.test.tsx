@@ -10,15 +10,6 @@ vi.mock('next/navigation', () => ({
   useRouter: () => ({ replace: mockReplace }),
 }));
 
-vi.mock('next/link', () => {
-  const Link = ({ href, children, ...rest }: { href: string; children: React.ReactNode; [key: string]: unknown }) => (
-    <a data-testid="mock-language-link" href={href} {...rest}>
-      {children}
-    </a>
-  );
-  return { default: Link };
-});
-
 function setLocation(url: string) {
   const parsed = new URL(url, 'http://localhost');
   Object.defineProperty(window, 'location', {
@@ -31,14 +22,38 @@ function setLocation(url: string) {
   });
 }
 
-describe('LanguageSwitch', () => {
+describe('LanguageSwitch (toggler)', () => {
   beforeEach(() => {
     mockReplace.mockClear();
     mockUsePathname.mockReturnValue('/en/about');
     setLocation('http://localhost/en/about?utm=x#y');
   });
 
-  test('shows the active language with aria-current', () => {
+  test('renders a single toggler button without visible text', () => {
+    render(
+      <LanguageSwitch
+        locale="en"
+        ariaLabelEn="Switch to English"
+        ariaLabelEs="Cambiar a español"
+      />
+    );
+    const button = screen.getByRole('button');
+    expect(button).toBeInTheDocument();
+    expect(button.textContent?.trim()).toBe('');
+  });
+
+  test('aria-pressed reflects the current language (true when English is active)', () => {
+    render(
+      <LanguageSwitch
+        locale="en"
+        ariaLabelEn="Switch to English"
+        ariaLabelEs="Cambiar a español"
+      />
+    );
+    expect(screen.getByRole('button')).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  test('aria-pressed is false when Spanish is active', () => {
     render(
       <LanguageSwitch
         locale="es"
@@ -46,53 +61,10 @@ describe('LanguageSwitch', () => {
         ariaLabelEs="Cambiar a español"
       />
     );
-    const links = screen.getAllByRole('link');
-    expect(links[1]).toHaveAttribute('aria-current', 'page');
-    expect(links[0]).not.toHaveAttribute('aria-current');
+    expect(screen.getByRole('button')).toHaveAttribute('aria-pressed', 'false');
   });
 
-  test('offers both languages as accessible links by role', () => {
-    render(
-      <LanguageSwitch
-        locale="en"
-        ariaLabelEn="Switch to English"
-        ariaLabelEs="Cambiar a español"
-      />
-    );
-    const links = screen.getAllByRole('link');
-    expect(links).toHaveLength(2);
-    expect(links[0]).toHaveAttribute('href', '/en/about?utm=x#y');
-    expect(links[1]).toHaveAttribute('href', '/es/about?utm=x#y');
-  });
-
-  test('announces aria-label with the text passed by prop', () => {
-    render(
-      <LanguageSwitch
-        locale="en"
-        ariaLabelEn="Switch to English"
-        ariaLabelEs="Cambiar a español"
-      />
-    );
-    const links = screen.getAllByRole('link');
-    expect(links[0]).toHaveAttribute('aria-label', 'Switch to English');
-    expect(links[1]).toHaveAttribute('aria-label', 'Cambiar a español');
-  });
-
-  test('shows no visible text, only symbol and accessibility attributes', () => {
-    render(
-      <LanguageSwitch
-        locale="en"
-        ariaLabelEn="Switch to English"
-        ariaLabelEs="Cambiar a español"
-      />
-    );
-    const links = screen.getAllByRole('link');
-    links.forEach((link) => {
-      expect(link.textContent?.trim()).toBe('');
-    });
-  });
-
-  test('navigates to English preserving search and hash on click', () => {
+  test('aria-label announces the language to switch to', () => {
     render(
       <LanguageSwitch
         locale="es"
@@ -100,9 +72,10 @@ describe('LanguageSwitch', () => {
         ariaLabelEs="Cambiar a español"
       />
     );
-    const enLink = screen.getAllByRole('link')[0];
-    fireEvent.click(enLink);
-    expect(mockReplace).toHaveBeenCalledWith('/en/about?utm=x#y');
+    expect(screen.getByRole('button')).toHaveAttribute(
+      'aria-label',
+      'Switch to English'
+    );
   });
 
   test('navigates to Spanish preserving search and hash on click', () => {
@@ -113,8 +86,79 @@ describe('LanguageSwitch', () => {
         ariaLabelEs="Cambiar a español"
       />
     );
-    const esLink = screen.getAllByRole('link')[1];
-    fireEvent.click(esLink);
+    const button = screen.getByRole('button');
+    fireEvent.click(button);
     expect(mockReplace).toHaveBeenCalledWith('/es/about?utm=x#y');
+  });
+
+  test('navigates to English preserving search and hash on click', () => {
+    render(
+      <LanguageSwitch
+        locale="es"
+        ariaLabelEn="Switch to English"
+        ariaLabelEs="Cambiar a español"
+      />
+    );
+    const button = screen.getByRole('button');
+    fireEvent.click(button);
+    expect(mockReplace).toHaveBeenCalledWith('/en/about?utm=x#y');
+  });
+
+  test('navigates on Enter key', () => {
+    render(
+      <LanguageSwitch
+        locale="en"
+        ariaLabelEn="Switch to English"
+        ariaLabelEs="Cambiar a español"
+      />
+    );
+    const button = screen.getByRole('button');
+    button.focus();
+    fireEvent.keyDown(button, { key: 'Enter' });
+    expect(mockReplace).toHaveBeenCalledWith('/es/about?utm=x#y');
+  });
+
+  test('navigates on Space key', () => {
+    render(
+      <LanguageSwitch
+        locale="en"
+        ariaLabelEn="Switch to English"
+        ariaLabelEs="Cambiar a español"
+      />
+    );
+    const button = screen.getByRole('button');
+    button.focus();
+    fireEvent.keyDown(button, { key: ' ' });
+    expect(mockReplace).toHaveBeenCalledWith('/es/about?utm=x#y');
+  });
+
+  test('has an href pointing to the other language (works without JS)', () => {
+    render(
+      <LanguageSwitch
+        locale="en"
+        ariaLabelEn="Switch to English"
+        ariaLabelEs="Cambiar a español"
+      />
+    );
+    const button = screen.getByRole('button');
+    expect(button).toHaveAttribute('href', '/es/about?utm=x#y');
+  });
+
+  test('renders null when locale is missing', () => {
+    // @ts-expect-error - Testing missing required prop locale
+    const { container } = render(<LanguageSwitch ariaLabelEn="Switch to English" ariaLabelEs="Cambiar a español" />);
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  test('renders null when ariaLabelEn is missing', () => {
+    // @ts-expect-error - Testing missing required prop ariaLabelEn
+    const { container } = render(<LanguageSwitch locale="en" ariaLabelEs="Cambiar a español" />);
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  test('renders null when ariaLabelEs is missing', () => {
+    // @ts-expect-error - Testing missing required prop ariaLabelEs
+    const { container } = render(<LanguageSwitch locale="en" ariaLabelEn="Switch to English" />);
+    expect(container).toBeEmptyDOMElement();
   });
 });
