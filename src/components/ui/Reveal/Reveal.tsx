@@ -31,7 +31,8 @@ export default function Reveal({ children, role, 'aria-label': ariaLabel, isLast
 
       let isInExitPhase = false;
       const rect = revealRef.current!.getBoundingClientRect();
-      const exitThreshold = scrollY + innerHeight * 0.25;
+      // rect.bottom is viewport-relative, so the threshold must be too.
+      const exitThreshold = innerHeight * 0.25;
       isInExitPhase = rect.bottom <= exitThreshold;
 
       setGeometry({ isInExitPhase, isAtPageEnd });
@@ -39,10 +40,12 @@ export default function Reveal({ children, role, 'aria-label': ariaLabel, isLast
 
     check();
     window.addEventListener('scroll', check, { passive: true });
+    window.addEventListener('scrollend', check);
     window.addEventListener('resize', check, { passive: true });
 
     return (): void => {
       window.removeEventListener('scroll', check);
+      window.removeEventListener('scrollend', check);
       window.removeEventListener('resize', check);
     };
   }, [isLastSection]);

@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import Reveal from './Reveal';
 
@@ -116,6 +116,90 @@ function setScrollGeometry({
   return (): void => {
     restoreInnerHeight();
     Element.prototype.getBoundingClientRect = originalGetBoundingClientRect;
+  };
+}
+
+type ScrollEnvironment = {
+  setScroll: (scrollY: number, rectTop: number, rectBottom: number) => void;
+  restore: () => void;
+};
+
+function setScrollEnvironment({
+  viewportHeight,
+  pageHeight,
+  scrollY,
+  rectTop,
+  rectBottom,
+}: {
+  viewportHeight: number;
+  pageHeight: number;
+  scrollY: number;
+  rectTop: number;
+  rectBottom: number;
+}): ScrollEnvironment {
+  const originalInnerHeight = window.innerHeight;
+  const originalScrollY = window.scrollY;
+  const originalScrollHeight = document.documentElement.scrollHeight;
+  const originalGetBoundingClientRect = Element.prototype.getBoundingClientRect;
+
+  let currentScrollY = scrollY;
+  let currentRectTop = rectTop;
+  let currentRectBottom = rectBottom;
+
+  Object.defineProperty(window, 'innerHeight', {
+    writable: true,
+    configurable: true,
+    value: viewportHeight,
+  });
+  Object.defineProperty(window, 'scrollY', {
+    configurable: true,
+    get: () => currentScrollY,
+  });
+  Object.defineProperty(document.documentElement, 'scrollHeight', {
+    writable: true,
+    configurable: true,
+    value: pageHeight,
+  });
+
+  Element.prototype.getBoundingClientRect = function () {
+    return {
+      ...originalGetBoundingClientRect.call(this),
+      top: currentRectTop,
+      bottom: currentRectBottom,
+      height: currentRectBottom - currentRectTop,
+      width: 100,
+      left: 0,
+      right: 100,
+      x: 0,
+      y: currentRectTop,
+      toJSON: () => ({}),
+    } as unknown as DOMRect;
+  };
+
+  return {
+    setScroll(nextScrollY: number, nextRectTop: number, nextRectBottom: number): void {
+      currentScrollY = nextScrollY;
+      currentRectTop = nextRectTop;
+      currentRectBottom = nextRectBottom;
+    },
+    restore(): void {
+      Object.defineProperty(window, 'innerHeight', {
+        writable: true,
+        configurable: true,
+        value: originalInnerHeight,
+      });
+      Object.defineProperty(window, 'scrollY', {
+        writable: true,
+        configurable: true,
+        value: originalScrollY,
+      });
+      Object.defineProperty(document.documentElement, 'scrollHeight', {
+        writable: true,
+        configurable: true,
+        value: originalScrollHeight,
+      });
+      Element.prototype.getBoundingClientRect = originalGetBoundingClientRect;
+    },
   };
 }
 
@@ -444,5 +528,78 @@ describe('Reveal reversibility (RF-06)', () => {
     expect(screen.getByRole('group', { name: 'Reveal content' })).toHaveStyle(
       styleAtStable,
     );
+  });
+});
+
+describe('Reveal fast scroll (RF-07)', () => {
+  let restoreEnvironment: (() => void) | null = null;
+
+  afterEach(() => {
+    if (restoreEnvironment) {
+      restoreEnvironment();
+      restoreEnvironment = null;
+    }
+  });
+
+  test('keeps stable blocks at computed opacity 1 after a fast scroll burst stops', () => {
+    setMotionPreferences({
+      supportsScrollTimeline: true,
+      reducedMotion: false,
+      printing: false,
+    });
+    const environment = setScrollEnvironment({
+      viewportHeight: 900,
+      pageHeight: 6000,
+      scrollY: 0,
+      rectTop: 2400,
+      rectBottom: 2600,
+    });
+    restoreEnvironment = environment.restore;
+
+    const revealRegion = getRevealRegion();
+
+    // Fast scroll burst: the block crosses entry and mid-screen phases
+    for (const scrollY of [0, 800, 1600, 2400, 3200]) {
+      environment.setScroll(scrollY, 2400 - scrollY, 2600 - scrollY);
+      fireEvent.scroll(window);
+    }
+
+    // Abrupt stop in the stable phase (top edge at 44% of the viewport)
+    environment.setScroll(2000, 400, 600);
+    fireEvent.scroll(window);
+    fireEvent(window, new Event('scrollend'));
+
+    const styles = window.getComputedStyle(revealRegion);
+
+    expect(styles.opacity).toBe('1');
+    expect(styles.transform).toBe('none');
+  });
+
+  test('clears the last-section exit override when fast scroll settles in the stable phase', () => {
+    setMotionPreferences({
+      supportsScrollTimeline: true,
+      reducedMotion: false,
+      printing: false,
+    });
+    const environment = setScrollEnvironment({
+      viewportHeight: 900,
+      pageHeight: 6000,
+      scrollY: 0,
+      rectTop: -300,
+      rectBottom: 100,
+    });
+    restoreEnvironment = environment.restore;
+
+    const revealRegion = getRevealRegion({ isLastSection: true });
+
+    // In the exit phase the last section keeps a forced visibility override
+    expect(revealRegion).toHaveStyle({ opacity: '1', transform: 'none' });
+
+    // Abrupt stop in the stable phase: the browser only emits scroll end
+    environment.setScroll(2000, 400, 600);
+    fireEvent(window, new Event('scrollend'));
+
+    // No inline override: opacity is back under CSS animation control
+    expect(revealRegion.getAttribute('style')).toHaveLength(0);
   });
 });

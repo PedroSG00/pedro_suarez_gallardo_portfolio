@@ -112,17 +112,21 @@ Tareas pequeñas y ordenadas (T1 a T15). Cada tarea tiene objetivo, RF que cubre
 
 ---
 
-## T7 — Scroll rápido sin contenido oculto
+## T7 — Scroll rápido sin contenido oculto ✅ COMPLETADA
 
 **Objetivo:** Con scroll rápido y parada brusca, ningún bloque queda a medio revelar ni invisible de forma permanente. Los bloques en fase estable muestran opacidad 1.
 
 **RF cubiertos:** RF-07.
 
-**Tests a escribir primero:**
-- Test unitario: tras scroll rápido y detención, bloques en fase estable muestran opacidad computada igual a 1.
-- Test unitario: ningún bloque queda con opacidad menor que 1 de forma permanente tras detener el scroll rápido.
+**Tests escritos y pasantes (2 unitarios):**
+- Tras una ráfaga de scroll rápido y parada brusca en fase estable, el bloque muestra opacidad computada 1 y sin desplazamiento. ✅
+- Tras detener el scroll rápido en fase estable, la última sección elimina el override de salida y vuelve a la animación CSS (sin estado atascado). ✅
 
-**Criterio de hecho:** Los dos tests pasan. El recalculo ante scroll rápido no deja estados atascados.
+**Criterio de hecho:** Los dos tests pasan en Vitest. El recálculo ante scroll rápido no deja estados atascados.
+
+**Archivos modificados:**
+- `src/components/ui/Reveal/Reveal.tsx` — añade escucha de `scrollend` para recalcular al detenerse el scroll y corrige el umbral de salida: `rect.bottom` es relativo al viewport, así que se compara con `innerHeight * 0.25` (antes sumaba `scrollY` y marcaba salida en cualquier posición de scroll distinta de cero).
+- `src/components/ui/Reveal/Reveal.test.tsx` — 2 pruebas unitarias de RF-07 y helper `setScrollEnvironment` para simular posiciones de scroll cambiantes.
 
 ---
 
