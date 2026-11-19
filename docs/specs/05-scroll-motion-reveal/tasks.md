@@ -4,18 +4,23 @@ Tareas pequeñas y ordenadas (T1 a T15). Cada tarea tiene objetivo, RF que cubre
 
 ---
 
-## T1 — Infraestructura de detección de capacidades y estado base
+## T1 — Infraestructura de detección de capacidades y estado base ✅ COMPLETADA
 
 **Objetivo:** Establecer la detección de `animation-timeline: view()`, `prefers-reduced-motion: reduce` y modo impresión, más el estado base del revelado (opacidad 1 estática por defecto). Este es el fallback seguro que prevalece ante cualquier situación sin revelado activo.
 
 **RF cubiertos:** RF-10 (fallo seguro), RF-16 (impresión base).
 
-**Tests a escribir primero:**
-- Test unitario: sin soporte de scroll timeline → todos los bloques renderizan con opacidad 1 y sin desplazamiento.
-- Test unitario: con `prefers-reduced-motion: reduce` → todos los bloques renderizan con opacidad 1 y sin animación.
-- Test unitario: en modo `@media print` → todos los bloques renderizan con opacidad 1 y sin desplazamiento.
+**Tests escritos y pasantes (4):**
+- Test unitario: sin soporte de scroll timeline → opacidad computada 1 y transform none (vía `getComputedStyle`). ✅
+- Test unitario: con `prefers-reduced-motion: reduce` → opacidad computada 1 y transform none. ✅
+- Test unitario: en modo `@media print` → opacidad computada 1 y transform none. ✅
+- Test unitario: revelado activo sin fallback → hijos visibles (opacidad computada 1, sin desplazamiento). ✅
 
-**Criterio de hecho:** Los tres tests pasan en Vitest. El componente `Reveal` renderiza cualquier hijo con `opacity: 1` y `transform: none` cuando el revelado está inactivo.
+**Criterio de hecho:** Los 4 tests pasan en Vitest verificando opacidad computada (no estilos en línea, per constitución punto 8). El componente `Reveal` renderiza cualquier hijo con opacidad 1 y sin desplazamiento cuando el revelado está inactivo. Cobertura de ramas del proyecto: 95.36% (≥ 95%).
+
+**Archivos creados:**
+- `src/components/ui/Reveal/Reveal.tsx`
+- `src/components/ui/Reveal/Reveal.test.tsx`
 
 ---
 
