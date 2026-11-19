@@ -1,37 +1,61 @@
 'use client';
 
 import type { AriaRole, ReactNode } from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styles from './Reveal.module.css';
 
 type RevealProps = {
   children: ReactNode;
   role?: AriaRole;
   'aria-label'?: string;
+  isLastSection?: boolean;
 };
 
-export default function Reveal({ children, role, 'aria-label': ariaLabel }: RevealProps) {
+export default function Reveal({ children, role, 'aria-label': ariaLabel, isLastSection = false }: RevealProps) {
+  const revealRef = useRef<HTMLDivElement>(null);
   const [isShortPage, setIsShortPage] = useState(false);
+  const [geometry, setGeometry] = useState<{ isInExitPhase: boolean; isAtPageEnd: boolean }>({
+    isInExitPhase: false,
+    isAtPageEnd: false,
+  });
 
   useEffect(() => {
-    const checkShortPage = (): void => {
-      setIsShortPage(document.documentElement.scrollHeight <= window.innerHeight);
+    const check = (): void => {
+      const scrollHeight = document.documentElement.scrollHeight;
+      const innerHeight = window.innerHeight;
+      const scrollY = window.scrollY;
+
+      setIsShortPage(scrollHeight <= innerHeight);
+
+      const isAtPageEnd = scrollY + innerHeight >= scrollHeight - 1;
+
+      let isInExitPhase = false;
+      const rect = revealRef.current!.getBoundingClientRect();
+      const exitThreshold = scrollY + innerHeight * 0.25;
+      isInExitPhase = rect.bottom <= exitThreshold;
+
+      setGeometry({ isInExitPhase, isAtPageEnd });
     };
 
-    checkShortPage();
-    window.addEventListener('resize', checkShortPage);
+    check();
+    window.addEventListener('scroll', check, { passive: true });
+    window.addEventListener('resize', check, { passive: true });
 
     return (): void => {
-      window.removeEventListener('resize', checkShortPage);
+      window.removeEventListener('scroll', check);
+      window.removeEventListener('resize', check);
     };
-  }, []);
+  }, [isLastSection]);
 
-  const inlineStyle: React.CSSProperties = isShortPage
+  const forceVisible = isShortPage || (isLastSection && (geometry.isInExitPhase || geometry.isAtPageEnd));
+
+  const inlineStyle: React.CSSProperties = forceVisible
     ? { opacity: 1, transform: 'none' }
     : {};
 
   return (
     <div
+      ref={revealRef}
       className={styles.reveal}
       data-reveal-root
       role={role}

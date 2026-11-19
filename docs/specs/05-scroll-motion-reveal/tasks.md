@@ -77,17 +77,21 @@ Tareas pequeñas y ordenadas (T1 a T15). Cada tarea tiene objetivo, RF que cubre
 
 ---
 
-## T5 — Última sección (Contact) sin salida
+## T5 — Última sección (Contact) sin salida ✅ COMPLETADA
 
 **Objetivo:** La última sección de la página no tiene salida: ninguno de sus bloques se desvanece al salir. Al llegar al final, todos sus bloques tienen opacidad 1 aunque no hayan completado su entrada.
 
 **RF cubiertos:** RF-04.
 
-**Tests a escribir primero:**
-- Test unitario: bloque de la última sección al final de la página → opacidad computada igual a 1.
-- Test unitario: ningún bloque de la última sección muestra fase de salida por la parte alta de la pantalla.
+**Tests escritos y pasantes (2 unitarios):**
+- Bloque de la última sección al final de la página → opacidad computada igual a 1. ✅
+- Ningún bloque de la última sección muestra fase de salida por la parte alta de la pantalla (opacidad 1 y sin desplazamiento). ✅
 
-**Criterio de hecho:** Los dos tests pasan. La propiedad `isLastSection` prevalece sobre la fase de salida.
+**Criterio de hecho:** Los 2 tests pasan en Vitest. La propiedad `isLastSection` prevalece sobre la fase de salida.
+
+**Archivos modificados:**
+- `src/components/ui/Reveal/Reveal.tsx` — añade prop `isLastSection`, detección de fase de salida y final de página mediante `ref` + `scroll`/`resize`, y estilo inline que anula la salida cuando es la última sección.
+- `src/components/ui/Reveal/Reveal.test.tsx` — 2 pruebas unitarias de RF-04.
 
 ---
 
