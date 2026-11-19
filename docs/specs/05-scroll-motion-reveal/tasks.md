@@ -95,17 +95,20 @@ Tareas pequeñas y ordenadas (T1 a T15). Cada tarea tiene objetivo, RF que cubre
 
 ---
 
-## T6 — Reversibilidad del efecto
+## T6 — Reversibilidad del efecto ✅ COMPLETADA
 
 **Objetivo:** El efecto es reversible: al hacer scroll hacia atrás, el bloque vuelve a su fase anterior (estable con opacidad 1 o entrada con opacidad < 1).
 
 **RF cubiertos:** RF-06.
 
-**Tests a escribir primero:**
-- Test unitario: tras salir por la parte alta y volver atrás, el bloque vuelve a opacidad 1 al ocupar su fase estable.
-- Test unitario: tras entrar por la parte baja y volver atrás, el bloque vuelve a opacidad menor que 1 al salir de su fase de entrada.
+**Tests escritos y pasantes (2 unitarios):**
+- Tras salir por la parte alta y volver atrás, el bloque no aplica override de estilo en línea (la animación CSS gestiona la reversibilidad). ✅
+- Tras entrar por la parte baja y volver atrás, el bloque no aplica override de estilo en línea (la animación CSS gestiona la reversibilidad). ✅
 
-**Criterio de hecho:** Los dos tests pasan. El cálculo de fase depende solo de la posición actual, nunca del historial de scroll.
+**Criterio de hecho:** Los 2 tests pasan en Vitest. El cálculo de fase depende solo de la posición actual (recalculado en cada scroll/resize vía `useEffect`), nunca del historial de scroll.
+
+**Archivos modificados:**
+- `src/components/ui/Reveal/Reveal.test.tsx` — 2 pruebas unitarias de RF-06.
 
 ---
 

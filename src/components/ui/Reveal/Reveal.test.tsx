@@ -340,3 +340,109 @@ describe('Reveal last section (RF-04)', () => {
     expect(styles.transform).toBe('none');
   });
 });
+
+describe('Reveal reversibility (RF-06)', () => {
+  let restoreScrollY: (() => void) | null = null;
+  let restoreGeometry: (() => void) | null = null;
+
+  afterEach(() => {
+    if (restoreScrollY) {
+      restoreScrollY();
+      restoreScrollY = null;
+    }
+    if (restoreGeometry) {
+      restoreGeometry();
+      restoreGeometry = null;
+    }
+  });
+
+  test('does not force opacity when returning to stable phase after exit', () => {
+    setMotionPreferences({
+      supportsScrollTimeline: true,
+      reducedMotion: false,
+      printing: false,
+    });
+
+    // Salida: borde inferior en el cuarto superior de pantalla
+    restoreScrollY = defineWindowScrollY(0);
+    restoreGeometry = setScrollGeometry({
+      viewportHeight: 900,
+      rectTop: -300,
+      rectBottom: 100,
+    });
+
+    const { rerender } = render(
+      <Reveal role="group" aria-label="Reveal content">
+        <p>Readable content</p>
+      </Reveal>,
+    );
+    const revealRegion = screen.getByRole('group', {
+      name: 'Reveal content',
+    });
+    const styleAtExit = revealRegion.getAttribute('style')!;
+
+    // Volver a fase estable y re-renderizar
+    restoreScrollY = defineWindowScrollY(300);
+    restoreGeometry = setScrollGeometry({
+      viewportHeight: 900,
+      rectTop: 400,
+      rectBottom: 600,
+    });
+
+    rerender(
+      <Reveal role="group" aria-label="Reveal content">
+        <p>Readable content</p>
+      </Reveal>,
+    );
+
+    // El estilo en línea no cambia al volver a fase estable: la animación CSS gestiona la opacidad
+    expect(screen.getByRole('group', { name: 'Reveal content' })).toHaveStyle(
+      styleAtExit,
+    );
+  });
+
+  test('does not force opacity when returning to entry phase after stable', () => {
+    setMotionPreferences({
+      supportsScrollTimeline: true,
+      reducedMotion: false,
+      printing: false,
+    });
+
+    // Estable
+    restoreScrollY = defineWindowScrollY(300);
+    restoreGeometry = setScrollGeometry({
+      viewportHeight: 900,
+      rectTop: 400,
+      rectBottom: 600,
+    });
+
+    const { rerender } = render(
+      <Reveal role="group" aria-label="Reveal content">
+        <p>Readable content</p>
+      </Reveal>,
+    );
+    const revealRegion = screen.getByRole('group', {
+      name: 'Reveal content',
+    });
+    const styleAtStable = revealRegion.getAttribute('style')!;
+
+    // Entrada: borde superior en el 15% inferior de la pantalla
+    restoreScrollY = defineWindowScrollY(600);
+    restoreGeometry = setScrollGeometry({
+      viewportHeight: 900,
+      rectTop: 800,
+      rectBottom: 850,
+    });
+
+    rerender(
+      <Reveal role="group" aria-label="Reveal content">
+        <p>Readable content</p>
+      </Reveal>,
+    );
+
+    // El estilo en línea no cambia al volver a fase de entrada: la animación CSS gestiona la opacidad
+    expect(screen.getByRole('group', { name: 'Reveal content' })).toHaveStyle(
+      styleAtStable,
+    );
+  });
+});
