@@ -24,19 +24,24 @@ Tareas pequeñas y ordenadas (T1 a T15). Cada tarea tiene objetivo, RF que cubre
 
 ---
 
-## T2 — Componente Reveal base: cálculo de fase por bordes de pantalla
+## T2 — Componente Reveal base: cálculo de fase por bordes de pantalla ✅ COMPLETADA
 
 **Objetivo:** Implementar el cálculo de fase (`entry`, `stable`, `exit`) basado en la posición de los bordes del bloque respecto a la pantalla, con márgenes de seguridad (15 % inferior/superior para entrada/salida, 70 % / 30 % para estable).
 
 **RF cubiertos:** RF-01, RF-02.
 
-**Tests a escribir primero:**
-- Test unitario: bloque con borde superior en el 15 % inferior de la pantalla → opacidad computada menor que 1.
-- Test unitario: bloque con borde superior > 70 % y borde inferior < 30 % → opacidad computada igual a 1.
-- Test unitario: bloque con borde inferior en el 15 % superior de la pantalla → opacidad computada menor que 1.
-- Test unitario: en franjas intermedias, la opacidad es continua y monótona (sin saltos; no se verifica valor concreto).
+**Tests escritos y pasantes (4, Playwright Chromium):**
+- Borde superior en el 15 % inferior de la pantalla → opacidad computada < 1 y desplazamiento de entrada. ✅
+- Bloque más alto que el viewport, con los bordes dentro de la zona estable → opacidad computada = 1 y sin desplazamiento. ✅
+- Borde inferior en el 15 % superior de la pantalla → opacidad computada < 1 y desplazamiento de salida. ✅
+- En las franjas de entrada y salida, la opacidad cambia de forma monótona y continua según posiciones muestreadas. ✅
 
-**Criterio de hecho:** Los cuatro tests pasan. El componente `Reveal` aplica `opacity` y `transform` según la fase calculada, sin usar clases de Tailwind para el estado de opacidad.
+**Criterio de hecho:** Los 4 escenarios pasan en Playwright Chromium. `Reveal` aplica opacidad y desplazamiento mediante CSS ligado a la posición de los bordes respecto al viewport; no calcula ni conserva estado de scroll con JavaScript. Se usa Chromium porque jsdom no evalúa animaciones ligadas al scroll.
+
+**Archivos modificados o creados:**
+- `src/components/ui/Reveal/Reveal.tsx` — añade marcadores de borde accesibles como decorativos.
+- `src/components/ui/Reveal/Reveal.module.css` — anima opacidad y desplazamiento según las líneas de tiempo de los bordes.
+- `e2e/reveal.spec.ts` — escenarios de verificación de T2.
 
 ---
 

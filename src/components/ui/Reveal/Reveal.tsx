@@ -9,7 +9,14 @@ type RevealProps = {
 
 export default function Reveal({ children, role, 'aria-label': ariaLabel }: RevealProps) {
   return (
-    <div className={styles.reveal} role={role} aria-label={ariaLabel}>
+    <div
+      className={styles.reveal}
+      data-reveal-root
+      role={role}
+      aria-label={ariaLabel}
+    >
+      <span data-reveal-entry-marker aria-hidden="true" />
+      <span data-reveal-exit-marker aria-hidden="true" />
       {children}
     </div>
   );

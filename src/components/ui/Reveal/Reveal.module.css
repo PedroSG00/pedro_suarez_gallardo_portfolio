@@ -1,10 +1,109 @@
+@property --psg-reveal-entry-opacity {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+
+@property --psg-reveal-exit-opacity {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+
+@property --psg-reveal-entry-offset {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --psg-reveal-exit-offset {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
 .reveal {
+  position: relative;
   opacity: 1;
   transform: none;
 }
 
-@supports not (animation-timeline: view()) {
+[data-reveal-entry-marker],
+[data-reveal-exit-marker] {
+  position: absolute;
+  inline-size: 0;
+  block-size: 0;
+}
+
+[data-reveal-entry-marker] {
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  view-timeline-name: --reveal-entry;
+  view-timeline-axis: block;
+}
+
+[data-reveal-exit-marker] {
+  inset-block-end: 0;
+  inset-inline-start: 0;
+  view-timeline-name: --reveal-exit;
+  view-timeline-axis: block;
+}
+
+@keyframes reveal-enter {
+  from {
+    --psg-reveal-entry-opacity: 0;
+    --psg-reveal-entry-offset: var(--motion-distance, 0px);
+  }
+
+  to {
+    --psg-reveal-entry-opacity: 1;
+    --psg-reveal-entry-offset: 0px;
+  }
+}
+
+@keyframes reveal-exit {
+  from {
+    --psg-reveal-exit-opacity: 1;
+    --psg-reveal-exit-offset: 0px;
+  }
+
+  to {
+    --psg-reveal-exit-opacity: 0;
+    --psg-reveal-exit-offset: calc(0px - var(--motion-distance, 0px));
+  }
+}
+
+@supports
+  (animation-timeline: view())
+  and (view-timeline-name: --reveal-entry)
+  and (timeline-scope: --reveal-entry) {
   .reveal {
+    timeline-scope: --reveal-entry, --reveal-exit;
+  }
+
+  [data-reveal-root] {
+    animation:
+      reveal-enter auto linear both,
+      reveal-exit auto linear both;
+    animation-timeline: --reveal-entry, --reveal-exit;
+    animation-range:
+      cover 0% cover 25%,
+      cover 75% cover 100%;
+    opacity: min(
+      var(--psg-reveal-entry-opacity),
+      var(--psg-reveal-exit-opacity)
+    );
+    transform: translateY(
+      calc(
+        var(--psg-reveal-entry-offset) +
+        var(--psg-reveal-exit-offset)
+      )
+    );
+  }
+}
+
+@supports not (animation-timeline: view()) {
+  [data-reveal-root] {
     animation: none;
     opacity: 1;
     transform: none;
@@ -12,7 +111,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .reveal {
+  [data-reveal-root] {
     animation: none;
     opacity: 1;
     transform: none;
@@ -20,7 +119,7 @@
 }
 
 @media print {
-  .reveal {
+  [data-reveal-root] {
     animation: none;
     opacity: 1;
     transform: none;
