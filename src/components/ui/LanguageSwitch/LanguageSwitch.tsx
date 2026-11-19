@@ -1,64 +1,65 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import type { Locale } from '@/lib/locale';
 
 type Props = {
-  onChange: (lang: string) => void;
-  currentLang: 'en' | 'es';
-  ariaLabel: string;
-  icon?: ReactNode;
+  locale: Locale;
+  ariaLabelEn: string;
+  ariaLabelEs: string;
 };
 
-const DEFAULT_ICON = (
+const GLOBE = (
   <svg
     viewBox="0 0 24 24"
     aria-hidden="true"
     style={{ color: 'currentColor' }}
   >
-    <circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" />
+    <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.5" />
   </svg>
 );
 
 export default function LanguageSwitch({
-  onChange,
-  currentLang,
-  ariaLabel,
-  icon,
+  locale,
+  ariaLabelEn,
+  ariaLabelEs,
 }: Props) {
-  if (!onChange || currentLang === undefined || !ariaLabel) {
-    return null;
-  }
+  const pathname = usePathname();
+  const router = useRouter();
 
-  const handleClick = () => {
-    const nextLang = currentLang === 'en' ? 'es' : 'en';
-    onChange(nextLang);
-  };
+  const search = typeof window !== 'undefined' ? window.location.search : '';
+  const hash = typeof window !== 'undefined' ? window.location.hash : '';
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      const nextLang = currentLang === 'en' ? 'es' : 'en';
-      onChange(nextLang);
-    }
+  const hrefFor = (targetLang: Locale) =>
+    `${pathname.replace(/^\/(en|es)/, `/${targetLang}`)}${search}${hash}`;
+
+  const handleClick = (targetLang: Locale) => (
+    e: React.MouseEvent<HTMLAnchorElement>
+  ) => {
+    e.preventDefault();
+    router.replace(hrefFor(targetLang));
   };
 
   return (
-    <button
-      type="button"
-      onClick={handleClick}
-      onKeyDown={handleKeyDown}
-      aria-pressed={currentLang === 'en'}
-      aria-label={ariaLabel}
-      className={`
-        inline-flex items-center justify-center
-        bg-[var(--color-surface)] text-[var(--color-ink)]
-        border [var(--line-width)] solid [var(--color-line)]
-        w-10 h-10 rounded-full
-        transition-colors duration-[var(--duration-state)]
-        focus-visible:outline-none
-      `}
-    >
-      {icon ?? DEFAULT_ICON}
-    </button>
+    <div role="group" aria-label="Idioma / Language">
+      <a
+        href={hrefFor('en')}
+        onClick={handleClick('en')}
+        aria-label={ariaLabelEn}
+        aria-current={locale === 'en' ? 'page' : undefined}
+        className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[var(--color-surface)] text-[var(--color-ink)] border [var(--line-width)] solid [var(--color-line)] transition-colors duration-[var(--duration-state)] aria-current:bg-[var(--color-ink)] aria-current:text-[var(--color-surface)]"
+      >
+        {GLOBE}
+      </a>
+      <a
+        href={hrefFor('es')}
+        onClick={handleClick('es')}
+        aria-label={ariaLabelEs}
+        aria-current={locale === 'es' ? 'page' : undefined}
+        className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[var(--color-surface)] text-[var(--color-ink)] border [var(--line-width)] solid [var(--color-line)] transition-colors duration-[var(--duration-state)] aria-current:bg-[var(--color-ink)] aria-current:text-[var(--color-surface)]"
+      >
+        {GLOBE}
+      </a>
+    </div>
   );
 }

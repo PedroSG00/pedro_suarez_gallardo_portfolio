@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { Suspense } from 'react';
 import { locale } from 'next/root-params';
-import LanguageSwitchClient from '@/components/ui/LanguageSwitch/LanguageSwitchClient';
+import LanguageSwitch from '@/components/ui/LanguageSwitch/LanguageSwitch';
 import type { Locale } from '@/lib/locale';
 import { themeScript } from '@/lib/theme-script';
 import { THEME_STORAGE_KEY } from '@/lib/theme';
@@ -41,11 +41,10 @@ export default async function LocaleLayout({
       <body className="min-h-full flex flex-col">
         <nav>
           <Suspense fallback={null}>
-            <LanguageSwitchClient
-              currentLang={lang as Locale}
-              ariaLabel={
-                lang === 'en' ? 'Switch to English' : 'Cambiar a español'
-              }
+            <LanguageSwitch
+              locale={lang as Locale}
+              ariaLabelEn="Switch to English"
+              ariaLabelEs="Cambiar a español"
             />
           </Suspense>
         </nav>
