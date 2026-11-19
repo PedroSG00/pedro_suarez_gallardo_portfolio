@@ -1,6 +1,6 @@
 # Tareas — 04 Átomos de UI
 
-Estado: T1 completado (Button, RF-1) y T2 completado (Link, RF-2). T3–T8 pendientes. Cada tarea es pequeña, ordenada e implementable y verificable por separado. Se siguen los gates de la constitución: `pnpm lint`, `pnpm typecheck`, `pnpm test` y `pnpm build`. Los tests se escriben antes que el código (regla 8 de la constitución).
+Estado: T1 completado (Button, RF-1), T2 completado (Link, RF-2) y T3 completado (Heading, RF-3). T4–T8 pendientes. Cada tarea es pequeña, ordenada e implementable y verificable por separado. Se siguen los gates de la constitución: `pnpm lint`, `pnpm typecheck`, `pnpm test` y `pnpm build`. Los tests se escriben antes que el código (regla 8 de la constitución).
 
 ---
 
@@ -46,7 +46,7 @@ Estado: T1 completado (Button, RF-1) y T2 completado (Link, RF-2). T3–T8 pendi
 
 ---
 
-## T3 — Heading
+## T3 — Heading ✅ (completado)
 
 **Objetivo:** Implementar el átomo Heading con niveles semánticos h1–h6 y escala tipográfica editorial, todo recibido por prop.
 
