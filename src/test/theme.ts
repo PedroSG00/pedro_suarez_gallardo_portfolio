@@ -1,5 +1,6 @@
 import { readFileSync } from "fs";
 import { join } from "path";
+import { createContext, runInContext } from "node:vm";
 import { parseTokenSheet, type TokenSheet } from "./theme-tokens";
 
 const CSS_PATH = join(process.cwd(), "src/styles/globals.css");
@@ -25,5 +26,9 @@ export function runThemeScript(
   const w = deps?.window ?? window as unknown as ThemeScriptDeps["window"];
   const d = deps?.document ?? document as unknown as ThemeScriptDeps["document"];
   const ls = deps?.ls ?? window.localStorage;
-  new Function("w", "d", "ls", "return " + script)(w, d, ls)(w, d, ls);
+
+  const context = createContext({ w, d, ls });
+  // script es una IIFE: (function(w,d,ls){...})
+  // La ejecutamos dentro de un contexto aislado con w, d, ls como argumentos
+  runInContext(`(${script})(w, d, ls)`, context);
 }
