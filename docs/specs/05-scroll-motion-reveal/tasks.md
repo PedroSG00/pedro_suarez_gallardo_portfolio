@@ -289,3 +289,23 @@ Tareas pequeñas y ordenadas (T1 a T15). Cada tarea tiene objetivo, RF que cubre
 
 **Archivos creados o modificados:**
 - `e2e/scroll-motion.spec.ts` — 8 tests e2e integrados (RF-01, RF-02, RF-04, RF-06, RF-08, RF-09, RF-10, RF-16).
+
+---
+
+## T16 — e2e fallback sin animation-timeline (RF-10) ✅ COMPLETADA
+
+**Objetivo:** En Chromium, simular la ausencia de soporte de `animation-timeline: view()` y verificar que todos los bloques revelables muestran opacidad computada 1 y transform none (fallback "visible sin animar"). Ejecutar en /en y /es, tema claro y oscuro. Comprobar que el test falla si se quita el fallback.
+
+**RF cubiertos:** RF-10.
+
+**Tests escritos y pasantes (5 e2e):**
+- /en claro, /en oscuro, /es claro, /es oscuro: con fallback inyectado → todos los bloques opacidad 1 y transform none. ✅
+- Sin fallback: al menos un bloque queda atenuado (opacidad < 1), demostrando que el test cubre el fallback. ✅
+
+**Criterio de hecho:** Los 5 tests pasan en Chromium. Se demostró que al quitar el fallback CSS, el test falla (Expected: 1, Received: 0), y se revertió.
+
+**Archivos creados o modificados:**
+- `e2e/reveal-fallback.spec.ts` — 5 tests e2e de fallback (RF-10).
+
+---
+

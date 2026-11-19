@@ -1,0 +1,11 @@
+[WebServer] $ next start -p 3000
+
+Running 5 tests using 5 workers
+
+  ok 3 [chromium] ÔÇ║ e2e\reveal-fallback.spec.ts:116:3 ÔÇ║ RF-10: fallback sin animation-timeline ÔÇ║ SIN fallback: al menos un bloque queda atenuado (opacidad < 1) (338ms)
+  ok 2 [chromium] ÔÇ║ e2e\reveal-fallback.spec.ts:106:3 ÔÇ║ RF-10: fallback sin animation-timeline ÔÇ║ en claro / es (358ms)
+  ok 1 [chromium] ÔÇ║ e2e\reveal-fallback.spec.ts:96:3 ÔÇ║ RF-10: fallback sin animation-timeline ÔÇ║ en claro / en (372ms)
+  ok 4 [chromium] ÔÇ║ e2e\reveal-fallback.spec.ts:101:3 ÔÇ║ RF-10: fallback sin animation-timeline ÔÇ║ en oscuro / en (380ms)
+  ok 5 [chromium] ÔÇ║ e2e\reveal-fallback.spec.ts:111:3 ÔÇ║ RF-10: fallback sin animation-timeline ÔÇ║ en oscuro / es (388ms)
+
+  5 passed (2.2s)
