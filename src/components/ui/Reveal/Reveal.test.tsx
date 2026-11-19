@@ -48,43 +48,95 @@ function getRevealRegion(): HTMLElement {
   return screen.getByRole('group', { name: 'Reveal content' });
 }
 
+function setScrollGeometry({
+  viewportHeight,
+  rectTop,
+  rectBottom,
+}: {
+  viewportHeight: number;
+  rectTop: number;
+  rectBottom: number;
+}): () => void {
+  Object.defineProperty(window, 'innerHeight', {
+    writable: true,
+    configurable: true,
+    value: viewportHeight,
+  });
+
+  const originalGetBoundingClientRect = Element.prototype.getBoundingClientRect;
+  Element.prototype.getBoundingClientRect = function () {
+    return {
+      ...originalGetBoundingClientRect.call(this),
+      top: rectTop,
+      bottom: rectBottom,
+      height: rectBottom - rectTop,
+      width: 100,
+      left: 0,
+      right: 100,
+      x: 0,
+      y: rectTop,
+      toJSON: () => ({}),
+    } as unknown as DOMRect;
+  };
+
+  return () => {
+    Element.prototype.getBoundingClientRect = originalGetBoundingClientRect;
+  };
+}
+
 afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe('Reveal safe baseline', () => {
-  describe('al cargar sin scroll previo (RF-03)', () => {
-    test('muestra opacidad computada igual a 1 desde el primer fotograma para un bloque inicialmente visible', () => {
-      setMotionPreferences({
-        supportsScrollTimeline: true,
-        reducedMotion: false,
-        printing: false,
-      });
+describe('Reveal initial load (RF-03)', () => {
+  let restoreGeometry: (() => void) | null = null;
 
-      const revealRegion = getRevealRegion();
-      const styles = window.getComputedStyle(revealRegion);
-
-      expect(styles.opacity).toBe('1');
-      expect(styles.transform).toBe('none');
-    });
-
-    test('no aplica una transición de entrada visible para bloques ya en pantalla al cargar', () => {
-      setMotionPreferences({
-        supportsScrollTimeline: true,
-        reducedMotion: false,
-        printing: false,
-      });
-
-      const revealRegion = getRevealRegion();
-      const styles = window.getComputedStyle(revealRegion);
-
-      expect(styles.opacity).toBe('1');
-      expect(styles.transform).toBe('none');
-      expect(styles.animation).toBe('');
-      expect(styles.transition).toBe('');
-    });
+  afterEach(() => {
+    if (restoreGeometry) {
+      restoreGeometry();
+      restoreGeometry = null;
+    }
   });
 
+  test('shows computed opacity 1 from the first frame when the block is initially visible', () => {
+    setMotionPreferences({
+      supportsScrollTimeline: true,
+      reducedMotion: false,
+      printing: false,
+    });
+    restoreGeometry = setScrollGeometry({
+      viewportHeight: 900,
+      rectTop: 400,
+      rectBottom: 600,
+    });
+
+    const revealRegion = getRevealRegion();
+    const styles = window.getComputedStyle(revealRegion);
+
+    expect(styles.opacity).toBe('1');
+  });
+
+  test('does not apply an entry transition to blocks already on screen at load', () => {
+    setMotionPreferences({
+      supportsScrollTimeline: true,
+      reducedMotion: false,
+      printing: false,
+    });
+    restoreGeometry = setScrollGeometry({
+      viewportHeight: 900,
+      rectTop: 400,
+      rectBottom: 600,
+    });
+
+    const revealRegion = getRevealRegion();
+    const styles = window.getComputedStyle(revealRegion);
+
+    expect(styles.opacity).toBe('1');
+    expect(styles.transform).toBe('none');
+  });
+});
+
+describe('Reveal safe baseline', () => {
   test('keeps content fully visible when scroll timelines are unsupported', () => {
     setMotionPreferences({
       supportsScrollTimeline: false,

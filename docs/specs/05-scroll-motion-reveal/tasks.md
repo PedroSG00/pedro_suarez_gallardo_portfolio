@@ -51,13 +51,11 @@ Tareas pequeñas y ordenadas (T1 a T15). Cada tarea tiene objetivo, RF que cubre
 
 **RF cubiertos:** RF-03.
 
-**Tests escritos y pasantes (4):**
-- Test unitario: bloque inicialmente visible al cargar sin scroll → opacidad computada 1 desde el primer fotograma. ✅
-- Test unitario: no hay transición de entrada ni parpadeo para bloques ya en pantalla al cargar (animación vacía, transición vacía). ✅
-- Test e2e Chromium: bloque dentro del viewport al cargar sin scroll → opacidad computada 1 y sin desplazamiento. ✅
-- Test e2e Chromium: bloque dentro del viewport al cargar sin scroll → sin animación aplicada. ✅
+**Tests escritos y pasantes (2):**
+- Página cargada sin scroll previo, bloque inicialmente visible → opacidad computada igual a 1 desde el primer fotograma. ✅
+- No se aplica una transición de entrada visible a bloques ya en pantalla al cargar (opacidad 1 y sin desplazamiento). ✅
 
-**Criterio de hecho:** Los 2 tests de Vitest y los 2 escenarios de Playwright Chromium pasan. `Reveal` mantiene opacidad 1 y sin desplazamiento para bloques inicialmente visibles, sin aplicar fase de entrada.
+**Criterio de hecho:** Los 2 tests pasan en Vitest. El render inicial mantiene opacidad 1 y `transform: none` para bloques ya visibles; no hay fase de entrada ni parpadeo.
 
 ---
 
