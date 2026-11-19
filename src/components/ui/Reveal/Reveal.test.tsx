@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import Reveal from './Reveal';
 
@@ -121,6 +121,7 @@ function setScrollGeometry({
 
 type ScrollEnvironment = {
   setScroll: (scrollY: number, rectTop: number, rectBottom: number) => void;
+  setViewport: (viewportHeight: number, pageHeight: number) => void;
   restore: () => void;
 };
 
@@ -182,6 +183,18 @@ function setScrollEnvironment({
       currentRectTop = nextRectTop;
       currentRectBottom = nextRectBottom;
     },
+    setViewport(nextViewportHeight: number, nextPageHeight: number): void {
+      Object.defineProperty(window, 'innerHeight', {
+        writable: true,
+        configurable: true,
+        value: nextViewportHeight,
+      });
+      Object.defineProperty(document.documentElement, 'scrollHeight', {
+        writable: true,
+        configurable: true,
+        value: nextPageHeight,
+      });
+    },
     restore(): void {
       Object.defineProperty(window, 'innerHeight', {
         writable: true,
@@ -199,6 +212,37 @@ function setScrollEnvironment({
         value: originalScrollHeight,
       });
       Element.prototype.getBoundingClientRect = originalGetBoundingClientRect;
+    },
+  };
+}
+
+type ResizeObserverStub = {
+  notify: () => void;
+};
+
+function stubResizeObserver(): ResizeObserverStub {
+  const callbacks: ResizeObserverCallback[] = [];
+
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      constructor(callback: ResizeObserverCallback) {
+        callbacks.push(callback);
+      }
+
+      observe(): void {}
+
+      unobserve(): void {}
+
+      disconnect(): void {}
+    },
+  );
+
+  return {
+    notify(): void {
+      for (const callback of callbacks) {
+        callback([], {} as ResizeObserver);
+      }
     },
   };
 }
@@ -756,5 +800,97 @@ describe('Reveal exclusions (RF-11)', () => {
     expect(stickyRegion).toHaveStyle({ opacity: '1', transform: 'none' });
     expect(window.getComputedStyle(screen.getByText('Fixed inside')).opacity).toBe('1');
     expect(window.getComputedStyle(screen.getByText('Sticky inside')).opacity).toBe('1');
+  });
+});
+
+describe('Reveal viewport changes (RF-08)', () => {
+  let restoreEnvironment: (() => void) | null = null;
+
+  afterEach(() => {
+    if (restoreEnvironment) {
+      restoreEnvironment();
+      restoreEnvironment = null;
+    }
+  });
+
+  test('keeps stable-phase blocks at computed opacity 1 after resize and rotation', () => {
+    setMotionPreferences({
+      supportsScrollTimeline: true,
+      reducedMotion: false,
+      printing: false,
+    });
+    const environment = setScrollEnvironment({
+      viewportHeight: 900,
+      pageHeight: 6000,
+      scrollY: 3000,
+      rectTop: -300,
+      rectBottom: 100,
+    });
+    restoreEnvironment = environment.restore;
+
+    const revealRegion = getRevealRegion({ isLastSection: true });
+
+    // Exit phase on a phone in portrait: the block is forced visible.
+    expect(revealRegion).toHaveStyle({ opacity: '1', transform: 'none' });
+
+    // Same position reached by normal scroll: the block sits in its stable phase.
+    environment.setScroll(2000, 400, 600);
+    fireEvent.scroll(window);
+    const opacityAtStable = window.getComputedStyle(revealRegion).opacity;
+    expect(opacityAtStable).toBe('1');
+    expect(revealRegion.getAttribute('style')).toHaveLength(0);
+
+    // Rotation to landscape: the block is back in its exit phase.
+    environment.setViewport(400, 6000);
+    environment.setScroll(2000, -300, 100);
+    fireEvent(window, new Event('resize'));
+    expect(revealRegion).toHaveStyle({ opacity: '1', transform: 'none' });
+
+    // Rotation back: the viewport recalculates to the stable phase again.
+    environment.setViewport(900, 6000);
+    environment.setScroll(2000, 400, 600);
+    fireEvent(window, new Event('resize'));
+
+    // The opacity matches arriving at the same position with normal scroll.
+    expect(window.getComputedStyle(revealRegion).opacity).toBe(opacityAtStable);
+    expect(revealRegion.getAttribute('style')).toHaveLength(0);
+  });
+
+  test('recalculates when zoom or reflow changes the page height without a resize event', () => {
+    setMotionPreferences({
+      supportsScrollTimeline: true,
+      reducedMotion: false,
+      printing: false,
+    });
+    const resizeObserver = stubResizeObserver();
+    const environment = setScrollEnvironment({
+      viewportHeight: 900,
+      pageHeight: 6000,
+      scrollY: 0,
+      rectTop: 800,
+      rectBottom: 1000,
+    });
+    restoreEnvironment = environment.restore;
+
+    const revealRegion = getRevealRegion();
+
+    // Tall page, block in its entry phase: the CSS animation drives the reveal.
+    expect(revealRegion).not.toHaveAttribute('style');
+
+    // Text zoom/reflow shrinks the page below the viewport without a window
+    // resize event, so only the layout change reports the new size.
+    environment.setViewport(900, 500);
+    act(() => resizeObserver.notify());
+
+    // There is no scroll left: the block must be fully visible, never stuck faded.
+    expect(window.getComputedStyle(revealRegion).opacity).toBe('1');
+    expect(revealRegion).toHaveAttribute('style');
+    expect(revealRegion).toHaveStyle({ opacity: '1', transform: 'none' });
+
+    // Text zoom back out: the page scrolls again and the block returns to the reveal.
+    environment.setViewport(900, 6000);
+    act(() => resizeObserver.notify());
+
+    expect(revealRegion.getAttribute('style')).toHaveLength(0);
   });
 });

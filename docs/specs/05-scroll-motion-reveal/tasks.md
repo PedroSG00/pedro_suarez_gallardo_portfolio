@@ -150,17 +150,21 @@ Tareas pequeñas y ordenadas (T1 a T15). Cada tarea tiene objetivo, RF que cubre
 
 ---
 
-## T9 — Resize, giro de pantalla y zoom sin estados atascados
+## T9 — Resize, giro de pantalla y zoom sin estados atascados ✅ COMPLETADA
 
 **Objetivo:** Tras resize, giro de pantalla o zoom (incluido texto al 200 %), el efecto se recalcula y nunca deja contenido oculto. La opacidad de cada bloque debe ser la misma que tendría llegando a esa misma posición con scroll normal (tolerancia 0,01).
 
 **RF cubiertos:** RF-08.
 
-**Tests a escribir primero:**
-- Test unitario: tras cambio de viewport, bloques en fase estable muestran opacidad computada igual a 1.
-- Test unitario: tras resize/giro/zoom, ningún bloque queda con opacidad menor que 1 de forma permanente si ocupa su fase estable.
+**Tests escritos y pasantes (2 unitarios):**
+- Tras resize y giro, el bloque recalculado a su fase estable muestra opacidad computada 1, sin anular la animación CSS con un estilo en línea obsoleto; al volver al viewport original la opacidad coincide con la de llegar por scroll normal. ✅
+- Cuando un zoom de texto o un reflujo cambia el alto de la página sin emitir `resize`, el bloque se recalcula: en una página sin scroll queda plenamente visible (nunca atenuado) y al volver a haber scroll recupera el revelado. ✅
 
-**Criterio de hecho:** Los dos tests pasan. El recalculo ante cambio de viewport es inmediato y no deja estados atascados.
+**Criterio de hecho:** Los dos tests pasan. El recálculo ante cambio de viewport es inmediato (evento `resize`) y el que provoca un cambio de layout sin `resize` (zoom de texto, reflujo) llega por un `ResizeObserver` sobre `document.documentElement`; ningún estado queda atascado.
+
+**Archivos modificados:**
+- `src/components/ui/Reveal/Reveal.tsx` — añade un `ResizeObserver` sobre el elemento raíz del documento (con guarda para entornos sin la API) que ejecuta el mismo recálculo que `scroll`/`resize`; se desconecta al desmontar.
+- `src/components/ui/Reveal/Reveal.test.tsx` — extiende el entorno de scroll con `setViewport`, añade un doble de `ResizeObserver` y 2 pruebas unitarias de RF-08.
 
 ---
 

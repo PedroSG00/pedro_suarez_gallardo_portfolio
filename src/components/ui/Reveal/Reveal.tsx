@@ -52,11 +52,9 @@ export default function Reveal({
 
       const isAtPageEnd = scrollY + innerHeight >= scrollHeight - 1;
 
-      let isInExitPhase = false;
-      const rect = revealRef.current!.getBoundingClientRect();
       // rect.bottom is viewport-relative, so the threshold must be too.
-      const exitThreshold = innerHeight * 0.25;
-      isInExitPhase = rect.bottom <= exitThreshold;
+      const rect = revealRef.current!.getBoundingClientRect();
+      const isInExitPhase = rect.bottom <= innerHeight * 0.25;
 
       setGeometry({ isInExitPhase, isAtPageEnd });
     };
@@ -66,10 +64,17 @@ export default function Reveal({
     window.addEventListener('scrollend', check);
     window.addEventListener('resize', check, { passive: true });
 
+    // Text zoom and reflow change the page size without a window resize, so the
+    // overrides must follow the layout to avoid a permanently stuck state.
+    const resizeObserver =
+      typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(check);
+    resizeObserver?.observe(document.documentElement);
+
     return (): void => {
       window.removeEventListener('scroll', check);
       window.removeEventListener('scrollend', check);
       window.removeEventListener('resize', check);
+      resizeObserver?.disconnect();
     };
   }, [isExcluded, isLastSection]);
 
