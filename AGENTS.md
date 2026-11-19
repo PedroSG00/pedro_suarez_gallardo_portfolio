@@ -55,11 +55,11 @@ Para iterar rápido: `pnpm exec vitest run ruta/al/archivo.test.tsx`.
 - Escribe los tests antes que el código.
 
 ## Dirección visual
-- Crudo y negro; modo oscuro diseñado, no invertido (crudo sobre negro puro). Una familia monoespaciada (`next/font`), máximo dos pesos. Sin color de acento.
+- Crudo y negro; modo oscuro diseñado, no invertido (crudo sobre negro cálido casi puro). Una familia monoespaciada (`next/font`), máximo dos pesos. Sin color de acento.
 - Escala extrema: titulares masivos y fluidos (`clamp`) como elemento gráfico frente a cuerpo pequeño y legible. El nombre del hero ocupa el ancho de la pantalla.
 - Retícula visible con líneas de 1 px, secciones numeradas (`01 / EXPERIENCE`), metadatos pequeños en mono, bloques invertidos, asimetría y mucho espacio negativo.
 - Detalles tipográficos: texto contorneado (`-webkit-text-stroke`), cifras tabulares, cursor parpadeante tipo terminal, inversión de color en hover.
-- Movimiento solo con CSS, sin librerías de animación. Estados 150–400 ms, revelados hasta 600 ms; duraciones y distancias salen de tokens de `globals.css`. Entradas escalonadas y transición de tema con View Transitions.
+- Movimiento solo con CSS, sin librerías de animación. Estados 150–250 ms, transición de tema hasta 400 ms, revelados hasta 600 ms; duraciones y distancias salen de tokens de `globals.css`. Entradas escalonadas y transición de tema con View Transitions.
 - Cada bloque **entra y sale** con el scroll (ver «Movimiento»).
 - Con `prefers-reduced-motion`, el impacto debe mantenerse con composición y tipografía estáticas.
 - Cada sección tiene su "momento firma" definido en su spec. Base: Hero (nombre a todo el ancho, líneas escalonadas, cursor parpadeante; al hacer scroll pasa a contorno y se mueve más lento), About (frase invertida que se ilumina palabra a palabra), Experience (filas con número tabular que se invierten en hover), Stack (grupos escalonados con etiquetas mono), Contact (titular gigante con `clip` y email enorme que se invierte en hover).
