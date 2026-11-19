@@ -38,6 +38,14 @@ describe('Button', () => {
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
+  test('does not execute onClick on unrelated key', () => {
+    render(<Button onClick={onClick}>Click me</Button>);
+    const button = screen.getByRole('button');
+    button.focus();
+    fireEvent.keyDown(button, { key: 'a' });
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
   test('does not execute onClick when disabled', () => {
     render(<Button onClick={onClick} disabled>Click me</Button>);
     const button = screen.getByRole('button');
