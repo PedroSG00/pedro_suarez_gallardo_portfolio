@@ -168,49 +168,68 @@ Tareas pequeñas y ordenadas (T1 a T15). Cada tarea tiene objetivo, RF que cubre
 
 ---
 
-## T10 — Cambio de idioma o tema sin bloques ocultos ni parpadeos
+## T10 — Cambio de idioma o tema sin bloques ocultos ni parpadeos ✅ COMPLETADA
 
 **Objetivo:** Al cambiar de idioma (`/en` ↔ `/es`) o de tema (claro ↔ oscuro), no quedan bloques ocultos ni se producen parpadeos (un bloque en zona estable no baja de opacidad 1 en ningún fotograma durante el cambio).
 
 **RF cubiertos:** RF-09.
 
-**Tests a escribir primero:**
-- Test unitario: tras cambiar de idioma, bloques en fase estable muestran opacidad computada igual a 1.
-- Test unitario: tras cambiar de tema, bloques en fase estable muestran opacidad computada igual a 1.
-- Test unitario: no se produce parpadeo visible de entrada o salida durante el cambio de idioma o de tema.
+**Tests escritos y pasantes (3 unitarios):**
+- Tras cambiar de idioma, los bloques en fase estable mantienen opacidad computada 1 y no reciben override en línea. ✅
+- Tras cambiar de tema, los bloques en fase estable mantienen opacidad computada 1 y no reciben override en línea. ✅
+- Durante el cambio de idioma (con reflujo de altura de página) y de tema en ambos sentidos, ninguna muestra baja de opacidad 1 ni aplica desplazamiento. ✅
 
-**Criterio de hecho:** Los tres tests pasan. El cambio de idioma y tema no afecta al cálculo de fase de scroll.
+**Criterio de hecho:** Los tres tests pasan. El cambio de idioma y tema no afecta al cálculo de fase de scroll: este depende solo de la geometría del bloque y del viewport, por lo que no fue necesario añadir código de producción. La cobertura de RF-09 queda en `Reveal.test.tsx`.
+
+**Archivos modificados:**
+- `src/components/ui/Reveal/Reveal.test.tsx` — 3 pruebas unitarias de RF-09.
 
 ---
 
-## T11 — Escalonado solo entre hermanos de un mismo grupo (RevealGroup)
+## T11 — Escalonado solo entre hermanos de un mismo grupo (RevealGroup) ✅ COMPLETADA
 
 **Objetivo:** Implementar `RevealGroup` que aplica desfases de posición de scroll (no de tiempo) a hermanos de un mismo grupo. Máximo 6 elementos con desfase propio; los restantes comparten el último desfase. Desfase total ≤ 5 puntos del recorrido. Cada elemento completa su entrada antes de la fase estable. Un bloque suelto no usa desfase. No hay encadenamiento entre grupos.
 
 **RF cubiertos:** RF-13.
 
-**Tests a escribir primero:**
-- Test unitario: dentro de un mismo grupo, los elementos hermanos muestran desfases escalonados de posición.
-- Test unitario: entre grupos diferentes no hay encadenamiento de desfases.
-- Test unitario: un bloque suelto fuera de un grupo no usa desfase de escalonado.
-- Test unitario: el desfase total del grupo no supera 5 puntos del recorrido.
-- Test unitario: cada elemento del grupo completa su entrada antes de entrar en su fase estable.
+**Tests escritos y pasantes (6 unitarios):**
+- Dentro de un mismo grupo, los hermanos muestran desfases escalonados de posición (0 → 1,67 % → 3,33 % con 3 elementos). ✅
+- Entre grupos diferentes no hay encadenamiento: el primer bloque del segundo grupo vuelve a 0 y su paso se calcula con su propio tamaño. ✅
+- Un bloque suelto fuera de un grupo no usa desfase (sin variable de offset). ✅
+- El desfase total del grupo no supera 5 puntos y, a partir del sexto elemento, los restantes comparten el último desfase. ✅
+- Cada elemento del grupo completa su entrada antes de la fase estable: el inicio de entrada queda por debajo del 25 %, donde arranca la fase estable. ✅
+- Los hijos que no son elementos React se renderizan sin envoltura de reveal ni desfase. ✅
 
-**Criterio de hecho:** Los cinco tests pasan. `RevealGroup` envuelve cada hijo en `Reveal` con `offsetPoints` calculado.
+**Criterio de hecho:** Los seis tests pasan. `RevealGroup` envuelve cada hijo en `Reveal` con `offsetPoints` calculado por su posición. El offset se aplica con la variable CSS `--psg-reveal-entry-start`, que mueve el inicio de la entrada sin tocar la fase estable y sin usar tiempo (`animation-delay` ni `transition-delay`).
+
+**Archivos creados o modificados:**
+- `src/components/ui/RevealGroup/RevealGroup.tsx`
+- `src/components/ui/RevealGroup/RevealGroup.test.tsx`
+- `src/components/ui/Reveal/Reveal.tsx` — añade la prop `offsetPoints` y la expone como variable CSS.
+- `src/components/ui/Reveal/Reveal.module.css` — el rango de entrada empieza en el offset del grupo y termina siempre en el 25 %.
 
 ---
 
-## T12 — Variantes rise, clip y fade (RF-14)
+## T12 — Variantes rise, clip y fade (RF-14) ✅ COMPLETADA
 
 **Objetivo:** El componente `Reveal` admite únicamente las variantes `rise` (desplazamiento), `clip` (recorte) y `fade` (solo opacidad). Cada sección decide qué variante usa cada bloque. No se definen variantes adicionales.
 
 **RF cubiertos:** RF-14.
 
-**Tests a escribir primero:**
-- Test unitario: cada bloque revelado usa una de las tres variantes válidas.
-- Test unitario: no existen variantes adicionales definidas por el sistema.
+**Tests escritos y pasantes (4 unitarios):**
+- Cada bloque revelado usa una de las tres variantes válidas: `rise`, `clip` y `fade` se renderizan con su variante declarada. ✅
+- Un bloque sin variante explícita cae en una variante válida del sistema. ✅
+- El sistema no define variantes más allá de `rise`, `clip` y `fade`; un valor no soportado en tiempo de ejecución vuelve a una variante definida, nunca a una cuarta. ✅
+- Un grupo comparte la misma variante con todos sus hermanos. ✅
 
-**Criterio de hecho:** Los dos tests pasan. La prop `variant` de `Reveal` está tipada como `"rise" | "clip" | "fade"`.
+**Criterio de hecho:** Los tests pasan. La prop `variant` de `Reveal` está tipada como `"rise" | "clip" | "fade"` y se expone como `data-reveal-variant` para que el CSS aplique el tratamiento de cada variante: `rise` desplaza, `clip` recorta con `clip-path` y `fade` solo cambia la opacidad. Los fallos seguros (sin scroll timeline, reduced motion, impresión) anulan también el recorte.
+
+**Archivos creados o modificados:**
+- `src/components/ui/Reveal/Reveal.tsx` — tipo `RevealVariant`, lista `REVEAL_VARIANTS`, prop `variant` (por defecto `rise`) y su atributo de variante.
+- `src/components/ui/Reveal/Reveal.module.css` — variables y rangos de recorte por variante, sin desplazamiento en `clip` ni `fade`.
+- `src/components/ui/Reveal/Reveal.test.tsx` — 3 tests de variantes.
+- `src/components/ui/RevealGroup/RevealGroup.tsx` — prop `variant` compartida.
+- `src/components/ui/RevealGroup/RevealGroup.test.tsx` — 1 test de variante compartida.
 
 ---
 

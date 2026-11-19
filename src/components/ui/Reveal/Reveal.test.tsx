@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, test, vi } from 'vitest';
-import Reveal from './Reveal';
+import { applyTheme } from '@/lib/theme-dom';
+import Reveal, { REVEAL_VARIANTS, type RevealVariant } from './Reveal';
 
 type MotionPreferences = {
   reducedMotion: boolean;
@@ -892,5 +893,214 @@ describe('Reveal viewport changes (RF-08)', () => {
     act(() => resizeObserver.notify());
 
     expect(revealRegion.getAttribute('style')).toHaveLength(0);
+  });
+});
+
+describe('Reveal locale and theme changes (RF-09)', () => {
+  let restoreEnvironment: (() => void) | null = null;
+
+  function renderStableReveal(): {
+    environment: ScrollEnvironment;
+    rerender: (text: string) => void;
+    revealRegion: HTMLElement;
+  } {
+    setMotionPreferences({
+      supportsScrollTimeline: true,
+      reducedMotion: false,
+      printing: false,
+    });
+    const environment = setScrollEnvironment({
+      viewportHeight: 900,
+      pageHeight: 6000,
+      scrollY: 2000,
+      rectTop: 400,
+      rectBottom: 600,
+    });
+
+    const { rerender } = render(
+      <Reveal role="group" aria-label="Reveal content">
+        <p>Experience</p>
+      </Reveal>,
+    );
+
+    return {
+      environment,
+      rerender: (text: string): void => {
+        rerender(
+          <Reveal role="group" aria-label="Reveal content">
+            <p>{text}</p>
+          </Reveal>,
+        );
+      },
+      revealRegion: screen.getByRole('group', { name: 'Reveal content' }),
+    };
+  }
+
+  function sampleStableStyle(revealRegion: HTMLElement): {
+    opacity: string;
+    transform: string;
+  } {
+    const styles = window.getComputedStyle(revealRegion);
+    return { opacity: styles.opacity, transform: styles.transform };
+  }
+
+  afterEach(() => {
+    if (restoreEnvironment) {
+      restoreEnvironment();
+      restoreEnvironment = null;
+    }
+    document.documentElement.lang = '';
+    delete document.documentElement.dataset.theme;
+  });
+
+  test('keeps stable-phase blocks at computed opacity 1 after changing language', () => {
+    const { environment, rerender, revealRegion } = renderStableReveal();
+    restoreEnvironment = environment.restore;
+
+    rerender('Experiencia');
+    document.documentElement.lang = 'es';
+
+    expect(screen.getByText('Experiencia')).toBeVisible();
+    const styles = window.getComputedStyle(revealRegion);
+    expect(styles.opacity).toBe('1');
+    expect(styles.transform).toBe('none');
+    expect(revealRegion).not.toHaveAttribute('style');
+  });
+
+  test('keeps stable-phase blocks at computed opacity 1 after changing theme', () => {
+    const { environment, revealRegion } = renderStableReveal();
+    restoreEnvironment = environment.restore;
+
+    applyTheme(document.documentElement, 'dark');
+
+    expect(revealRegion).toBeVisible();
+    const styles = window.getComputedStyle(revealRegion);
+    expect(styles.opacity).toBe('1');
+    expect(styles.transform).toBe('none');
+    expect(revealRegion).not.toHaveAttribute('style');
+  });
+
+  test('does not fade stable-phase blocks in or out while switching language and theme', () => {
+    setMotionPreferences({
+      supportsScrollTimeline: true,
+      reducedMotion: false,
+      printing: false,
+    });
+    const resizeObserver = stubResizeObserver();
+    const environment = setScrollEnvironment({
+      viewportHeight: 900,
+      pageHeight: 500,
+      scrollY: 0,
+      rectTop: 400,
+      rectBottom: 600,
+    });
+    restoreEnvironment = environment.restore;
+
+    const { rerender } = render(
+      <Reveal role="group" aria-label="Reveal content">
+        <p>Experience</p>
+      </Reveal>,
+    );
+    const revealRegion = screen.getByRole('group', { name: 'Reveal content' });
+    const samples: Array<{ opacity: string; transform: string }> = [];
+
+    // The page is shorter than the viewport: no scroll, nothing to reveal.
+    samples.push(sampleStableStyle(revealRegion));
+
+    // Language change: the translated copy makes the page scrollable again.
+    environment.setViewport(900, 6000);
+    act(() => resizeObserver.notify());
+    rerender(
+      <Reveal role="group" aria-label="Reveal content">
+        <p>Experiencia</p>
+      </Reveal>,
+    );
+    document.documentElement.lang = 'es';
+    samples.push(sampleStableStyle(revealRegion));
+
+    // Theme change in both directions.
+    applyTheme(document.documentElement, 'dark');
+    samples.push(sampleStableStyle(revealRegion));
+
+    applyTheme(document.documentElement, 'light');
+    samples.push(sampleStableStyle(revealRegion));
+
+    for (const sample of samples) {
+      expect(sample.opacity).toBe('1');
+      expect(sample.transform).toBe('none');
+    }
+    expect(revealRegion.getAttribute('style')).toHaveLength(0);
+  });
+});
+
+describe('Reveal variants (RF-14)', () => {
+  test('uses one of the three valid variants for every revealed block', () => {
+    setMotionPreferences({
+      supportsScrollTimeline: true,
+      reducedMotion: false,
+      printing: false,
+    });
+
+    for (const variant of REVEAL_VARIANTS) {
+      const { unmount } = render(
+        <Reveal role="group" aria-label={`${variant} block`} variant={variant}>
+          <p>{variant} content</p>
+        </Reveal>,
+      );
+
+      const block = screen.getByRole('group', { name: `${variant} block` });
+
+      expect(REVEAL_VARIANTS).toContain(block.getAttribute('data-reveal-variant'));
+      expect(block).toHaveAttribute('data-reveal-variant', variant);
+
+      unmount();
+    }
+  });
+
+  test('keeps a block without an explicit variant on a valid default', () => {
+    setMotionPreferences({
+      supportsScrollTimeline: true,
+      reducedMotion: false,
+      printing: false,
+    });
+
+    render(
+      <Reveal role="group" aria-label="Default variant block">
+        <p>Default variant content</p>
+      </Reveal>,
+    );
+
+    expect(REVEAL_VARIANTS).toContain(
+      screen
+        .getByRole('group', { name: 'Default variant block' })
+        .getAttribute('data-reveal-variant'),
+    );
+  });
+
+  test('does not show any variant beyond rise, clip and fade', () => {
+    setMotionPreferences({
+      supportsScrollTimeline: true,
+      reducedMotion: false,
+      printing: false,
+    });
+
+    expect([...REVEAL_VARIANTS]).toStrictEqual(['rise', 'clip', 'fade']);
+
+    // Even if a caller passes an unsupported value at runtime, the block stays
+    // on a defined variant instead of inventing a fourth one.
+    render(
+      <Reveal
+        role="group"
+        aria-label="Unknown variant block"
+        variant={'zoom' as unknown as RevealVariant}
+      >
+        <p>Unknown variant content</p>
+      </Reveal>,
+    );
+
+    const block = screen.getByRole('group', { name: 'Unknown variant block' });
+
+    expect(REVEAL_VARIANTS).toContain(block.getAttribute('data-reveal-variant'));
+    expect(block).toHaveAttribute('data-reveal-variant', 'rise');
   });
 });

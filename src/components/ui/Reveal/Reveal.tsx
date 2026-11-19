@@ -4,25 +4,43 @@ import type { AriaRole, ReactNode } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import styles from './Reveal.module.css';
 
+export const REVEAL_VARIANTS = ['rise', 'clip', 'fade'] as const;
+
+export type RevealVariant = (typeof REVEAL_VARIANTS)[number];
+
 type RevealProps = {
   children: ReactNode;
   role?: AriaRole;
   'aria-label'?: string;
+  variant?: RevealVariant;
   isLastSection?: boolean;
   isExcluded?: boolean;
+  offsetPoints?: number;
 };
+
+type RevealStyle = React.CSSProperties & {
+  '--psg-reveal-entry-start'?: string;
+};
+
+const DEFAULT_VARIANT: RevealVariant = 'rise';
 
 const FORCED_VISIBLE_STYLE: React.CSSProperties = {
   opacity: 1,
   transform: 'none',
 };
 
+function resolveVariant(variant: RevealVariant): RevealVariant {
+  return REVEAL_VARIANTS.includes(variant) ? variant : DEFAULT_VARIANT;
+}
+
 export default function Reveal({
   children,
   role,
   'aria-label': ariaLabel,
+  variant = DEFAULT_VARIANT,
   isLastSection = false,
   isExcluded = false,
+  offsetPoints,
 }: RevealProps) {
   const revealRef = useRef<HTMLDivElement>(null);
   const [isShortPage, setIsShortPage] = useState(false);
@@ -84,13 +102,18 @@ export default function Reveal({
     isShortPage ||
     (isLastSection && (geometry.isInExitPhase || geometry.isAtPageEnd));
 
-  const inlineStyle: React.CSSProperties = forceVisible ? FORCED_VISIBLE_STYLE : {};
+  const inlineStyle: RevealStyle = forceVisible ? { ...FORCED_VISIBLE_STYLE } : {};
+
+  if (offsetPoints !== undefined) {
+    inlineStyle['--psg-reveal-entry-start'] = `${offsetPoints}%`;
+  }
 
   return (
     <div
       ref={revealRef}
       className={isExcluded ? styles.excluded : styles.reveal}
       data-reveal-root={isExcluded ? undefined : ''}
+      data-reveal-variant={isExcluded ? undefined : resolveVariant(variant)}
       role={role}
       aria-label={ariaLabel}
       style={inlineStyle}
