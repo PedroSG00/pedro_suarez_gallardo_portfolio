@@ -23,7 +23,7 @@ Fuera de alcance por ahora: sección de proyectos y ruta `/projects/[slug]` (fut
 - [ ] 13 Lanzamiento
 
 ## Specs
-
+El 
 | # | Spec (`docs/specs/`) | Qué decide | Depende de | Hecho cuando |
 |---|---|---|---|---|
 | 01 | `01-tooling-and-ci` | pnpm, ESLint, Vitest con umbral del 95 % global, RTL, Playwright (Chromium), `src/test/setup.ts`, CI de seis checks y gate de Sonar | — | CI en verde con seis checks y Sonar sobre una página vacía; ruleset de `main` con los seis |
