@@ -130,18 +130,23 @@ Tareas pequeñas y ordenadas (T1 a T15). Cada tarea tiene objetivo, RF que cubre
 
 ---
 
-## T8 — Exclusiones del reveal (nav, footer, skip link, fijos/pegajosos)
+## T8 — Exclusiones del reveal (nav, footer, skip link, fijos/pegajosos) ✅ COMPLETADA
 
 **Objetivo:** Navegación, pie de página, enlace de salto al contenido y cualquier elemento fijo o pegajoso mantienen opacidad 1 en todo momento y nunca participan en el reveal. Ningún elemento fijo/pegajoso puede estar dentro de un bloque revelable.
 
 **RF cubiertos:** RF-11.
 
-**Tests a escribir primero:**
-- Test unitario: nav, footer y skip link mantienen opacidad computada igual a 1 en todo momento.
-- Test unitario: ningún elemento fijo/pegajoso participa en entrada, centro o salida del reveal.
-- Test unitario: ningún elemento fijo o pegajoso está contenido dentro de un bloque revelable.
+**Tests escritos y pasantes (3 unitarios):**
+- Nav, footer y skip link mantienen opacidad computada 1 y sin desplazamiento en entrada, centro y salida. ✅
+- Los elementos fijos y pegajosos no participan en el reveal en ninguna fase (opacidad computada 1). ✅
+- Un bloque revelable con contenido fijo o pegajoso anidado se excluye del reveal y permanece visible (opacidad 1 y sin desplazamiento). ✅
 
-**Criterio de hecho:** Los tres tests pasan. Los componentes `Navbar`, `Footer` y `SkipLink` no se envuelven en `Reveal`.
+**Criterio de hecho:** Los tres tests pasan. `Navbar`, `Footer` y `SkipLink` (spec 06) no se envuelven en `Reveal`; el shell actual mantiene el `<nav>` fuera de cualquier bloque revelable. `Reveal` expone `isExcluded` para exclusiones explícitas y neutraliza cualquier fijo/pegajoso anidado para que nunca se atenúe ni se desplace.
+
+**Archivos modificados:**
+- `src/components/ui/Reveal/Reveal.tsx` — añade `isExcluded` (envoltorio estático sin marcadores ni escuchas, siempre visible) y detecta descendientes `fixed`/`sticky` para excluir el bloque del reveal.
+- `src/components/ui/Reveal/Reveal.module.css` — estilo `.excluded` sin animación, opacidad 1 y sin desplazamiento.
+- `src/components/ui/Reveal/Reveal.test.tsx` — 3 pruebas unitarias de RF-11.
 
 ---
 

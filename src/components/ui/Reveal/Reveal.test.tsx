@@ -603,3 +603,158 @@ describe('Reveal fast scroll (RF-07)', () => {
     expect(revealRegion.getAttribute('style')).toHaveLength(0);
   });
 });
+
+describe('Reveal exclusions (RF-11)', () => {
+  let restoreEnvironment: (() => void) | null = null;
+
+  const SCROLL_PHASES = [
+    { scrollY: 0, rectTop: 800, rectBottom: 850 },
+    { scrollY: 2000, rectTop: 400, rectBottom: 600 },
+    { scrollY: 3000, rectTop: -300, rectBottom: 100 },
+  ];
+
+  afterEach(() => {
+    if (restoreEnvironment) {
+      restoreEnvironment();
+      restoreEnvironment = null;
+    }
+  });
+
+  test('keeps navigation, footer and skip link at computed opacity 1 in every scroll phase', () => {
+    setMotionPreferences({
+      supportsScrollTimeline: true,
+      reducedMotion: false,
+      printing: false,
+    });
+    const environment = setScrollEnvironment({
+      viewportHeight: 900,
+      pageHeight: 6000,
+      scrollY: 0,
+      rectTop: 800,
+      rectBottom: 850,
+    });
+    restoreEnvironment = environment.restore;
+
+    render(
+      <>
+        <Reveal isExcluded role="navigation" aria-label="Site navigation">
+          <a href="#main">Skip to content</a>
+        </Reveal>
+        <Reveal isExcluded role="contentinfo" aria-label="Site footer">
+          <p>Footer content</p>
+        </Reveal>
+      </>,
+    );
+
+    const excludedRegions = [
+      screen.getByRole('navigation', { name: 'Site navigation' }),
+      screen.getByRole('contentinfo', { name: 'Site footer' }),
+    ];
+    const skipLink = screen.getByRole('link', { name: 'Skip to content' });
+
+    for (const phase of SCROLL_PHASES) {
+      environment.setScroll(phase.scrollY, phase.rectTop, phase.rectBottom);
+      fireEvent.scroll(window);
+
+      for (const region of [...excludedRegions, skipLink]) {
+        const styles = window.getComputedStyle(region);
+
+        expect(styles.opacity).toBe('1');
+        expect(styles.transform).toBe('none');
+      }
+
+      for (const region of excludedRegions) {
+        expect(region).toHaveStyle({ opacity: '1', transform: 'none' });
+      }
+    }
+  });
+
+  test('keeps fixed and sticky elements out of the reveal in every scroll phase', () => {
+    setMotionPreferences({
+      supportsScrollTimeline: true,
+      reducedMotion: false,
+      printing: false,
+    });
+    const environment = setScrollEnvironment({
+      viewportHeight: 900,
+      pageHeight: 6000,
+      scrollY: 0,
+      rectTop: 800,
+      rectBottom: 850,
+    });
+    restoreEnvironment = environment.restore;
+
+    render(
+      <>
+        <Reveal isExcluded role="region" aria-label="Fixed toolbar">
+          <div style={{ position: 'fixed', top: 0 }}>Fixed toolbar</div>
+        </Reveal>
+        <Reveal isExcluded role="region" aria-label="Sticky summary">
+          <div style={{ position: 'sticky', top: 0 }}>Sticky summary</div>
+        </Reveal>
+      </>,
+    );
+
+    const fixedAndSticky = [
+      screen.getByText('Fixed toolbar'),
+      screen.getByText('Sticky summary'),
+    ];
+    const excludedRegions = [
+      screen.getByRole('region', { name: 'Fixed toolbar' }),
+      screen.getByRole('region', { name: 'Sticky summary' }),
+    ];
+
+    for (const phase of SCROLL_PHASES) {
+      environment.setScroll(phase.scrollY, phase.rectTop, phase.rectBottom);
+      fireEvent.scroll(window);
+
+      for (const element of fixedAndSticky) {
+        const styles = window.getComputedStyle(element);
+
+        expect(styles.opacity).toBe('1');
+        expect(styles.transform).toBe('none');
+      }
+
+      for (const region of excludedRegions) {
+        expect(region).toHaveStyle({ opacity: '1', transform: 'none' });
+      }
+    }
+  });
+
+  test('keeps fixed and sticky content out of the reveal when nested in a reveal block', () => {
+    setMotionPreferences({
+      supportsScrollTimeline: true,
+      reducedMotion: false,
+      printing: false,
+    });
+    const environment = setScrollEnvironment({
+      viewportHeight: 900,
+      pageHeight: 6000,
+      scrollY: 3000,
+      rectTop: -300,
+      rectBottom: 100,
+    });
+    restoreEnvironment = environment.restore;
+
+    render(
+      <>
+        <Reveal role="group" aria-label="Fixed reveal block">
+          <div style={{ position: 'fixed', top: 0 }}>Fixed inside</div>
+        </Reveal>
+        <Reveal role="group" aria-label="Sticky reveal block">
+          <div style={{ position: 'sticky', top: 0 }}>Sticky inside</div>
+        </Reveal>
+      </>,
+    );
+
+    const fixedRegion = screen.getByRole('group', { name: 'Fixed reveal block' });
+    const stickyRegion = screen.getByRole('group', { name: 'Sticky reveal block' });
+
+    // The blocks opt out of the reveal and stay fully visible instead of
+    // animating content that must remain fixed to the viewport.
+    expect(fixedRegion).toHaveStyle({ opacity: '1', transform: 'none' });
+    expect(stickyRegion).toHaveStyle({ opacity: '1', transform: 'none' });
+    expect(window.getComputedStyle(screen.getByText('Fixed inside')).opacity).toBe('1');
+    expect(window.getComputedStyle(screen.getByText('Sticky inside')).opacity).toBe('1');
+  });
+});

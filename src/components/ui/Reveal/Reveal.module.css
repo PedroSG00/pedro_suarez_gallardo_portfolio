@@ -28,6 +28,12 @@
   transform: none;
 }
 
+.excluded {
+  opacity: 1;
+  transform: none;
+  animation: none;
+}
+
 [data-reveal-entry-marker],
 [data-reveal-exit-marker] {
   position: absolute;

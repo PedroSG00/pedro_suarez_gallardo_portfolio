@@ -9,17 +9,40 @@ type RevealProps = {
   role?: AriaRole;
   'aria-label'?: string;
   isLastSection?: boolean;
+  isExcluded?: boolean;
 };
 
-export default function Reveal({ children, role, 'aria-label': ariaLabel, isLastSection = false }: RevealProps) {
+const FORCED_VISIBLE_STYLE: React.CSSProperties = {
+  opacity: 1,
+  transform: 'none',
+};
+
+export default function Reveal({
+  children,
+  role,
+  'aria-label': ariaLabel,
+  isLastSection = false,
+  isExcluded = false,
+}: RevealProps) {
   const revealRef = useRef<HTMLDivElement>(null);
   const [isShortPage, setIsShortPage] = useState(false);
-  const [geometry, setGeometry] = useState<{ isInExitPhase: boolean; isAtPageEnd: boolean }>({
-    isInExitPhase: false,
-    isAtPageEnd: false,
-  });
+  const [hasFixedOrStickyDescendant, setHasFixedOrStickyDescendant] = useState(false);
+  const [geometry, setGeometry] = useState({ isInExitPhase: false, isAtPageEnd: false });
 
   useEffect(() => {
+    if (isExcluded) {
+      return;
+    }
+
+    const node = revealRef.current!;
+    const hasFixedOrSticky = Array.from(node.querySelectorAll<HTMLElement>('*')).some(
+      (descendant) => {
+        const { position } = window.getComputedStyle(descendant);
+        return position === 'fixed' || position === 'sticky';
+      },
+    );
+    setHasFixedOrStickyDescendant(hasFixedOrSticky);
+
     const check = (): void => {
       const scrollHeight = document.documentElement.scrollHeight;
       const innerHeight = window.innerHeight;
@@ -48,25 +71,31 @@ export default function Reveal({ children, role, 'aria-label': ariaLabel, isLast
       window.removeEventListener('scrollend', check);
       window.removeEventListener('resize', check);
     };
-  }, [isLastSection]);
+  }, [isExcluded, isLastSection]);
 
-  const forceVisible = isShortPage || (isLastSection && (geometry.isInExitPhase || geometry.isAtPageEnd));
+  const forceVisible =
+    isExcluded ||
+    hasFixedOrStickyDescendant ||
+    isShortPage ||
+    (isLastSection && (geometry.isInExitPhase || geometry.isAtPageEnd));
 
-  const inlineStyle: React.CSSProperties = forceVisible
-    ? { opacity: 1, transform: 'none' }
-    : {};
+  const inlineStyle: React.CSSProperties = forceVisible ? FORCED_VISIBLE_STYLE : {};
 
   return (
     <div
       ref={revealRef}
-      className={styles.reveal}
-      data-reveal-root
+      className={isExcluded ? styles.excluded : styles.reveal}
+      data-reveal-root={isExcluded ? undefined : ''}
       role={role}
       aria-label={ariaLabel}
       style={inlineStyle}
     >
-      <span data-reveal-entry-marker aria-hidden="true" />
-      <span data-reveal-exit-marker aria-hidden="true" />
+      {!isExcluded && (
+        <>
+          <span data-reveal-entry-marker aria-hidden="true" />
+          <span data-reveal-exit-marker aria-hidden="true" />
+        </>
+      )}
       {children}
     </div>
   );
