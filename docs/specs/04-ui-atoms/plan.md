@@ -156,23 +156,21 @@ Ejemplo de instancia:
 }
 ```
 
-### 2.7 LanguageSwitch
+### 2.7 LanguageSwitch (toggler)
 
 | Prop | Tipo | Obligatorio | Descripción |
 |------|------|-------------|-------------|
-| onChange | (lang: string) => void | sí | Se dispara al activar el símbolo |
-| currentLang | "en" \| "es" | sí | Idioma actual (para aria-pressed contextual) |
-| ariaLabel | string | sí | Texto anunciado en ambos idiomas, provisto por el consumidor desde `messages/` |
-| icon | ReactNode | no | Símbolo gráfico (Iconoir) |
+| locale | "en" \| "es" | sí | Idioma actual (para aria-pressed y para calcular el otro idioma) |
+| ariaLabelEn | string | sí | Texto anunciado al cambiar a inglés, provisto por el consumidor desde `messages/` |
+| ariaLabelEs | string | sí | Texto anunciado al cambiar a español, provisto por el consumidor desde `messages/` |
 
 Ejemplo de instancia:
 
 ```json
 {
-  "onChange": "<función del consumidor>",
-  "currentLang": "en",
-  "ariaLabel": "Cambiar a español",
-  "icon": "<SvgGlobe />"
+  "locale": "en",
+  "ariaLabelEn": "Switch to English",
+  "ariaLabelEs": "Cambiar a español"
 }
 ```
 
@@ -316,21 +314,22 @@ El estado del tema (`pressed`, `ariaLabel`) lo administra el consumidor (secció
 
 Cobertura RF: RF-6.
 
-### 3.8 LanguageSwitch: símbolo sin texto
+### 3.8 LanguageSwitch: toggler de un solo botón
 
 ```
-ON click / ON keypress:
-    onChange(idiomaDestino)
+ON click / ON keypress (Enter o Space):
+    navegar al otro idioma (en <-> es)
+    preservar search y hash
 
 RENDER:
-    <button
-        aria-pressed={currentLang === idiomaDestino}
-        aria-label={ariaLabel}
-        onClick={manejarClick}
-        onKeyDown={manejarTeclado}
+    <a role="button"
+        href={href al otro idioma}
+        aria-pressed={locale === 'en'}   // true si inglés está activo
+        aria-label={locale === 'en' ? ariaLabelEs : ariaLabelEn}  // anuncia el destino
+        onClick={prevenir click nativo y hacer router.replace}
     >
-        {icon ?? <SímboloPorDefecto />}
-    </button>
+        {símbolo globo}
+    </a>
 ```
 
 Cobertura RF: RF-7.
@@ -399,9 +398,9 @@ Cada contrato declara: entradas (props), salidas (JSX renderizado y eventos) y e
 
 ### 4.7 LanguageSwitch
 
-- Entradas: `onChange` (función, obligatorio), `currentLang` (string, obligatorio), `ariaLabel` (string, obligatorio), `icon` (ReactNode, opcional).
-- Salidas: botón `<button>` con `aria-pressed` y `aria-label`, símbolo gráfico, dispara `onChange` al activar.
-- Errores: si faltan `onChange`, `currentLang` o `ariaLabel`, renderiza `null`.
+- Entradas: `locale` ("en" \| "es", obligatorio), `ariaLabelEn` (string, obligatorio), `ariaLabelEs` (string, obligatorio).
+- Salidas: `<a role="button">` con `href` al otro idioma, `aria-pressed` reflejando el idioma actual, `aria-label` anunciando el idioma al que se va, símbolo gráfico, navega al otro idioma al activar preservando search y hash.
+- Errores: si faltan `locale`, `ariaLabelEn` o `ariaLabelEs`, renderiza `null`.
 
 ### 4.8 Logo
 
@@ -481,7 +480,7 @@ Los tests se escriben antes que el código (regla 8 de la constitución y criter
 | Tag | Renderiza texto corto como etiqueta monoespaciada; vacío renderiza `null` | RF-4 |
 | Section | Muestra retícula de 1 px cuando `grid=true`; oculta retícula cuando `grid=false`; muestra hijos por prop; sin `children` renderiza `null` | RF-5 |
 | ThemeToggle | Dispara `onToggle` al activar; `aria-pressed` refleja `pressed`; `aria-label` se anuncia; sin texto visible, solo símbolo; sin props obligatorios renderiza `null` | RF-6 |
-| LanguageSwitch | Dispara `onChange` al activar; `aria-pressed` refleja `currentLang`; `aria-label` se anuncia; sin texto visible, solo símbolo; sin props obligatorios renderiza `null` | RF-7 |
+| LanguageSwitch | Un único botón toggler que alterna entre idiomas; `aria-pressed` refleja el idioma actual; `aria-label` anuncia el idioma destino; navega al otro idioma en click y Enter/Space preservando search y hash; sin props obligatorios renderiza `null` | RF-7 |
 | Logo | Renderiza la letra "D" del símbolo `id="d"`; enlace al `href` indicado; color se adapta al tema vía `currentColor`; sin `href` o sin contenido renderiza `null` | RF-8 |
 
 ### 6.2 Pruebas de accesibilidad (regla 14)
@@ -531,7 +530,7 @@ Cobertura RF: todos (tests escritos antes del código, criterio de finalización
 | RF-4 Tag | `Tag/` | `Tag` props | Texto mono | Entrada/salida/error | 5.3 | 6.1 (Tag), 6.3 |
 | RF-5 Section | `Section/` | `Section` props | Retícula 1 px | Entrada/salida/error | 5.3 | 6.1 (Section) |
 | RF-6 ThemeToggle | `ThemeToggle/` | `ThemeToggle` props | Emitir `onToggle`, aria | Entrada/salida/error | 5.2, 5.3, 5.5 | 6.1 (ThemeToggle), 6.2, 6.3, 6.4 |
-| RF-7 LanguageSwitch | `LanguageSwitch/` | `LanguageSwitch` props | Emitir `onChange`, aria | Entrada/salida/error | 5.2, 5.3, 5.5 | 6.1 (LanguageSwitch), 6.2, 6.3, 6.4 |
+| RF-7 LanguageSwitch | `LanguageSwitch/` | `LanguageSwitch` props | Emitir navegación al otro idioma, aria | Entrada/salida/error | 5.2, 5.3, 5.5 | 6.1 (LanguageSwitch), 6.2, 6.3, 6.4 |
 | RF-8 Logo | `Logo/` | `Logo` props | Render símbolo `id="d"`, currentColor | Entrada/salida/error | 5.1, 5.3, 5.4, 5.5 | 6.1 (Logo), 6.2, 6.3 |
 
 Todos los RF del spec 04 están cubiertos por al menos una parte de este plan. No hay RF sin módulo asociado.

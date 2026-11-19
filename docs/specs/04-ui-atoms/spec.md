@@ -1,6 +1,6 @@
 # 04 — Átomos de UI
 
-**Estado:** Redactada y pendiente de aprobación. La implementación aún no ha comenzado.
+**Estado:** Completada. Todos los átomos implementados, testeados y verificados (T1–T8, RF-1–RF-8). LanguageSwitch implementado como toggler de un solo botón.
 
 ## Contexto y objetivo
 

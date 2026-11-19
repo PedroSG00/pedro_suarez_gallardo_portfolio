@@ -11,7 +11,7 @@ Fuera de alcance por ahora: sección de proyectos y ruta `/projects/[slug]` (fut
 - [x] 01 Tooling y CI
 - [x] 02 i18n y rutas
 - [x] 03 Tema y tokens
-- [ ] 04 Átomos de UI
+- [x] 04 Átomos de UI
 - [ ] 05 Movimiento de scroll (`Reveal`)
 - [ ] 06 Shell y Hero
 - [ ] 07 About
@@ -23,7 +23,7 @@ Fuera de alcance por ahora: sección de proyectos y ruta `/projects/[slug]` (fut
 - [ ] 13 Lanzamiento
 
 ## Specs
-
+El 
 | # | Spec (`docs/specs/`) | Qué decide | Depende de | Hecho cuando |
 |---|---|---|---|---|
 | 01 | `01-tooling-and-ci` | pnpm, ESLint, Vitest con umbral del 95 % global, RTL, Playwright (Chromium), `src/test/setup.ts`, CI de seis checks y gate de Sonar | — | CI en verde con seis checks y Sonar sobre una página vacía; ruleset de `main` con los seis |

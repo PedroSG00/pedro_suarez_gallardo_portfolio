@@ -1,6 +1,6 @@
 # Tareas — 04 Átomos de UI
 
-Estado: T1 completado (Button, RF-1), T2 completado (Link, RF-2), T3 completado (Heading, RF-3), T4 completado (Tag, RF-4), T5 completado (Section, RF-5), T6 completado (ThemeToggle, RF-6), T7 completado (LanguageSwitch, RF-7) y T8 completado (Logo, RF-8). Todos los átomos de la spec 04 están completados. Cada tarea es pequeña, ordenada e implementable y verificable por separado. Se siguen los gates de la constitución: `pnpm lint`, `pnpm typecheck`, `pnpm test` y `pnpm build`. Los tests se escriben antes que el código (regla 8 de la constitución).
+Estado: T1 completado (Button, RF-1), T2 completado (Link, RF-2), T3 completado (Heading, RF-3), T4 completado (Tag, RF-4), T5 completado (Section, RF-5), T6 completado (ThemeToggle, RF-6), T7 completado (LanguageSwitch toggler, RF-7) y T8 completado (Logo, RF-8). Todos los átomos de la spec 04 están completados. Cada tarea es pequeña, ordenada e implementable y verificable por separado. Se siguen los gates de la constitución: `pnpm lint`, `pnpm typecheck`, `pnpm test` y `pnpm build`. Los tests se escriben antes que el código (regla 8 de la constitución).
 
 ---
 
@@ -122,21 +122,22 @@ Estado: T1 completado (Button, RF-1), T2 completado (Link, RF-2), T3 completado 
 
 ---
 
-## T7 — LanguageSwitch ✅ (completado)
+## T7 — LanguageSwitch ✅ (completado como toggler)
 
-**Objetivo:** Implementar el cambiador de idioma como símbolo sin texto, con `aria-label` / `aria-pressed` recibidos por prop y emisión de evento al activar.
+**Objetivo:** Implementar el cambiador de idioma como toggler: un solo símbolo sin texto, con `aria-label` / `aria-pressed` recibidos por prop, que alterna entre los dos idiomas al activar. Todo recibido por prop.
 
 **RF cubierto:** RF-7.
 
 **Tests a escribir primero:**
-- Dispara `onChange` al activar el símbolo (click o teclado).
-- `aria-pressed` refleja el valor de `currentLang`.
-- `aria-label` se anuncia con el texto pasado por prop (en ambos idiomas, provisto por el consumidor desde `messages/`).
-- No muestra texto visible; comunica su función únicamente con el símbolo gráfico y los atributos de accesibilidad.
-- Si faltan props obligatorias (`onChange`, `currentLang` o `ariaLabel`), renderiza nada (`null`) sin romper la página.
+- Renderiza un único botón (toggler) sin texto visible.
+- `aria-pressed` refleja el idioma actual (`true` si inglés activo, `false` si español activo, o viceversa según convenga).
+- `aria-label` anuncia el idioma al que se va a cambiar (texto pasado por prop).
+- Al hacer clic (o pulsar Enter/Space con teclado) navega al otro idioma preservando query string y fragment.
+- Sin JS (enlace `href`), funciona navegando al otro idioma.
+- Si faltan props obligatorias (`locale`, `ariaLabelEn` o `ariaLabelEs`), renderiza nada (`null`) sin romper la página.
 
 **Criterio de hecho:**
-- Componente `LanguageSwitch/LanguageSwitch.tsx` implementado con props tipadas en inglés.
+- Componente `LanguageSwitch/LanguageSwitch.tsx` implementado como toggler con props tipadas en inglés.
 - Test `LanguageSwitch/LanguageSwitch.test.tsx` pasando con React Testing Library y Vitest.
 - `pnpm lint`, `pnpm typecheck` y `pnpm test` en verde para este módulo.
 
