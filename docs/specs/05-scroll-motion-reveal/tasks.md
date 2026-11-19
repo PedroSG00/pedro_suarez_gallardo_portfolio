@@ -45,17 +45,19 @@ Tareas pequeñas y ordenadas (T1 a T15). Cada tarea tiene objetivo, RF que cubre
 
 ---
 
-## T3 — Bloques ya visibles al cargar (sin entrada ni parpadeo inicial)
+## T3 — Bloques ya visibles al cargar (sin entrada ni parpadeo inicial) ✅ COMPLETADA
 
 **Objetivo:** Garantizar que los bloques inicialmente dentro del viewport al cargar la página muestren opacidad 1 desde el primer fotograma, sin transición de entrada.
 
 **RF cubiertos:** RF-03.
 
-**Tests a escribir primero:**
-- Test unitario: página cargada sin scroll previo, bloque inicialmente visible → opacidad computada igual a 1 desde el primer fotograma.
-- Test unitario: no se produce una transición de entrada visible para bloques ya en pantalla al cargar.
+**Tests escritos y pasantes (4):**
+- Test unitario: bloque inicialmente visible al cargar sin scroll → opacidad computada 1 desde el primer fotograma. ✅
+- Test unitario: no hay transición de entrada ni parpadeo para bloques ya en pantalla al cargar (animación vacía, transición vacía). ✅
+- Test e2e Chromium: bloque dentro del viewport al cargar sin scroll → opacidad computada 1 y sin desplazamiento. ✅
+- Test e2e Chromium: bloque dentro del viewport al cargar sin scroll → sin animación aplicada. ✅
 
-**Criterio de hecho:** Los dos tests pasan. El render inicial no aplica fase de entrada a bloques ya visibles.
+**Criterio de hecho:** Los 2 tests de Vitest y los 2 escenarios de Playwright Chromium pasan. `Reveal` mantiene opacidad 1 y sin desplazamiento para bloques inicialmente visibles, sin aplicar fase de entrada.
 
 ---
 

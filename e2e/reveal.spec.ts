@@ -129,4 +129,47 @@ test.describe('Reveal edge-based opacity', () => {
       expect(exitOpacities[index]).toBeLessThan(exitOpacities[index - 1]);
     }
   });
+
+  test('no parpadea al cargar: bloque inicialmente visible tiene opacidad 1 sin scroll', async ({
+    page,
+  }) => {
+    const revealStyles = await readFile(REVEAL_STYLES_PATH, 'utf8');
+
+    await page.setViewportSize({ width: 1280, height: VIEWPORT_HEIGHT });
+    await page.setContent(`
+      <style>
+        html, body { margin: 0; }
+        :root { --motion-distance: ${MOTION_DISTANCE}; }
+        body { min-height: 3000px; }
+        main { min-height: 3000px; padding-top: 400px; }
+        [data-reveal-root] { height: ${BLOCK_HEIGHT}px; }
+      </style>
+      <main>
+        <section class="reveal" data-reveal-root role="group" aria-label="Scroll content">
+          <span data-reveal-entry-marker aria-hidden="true" />
+          <span data-reveal-exit-marker aria-hidden="true" />
+          <h2>Initially visible content</h2>
+        </section>
+      </main>
+    `);
+    await page.addStyleTag({ content: revealStyles });
+
+    // Bloque inicialmente dentro del viewport sin scroll (borde superior al 40%,
+    // inferior al 60%, dentro de la zona estable). No hay scroll previo.
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.evaluate(
+      () => new Promise<void>((resolveFrame) => requestAnimationFrame(() => resolveFrame())),
+    );
+
+    const reveal = page.getByRole('group', { name: 'Scroll content' });
+    await expect(reveal).toBeVisible();
+
+    const styles = await reveal.evaluate((element) => {
+      const computed = window.getComputedStyle(element);
+      return { opacity: Number(computed.opacity), transform: computed.transform };
+    });
+
+    expect(styles.opacity).toBe(1);
+    expect(styles.transform).toBe('matrix(1, 0, 0, 1, 0, 0)');
+  });
 });

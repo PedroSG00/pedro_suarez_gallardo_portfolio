@@ -53,6 +53,38 @@ afterEach(() => {
 });
 
 describe('Reveal safe baseline', () => {
+  describe('al cargar sin scroll previo (RF-03)', () => {
+    test('muestra opacidad computada igual a 1 desde el primer fotograma para un bloque inicialmente visible', () => {
+      setMotionPreferences({
+        supportsScrollTimeline: true,
+        reducedMotion: false,
+        printing: false,
+      });
+
+      const revealRegion = getRevealRegion();
+      const styles = window.getComputedStyle(revealRegion);
+
+      expect(styles.opacity).toBe('1');
+      expect(styles.transform).toBe('none');
+    });
+
+    test('no aplica una transición de entrada visible para bloques ya en pantalla al cargar', () => {
+      setMotionPreferences({
+        supportsScrollTimeline: true,
+        reducedMotion: false,
+        printing: false,
+      });
+
+      const revealRegion = getRevealRegion();
+      const styles = window.getComputedStyle(revealRegion);
+
+      expect(styles.opacity).toBe('1');
+      expect(styles.transform).toBe('none');
+      expect(styles.animation).toBe('');
+      expect(styles.transition).toBe('');
+    });
+  });
+
   test('keeps content fully visible when scroll timelines are unsupported', () => {
     setMotionPreferences({
       supportsScrollTimeline: false,
