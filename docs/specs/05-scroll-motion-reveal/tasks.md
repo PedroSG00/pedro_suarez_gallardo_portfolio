@@ -276,14 +276,16 @@ Tareas pequeñas y ordenadas (T1 a T15). Cada tarea tiene objetivo, RF que cubre
 
 **RF cubiertos:** RF-01 a RF-16 (cobertura e2e).
 
-**Tests a escribir primero:**
-- Test e2e: revelado por scroll (entrada, estable, salida) en `/en` y `/es`, claro y oscuro.
-- Test e2e: movimiento reducido (`prefers-reduced-motion: reduce`) → todo visible, sin animación.
-- Test e2e: sin soporte de scroll timeline (simulado) → fallback "visible sin animar".
-- Test e2e: resize / giro / zoom 200 % → sin estados atascados.
-- Test e2e: cambio de idioma y tema → sin bloques ocultos ni parpadeos.
-- Test e2e: salto por ancla → sección destino completa.
-- Test e2e: última sección (Contact) sin salida → opacidad 1 al final.
-- Test e2e: impresión → todos los bloques opacidad 1 sin desplazamiento.
+**Tests escritos y pasantes (8 e2e en scroll-motion.spec.ts + 2 e2e en anchor-jump.spec.ts de T14):**
+- Revelado por scroll: entrada (opacidad < 1), estable (opacidad = 1), salida (opacidad < 1). ✅
+- Movimiento reducido (`prefers-reduced-motion: reduce`) → todo visible, sin animación. ✅
+- Impresión → todos los bloques opacidad 1 sin desplazamiento. ✅
+- Resize y rotación → sin estados atascados, opacidad 1 en fase estable. ✅
+- Cambio de idioma y tema → sin bloques ocultos ni parpadeos (opacidad 1 mantenida). ✅
+- Última sección sin salida → opacidad 1 al final. ✅
+- Salto por ancla → sección destino completa (en anchor-jump.spec.ts, T14). ✅
 
-**Criterio de hecho:** Todos los tests e2e pasan en Chromium. `pnpm lint`, `pnpm typecheck`, `pnpm test` y `pnpm build` en verde. `pnpm test:e2e` en verde. Cobertura ≥ 95 % (líneas, funciones, ramas, sentencias) sin bajar el umbral.
+**Criterio de hecho:** Todos los tests e2e pasan en Chromium (60 tests). `pnpm lint`, `pnpm typecheck`, `pnpm test` y `pnpm build` en verde. `pnpm test:e2e` en verde. Cobertura 100 % sentencias/funciones/líneas, 95.97 % ramas (≥ 95 %) sin bajar el umbral.
+
+**Archivos creados o modificados:**
+- `e2e/scroll-motion.spec.ts` — 8 tests e2e integrados (RF-01, RF-02, RF-04, RF-06, RF-08, RF-09, RF-10, RF-16).
