@@ -1,6 +1,6 @@
 # 06 — Shell y Hero
 
-**Estado:** Especificada, pendiente de plan.
+**Estado:** Implementada.
 **Depende de:** 04 (átomos de UI) y 05 (movimiento y revelado). **Consume:** 02 (i18n) y 03 (tema).
 **Enmienda:** RF-11 de la spec 05.
 

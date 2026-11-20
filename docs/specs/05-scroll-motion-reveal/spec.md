@@ -137,10 +137,13 @@ Criterios de aceptación:
 
 **RF-11 — Exclusiones del reveal**
 
-Quedan fuera del sistema de revelado: la barra de navegación, el pie de página, el enlace de salto al contenido y cualquier elemento fijo o pegajoso. Ningún elemento fijo o pegajoso puede estar dentro de un bloque revelable. Estos elementos nunca se ocultan por scroll.
+Quedan fuera del sistema de revelado: la barra de navegación, el pie de página, el enlace de salto al contenido y cualquier elemento fijo o pegajoso. Ningún elemento fijo o pegajoso puede estar dentro de un bloque revelable.
+
+La barra de navegación puede salir de la vista al hacer scroll hacia abajo y volver al subir; nunca se atenúa ni se desvanece (su opacidad es siempre 1), no participa del revelado por scroll y sigue en el orden de tabulación y en el árbol de accesibilidad mientras está fuera de la vista. El pie de página, el enlace de salto al contenido y los demás elementos fijos o pegajosos que no son la barra nunca se ocultan por scroll y mantienen opacidad igual a 1 en todo momento.
 
 Criterios de aceptación:
-- La navegación, el pie de página, el enlace de salto al contenido y los elementos fijos o pegajosos mantienen opacidad igual a 1 en todo momento.
+- La barra de navegación puede ocultarse y reaparecer con el scroll; su opacidad computada es siempre 1, no participa en el revelado (entrada, centro o salida) y permanece en el orden de tabulación.
+- El pie de página, el enlace de salto al contenido y los elementos fijos o pegajosos que no son la barra mantienen opacidad igual a 1 en todo momento.
 - Ninguno de estos elementos participa en el revelado por scroll (entrada, centro o salida).
 - Ningún elemento fijo o pegajoso está contenido dentro de un bloque revelable.
 
