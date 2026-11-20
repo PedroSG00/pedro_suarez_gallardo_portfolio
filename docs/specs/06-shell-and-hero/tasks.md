@@ -213,7 +213,7 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
 
 ---
 
-## T7 — `SectionHeading`
+## T7 — `SectionHeading` ✅ COMPLETADA
 
 **Objetivo:** mostrar el número y la etiqueta de cada destino como un `h2` cuyo nombre accesible sea solo la etiqueta.
 
