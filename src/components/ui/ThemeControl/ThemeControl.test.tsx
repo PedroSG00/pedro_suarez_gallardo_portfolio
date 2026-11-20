@@ -29,8 +29,8 @@ function renderControl(label = enMessages.shared.theme.toggle) {
   return renderWithIntl(<ThemeControl label={label} />);
 }
 
-// Observa el primer commit (antes de que se flusheen los efectos pasivos):
-// sin montar no debe haber botón, solo el espacio reservado.
+// Observe the first commit (before passive effects flush):
+// no button when not mounted, only reserved space.
 function mountSync(label = enMessages.shared.theme.toggle) {
   const container = document.createElement('div');
   document.body.appendChild(container);

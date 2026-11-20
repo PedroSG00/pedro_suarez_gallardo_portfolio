@@ -14,12 +14,12 @@
   font-variant-numeric: tabular-nums;
   margin: 0;
   position: relative;
-  /* espacio reservado para el cursor; no forma parte de la línea más larga */
+  /* reserved space for the cursor; not part of the longest line */
   padding-inline-end: var(--cursor-width);
 }
 
 #hero-name > span[aria-hidden="true"] {
-  /* una palabra por línea, alineada a la izquierda, ancho del contenido */
+  /* one word per line, left-aligned, content width */
   display: block;
   width: max-content;
 }
@@ -33,8 +33,8 @@
   width: var(--cursor-width);
 }
 
-/* RF-9: entrada escalonada de cada línea (400 ms, desfases 0/100/200 ms,
-   total 600 ms, fill-mode both, no se repite al scroll). */
+/* RF-9: staggered entry of each line (400 ms, offsets 0/100/200 ms,
+   total 600 ms, fill-mode both, does not repeat on scroll). */
 @keyframes hero-line-enter {
   from {
     opacity: 0;
@@ -122,8 +122,8 @@ section[aria-labelledby="hero-name"] {
   padding-block-end: var(--hero-parallax-distance);
 }
 
-/* Fallback: sin soporte de animation-timeline → nombre sólido, estático,
-   sin transformación. */
+/* Fallback: no animation-timeline support → solid static name,
+   no transformation. */
 @supports not (animation-timeline: view()) {
   #hero-name {
     animation: none !important;
@@ -141,8 +141,8 @@ section[aria-labelledby="hero-name"] {
   }
 }
 
-/* Fallback: movimiento reducido → sin entrada, sin parpadeo, sin contorno,
-   sin parallax; cursor estático y visible. */
+/* Fallback: reduced motion → no entry, no blink, no outline,
+   no parallax; static visible cursor. */
 @media (prefers-reduced-motion: reduce) {
   #hero-name {
     animation: none !important;
@@ -160,7 +160,7 @@ section[aria-labelledby="hero-name"] {
   }
 }
 
-/* Fallback: impresión → nombre sólido, sin animaciones. */
+/* Fallback: print → solid name, no animations. */
 @media print {
   #hero-name {
     animation: none !important;
@@ -173,7 +173,7 @@ section[aria-labelledby="hero-name"] {
   }
 }
 
-/* Fallback: colores forzados → relleno y trazo visibles con CanvasText. */
+/* Fallback: forced colors → fill and stroke visible with CanvasText. */
 @media (forced-colors: active) {
   #hero-name {
     color: CanvasText !important;

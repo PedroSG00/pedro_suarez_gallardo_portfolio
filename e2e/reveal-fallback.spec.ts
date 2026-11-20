@@ -9,10 +9,10 @@ const REVEAL_STYLES_PATH = resolve(
 const VIEWPORT_HEIGHT = 1000;
 const BLOCK_HEIGHT = 200;
 
-// RF-10: fallback "visible sin animar" cuando el navegador no soporta
-// animation-timeline: view(). Como Chromium sí lo soporta, se inyecta el CSS
-// del fallback para simular la ausencia de soporte y se verifica que todos los
-// bloques revelables quedan con opacidad computada 1 y transform none.
+// RF-10: fallback "visible without animation" when browser does not support
+// animation-timeline: view(). Since Chromium does support it, inject fallback
+// CSS to simulate lack of support and verify all revealable blocks remain
+// at computed opacity 1 and transform none.
 const FALLBACK_CSS = `
   [data-reveal-root] {
     opacity: 1 !important;
@@ -118,8 +118,8 @@ test.describe('RF-10: fallback sin animation-timeline', () => {
   }) => {
     await mountFallbackFixture(page, 'en', 'light', false);
 
-    // Chromium soporta animation-timeline, así que sin el fallback CSS los
-    // bloques en fase de entrada/salida quedan atenuados.
+    // Chromium supports animation-timeline, so without fallback CSS the
+    // blocks in entry/exit phase remain dimmed.
     const opacities: number[] = [];
     for (const label of ['Bloque A', 'Bloque B', 'Bloque C']) {
       const selector = `[aria-label="${label}"]`;

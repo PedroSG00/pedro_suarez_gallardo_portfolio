@@ -62,18 +62,18 @@
   }
 
   :root {
-    /* RF-04: padding inferior de la última sección para que el último bloque
-       alcance la zona estable al final de la página. (30vh = 75 * 0.25rem) */
+    /* RF-04: bottom padding of the last section so the last block
+       reaches the stable zone at the end of the page. (30vh = 75 * 0.25rem) */
     --section-end-padding: calc(var(--spacing) * 75);
 
-    /* RF-3: barra pegajosa. La altura y el umbral de ocultación (80px) son
-       contrato con lib/nav-visibility. */
+    /* RF-3: sticky nav. Height and hide threshold (80px) are
+       contract with lib/nav-visibility. */
     --nav-height: calc(var(--spacing) * 16);
     --nav-hide-threshold: calc(var(--spacing) * 20);
     --nav-z: 10;
 
-    /* RF-8: retícula y nombre a todo el ancho. El nombre se calcula con
-       clamp() a partir del margen, el relleno (0.9 sin unidad) y el divisor. */
+    /* RF-8: grid and full-width name. Name is calculated with
+       clamp() from margin, fill (unitless 0.9) and divisor. */
     --grid-gutter: calc(var(--spacing) * 6);
     --grid-max-width: 100rem;
     --hero-name-fill: 0.9;
@@ -94,10 +94,10 @@
     --hero-line-duration: 400ms;
     --hero-line-stagger: 100ms;
 
-    /* RF-10: desplazamiento máximo del parallax (<= 20% de la altura del hero). */
+    /* RF-10: maximum parallax displacement (<= 20% of hero height). */
     --hero-parallax-distance: 20dvh;
 
-    /* RF-6: área de contacto mínima de los controles. */
+    /* RF-6: minimum touch area of controls. */
     --touch-target: calc(var(--spacing) * 6);
   }
 
@@ -116,9 +116,9 @@
     color-scheme: dark;
   }
 
-  /* RF-12: al llegar por ancla a una sección, el objetivo se sitúa en la banda
-     estable del revelado en vez de en el borde superior, donde quedaría
-     atenuado por la fase de salida. Relajación contemplada en spec.md RF-12. */
+  /* RF-12: when arriving by anchor at a section, the target sits in the
+     stable band of the reveal instead of at the top edge, where it would be
+     faded by the exit phase. Relaxation contemplated in spec.md RF-12. */
   html {
     scroll-padding-top: calc(var(--spacing) * 75);
   }

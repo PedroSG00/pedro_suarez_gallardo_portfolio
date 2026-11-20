@@ -33,7 +33,7 @@ test.describe('Hero: entrada, cursor, contorno y parallax (RF-7, RF-9, RF-10)', 
   test('entrada <= 600 ms y estado final estable', async ({ page }) => {
     await loadHero(page, 'en', 'light');
 
-    // Tras las animaciones de entrada (600 ms), opacidad 1 y sin desplazamiento.
+    // After entry animations (600 ms), opacity 1 and no displacement.
     await page.waitForTimeout(700);
     await expect(h1(page)).toHaveCSS('opacity', '1');
     const transform = await h1(page).evaluate(
@@ -90,7 +90,7 @@ test.describe('Hero: entrada, cursor, contorno y parallax (RF-7, RF-9, RF-10)', 
     const hero = page.locator('section[aria-labelledby="hero-name"]');
     const h1El = h1(page);
 
-    // Posición inicial del nombre (arriba del hero).
+    // Initial position of the name (top of hero).
     const topStart = await h1El.evaluate((el) => el.getBoundingClientRect().top);
     const heroTop = await hero.evaluate((el) => el.getBoundingClientRect().top);
     expect(topStart).toBeGreaterThanOrEqual(heroTop);
@@ -102,7 +102,7 @@ test.describe('Hero: entrada, cursor, contorno y parallax (RF-7, RF-9, RF-10)', 
     const transformExit = await h1El.evaluate(
       (el) => new DOMMatrixReadOnly(getComputedStyle(el).transform).m42,
     );
-    // El nombre se desplaza hacia abajo (positivo) al salir el hero.
+    // Name moves down (positive) as hero exits.
     expect(transformExit).toBeGreaterThan(0);
 
     // Volver arriba: el parallax revierte.
@@ -221,7 +221,7 @@ test.describe('Hero: entrada, cursor, contorno y parallax (RF-7, RF-9, RF-10)', 
       </section>
     `);
     await page.addStyleTag({ content: heroStyles });
-    // Se inyecta la regla de fallback (patrón reveal-fallback.spec.ts) para
+    // Inject fallback rule (reveal-fallback.spec.ts pattern) to
     // simular ausencia de animation-timeline, aunque Chromium lo soporte.
     await page.addStyleTag({
       content: `

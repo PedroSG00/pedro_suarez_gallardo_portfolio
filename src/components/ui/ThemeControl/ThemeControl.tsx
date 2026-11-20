@@ -17,9 +17,9 @@ export default function ThemeControl({ label }: ThemeControlProps) {
   const [mounted, setMounted] = useState(false);
   const [theme, setThemeState] = useState<Theme>('light');
 
-  // El botón solo existe tras montar: en el servidor (SSR) no hay efecto, así que
-  // nunca se renderiza un control inerte sin JS. setMounted en el efecto es el
-  // único modo de disparar el re-render que muestra el botón tras la hidratación.
+  // The button only exists after mounting: on the server (SSR) there is no effect, so
+  // an inert control is never rendered without JS. setMounted in the effect is the
+  // only way to trigger the re-render that shows the button after hydration.
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
@@ -30,7 +30,7 @@ export default function ThemeControl({ label }: ThemeControlProps) {
     return null;
   }
 
-  // Antes de montar: solo reserva el espacio, sin botón (evita saltos de layout).
+  // Before mounting: only reserves space, no button (avoids layout shifts).
   if (!mounted) {
     return <span aria-hidden={true} />;
   }
@@ -41,7 +41,7 @@ export default function ThemeControl({ label }: ThemeControlProps) {
       setTheme(next);
       setThemeState(next);
     } catch {
-      // setTheme falló: no se actualiza el estado local, se mantiene el tema actual.
+      // setTheme failed: local state is not updated, current theme is kept.
     }
   };
 
