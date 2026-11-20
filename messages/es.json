@@ -2,21 +2,38 @@
   "shared": {
     "nav": {
       "home": "Inicio",
+      "label": "Principal",
       "about": "Sobre mí",
-      "experience": "Experiencia",
+      "experience": "Trabajo",
       "stack": "Stack",
       "contact": "Contacto"
+    },
+    "menu": {
+      "open": "Abrir menú",
+      "close": "Cerrar menú"
+    },
+    "theme": {
+      "toggle": "Cambiar tema"
     },
     "langSwitch": {
       "en": "English",
       "es": "Español"
     },
+    "skipToContent": "Saltar al contenido",
+    "newTab": "se abre en una pestaña nueva",
     "notFound": {
       "title": "No encontrado",
       "message": "Esta página no existe."
     }
   },
   "hero": {
+    "name": "Pedro Suárez Gallardo",
+    "role": "Desarrollador full-stack",
+    "pitch": "Construyo los productos web en los que los equipos confían: en tiempo real, con muchos datos y hechos para funcionar en producción.",
+    "support": "React, TypeScript y Node.js.",
+    "meta": "3+ AÑOS / ES · EN",
+    "ctaPrimary": "Ver lo que entrego",
+    "ctaSecondary": "Hablemos",
     "title": "Portfolio web",
     "subtitle": "Desarrollador full-stack"
   },
@@ -39,6 +56,7 @@
     "cv": "CV"
   },
   "footer": {
-    "text": "Pedro Suárez Gallardo"
+    "text": "Pedro Suárez Gallardo",
+    "copyright": "© 2026 Pedro Suárez Gallardo"
   }
 }

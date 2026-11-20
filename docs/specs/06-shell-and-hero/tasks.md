@@ -57,7 +57,7 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
 
 ---
 
-## T1 — Datos del sitio, destinos y textos bilingües
+## T1 — Datos del sitio, destinos y textos bilingües ✅ COMPLETADA
 
 **Objetivo:** crear la fuente única de datos no traducibles y todos los textos nuevos, en inglés y castellano, antes de que los consumidores existan.
 

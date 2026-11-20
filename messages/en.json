@@ -2,21 +2,38 @@
   "shared": {
     "nav": {
       "home": "Home",
+      "label": "Main",
       "about": "About",
-      "experience": "Experience",
+      "experience": "Work",
       "stack": "Stack",
       "contact": "Contact"
+    },
+    "menu": {
+      "open": "Open menu",
+      "close": "Close menu"
+    },
+    "theme": {
+      "toggle": "Toggle theme"
     },
     "langSwitch": {
       "en": "English",
       "es": "Español"
     },
+    "skipToContent": "Skip to content",
+    "newTab": "opens in a new tab",
     "notFound": {
       "title": "Not found",
       "message": "This page does not exist."
     }
   },
   "hero": {
+    "name": "Pedro Suárez Gallardo",
+    "role": "Full-stack developer",
+    "pitch": "I build the web products teams rely on: real-time, data-heavy and made to run in production.",
+    "support": "React, TypeScript and Node.js.",
+    "meta": "3+ YEARS / ES · EN",
+    "ctaPrimary": "See what I deliver",
+    "ctaSecondary": "Let's talk",
     "title": "Web portfolio",
     "subtitle": "Full-stack developer"
   },
@@ -39,6 +56,7 @@
     "cv": "CV"
   },
   "footer": {
-    "text": "Pedro Suárez Gallardo"
+    "text": "Pedro Suárez Gallardo",
+    "copyright": "© 2026 Pedro Suárez Gallardo"
   }
 }
