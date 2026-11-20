@@ -264,7 +264,7 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
 
 ---
 
-## T9 — `NavLinks`
+## T9 — `NavLinks` ✅ COMPLETADA
 
 **Objetivo:** renderizar la lista de enlaces de sección una sola vez como pieza reutilizable por escritorio y por el panel móvil.
 
