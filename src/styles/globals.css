@@ -84,7 +84,7 @@
     --grid-gutter: calc(var(--spacing) * 6);
     --grid-max-width: 100rem;
     --hero-name-fill: 0.9;
-    --hero-name-scale: 0.95;
+    --hero-name-scale: 0.96;
     --hero-name-letter-spacing: 0.032;
     --hero-name-advance: 0.6;
     --hero-name-divisor: 4.8;

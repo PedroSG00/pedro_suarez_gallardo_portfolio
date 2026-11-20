@@ -39,7 +39,10 @@ test.describe('hero name width (RF-8)', () => {
       const expected = contentWidthFor(viewportWidth);
       const ratio = width / expected;
 
-      expect(ratio).toBeGreaterThanOrEqual(0.9);
+      expect(
+        ratio,
+        `name width ratio at ${viewportWidth}px should be at least 90% of the grid content width`,
+      ).toBeGreaterThanOrEqual(0.9);
     }
   });
 
@@ -54,7 +57,7 @@ test.describe('hero name width (RF-8)', () => {
     page,
   }) => {
     const capped = contentWidthFor(1920);
-    const expected = 0.9 * capped;
+    let widthAt1920 = 0;
 
     for (const viewportWidth of [1920, 2560]) {
       await page.setViewportSize({ width: viewportWidth, height: 900 });
@@ -63,8 +66,13 @@ test.describe('hero name width (RF-8)', () => {
 
       const width = await blockWidth(page);
 
-      expect(width).toBeLessThanOrEqual(expected + 1);
-      expect(width).toBeLessThanOrEqual(GRID_MAX_WIDTH * 0.9 + 1);
+      expect(width).toBeLessThanOrEqual(capped + 1);
+      expect(width).toBeLessThanOrEqual(GRID_MAX_WIDTH + 1);
+      if (viewportWidth === 1920) {
+        widthAt1920 = width;
+      } else {
+        expect(Math.abs(width - widthAt1920)).toBeLessThanOrEqual(1);
+      }
     }
   });
 

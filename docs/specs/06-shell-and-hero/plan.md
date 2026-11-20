@@ -409,7 +409,7 @@ FUNCTION heroNameMetrics(viewportWidth, gutter, options):
     RETURN { fontSize, blockWidth, ratio, contentWidth }
 ```
 
-La misma fórmula base se expresa en CSS con `clamp()` y `calc()`; la función pura existe para verificarla sin depender de un motor de layout. La composición aplica `--hero-name-scale` (0.95) y `--hero-name-letter-spacing` (0.032) para reducir la altura óptica y conservar un ancho medido ≥90 %. El cursor se pinta fuera del flujo y no suma al ancho de la línea más larga.
+La misma fórmula base se expresa en CSS con `clamp()` y `calc()`; la función pura existe para verificarla sin depender de un motor de layout. La composición aplica `--hero-name-scale` (0.96) y `--hero-name-letter-spacing` (0.032) para reducir la altura óptica y conservar un ancho medido ≥90 % también en Chromium Linux. El cursor se pinta fuera del flujo y no suma al ancho de la línea más larga.
 
 Casos de la tabla de tests (gutter 24 px hasta 767 y 48 px desde 768):
 

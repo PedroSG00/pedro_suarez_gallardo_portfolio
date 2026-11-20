@@ -715,7 +715,7 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
 - Al recargar, el navegador conserva la posición de scroll sin una corrección de anclaje posterior. Al cambiar de idioma, se mantienen la posición visible, el query y el hash sin desplazarse al inicio.
 - El scroll que inicia un enlace de la navbar no oculta la navbar. El siguiente scroll iniciado por el usuario vuelve a aplicar RF-3.
 - Los anclajes tienen `scroll-behavior: smooth` con movimiento permitido e `auto` con `prefers-reduced-motion: reduce`; no se programa una animación propia en JavaScript.
-- La escala óptica 0.95 y el tracking 0.032 reducen la altura del nombre sin bajar de 90 % del ancho disponible; el cursor usa tokens proporcionales (0.2 × 0.8 em).
+- La escala óptica 0.96 y el tracking 0.032 reducen la altura del nombre sin bajar de 90 % del ancho disponible en Chromium Windows y Linux; el cursor usa tokens proporcionales (0.2 × 0.8 em).
 - El nombre permanece relleno hasta el 80 % del exit y pasa a contorno en el tramo final, sin artefactos intermedios visibles. El efecto continúa siendo reversible y mantiene los fallbacks de T21.
 - El retrato `public/pedro-suarez.png` queda para About en la spec 07 por decisión del usuario; no se crea ni se implementa la sección About en T24.
 - README, spec 05, spec 06 y el plan/tareas de 06 reflejan estas decisiones. El umbral global vigente es 85 %.
