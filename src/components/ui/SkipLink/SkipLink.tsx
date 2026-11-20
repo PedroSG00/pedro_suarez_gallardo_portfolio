@@ -1,13 +1,19 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useCallback } from 'react';
 
+import styles from './SkipLink.module.css';
+
 type Props = {
-  label: string;
+  label?: string;
   href?: string;
 };
 
 export default function SkipLink({ label, href = '#main' }: Props) {
+  const t = useTranslations('shared');
+  const text = label ?? t('skipToContent');
+
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLAnchorElement>) => {
       e.preventDefault();
@@ -18,7 +24,7 @@ export default function SkipLink({ label, href = '#main' }: Props) {
     [href],
   );
 
-  if (!label) {
+  if (!text) {
     return null;
   }
 
@@ -26,32 +32,9 @@ export default function SkipLink({ label, href = '#main' }: Props) {
     <a
       href={href}
       onClick={handleClick}
-      className={`
-        absolute
-        w-[1px] h-[1px]
-        p-0 m-[-1px]
-        overflow-hidden
-        whitespace-nowrap
-        border-0
-        clip-[rect(0,0,0,0)]
-        focus-visible:static
-        focus-visible:w-auto
-        focus-visible:h-auto
-        focus-visible:m-0
-        focus-visible:clip-auto
-        focus-visible:overflow-visible
-        focus-visible:whitespace-normal
-        focus-visible:bg-[var(--color-surface)]
-        focus-visible:text-[var(--color-ink)]
-        focus-visible:px-[calc(var(--spacing)*6)]
-        focus-visible:py-[calc(var(--spacing)*4)]
-        focus-visible:border [var(--line-width)] solid [var(--color-line)]
-        focus-visible:z-[var(--nav-z)]
-        focus-visible:outline-[calc(var(--line-width)*2)] solid [var(--color-focus)]
-        focus-visible:outline-offset-[calc(var(--spacing)/2)]
-      `}
+      className={styles.link}
     >
-      {label}
+      {text}
     </a>
   );
 }

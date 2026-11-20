@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/react';
 import { createRoot } from 'react-dom/client';
 import { flushSync } from 'react-dom';
+import { NextIntlClientProvider } from 'next-intl';
+import enMessages from '../../../../messages/en.json';
+import { renderWithIntl } from '@/test/render-with-intl';
 import ThemeControl from './ThemeControl';
 
 vi.mock('@/lib/theme-dom', () => ({
@@ -22,18 +25,22 @@ beforeEach(() => {
   document.documentElement.removeAttribute('data-theme');
 });
 
-function renderControl(label = 'Cambiar tema') {
-  return render(<ThemeControl label={label} />);
+function renderControl(label = enMessages.shared.theme.toggle) {
+  return renderWithIntl(<ThemeControl label={label} />);
 }
 
 // Observa el primer commit (antes de que se flusheen los efectos pasivos):
 // sin montar no debe haber botón, solo el espacio reservado.
-function mountSync(label = 'Cambiar tema') {
+function mountSync(label = enMessages.shared.theme.toggle) {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const root = createRoot(container);
   flushSync(() => {
-    root.render(<ThemeControl label={label} />);
+    root.render(
+      <NextIntlClientProvider locale="en" messages={enMessages}>
+        <ThemeControl label={label} />
+      </NextIntlClientProvider>,
+    );
   });
   return { container, root };
 }
@@ -54,7 +61,7 @@ describe('ThemeControl', () => {
     const button = screen.getByRole('button');
     expect(button).toBeInTheDocument();
     expect(button).toHaveAttribute('aria-pressed');
-    expect(button).toHaveAttribute('aria-label', 'Cambiar tema');
+    expect(button).toHaveAttribute('aria-label', 'Toggle theme');
   });
 
   test('al pulsar alterna aria-pressed y llama a setTheme', () => {
@@ -78,6 +85,23 @@ describe('ThemeControl', () => {
 
   test('etiqueta ausente no renderiza botón', () => {
     renderControl('');
+    expect(screen.queryAllByRole('button')).toHaveLength(0);
+  });
+
+  test('uses the active message catalog when no label override is provided', () => {
+    renderWithIntl(<ThemeControl />, { locale: 'es' });
+    expect(screen.getByRole('button', { name: 'Cambiar tema' })).toBeInTheDocument();
+  });
+
+  test('renders null when toggle message is empty', () => {
+    const messages = {
+      ...enMessages,
+      shared: {
+        ...enMessages.shared,
+        theme: { ...enMessages.shared.theme, toggle: '' },
+      },
+    };
+    renderWithIntl(<ThemeControl />, { messages });
     expect(screen.queryAllByRole('button')).toHaveLength(0);
   });
 });

@@ -1,7 +1,8 @@
 import { describe, expect, test } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import enMessages from '../../../../messages/en.json';
 import esMessages from '../../../../messages/es.json';
+import { renderWithIntl } from '@/test/render-with-intl';
 import Hero from './Hero';
 
 type HeroContent = {
@@ -14,33 +15,21 @@ type HeroContent = {
   ctaSecondary: string;
 };
 
-function defaultContent(locale: 'en' | 'es'): HeroContent {
-  const messages = locale === 'en' ? enMessages : esMessages;
-  return {
-    name: messages.hero.name,
-    role: messages.hero.role,
-    pitch: messages.hero.pitch,
-    support: messages.hero.support,
-    meta: messages.hero.meta,
-    ctaPrimary: messages.hero.ctaPrimary,
-    ctaSecondary: messages.hero.ctaSecondary,
-  };
-}
-
 function mountHero(
   content: Partial<HeroContent> = {},
-  { primaryHref, secondaryHref }: { primaryHref?: string; secondaryHref?: string } = {},
+  {
+    primaryHref,
+    secondaryHref,
+    locale = 'en',
+  }: { primaryHref?: string; secondaryHref?: string; locale?: 'en' | 'es' } = {},
 ): void {
-  const full: HeroContent = {
-    ...defaultContent('en'),
-    ...content,
-  };
-  render(
+  renderWithIntl(
     <Hero
-      content={full}
+      content={content}
       primaryHref={primaryHref ?? '#work'}
       secondaryHref={secondaryHref ?? '#contact'}
     />,
+    { locale },
   );
 }
 
@@ -130,9 +119,11 @@ describe('Hero content and reveal', () => {
     }
   });
 
-  test('renders metadata in Spanish when Spanish messages are used', () => {
-    mountHero(defaultContent('es'));
+  test('renders all hero text in Spanish for the Spanish locale', () => {
+    mountHero({}, { locale: 'es' });
     expect(screen.getByText(esMessages.hero.meta)).toBeVisible();
+    expect(screen.getByText(esMessages.hero.role)).toBeVisible();
+    expect(screen.getByRole('link', { name: esMessages.hero.ctaPrimary })).toBeVisible();
   });
 
   test('keeps rendering the rest when the name is missing, without h1 or aria-labelledby', () => {

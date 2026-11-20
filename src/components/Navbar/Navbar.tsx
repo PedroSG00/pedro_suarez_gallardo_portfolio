@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { useLocale, useTranslations } from 'next-intl';
+import { getPathname, usePathname, useRouter } from '@/i18n/navigation';
 
 import Logo from '@/components/ui/Logo/Logo';
 import NavLinks from '@/components/ui/NavLinks/NavLinks';
@@ -10,36 +11,58 @@ import LanguageSwitch from '@/components/ui/LanguageSwitch/LanguageSwitch';
 import { resolveNavbarVisibility } from '@/lib/nav-visibility';
 import type { Locale } from '@/lib/locale';
 import type { SiteData } from '@/content/site';
-import type { SectionDestination } from '@/content/sections';
+import { buildSectionDestinations, type SectionDestination } from '@/content/sections';
 import styles from './Navbar.module.css';
 
 type Props = {
-  locale: Locale;
   site: SiteData;
-  sections: SectionDestination[];
-  labels: {
+  locale?: Locale;
+  sections?: SectionDestination[];
+  labels?: Partial<{
     nav: string;
     openMenu: string;
     closeMenu: string;
     themeToggle: string;
     langEn: string;
     langEs: string;
-  };
+  }>;
 };
 
 export default function Navbar({
   locale,
   site,
-  sections,
+  sections: providedSections,
   labels,
 }: Props) {
+  const hookLocale = useLocale();
+  const currentLocale = (locale ?? hookLocale) as Locale;
+  const t = useTranslations('shared');
+  const tNav = useTranslations('shared.nav');
   const pathname = usePathname();
   const router = useRouter();
 
-  const isHome = pathname === `/${locale}` || pathname === `/${locale}/`;
+  const isHome = pathname === '/' || pathname === '';
+  const homePath = getPathname({ href: '/', locale: currentLocale });
+  const navLabel = labels?.nav ?? tNav('label');
+  const openMenuLabel = labels?.openMenu ?? t('menu.open');
+  const closeMenuLabel = labels?.closeMenu ?? t('menu.close');
+  const themeToggleLabel =
+    labels?.themeToggle ?? t('theme.toggle');
+  const langEnLabel =
+    labels?.langEn ?? t('langSwitch.en');
+  const langEsLabel =
+    labels?.langEs ?? t('langSwitch.es');
+  const sections =
+    providedSections ??
+    buildSectionDestinations({
+      about: tNav('about'),
+      work: tNav('experience'),
+      stack: tNav('stack'),
+      contact: tNav('contact'),
+    });
 
   const sectionItems = sections.map((section) => ({
-    href: isHome ? `#${section.id}` : `/${locale}#${section.id}`,
+    href: isHome ? `#${section.id}` : `${homePath}#${section.id}`,
     label: section.label,
   }));
 
@@ -140,9 +163,9 @@ export default function Navbar({
         window.location.pathname + window.location.search,
       );
     } else {
-      router.replace(`/${locale}`);
+      router.replace('/', { locale: currentLocale });
     }
-  }, [isHome, router, locale]);
+  }, [isHome, router, currentLocale]);
 
   const handleToggle = useCallback(() => {
     setMenuOpen((prev) => {
@@ -190,20 +213,24 @@ export default function Navbar({
       data-hidden={visibility === 'hidden' ? '' : undefined}
     >
       <Logo
-        href={`/${locale}`}
+        href={homePath}
         alt={site.name}
         onClick={handleIdentityClick}
       >
         {site.name}
       </Logo>
 
-      <NavLinks items={sectionItems} ariaLabel={labels.nav} onNavigate={handleNavigate} />
+      <NavLinks
+        items={sectionItems}
+        ariaLabel={labels?.nav ?? navLabel}
+        onNavigate={handleNavigate}
+      />
 
       <details ref={detailsRef} className={styles.mobileMenu}>
         <summary className={styles.summary}>
           <button
             type="button"
-            aria-label={menuOpen ? labels.closeMenu : labels.openMenu}
+            aria-label={menuOpen ? closeMenuLabel : openMenuLabel}
             aria-expanded={menuOpen}
             onClick={handleToggle}
             className={styles.summaryButton}
@@ -222,17 +249,17 @@ export default function Navbar({
         <div className={styles.panel}>
           <NavLinks
             items={sectionItems}
-            ariaLabel={labels.nav}
+            ariaLabel={labels?.nav ?? navLabel}
             onNavigate={handleNavigate}
           />
         </div>
       </details>
 
-      <ThemeControl label={labels.themeToggle} />
+      <ThemeControl label={themeToggleLabel} />
       <LanguageSwitch
-        locale={locale}
-        ariaLabelEn={labels.langEn}
-        ariaLabelEs={labels.langEs}
+        locale={currentLocale}
+        ariaLabelEn={langEnLabel}
+        ariaLabelEs={langEsLabel}
       />
     </header>
   );

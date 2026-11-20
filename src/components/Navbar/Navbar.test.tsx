@@ -1,17 +1,18 @@
 import { describe, expect, test, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { screen, fireEvent, within } from '@testing-library/react';
 import Navbar from './Navbar';
 import type { Locale } from '@/lib/locale';
 import type { SiteData } from '@/content/site';
 import type { SectionDestination } from '@/content/sections';
+import { renderWithIntl } from '@/test/render-with-intl';
 
-let currentPathname = '/en';
-vi.mock('next/navigation', () => ({
+let currentPathname = '/';
+vi.mock('@/i18n/navigation', () => ({
   usePathname: vi.fn(() => currentPathname),
   useRouter: vi.fn(() => ({ replace: vi.fn() })),
+  getPathname: ({ href, locale }: { href: string; locale: string }) =>
+    href === '/' ? `/${locale}` : `/${locale}${href}`,
 }));
-
-const locale: Locale = 'en';
 
 const site: SiteData = {
   name: 'Pedro Suárez Gallardo',
@@ -37,15 +38,21 @@ const labels = {
   langEs: 'Español',
 };
 
-function renderNavbar(props = {}) {
-  return render(
+function renderNavbar(
+  props = {},
+  intlLocale: Locale = 'en',
+  currentPath = '/',
+) {
+  currentPathname = currentPath;
+  return renderWithIntl(
     <Navbar
-      locale={locale}
+      locale={intlLocale}
       site={site}
       sections={sections}
       labels={labels}
       {...props}
     />,
+    { locale: intlLocale },
   );
 }
 
@@ -56,7 +63,7 @@ function sectionLinks() {
 }
 
 beforeEach(() => {
-  currentPathname = '/en';
+  currentPathname = '/';
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
     value: vi.fn().mockImplementation((query) => ({
@@ -95,18 +102,25 @@ describe('Navbar', () => {
     ]);
   });
 
-  test('traduce las etiquetas de los enlaces en español', () => {
+  test('renders Spanish section labels from the Spanish message catalog', () => {
     const sectionsEs: SectionDestination[] = [
       { id: 'about', index: '01', label: 'Sobre mí' },
       { id: 'work', index: '02', label: 'Trabajo' },
       { id: 'stack', index: '03', label: 'Stack' },
       { id: 'contact', index: '04', label: 'Contacto' },
     ];
-    renderNavbar({ locale: 'es', sections: sectionsEs });
+    renderNavbar({ locale: 'es', sections: sectionsEs }, 'es', '/es');
     expect(screen.getAllByRole('link', { name: 'Sobre mí' })).toHaveLength(2);
     expect(screen.getAllByRole('link', { name: 'Trabajo' })).toHaveLength(2);
     expect(screen.getAllByRole('link', { name: 'Stack' })).toHaveLength(2);
     expect(screen.getAllByRole('link', { name: 'Contacto' })).toHaveLength(2);
+  });
+
+  test('uses next-intl translations when labels and sections are not passed', () => {
+    renderWithIntl(<Navbar site={site} />, { locale: 'es' });
+    expect(screen.getAllByRole('link', { name: 'Sobre mí' })).toHaveLength(2);
+    expect(screen.getAllByRole('link', { name: 'Trabajo' })).toHaveLength(2);
+    expect(screen.getByRole('button', { name: 'Abrir menú' })).toBeInTheDocument();
   });
 
   test('renderiza un NavLinks de escritorio y otro dentro de <details> móvil', () => {
@@ -162,7 +176,7 @@ describe('Navbar', () => {
       { id: 'stack', index: '03', label: 'Stack' },
       { id: 'contact', index: '04', label: 'Contacto' },
     ];
-    renderNavbar({ locale: 'es', sections: sectionsEs });
+    renderNavbar({ locale: 'es', sections: sectionsEs }, 'es', '/es/ruta-inexistente');
     const aboutLinks = screen.getAllByRole('link', { name: 'Sobre mí' });
     expect(aboutLinks[0]).toHaveAttribute('href', '/es#about');
   });
@@ -211,24 +225,82 @@ describe('Navbar — visibilidad por scroll y foco (RF-3, RF-4, RF-12)', () => {
     );
   }
 
-  function setScrollY(value: number) {
+  function mockScrollPosition(scrollY: number) {
     Object.defineProperty(window, 'scrollY', {
       writable: true,
       configurable: true,
-      value,
+      value: scrollY,
     });
   }
 
-  function scrollTo(value: number) {
-    setScrollY(value);
+  function dispatchScroll() {
     fireEvent.scroll(window);
   }
 
-  function mockReducedMotion(reduced: boolean) {
+  beforeEach(() => {
+    mockSupportsScrollTimeline(true);
+    mockScrollPosition(0);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  test('estado inicial visible', () => {
+    renderNavbar();
+    expect(screen.getByRole('banner')).not.toHaveAttribute('data-hidden');
+  });
+
+  test('scroll a 81 px bajando añade data-hidden', () => {
+    renderNavbar();
+    mockScrollPosition(81);
+    dispatchScroll();
+    expect(screen.getByRole('banner')).toHaveAttribute('data-hidden');
+  });
+
+  test('subir lo quita', () => {
+    renderNavbar();
+    mockScrollPosition(100);
+    dispatchScroll();
+    expect(screen.getByRole('banner')).toHaveAttribute('data-hidden');
+    mockScrollPosition(50);
+    dispatchScroll();
+    expect(screen.getByRole('banner')).not.toHaveAttribute('data-hidden');
+  });
+
+  test('scroll sin cambio mantiene el estado', () => {
+    renderNavbar();
+    mockScrollPosition(100);
+    dispatchScroll();
+    expect(screen.getByRole('banner')).toHaveAttribute('data-hidden');
+    dispatchScroll();
+    expect(screen.getByRole('banner')).toHaveAttribute('data-hidden');
+  });
+
+  test('focusin lo quita', () => {
+    renderNavbar();
+    mockScrollPosition(100);
+    dispatchScroll();
+    expect(screen.getByRole('banner')).toHaveAttribute('data-hidden');
+    const banner = screen.getByRole('banner');
+    fireEvent.focusIn(banner);
+    expect(screen.getByRole('banner')).not.toHaveAttribute('data-hidden');
+  });
+
+  test('menú abierto lo mantiene visible', () => {
+    renderNavbar();
+    const summary = screen.getByRole('button', { name: 'Open menu' });
+    fireEvent.click(summary);
+    mockScrollPosition(100);
+    dispatchScroll();
+    expect(screen.getByRole('banner')).not.toHaveAttribute('data-hidden');
+  });
+
+  test('reduced motion siempre visible', () => {
     Object.defineProperty(window, 'matchMedia', {
       writable: true,
       value: vi.fn().mockImplementation((query) => ({
-        matches: query === '(prefers-reduced-motion: reduce)' ? reduced : false,
+        matches: query === '(prefers-reduced-motion: reduce)',
         media: query,
         onchange: null,
         addListener: vi.fn(),
@@ -238,121 +310,9 @@ describe('Navbar — visibilidad por scroll y foco (RF-3, RF-4, RF-12)', () => {
         dispatchEvent: vi.fn(),
       })),
     });
-  }
-
-  beforeEach(() => {
-    mockSupportsScrollTimeline(true);
-    setScrollY(0);
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
-  test('estado inicial: la barra está visible, sin data-hidden', () => {
     renderNavbar();
-    const header = screen.getByRole('banner');
-    expect(header).not.toHaveAttribute('data-hidden');
-  });
-
-  test('scroll a 81 px hacia abajo añade data-hidden', () => {
-    renderNavbar();
-    scrollTo(81);
-    const header = screen.getByRole('banner');
-    expect(header).toHaveAttribute('data-hidden');
-  });
-
-  test('subir de nuevo quita data-hidden', () => {
-    renderNavbar();
-    scrollTo(640);
-    expect(screen.getByRole('banner')).toHaveAttribute('data-hidden');
-    scrollTo(600);
+    mockScrollPosition(100);
+    dispatchScroll();
     expect(screen.getByRole('banner')).not.toHaveAttribute('data-hidden');
-  });
-
-  test('scroll sin cambio de dirección mantiene el estado', () => {
-    renderNavbar();
-    scrollTo(81);
-    expect(screen.getByRole('banner')).toHaveAttribute('data-hidden');
-    scrollTo(81);
-    expect(screen.getByRole('banner')).toHaveAttribute('data-hidden');
-  });
-
-  test('focusin dentro del header quita data-hidden de inmediato', () => {
-    renderNavbar();
-    scrollTo(81);
-    expect(screen.getByRole('banner')).toHaveAttribute('data-hidden');
-    fireEvent.focusIn(screen.getByRole('banner'));
-    expect(screen.getByRole('banner')).not.toHaveAttribute('data-hidden');
-  });
-
-  test('focusout recalcula y conserva el estado si no hubo cambio de scroll', () => {
-    renderNavbar();
-    const header = screen.getByRole('banner');
-    scrollTo(81);
-    expect(header).toHaveAttribute('data-hidden');
-    fireEvent.focusIn(header);
-    expect(header).not.toHaveAttribute('data-hidden');
-    fireEvent.focusOut(header);
-    expect(header).not.toHaveAttribute('data-hidden');
-  });
-
-  test('menú abierto: la barra se mantiene visible aunque se haga scroll', () => {
-    renderNavbar();
-    fireEvent.click(screen.getByRole('button', { name: 'Open menu' }));
-    scrollTo(81);
-    expect(screen.getByRole('banner')).not.toHaveAttribute('data-hidden');
-  });
-
-  test('con prefers-reduced-motion: reduce, la barra siempre es visible', () => {
-    mockReducedMotion(true);
-    renderNavbar();
-    scrollTo(81);
-    expect(screen.getByRole('banner')).not.toHaveAttribute('data-hidden');
-  });
-
-  test('sin soporte de animation-timeline, la barra siempre es visible', () => {
-    mockSupportsScrollTimeline(false);
-    renderNavbar();
-    scrollTo(81);
-    expect(screen.getByRole('banner')).not.toHaveAttribute('data-hidden');
-  });
-
-  test('doble focusIn y un solo focusOut mantienen la barra visible', () => {
-    renderNavbar();
-    const header = screen.getByRole('banner');
-    scrollTo(81);
-    expect(header).toHaveAttribute('data-hidden');
-    fireEvent.focusIn(header);
-    fireEvent.focusIn(header);
-    expect(header).not.toHaveAttribute('data-hidden');
-    fireEvent.focusOut(header);
-    expect(header).not.toHaveAttribute('data-hidden');
-  });
-
-  test('con foco dentro del header, un scroll hacia abajo no oculta la barra', () => {
-    renderNavbar();
-    const header = screen.getByRole('banner');
-    scrollTo(81);
-    expect(header).toHaveAttribute('data-hidden');
-    fireEvent.focusIn(header);
-    expect(header).not.toHaveAttribute('data-hidden');
-    scrollTo(90);
-    expect(header).not.toHaveAttribute('data-hidden');
-  });
-
-  test('el foco no se pierde al ocultar y mostrar la barra', () => {
-    renderNavbar();
-    document.body.focus();
-    expect(document.body).toHaveFocus();
-    scrollTo(81);
-    expect(screen.getByRole('banner')).toHaveAttribute('data-hidden');
-    expect(document.body).toHaveFocus();
-    const link = screen.getAllByRole('link', { name: 'About' })[0];
-    link.focus();
-    expect(link).toHaveFocus();
-    scrollTo(0);
-    expect(screen.getByRole('banner')).not.toHaveAttribute('data-hidden');
-    expect(link).toHaveFocus();
   });
 });

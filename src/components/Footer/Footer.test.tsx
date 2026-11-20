@@ -1,5 +1,8 @@
 import { describe, expect, test } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import enMessages from '../../../messages/en.json';
+import esMessages from '../../../messages/es.json';
+import { renderWithIntl } from '@/test/render-with-intl';
 import Footer from './Footer';
 import type { Locale } from '@/lib/locale';
 import type { SiteData } from '@/content/site';
@@ -13,37 +16,26 @@ const site: SiteData = {
 };
 
 const labelsEn = {
-  copyright: '© 2026 Pedro Suárez Gallardo',
-  github: 'GitHub',
-  linkedin: 'LinkedIn',
-  email: 'Email',
-  cv: 'CV',
-  newTab: 'opens in a new tab',
-};
-
-const labelsEs = {
-  copyright: '© 2026 Pedro Suárez Gallardo',
-  github: 'GitHub',
-  linkedin: 'LinkedIn',
-  email: 'Email',
-  cv: 'CV',
-  newTab: 'se abre en una pestaña nueva',
+  copyright: enMessages.footer.copyright,
+  github: enMessages.contact.github,
+  linkedin: enMessages.contact.linkedin,
+  email: enMessages.contact.email,
+  cv: enMessages.contact.cv,
+  newTab: enMessages.shared.newTab,
 };
 
 function renderFooter(locale: Locale = 'en', props = {}) {
-  const labels = locale === 'es' ? labelsEs : labelsEn;
-  return render(
+  return renderWithIntl(
     <Footer
       locale={locale}
       site={site}
-      labels={labels}
       {...props}
-    />,
+    />, { locale },
   );
 }
 
 describe('Footer', () => {
-  test('renderiza cuatro destinos: GitHub, LinkedIn, email y CV', () => {
+  test('renders four destinations: GitHub, LinkedIn, email and CV', () => {
     renderFooter();
     expect(screen.getByRole('link', { name: 'GitHub opens in a new tab' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'LinkedIn opens in a new tab' })).toBeInTheDocument();
@@ -51,7 +43,7 @@ describe('Footer', () => {
     expect(screen.getByRole('link', { name: 'CV opens in a new tab' })).toBeInTheDocument();
   });
 
-  test('GitHub, LinkedIn y CV abren en pestaña nueva con rel y texto sr-only traducido', () => {
+  test('GitHub, LinkedIn and CV open a new tab with rel and translated sr-only text', () => {
     renderFooter();
     const github = screen.getByRole('link', { name: 'GitHub opens in a new tab' });
     expect(github).toHaveAttribute('target', '_blank');
@@ -66,41 +58,43 @@ describe('Footer', () => {
     expect(cv).toHaveAttribute('rel', 'noreferrer noopener');
   });
 
-  test('texto sr-only está presente para lectores de pantalla', () => {
+  test('the sr-only text is present for screen readers', () => {
     renderFooter();
     expect(screen.getAllByText('opens in a new tab')).toHaveLength(3);
   });
 
-  test('email usa mailto:', () => {
+  test('email uses mailto:', () => {
     renderFooter();
     const email = screen.getByRole('link', { name: 'Email' });
     expect(email).toHaveAttribute('href', 'mailto:suarezgallardopedro@gmail.com');
   });
 
-  test('CV del idioma activo en inglés', () => {
+  test('uses the English CV for the English locale', () => {
     renderFooter('en');
     const cv = screen.getByRole('link', { name: 'CV opens in a new tab' });
     expect(cv).toHaveAttribute('href', '/EN_Pedro_Suarez_Gallardo_CV.pdf');
   });
 
-  test('CV del idioma activo en español', () => {
+  test('uses the Spanish CV and translations for the Spanish locale', () => {
     renderFooter('es');
     const cv = screen.getByRole('link', { name: 'CV se abre en una pestaña nueva' });
     expect(cv).toHaveAttribute('href', '/ES_Pedro_Suarez_Gallardo_CV.pdf');
+    expect(screen.getByRole('link', { name: 'Email' })).toBeInTheDocument();
+    expect(screen.getByText(esMessages.footer.copyright)).toBeInTheDocument();
   });
 
-  test('copyright desde messages, no hardcodeado', () => {
+  test('renders the copyright from the active message catalog', () => {
     renderFooter();
-    expect(screen.getByText('© 2026 Pedro Suárez Gallardo')).toBeInTheDocument();
+    expect(screen.getByText(enMessages.footer.copyright)).toBeInTheDocument();
   });
 
-  test('no hay controles de tema ni idioma', () => {
+  test('does not render theme or language controls', () => {
     renderFooter();
     expect(screen.queryByRole('button', { name: /theme/i })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /idioma|language|english|español/i })).not.toBeInTheDocument();
   });
 
-  test('falta una URL de GitHub y el resto sigue renderizado', () => {
+  test('omits a missing GitHub URL and keeps the remaining links', () => {
     renderFooter('en', { site: { ...site, githubUrl: '' } });
     expect(screen.queryByRole('link', { name: 'GitHub opens in a new tab' })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'LinkedIn opens in a new tab' })).toBeInTheDocument();
@@ -108,9 +102,36 @@ describe('Footer', () => {
     expect(screen.getByRole('link', { name: 'Email' })).toBeInTheDocument();
   });
 
-  test('falta el copyright y no rompe, el resto se renderiza', () => {
+  test('omits a missing copyright without breaking the remaining footer', () => {
     renderFooter('en', { labels: { ...labelsEn, copyright: '' } });
-    expect(screen.queryByText('© 2026 Pedro Suárez Gallardo')).not.toBeInTheDocument();
+    expect(screen.queryByText(enMessages.footer.copyright)).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'GitHub opens in a new tab' })).toBeInTheDocument();
+  });
+
+  test('renders without any site URLs', () => {
+    const emptySite: SiteData = {
+      name: 'Pedro Suárez Gallardo',
+      email: '',
+      githubUrl: '',
+      linkedinUrl: '',
+      cvPath: { en: '', es: '' },
+    };
+    renderFooter('en', { site: emptySite });
+    expect(screen.getByText(enMessages.footer.copyright)).toBeInTheDocument();
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+  });
+
+  test('renders only email when other URLs are missing', () => {
+    const partialSite: SiteData = {
+      name: 'Pedro Suárez Gallardo',
+      email: 'suarezgallardopedro@gmail.com',
+      githubUrl: '',
+      linkedinUrl: '',
+      cvPath: { en: '', es: '' },
+    };
+    renderFooter('en', { site: partialSite });
+    expect(screen.getByRole('link', { name: 'Email' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'GitHub opens in a new tab' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'CV opens in a new tab' })).not.toBeInTheDocument();
   });
 });

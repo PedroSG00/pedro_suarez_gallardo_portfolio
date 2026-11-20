@@ -1,16 +1,19 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 import type { Theme } from '@/lib/theme';
 import { currentTheme, setTheme } from '@/lib/theme-dom';
 import ThemeToggle from '@/components/ui/ThemeToggle/ThemeToggle';
 
 export type ThemeControlProps = {
-  label: string;
+  label?: string;
 };
 
 export default function ThemeControl({ label }: ThemeControlProps) {
+  const t = useTranslations('shared.theme');
+  const ariaLabel = label ?? t('toggle');
   const [mounted, setMounted] = useState(false);
   const [theme, setThemeState] = useState<Theme>('light');
 
@@ -23,7 +26,7 @@ export default function ThemeControl({ label }: ThemeControlProps) {
     setThemeState(currentTheme(document.documentElement, false));
   }, []);
 
-  if (!label) {
+  if (!ariaLabel) {
     return null;
   }
 
@@ -46,7 +49,7 @@ export default function ThemeControl({ label }: ThemeControlProps) {
     <ThemeToggle
       onToggle={handleToggle}
       pressed={theme === 'dark'}
-      ariaLabel={label}
+      ariaLabel={ariaLabel}
     />
   );
 }

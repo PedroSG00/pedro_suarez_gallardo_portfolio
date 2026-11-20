@@ -72,28 +72,28 @@ test.describe('i18n routing', () => {
     const response = await page.goto('/EN');
     expect(response?.status()).toBeLessThan(400);
     expect(page.url()).toContain('/en');
-    await expect(page.locator('body')).toContainText('Web portfolio');
+    await expect(page.locator('body')).toContainText('Full-stack developer');
   });
 
   test('visiting /es/ normalizes to /es and shows Spanish', async ({ page }) => {
     const response = await page.goto('/es/');
     expect(response?.status()).toBeLessThan(400);
     expect(page.url()).toContain('/es');
-    await expect(page.locator('body')).toContainText('Portfolio web');
+    await expect(page.locator('body')).toContainText('Desarrollador full-stack');
   });
 
   test('visiting /en directly shows English content', async ({ page }) => {
     const response = await page.goto('/en');
     expect(response?.status()).toBeLessThan(400);
     expect(page.url()).toContain('/en');
-    await expect(page.locator('body')).toContainText('Web portfolio');
+    await expect(page.locator('body')).toContainText('Full-stack developer');
   });
 
   test('visiting /es directly shows Spanish content', async ({ page }) => {
     const response = await page.goto('/es');
     expect(response?.status()).toBeLessThan(400);
     expect(page.url()).toContain('/es');
-    await expect(page.locator('body')).toContainText('Portfolio web');
+    await expect(page.locator('body')).toContainText('Desarrollador full-stack');
   });
 
   test('Spanish cookie is ignored when entering /en directly', async ({ page, context }) => {
@@ -103,7 +103,7 @@ test.describe('i18n routing', () => {
     const response = await page.goto('/en');
     expect(response?.status()).toBeLessThan(400);
     expect(page.url()).toContain('/en');
-    await expect(page.locator('body')).toContainText('Web portfolio');
+    await expect(page.locator('body')).toContainText('Full-stack developer');
   });
 
   test('English cookie is ignored when entering /es directly', async ({ page, context }) => {
@@ -113,17 +113,17 @@ test.describe('i18n routing', () => {
     const response = await page.goto('/es');
     expect(response?.status()).toBeLessThan(400);
     expect(page.url()).toContain('/es');
-    await expect(page.locator('body')).toContainText('Portfolio web');
+    await expect(page.locator('body')).toContainText('Desarrollador full-stack');
   });
 
   test('page does not mix English and Spanish text', async ({ page }) => {
     await page.goto('/en');
-    await expect(page.locator('body')).toContainText('Web portfolio');
-    await expect(page.locator('body')).not.toContainText('Portfolio web');
+    await expect(page.locator('body')).toContainText('Full-stack developer');
+    await expect(page.locator('body')).not.toContainText('Desarrollador full-stack');
 
     await page.goto('/es');
-    await expect(page.locator('body')).toContainText('Portfolio web');
-    await expect(page.locator('body')).not.toContainText('Web portfolio');
+    await expect(page.locator('body')).toContainText('Desarrollador full-stack');
+    await expect(page.locator('body')).not.toContainText('Full-stack developer');
   });
 
   test('visiting /en/unknown shows 404 in English', async ({ page }) => {
@@ -151,24 +151,24 @@ test.describe('i18n routing', () => {
 
   test('changing language from /es#contact preserves fragment', async ({ page }) => {
     await page.goto('/es#contact');
-    await page.getByRole('button', { name: 'Switch to English' }).click();
+    await page.getByRole('button', { name: 'English' }).click();
     await expect(page).toHaveURL(/en#contact/);
-    await expect(page.locator('body')).toContainText('Web portfolio');
+    await expect(page.locator('body')).toContainText('Full-stack developer');
   });
 
   test('changing language from /en?utm_source=linkedin preserves query', async ({ page }) => {
     await page.goto('/en?utm_source=linkedin');
-    await page.getByRole('button', { name: 'Cambiar a español' }).click();
+    await page.getByRole('button', { name: 'Español' }).click();
     await expect(page).toHaveURL(/es\?utm_source=linkedin/);
-    await expect(page.locator('body')).toContainText('Portfolio web');
+    await expect(page.locator('body')).toContainText('Desarrollador full-stack');
   });
 
   test('changing language does not mix English and Spanish', async ({ page }) => {
     await page.goto('/en');
-    await expect(page.locator('body')).toContainText('Web portfolio');
-    await page.getByRole('button', { name: 'Cambiar a español' }).click();
-    await expect(page.locator('body')).toContainText('Portfolio web');
-    await expect(page.locator('body')).not.toContainText('Web portfolio');
+    await expect(page.locator('body')).toContainText('Full-stack developer');
+    await page.getByRole('button', { name: 'Español' }).click();
+    await expect(page.locator('body')).toContainText('Desarrollador full-stack');
+    await expect(page.locator('body')).not.toContainText('Full-stack developer');
   });
 
   test('visiting /en/unknown shows 404 in English with LanguageSwitch visible', async ({ page }) => {
@@ -177,13 +177,13 @@ test.describe('i18n routing', () => {
     expect(page.url()).toContain('/en/unknown');
     await expect(page.locator('body')).toContainText('Not found');
     await expect(page.locator('body')).toContainText('This page does not exist.');
-    await expect(page.getByRole('button', { name: 'Cambiar a español' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Español' })).toBeVisible();
   });
 
   test('changing language from /en/unknown preserves path to Spanish', async ({ page }) => {
     const response = await page.goto('/en/unknown');
     expect(response?.status()).toBe(404);
-    await page.getByRole('button', { name: 'Cambiar a español' }).click();
+    await page.getByRole('button', { name: 'Español' }).click();
     await expect(page).toHaveURL(/es\/unknown/);
     expect(page.url()).toContain('/es/unknown');
     expect(response?.status()).toBe(404);
@@ -194,7 +194,7 @@ test.describe('i18n routing', () => {
   test('changing language from /es/unknown preserves path to English', async ({ page }) => {
     const response = await page.goto('/es/unknown');
     expect(response?.status()).toBe(404);
-    await page.getByRole('button', { name: 'Switch to English' }).click();
+    await page.getByRole('button', { name: 'English' }).click();
     await expect(page).toHaveURL(/en\/unknown/);
     expect(page.url()).toContain('/en/unknown');
     await expect(page.locator('body')).toContainText('Not found');
@@ -203,7 +203,7 @@ test.describe('i18n routing', () => {
 
   test('changing language from /en/unknown preserves query and fragment', async ({ page }) => {
     await page.goto('/en/unknown?utm_source=x#y');
-    await page.getByRole('button', { name: 'Cambiar a español' }).click();
+    await page.getByRole('button', { name: 'Español' }).click();
     await expect(page).toHaveURL(/es\/unknown\?utm_source=x#y/);
     expect(page.url()).toContain('/es/unknown?utm_source=x#y');
   });
@@ -213,7 +213,7 @@ test.describe('i18n routing', () => {
     const response = await page.goto('/');
     expect(response?.status()).toBeLessThan(400);
     expect(page.url()).toContain('/en');
-    await expect(page.locator('body')).toContainText('Web portfolio');
+    await expect(page.locator('body')).toContainText('Full-stack developer');
   });
 
   test('served HTML of /en has exactly one <html> and one <body> with lang en', async ({ page }) => {
@@ -242,6 +242,6 @@ test.describe('i18n routing', () => {
     const response = await page.goto('/EN?utm_source=x');
     expect(response?.status()).toBeLessThan(400);
     expect(page.url()).toContain('/en?utm_source=x');
-    await expect(page.locator('body')).toContainText('Web portfolio');
+    await expect(page.locator('body')).toContainText('Full-stack developer');
   });
 });

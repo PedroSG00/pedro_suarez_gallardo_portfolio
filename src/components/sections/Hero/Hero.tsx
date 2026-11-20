@@ -1,22 +1,24 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import Link from '@/components/ui/Link/Link';
 import Reveal from '@/components/ui/Reveal/Reveal';
 import RevealGroup from '@/components/ui/RevealGroup/RevealGroup';
 import './Hero.module.css';
 
-type HeroContent = {
-  name: string;
-  role: string;
-  pitch: string;
-  support: string;
-  meta: string;
-  ctaPrimary: string;
-  ctaSecondary: string;
-};
+type HeroMessage =
+  | 'name'
+  | 'role'
+  | 'pitch'
+  | 'support'
+  | 'meta'
+  | 'ctaPrimary'
+  | 'ctaSecondary';
+
+type HeroContent = Partial<Record<HeroMessage, string>>;
 
 type Props = {
-  content: HeroContent;
+  content?: HeroContent;
   primaryHref?: string;
   secondaryHref?: string;
 };
@@ -26,7 +28,17 @@ export default function Hero({
   primaryHref = '#work',
   secondaryHref = '#contact',
 }: Props) {
-  const { name, role, pitch, support, meta, ctaPrimary, ctaSecondary } = content;
+  const t = useTranslations('hero');
+  const text = (key: HeroMessage): string =>
+    content?.[key] ?? (t.has(key) ? t(key) : '');
+
+  const name = text('name');
+  const role = text('role');
+  const pitch = text('pitch');
+  const support = text('support');
+  const meta = text('meta');
+  const ctaPrimary = text('ctaPrimary');
+  const ctaSecondary = text('ctaSecondary');
   const cursor = '█';
 
   return (

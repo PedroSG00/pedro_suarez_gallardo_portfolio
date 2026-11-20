@@ -1,13 +1,17 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/react';
+import { renderWithIntl } from '@/test/render-with-intl';
+import enMessages from '../../../../messages/en.json';
 import LanguageSwitch from './LanguageSwitch';
 
 const mockReplace = vi.fn();
-const mockUsePathname = vi.fn(() => '/en/about');
+const mockUsePathname = vi.fn(() => '/about');
 
-vi.mock('next/navigation', () => ({
+vi.mock('@/i18n/navigation', () => ({
   usePathname: () => mockUsePathname(),
   useRouter: () => ({ replace: mockReplace }),
+  getPathname: ({ href, locale }: { href: string; locale: string }) =>
+    href === '/' ? `/${locale}` : `/${locale}${href}`,
 }));
 
 function setLocation(url: string) {
@@ -25,12 +29,12 @@ function setLocation(url: string) {
 describe('LanguageSwitch (toggler)', () => {
   beforeEach(() => {
     mockReplace.mockClear();
-    mockUsePathname.mockReturnValue('/en/about');
+    mockUsePathname.mockReturnValue('/about');
     setLocation('http://localhost/en/about?utm=x#y');
   });
 
   test('renders a single toggler button without visible text', () => {
-    render(
+    renderWithIntl(
       <LanguageSwitch
         locale="en"
         ariaLabelEn="Switch to English"
@@ -43,7 +47,7 @@ describe('LanguageSwitch (toggler)', () => {
   });
 
   test('aria-pressed reflects the current language (true when English is active)', () => {
-    render(
+    renderWithIntl(
       <LanguageSwitch
         locale="en"
         ariaLabelEn="Switch to English"
@@ -54,7 +58,7 @@ describe('LanguageSwitch (toggler)', () => {
   });
 
   test('aria-pressed is false when Spanish is active', () => {
-    render(
+    renderWithIntl(
       <LanguageSwitch
         locale="es"
         ariaLabelEn="Switch to English"
@@ -65,7 +69,7 @@ describe('LanguageSwitch (toggler)', () => {
   });
 
   test('aria-label announces the language to switch to', () => {
-    render(
+    renderWithIntl(
       <LanguageSwitch
         locale="es"
         ariaLabelEn="Switch to English"
@@ -79,7 +83,7 @@ describe('LanguageSwitch (toggler)', () => {
   });
 
   test('navigates to Spanish preserving search and hash on click', () => {
-    render(
+    renderWithIntl(
       <LanguageSwitch
         locale="en"
         ariaLabelEn="Switch to English"
@@ -88,11 +92,11 @@ describe('LanguageSwitch (toggler)', () => {
     );
     const button = screen.getByRole('button');
     fireEvent.click(button);
-    expect(mockReplace).toHaveBeenCalledWith('/es/about?utm=x#y');
+    expect(mockReplace).toHaveBeenCalledWith('/about?utm=x#y', { locale: 'es' });
   });
 
   test('navigates to English preserving search and hash on click', () => {
-    render(
+    renderWithIntl(
       <LanguageSwitch
         locale="es"
         ariaLabelEn="Switch to English"
@@ -101,11 +105,11 @@ describe('LanguageSwitch (toggler)', () => {
     );
     const button = screen.getByRole('button');
     fireEvent.click(button);
-    expect(mockReplace).toHaveBeenCalledWith('/en/about?utm=x#y');
+    expect(mockReplace).toHaveBeenCalledWith('/about?utm=x#y', { locale: 'en' });
   });
 
   test('navigates on Enter key', () => {
-    render(
+    renderWithIntl(
       <LanguageSwitch
         locale="en"
         ariaLabelEn="Switch to English"
@@ -115,11 +119,11 @@ describe('LanguageSwitch (toggler)', () => {
     const button = screen.getByRole('button');
     button.focus();
     fireEvent.keyDown(button, { key: 'Enter' });
-    expect(mockReplace).toHaveBeenCalledWith('/es/about?utm=x#y');
+    expect(mockReplace).toHaveBeenCalledWith('/about?utm=x#y', { locale: 'es' });
   });
 
   test('navigates on Space key', () => {
-    render(
+    renderWithIntl(
       <LanguageSwitch
         locale="en"
         ariaLabelEn="Switch to English"
@@ -129,11 +133,11 @@ describe('LanguageSwitch (toggler)', () => {
     const button = screen.getByRole('button');
     button.focus();
     fireEvent.keyDown(button, { key: ' ' });
-    expect(mockReplace).toHaveBeenCalledWith('/es/about?utm=x#y');
+    expect(mockReplace).toHaveBeenCalledWith('/about?utm=x#y', { locale: 'es' });
   });
 
   test('has an href pointing to the other language (works without JS)', () => {
-    render(
+    renderWithIntl(
       <LanguageSwitch
         locale="en"
         ariaLabelEn="Switch to English"
@@ -144,21 +148,33 @@ describe('LanguageSwitch (toggler)', () => {
     expect(button).toHaveAttribute('href', '/es/about?utm=x#y');
   });
 
-  test('renders null when locale is missing', () => {
-    // @ts-expect-error - Testing missing required prop locale
-    const { container } = render(<LanguageSwitch ariaLabelEn="Switch to English" ariaLabelEs="Cambiar a español" />);
+  test('uses next-intl locale and message labels by default', () => {
+    renderWithIntl(<LanguageSwitch />, { locale: 'es' });
+    const button = screen.getByRole('button', { name: 'English' });
+    expect(button).toHaveAttribute('href', '/en/about?utm=x#y');
+  });
+
+  test('renders null when a switch label is unavailable', () => {
+    const messages = {
+      ...enMessages,
+      shared: {
+        ...enMessages.shared,
+        langSwitch: { ...enMessages.shared.langSwitch, es: '' },
+      },
+    };
+    const { container } = renderWithIntl(<LanguageSwitch />, { messages });
     expect(container).toBeEmptyDOMElement();
   });
 
-  test('renders null when ariaLabelEn is missing', () => {
-    // @ts-expect-error - Testing missing required prop ariaLabelEn
-    const { container } = render(<LanguageSwitch locale="en" ariaLabelEs="Cambiar a español" />);
-    expect(container).toBeEmptyDOMElement();
-  });
-
-  test('renders null when ariaLabelEs is missing', () => {
-    // @ts-expect-error - Testing missing required prop ariaLabelEs
-    const { container } = render(<LanguageSwitch locale="en" ariaLabelEn="Switch to English" />);
+  test('renders null when both switch labels are empty', () => {
+    const messages = {
+      ...enMessages,
+      shared: {
+        ...enMessages.shared,
+        langSwitch: { en: '', es: '' },
+      },
+    };
+    const { container } = renderWithIntl(<LanguageSwitch />, { messages });
     expect(container).toBeEmptyDOMElement();
   });
 });

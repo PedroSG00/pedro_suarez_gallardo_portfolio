@@ -1,38 +1,21 @@
-import enMessages from '../../../messages/en.json';
-import esMessages from '../../../messages/es.json';
+import { getTranslations } from 'next-intl/server';
 import { buildSectionDestinations } from '@/content/sections';
 import Hero from '@/components/sections/Hero/Hero';
 import Section from '@/components/ui/Section/Section';
 import SectionHeading from '@/components/ui/SectionHeading/SectionHeading';
 
-export default async function LocalePage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
-  const { locale } = await params;
-  const messages = locale === 'es' ? esMessages : enMessages;
-
+export default async function LocalePage() {
+  const t = await getTranslations('shared.nav');
   const sections = buildSectionDestinations({
-    about: messages.shared.nav.about,
-    work: messages.shared.nav.experience,
-    stack: messages.shared.nav.stack,
-    contact: messages.shared.nav.contact,
+    about: t.has('about') ? t('about') : '',
+    work: t.has('experience') ? t('experience') : '',
+    stack: t.has('stack') ? t('stack') : '',
+    contact: t.has('contact') ? t('contact') : '',
   });
-
-  const heroContent = {
-    name: messages.hero.name,
-    role: messages.hero.role,
-    pitch: messages.hero.pitch,
-    support: messages.hero.support,
-    meta: messages.hero.meta,
-    ctaPrimary: messages.hero.ctaPrimary,
-    ctaSecondary: messages.hero.ctaSecondary,
-  };
 
   return (
     <>
-      <Hero content={heroContent} primaryHref="#work" secondaryHref="#contact" />
+      <Hero primaryHref="#work" secondaryHref="#contact" />
       {sections.map((section) => (
         <Section key={section.id} id={section.id} labelledBy={`${section.id}-heading`}>
           <SectionHeading
