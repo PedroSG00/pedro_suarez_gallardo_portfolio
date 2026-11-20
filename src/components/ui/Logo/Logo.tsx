@@ -8,9 +8,10 @@ type Props = {
   src?: string;
   alt?: string;
   children?: ReactNode;
+  onClick?: () => void;
 };
 
-export default function Logo({ href, src, alt, children }: Props) {
+export default function Logo({ href, src, alt, children, onClick }: Props) {
   if (!href) {
     return null;
   }
@@ -20,7 +21,7 @@ export default function Logo({ href, src, alt, children }: Props) {
   }
 
   return (
-    <a href={href}>
+    <a href={href} onClick={onClick}>
       {src ? (
         <Image src={src} alt={alt ?? ''} width={64} height={64} />
       ) : children ? (

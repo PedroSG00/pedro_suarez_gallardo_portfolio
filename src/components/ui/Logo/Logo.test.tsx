@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import Logo from './Logo';
 
 vi.mock('next/image', () => ({
@@ -72,5 +72,22 @@ describe('Logo', () => {
   test('renders null when src, alt and children are missing', () => {
     const { container } = render(<Logo href="/en" />);
     expect(container).toBeEmptyDOMElement();
+  });
+
+  test('dispara onClick al activar el logo', () => {
+    const onClick = vi.fn();
+    render(<Logo href="/en" alt="Logo" onClick={onClick} />);
+    fireEvent.click(screen.getByRole('link'));
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  test('mantiene el href y el nombre accesible intactos con onClick', () => {
+    const onClick = vi.fn();
+    render(<Logo href="/en" alt="Logo" onClick={onClick} />);
+    const link = screen.getByRole('link');
+    expect(link).toHaveAttribute('href', '/en');
+    expect(link).toHaveAccessibleName('Logo');
+    fireEvent.click(link);
+    expect(onClick).toHaveBeenCalledTimes(1);
   });
 });

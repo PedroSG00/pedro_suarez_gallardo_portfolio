@@ -369,7 +369,7 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
 
 ---
 
-## T13 — Extensión de `Logo`
+## T13 — Extensión de `Logo` ✅ COMPLETADA
 
 **Objetivo:** permitir que la identidad de la barra suba al inicio y limpie el ancla cuando ya se está en la home.
 
