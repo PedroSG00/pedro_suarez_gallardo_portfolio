@@ -506,7 +506,7 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
 
 ---
 
-## T18 — Shell de layout y 404
+## T18 — Shell de layout y 404 ✅ COMPLETADA
 
 **Objetivo:** envolver todas las rutas localizadas con enlace de salto, barra, `main` accesible y pie, y mantener la shell en la 404.
 

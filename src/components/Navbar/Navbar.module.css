@@ -6,6 +6,13 @@
   transform: translateY(0);
   transition: transform var(--duration-state) ease;
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(var(--spacing) * 4);
+  padding: calc(var(--spacing) * 3) calc(var(--spacing) * 6);
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+  border-bottom: var(--line-width) solid var(--color-line);
 }
 
 .navbar[data-hidden] {
@@ -16,14 +23,6 @@
   .navbar {
     transition: none;
   }
-}
-  align-items: center;
-  justify-content: space-between;
-  gap: calc(var(--spacing) * 4);
-  padding: calc(var(--spacing) * 3) calc(var(--spacing) * 6);
-  background-color: var(--color-surface);
-  color: var(--color-ink);
-  border-bottom: var(--line-width) solid var(--color-line);
 }
 
 .identity {

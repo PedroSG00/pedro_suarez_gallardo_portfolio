@@ -9,9 +9,9 @@ export default function NotFound() {
   const locale = (pathname.split('/')[1] ?? 'en') as 'en' | 'es';
   const messages = locale === 'es' ? esMessages : enMessages;
   return (
-    <main>
+    <>
       <h1>{messages.shared.notFound.title}</h1>
       <p>{messages.shared.notFound.message}</p>
-    </main>
+    </>
   );
 }
