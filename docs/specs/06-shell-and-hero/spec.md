@@ -40,6 +40,7 @@ Esta spec decide qué se ve y qué se garantiza; la arquitectura y los valores d
 
 - Cuando la home se muestre en cualquiera de los dos idiomas, el sistema muestre una barra con identidad, cuatro enlaces de sección, control de tema y control de idioma.
 - El sistema muestre `public/logo.svg` como identidad de inicio, lo invierta en modo oscuro y lo anuncie como «Pedro Suárez Gallardo» con texto alternativo. El favicon usa la misma marca en blanco sobre fondo oscuro.
+- El sistema muestre la marca en un tamaño claramente legible y alineado con la altura de los controles de la barra.
 - Cuando el usuario active la identidad estando en la home, el sistema suba al inicio y limpie el ancla de la URL.
 - El sistema muestre los enlaces en el orden About, Work, Stack, Contact, con etiquetas en el idioma activo.
 - El sistema no muestre enlaces a proyectos ni a rutas inexistentes.
@@ -74,6 +75,7 @@ Esta spec decide qué se ve y qué se garantiza; la arquitectura y los valores d
 - El sistema permita abrir y cerrar el menú con teclado, sin JavaScript y sin atrapar el foco.
 - Sin JavaScript, el sistema no lo cierra al elegir un enlace; el usuario lo cierra con el control. Con JavaScript, el sistema lo cierra al elegir un enlace.
 - El sistema mantenga los controles de tema e idioma fuera del menú y un único conjunto de enlaces en el orden de tabulación.
+- El control hamburguesa aparezca a la derecha de tema e idioma. Al abrir, el panel entra con una transición breve; con movimiento reducido aparece sin animación.
 - El sistema no bloquee el scroll de la página al abrir el menú.
 
 ### RF-5 — Enlace de salto
@@ -91,6 +93,7 @@ Esta spec decide qué se ve y qué se garantiza; la arquitectura y los valores d
 - El sistema mantenga ambos controles visibles en la barra en todos los anchos, alcanzables por teclado y sin duplicarlos en la misma vista.
 - El sistema oculte el control de tema cuando no haya JavaScript.
 - El sistema muestre el estado del tema y del idioma sin depender solo del color.
+- El icono de tema represente el tema que realmente se está mostrando, incluida la preferencia del sistema cuando no existe una selección guardada, y siga correcto tras cambiar de idioma.
 - El sistema garantice un área de contacto de al menos 24 × 24 px en los controles.
 
 ### RF-7 — Contenido del hero
@@ -137,6 +140,7 @@ Esta spec decide qué se ve y qué se garantiza; la arquitectura y los valores d
 - Cuando la home se renderice, el sistema muestre un pie con GitHub, LinkedIn, email, CV y «© 2026 Pedro Suárez Gallardo».
 - Cuando el usuario active el email, el sistema abra el cliente de correo.
 - Cuando el usuario active GitHub, LinkedIn o el CV, el sistema abra el destino en pestaña nueva y lo anuncie con un texto solo para lectores de pantalla, traducido.
+- El sistema muestre el icono correspondiente de GitHub, LinkedIn, email y documento CV en cada enlace; los iconos decorativos no alteren sus nombres accesibles.
 - El sistema use el CV del idioma activo.
 - El sistema no muestre controles de tema ni de idioma en el pie, mantenga el pie fuera del revelado y no lo haga pegajoso.
 - El sistema tome los enlaces y el email de los datos del sitio y los textos de los mensajes, sin hardcodearlos en la interfaz.
@@ -167,6 +171,7 @@ Esta spec decide qué se ve y qué se garantiza; la arquitectura y los valores d
 - El sistema mantenga la shell en el idioma de la ruta; en la 404, el cambio de idioma conserva la 404 traducida.
 - El sistema renderice barra, pie y hero de forma estática, sin depender de JavaScript para mostrarse.
 - El sistema no muestre enlaces del shell a rutas inexistentes.
+- Al cambiar de idioma con navegación cliente, el sistema no produzca errores de React por volver a renderizar el script inicial del tema.
 
 ## Requisitos no funcionales
 
@@ -176,7 +181,7 @@ Esta spec decide qué se ve y qué se garantiza; la arquitectura y los valores d
 - **Scroll:** los anclajes usan el desplazamiento suave nativo solo sin preferencia de movimiento reducido. Recargas y cambios de idioma preservan la posición sin animarla; navegar desde la barra no la oculta.
 - **Rendimiento:** el mayor elemento de la primera pantalla es texto; sin saltos de layout; espacio del nombre reservado desde el primer fotograma; sin scroll horizontal entre 320 y 1920 px.
 - **Estático y sin JS:** barra, pie y hero renderizados estáticamente por idioma; contenido visible sin JS; menú, anclas, salto e idioma operativos; control de tema oculto; sin desajustes de hidratación.
-- **Robustez:** si falta un texto o un dato, el resto se renderiza sin error; ancla inexistente sin navegación ni ruptura; enlace externo fallido sin romper la página; estados de menú y barra se reinician al navegar.
+- **Robustez:** si falta un texto o un dato, el resto se renderiza sin error; ancla inexistente sin navegación ni ruptura; enlace externo fallido sin romper la página; estados de menú y barra se reinician al navegar; sin errores de consola al cambiar de locale.
 - **Impresión:** se imprime el contenido sin barra ni pie; el nombre se imprime sólido y sin animaciones.
 - **Compatibilidad:** navegadores actuales de escritorio y móvil; la verificación de Safari y Firefox y el fallback final corresponden a la spec 12.
 
@@ -217,7 +222,7 @@ Esta spec decide qué se ve y qué se garantiza; la arquitectura y los valores d
 - Fotografía en el hero.
 - Controles duplicados de tema o idioma en el pie.
 - Botón de volver arriba.
-- Animación de apertura/cierre del menú y trampa de foco.
+- Animación de cierre del menú y trampa de foco.
 - Bucles de scroll suave programados en JavaScript; se permite el comportamiento suave nativo de CSS cuando no se reduce el movimiento.
 - Metadatos SEO, `hreflang`, sitemap, robots e imagen OG (spec 11).
 - Auditoría final de accesibilidad, rendimiento y Safari/Firefox (spec 12).

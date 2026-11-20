@@ -148,6 +148,27 @@
     }
   }
 
+  @keyframes navbar-menu-open {
+    from {
+      opacity: 0;
+      transform: translateY(calc(0px - var(--motion-distance)));
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  [data-navbar-menu][open] > [data-menu-panel] {
+    animation: navbar-menu-open var(--duration-state) ease-out both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-navbar-menu][open] > [data-menu-panel] {
+      animation: none;
+    }
+  }
+
   .inverted {
     color-scheme: dark;
     background-color: light-dark(#f2efe6, #121110);

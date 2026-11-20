@@ -8,6 +8,7 @@ import { THEME_STORAGE_KEY } from '@/lib/theme';
 import '@/styles/globals.css';
 import { Geist_Mono } from 'next/font/google';
 import SkipLink from '@/components/ui/SkipLink/SkipLink';
+import { ThemeBootstrapScript } from '@/components/ui/ThemeControl/ThemeBootstrapScript';
 import Navbar from '@/components/Navbar/Navbar';
 import Footer from '@/components/Footer/Footer';
 import AnchorFocus from '@/components/ui/AnchorFocus/AnchorFocus';
@@ -39,6 +40,7 @@ export default async function LocaleLayout({
   }
   setRequestLocale(lang);
   const messages = await getMessages();
+  const themeBootstrapScript = `(${themeScript(THEME_STORAGE_KEY)})(window,document,localStorage)`;
 
   return (
     <html
@@ -47,11 +49,7 @@ export default async function LocaleLayout({
       className={`${geistMono.variable} h-full antialiased`}
     >
       <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(${themeScript(THEME_STORAGE_KEY)})(window,document,localStorage)`,
-          }}
-        />
+        <ThemeBootstrapScript html={themeBootstrapScript} />
       </head>
       <body className="min-h-full flex flex-col">
         <NextIntlClientProvider locale={lang} messages={messages}>

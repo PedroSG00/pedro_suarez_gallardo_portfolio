@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { screen, fireEvent } from '@testing-library/react';
 import { createRoot } from 'react-dom/client';
 import { flushSync } from 'react-dom';
@@ -8,21 +8,42 @@ import { renderWithIntl } from '@/test/render-with-intl';
 import ThemeControl from './ThemeControl';
 
 vi.mock('@/lib/theme-dom', () => ({
+  applyTheme: vi.fn((root: HTMLElement, theme: 'light' | 'dark') => {
+    root.dataset.theme = theme;
+  }),
   currentTheme: vi.fn(() => 'light'),
+  readStoredTheme: vi.fn(() => null),
   setTheme: vi.fn(),
 }));
 
-import { currentTheme, setTheme } from '@/lib/theme-dom';
+import { applyTheme, currentTheme, readStoredTheme, setTheme } from '@/lib/theme-dom';
 
 const mockedSetTheme = setTheme as ReturnType<typeof vi.fn>;
 const mockedCurrentTheme = currentTheme as ReturnType<typeof vi.fn>;
+const mockedApplyTheme = applyTheme as ReturnType<typeof vi.fn>;
+const mockedReadStoredTheme = readStoredTheme as ReturnType<typeof vi.fn>;
 
 beforeEach(() => {
   vi.clearAllMocks();
   mockedSetTheme.mockReset();
   mockedCurrentTheme.mockReset();
+  mockedApplyTheme.mockClear();
+  mockedReadStoredTheme.mockReset();
+  mockedReadStoredTheme.mockReturnValue(null);
   mockedCurrentTheme.mockReturnValue('light');
+  vi.stubGlobal(
+    'matchMedia',
+    vi.fn(() => ({
+      matches: false,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    })),
+  );
   document.documentElement.removeAttribute('data-theme');
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
 });
 
 function renderControl(label = enMessages.shared.theme.toggle) {
@@ -62,6 +83,34 @@ describe('ThemeControl', () => {
     expect(button).toBeInTheDocument();
     expect(button).toHaveAttribute('aria-pressed');
     expect(button).toHaveAttribute('aria-label', 'Toggle theme');
+  });
+
+  test('initializes the icon from the active system preference when no theme is stored', () => {
+    vi.mocked(window.matchMedia).mockReturnValue({
+      matches: true,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    } as unknown as MediaQueryList);
+    mockedCurrentTheme.mockImplementation((_root, systemPrefersDark) =>
+      systemPrefersDark ? 'dark' : 'light',
+    );
+
+    renderControl();
+
+    expect(screen.getByRole('button')).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button')).toHaveAttribute('data-theme-icon', 'moon');
+    expect(mockedCurrentTheme).toHaveBeenCalledWith(document.documentElement, true);
+  });
+
+  test('restores the saved theme if a locale transition removes the root attribute', () => {
+    mockedReadStoredTheme.mockReturnValue('dark');
+    mockedCurrentTheme.mockImplementation((root) => root.dataset.theme ?? 'light');
+
+    renderControl();
+
+    expect(mockedApplyTheme).toHaveBeenCalledWith(document.documentElement, 'dark');
+    expect(screen.getByRole('button')).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button')).toHaveAttribute('data-theme-icon', 'moon');
   });
 
   test('al pulsar alterna aria-pressed y llama a setTheme', () => {

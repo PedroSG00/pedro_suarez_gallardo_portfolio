@@ -14,7 +14,7 @@ test.describe('theme first paint', () => {
     expect(serverHtml).not.toContain('data-theme');
     expect(serverHtml).toContain('(function(w,d,ls){');
 
-    const inlineScripts = page.locator('head > script:not([src])');
+    const inlineScripts = page.locator('head > script#theme-bootstrap');
     await expect(inlineScripts).toHaveCount(1);
     const content = await inlineScripts.first().textContent();
     expect(content).toContain('psg-theme');
@@ -30,7 +30,7 @@ test.describe('theme first paint', () => {
     expect(serverHtml).not.toContain('data-theme');
     expect(serverHtml).toContain('(function(w,d,ls){');
 
-    const inlineScripts = page.locator('head > script:not([src])');
+    const inlineScripts = page.locator('head > script#theme-bootstrap');
     await expect(inlineScripts).toHaveCount(1);
     const content = await inlineScripts.first().textContent();
     expect(content).toContain('psg-theme');
@@ -360,6 +360,42 @@ test.describe('theme first paint', () => {
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
   });
 
+  test('keeps the selected theme and correct icon when switching locales', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'light' });
+    await page.goto('/en');
+
+    const theme = page.getByRole('button', { name: /toggle theme/i });
+    await theme.click();
+    await expect(theme).toHaveAttribute('data-theme-icon', 'moon');
+    await page.getByRole('button', { name: 'Español' }).click();
+    await expect(page).toHaveURL(/\/es$/);
+
+    const spanishTheme = page.getByRole('button', { name: /cambiar tema/i });
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await expect(spanishTheme).toHaveAttribute('aria-pressed', 'true');
+    await expect(spanishTheme).toHaveAttribute('data-theme-icon', 'moon');
+
+    await spanishTheme.click();
+    await expect(spanishTheme).toHaveAttribute('data-theme-icon', 'sun');
+    await page.getByRole('button', { name: 'English' }).click();
+    await expect(page).toHaveURL(/\/en$/);
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+    await expect(page.getByRole('button', { name: /toggle theme/i })).toHaveAttribute(
+      'data-theme-icon',
+      'sun',
+    );
+  });
+
+  test('system dark preference shows the dark-mode icon before a manual choice', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await page.goto('/en');
+
+    const theme = page.getByRole('button', { name: /toggle theme/i });
+    await expect(page.locator('html')).not.toHaveAttribute('data-theme');
+    await expect(theme).toHaveAttribute('aria-pressed', 'true');
+    await expect(theme).toHaveAttribute('data-theme-icon', 'moon');
+  });
+
   test('no JavaScript: theme control does not appear', async ({ browser }) => {
     const context = await browser.newContext({
       javaScriptEnabled: false,
@@ -382,7 +418,7 @@ test.describe('theme first paint', () => {
 
   test('exactly one inline theme script in <head>', async ({ page }) => {
     await page.goto('/en');
-    const inlineScripts = page.locator('head > script:not([src])');
+    const inlineScripts = page.locator('head > script#theme-bootstrap');
     await expect(inlineScripts).toHaveCount(1);
     const content = await inlineScripts.first().textContent();
     expect(content).toContain('psg-theme');

@@ -153,6 +153,15 @@ describe('Navbar', () => {
     expect(screen.getByRole('button', { name: 'Español' })).toBeInTheDocument();
   });
 
+  test('shows the hamburger after the theme and language controls on mobile', () => {
+    renderNavbar();
+    const theme = screen.getByRole('button', { name: 'Toggle theme' });
+    const language = screen.getByRole('button', { name: 'Español' });
+    const menu = screen.getByRole('button', { name: 'Open menu' });
+    expect(theme.compareDocumentPosition(language) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(language.compareDocumentPosition(menu) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
   test('onClick de la identidad navega a / en la home', () => {
     const onClick = vi.fn();
     renderNavbar({ site: { ...site, name: 'Pedro Suárez Gallardo' } });

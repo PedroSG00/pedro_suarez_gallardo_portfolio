@@ -1,6 +1,6 @@
 # Tareas — 06 Shell y Hero
 
-**Estado:** Pendiente de ejecución. Se deriva de `docs/specs/06-shell-and-hero/spec.md` y de `docs/specs/06-shell-and-hero/plan.md`, y respeta `docs/constitution.md`.
+**Estado:** Completada. Se deriva de `docs/specs/06-shell-and-hero/spec.md` y de `docs/specs/06-shell-and-hero/plan.md`, y respeta `docs/constitution.md`.
 
 **Alcance:** RF-1 a RF-14 de la spec 06 y sus requisitos no funcionales. Cada tarea se implementa y se verifica por separado; ninguna se cierra con tests en rojo.
 
@@ -55,6 +55,10 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
 | T22 | E2E de navegación y actualización de e2e existentes | RF-1–RF-6, RF-12–RF-14 | T14, T15, T16, T18, T19, T20, T21 |
 | T23 | Enmiendas documentales y gates finales | Todos | T1–T22 |
 | T24 | Pulido de marca, scroll y salida del hero | RF-1, RF-3, RF-6, RF-9, RF-10, RF-13, RF-14 | T14, T15, T18, T19, T21, T22, T23 |
+| T25 | Afinar controles de tema e idioma y menú móvil | RF-1, RF-4, RF-6 | T14, T22, T24 |
+| T26 | Iconos de footer y bootstrap seguro entre idiomas | RF-6, RF-11, RF-14 | T16, T18, T22, T25 |
+| T27 | Evitar el warning de script en navegación cliente | RF-6, RF-14 | T26 |
+| T28 | Completar pruebas de aceptación de la shell | RF-3–RF-6, RF-10–RF-13 | T22, T27 |
 
 ---
 
@@ -732,23 +736,111 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
 
 ---
 
+## T25 — Afinar controles de tema e idioma y menú móvil ✅ COMPLETADA
+
+**Objetivo:** mantener el tema e icono sincronizados al cambiar de idioma, dar más presencia a la marca y corregir el orden y la apertura animada del menú móvil.
+
+**RF:** RF-1, RF-4 y RF-6.
+
+**Depende de:** T14, T22 y T24.
+
+**Qué debe quedar:**
+- El tema guardado se reaplica si una navegación de locale elimina el atributo `data-theme`; sin selección guardada, estado e icono siguen `prefers-color-scheme`.
+- El icono (sol/luna), `aria-pressed` y el tema visible coinciden tras alternar tema e idioma.
+- El logo de inicio tiene 40 px de tamaño.
+- En móvil, el orden visual y de tabulación es logo, tema, idioma y hamburguesa.
+- El panel de menú anima su entrada con movimiento permitido y aparece de inmediato con `prefers-reduced-motion: reduce`.
+
+**Tests primero:** pruebas de sistema/preferencia guardada en `ThemeControl.test.tsx`; orden de los controles en `Navbar.test.tsx`; e2e de cambio de locale, iconos, orden y animación del menú.
+
+**Criterio de hecho:** gates completos en verde, cobertura ≥85 %, y sin alterar el fallback sin JavaScript del `<details>`.
+
+**Resultado verificado:**
+- `pnpm lint`, `pnpm typecheck`, `pnpm build`: ✅
+- `pnpm test`: 489 pasan; 92.74 % sentencias, 88.75 % ramas, 92.10 % funciones y 93.00 % líneas.
+- `pnpm test:e2e`: 171 pasan, 0 fallan.
+
+---
+
+## T26 — Iconos de footer y bootstrap seguro entre idiomas ✅ COMPLETADA
+
+**Objetivo:** añadir iconos reconocibles a los cuatro enlaces del footer y evitar que React intente renderizar el script de tema durante una navegación entre locales.
+
+**RF:** RF-6, RF-11 y RF-14.
+
+**Depende de:** T16, T18, T22 y T25.
+
+**Qué debe quedar:**
+- GitHub, LinkedIn, email y CV llevan sus iconos Iconoir correspondientes, decorativos y ocultos a lectores de pantalla; los nombres accesibles existentes no cambian.
+- El bootstrap crítico del tema se ejecuta como `text/javascript` en el HTML inicial y se vuelve `text/plain` en renderizados cliente, evitando que React reejecute o advierta sobre el script durante navegación de locale.
+- E2E cambia de idioma ida y vuelta y falla si React/Next informa que encontró un script durante el render cliente.
+- Se mantienen las comprobaciones de primer pintado del tema y el render sin JavaScript.
+
+**Tests primero:** pruebas unitarias y E2E verifican los cuatro iconos y la ausencia del error de React al navegar `/en` ↔ `/es`.
+
+**Resultado verificado para la implementación inicial:**
+- `pnpm lint`, `pnpm typecheck`, `pnpm build`: ✅
+- `pnpm test`: 490 pasan; 92.74 % sentencias, 88.75 % ramas, 92.10 % funciones y 93.00 % líneas.
+- `pnpm test:e2e`: 173 pasan, 0 fallan; no aparece el error al cambiar locale.
+
+---
+
+## T27 — Evitar el warning de script en navegación cliente ✅ COMPLETADA
+
+**Objetivo:** corregir el error que seguía apareciendo en desarrollo al cambiar idioma: Next `Script` también genera un `<script>` React activo durante el render del nuevo locale.
+
+**RF:** RF-6 y RF-14.
+
+**Qué queda implementado:**
+- `ThemeBootstrapScript` es un Client Component. En la respuesta inicial del servidor imprime un script ejecutable para establecer el tema antes del primer pintado; en el cliente cambia a `type="text/plain"` y `suppressHydrationWarning`.
+- La navegación cliente entre `/en` y `/es` no ejecuta el bootstrap ni crea un `<script>` ejecutable en el árbol que React reconcilia.
+- Los E2E verifican el tipo inicial `text/javascript`, el tipo cliente `text/plain` tras los dos cambios de idioma y ausencia del mensaje de consola.
+- Se verificó manualmente el mismo flujo contra `next dev` (no solo `next start`).
+
+**Resultado verificado:**
+- `pnpm lint`, `pnpm typecheck`, `pnpm build`: ✅
+- `pnpm test`: 491 pasan; 92.80 % sentencias, 88.56 % ramas, 92.17 % funciones y 93.07 % líneas.
+- `pnpm test:e2e`: 173 pasan, 0 fallan.
+- `next dev`: `/en` → `/es` → `/en`; el script pasa de `text/javascript` a `text/plain` y no genera errores de React.
+
+---
+
+## T28 — Completar pruebas de aceptación de la shell ✅ COMPLETADA
+
+**Objetivo:** cerrar las brechas de verificación encontradas en la revisión requisito por requisito, sin alterar el comportamiento existente salvo que una prueba evidencie un incumplimiento.
+
+**RF:** RF-3, RF-4, RF-5, RF-6, RF-10, RF-11, RF-12 y RF-13.
+
+**Tests añadidos:**
+- `e2e/navbar.spec.ts`: navbar oculta al final real de página y reaparece al subir; duración de 200 ms; targets de al menos 24 × 24 px; scroll interno del menú sin mover la página ni cerrarlo; indicador de foco en todos los stops, en ambos idiomas y temas; salida de teclado del menú sin trampa; cambio de idioma nativo sin JavaScript; activación de ancla desde 404; targets móviles.
+- `e2e/hero.spec.ts`: relleno, trazo, contraste de tema y reversibilidad del contorno/parallax en `/en` y `/es`, tema claro y oscuro.
+- `e2e/shell.spec.ts`: pie no pegajoso y barra/pie ocultos en impresión.
+- `e2e/i18n-routing.spec.ts`: el cambio de idioma mantiene el mismo documento (`performance.timeOrigin`) además de no re-renderizar el bootstrap ejecutable.
+
+**Resultado verificado:**
+- `pnpm lint`, `pnpm typecheck`, `pnpm build`: ✅
+- `pnpm test`: 491 pasan; 92.80 % sentencias, 88.56 % ramas, 92.17 % funciones y 93.07 % líneas.
+- `pnpm test:e2e`: 185 pasan, 0 fallan.
+
+---
+
 ## Cobertura RF → tareas
 
 | RF | Tareas que lo cubren |
 |---|---|
-| RF-1 Barra de navegación | T1, T9, T13, T14, T22, T24 |
+| RF-1 Barra de navegación | T1, T9, T13, T14, T22, T24, T25 |
 | RF-2 Destinos reservados | T1, T6, T7, T19, T22 |
-| RF-3 Barra pegajosa y scroll | T2, T3, T14, T15, T22, T24 |
-| RF-4 Menú en pantallas estrechas | T3, T9, T14, T15, T22 |
-| RF-5 Enlace de salto | T8, T18, T22 |
-| RF-6 Tema e idioma | T2, T10, T14, T22, T24 |
+| RF-3 Barra pegajosa y scroll | T2, T3, T14, T15, T22, T24, T28 |
+| RF-4 Menú en pantallas estrechas | T3, T9, T14, T15, T22, T25, T28 |
+| RF-5 Enlace de salto | T8, T18, T22, T28 |
+| RF-6 Tema e idioma | T2, T10, T14, T22, T24, T25, T26, T27, T28 |
 | RF-7 Contenido del hero | T1, T17, T19, T21 |
 | RF-8 Nombre a todo el ancho | T2, T4, T20 |
 | RF-9 Entrada y cursor | T2, T17, T21, T24 |
-| RF-10 Contorno y parallax | T2, T21, T24 |
-| RF-11 Pie de página | T1, T12, T16 |
-| RF-12 Navegación por teclado | T3, T8, T14, T15, T18, T22 |
-| RF-13 Llegada a una sección | T2, T5, T6, T7, T11, T19, T22, T24 |
-| RF-14 Shell en todas las rutas | T1, T14, T16, T18, T19, T22, T24 |
+| RF-10 Contorno y parallax | T2, T21, T24, T28 |
+| RF-11 Pie de página | T1, T12, T16, T26, T28 |
+| RF-12 Navegación por teclado | T3, T8, T14, T15, T18, T22, T28 |
+| RF-13 Llegada a una sección | T2, T5, T6, T7, T11, T19, T22, T24, T28 |
+| RF-14 Shell en todas las rutas | T1, T14, T16, T18, T19, T22, T24, T26, T27, T28 |
 
-Todos los RF tienen al menos una tarea de implementación y una verificación asociada. Las tareas T1–T22 se pueden ejecutar en el orden de la tabla; T23 cierra el cambio inicial y T24 registra el pulido posterior.
+Todos los RF tienen al menos una tarea de implementación y una verificación asociada. Las tareas T1–T22 se pueden ejecutar en el orden de la tabla; T23 cierra el cambio inicial y T24–T28 registran los pulidos posteriores.

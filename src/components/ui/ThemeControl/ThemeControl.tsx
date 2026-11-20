@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import type { Theme } from '@/lib/theme';
-import { currentTheme, setTheme } from '@/lib/theme-dom';
+import { applyTheme, currentTheme, readStoredTheme, setTheme } from '@/lib/theme-dom';
 import ThemeToggle from '@/components/ui/ThemeToggle/ThemeToggle';
 
 export type ThemeControlProps = {
@@ -23,7 +23,25 @@ export default function ThemeControl({ label }: ThemeControlProps) {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
-    setThemeState(currentTheme(document.documentElement, false));
+    const root = document.documentElement;
+    const systemPreference = window.matchMedia('(prefers-color-scheme: dark)');
+    const syncTheme = () => {
+      const storedTheme = readStoredTheme();
+      if (!root.dataset.theme && storedTheme) {
+        applyTheme(root, storedTheme);
+      }
+      setThemeState(currentTheme(root, systemPreference.matches));
+    };
+
+    syncTheme();
+    systemPreference.addEventListener('change', syncTheme);
+    const themeObserver = new MutationObserver(syncTheme);
+    themeObserver.observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+
+    return () => {
+      systemPreference.removeEventListener('change', syncTheme);
+      themeObserver.disconnect();
+    };
   }, []);
 
   if (!ariaLabel) {

@@ -1,6 +1,7 @@
 'use client';
 
 import { useLocale, useTranslations } from 'next-intl';
+import { Github, Linkedin, Mail, Page } from 'iconoir-react';
 import Link from '@/components/ui/Link/Link';
 import type { Locale } from '@/lib/locale';
 import type { SiteData } from '@/content/site';
@@ -37,22 +38,48 @@ export default function Footer({ locale, site, labels }: Props) {
         <ul className="flex flex-wrap gap-2">
           {site.githubUrl && (
             <li>
-              <Link href={site.githubUrl} target="_blank" srLabel={newTab}>{github}</Link>
+              <Link
+                href={site.githubUrl}
+                target="_blank"
+                srLabel={newTab}
+                icon={<Github aria-hidden="true" className="size-5 shrink-0" />}
+              >
+                {github}
+              </Link>
             </li>
           )}
           {site.linkedinUrl && (
             <li>
-              <Link href={site.linkedinUrl} target="_blank" srLabel={newTab}>{linkedin}</Link>
+              <Link
+                href={site.linkedinUrl}
+                target="_blank"
+                srLabel={newTab}
+                icon={<Linkedin aria-hidden="true" className="size-5 shrink-0" />}
+              >
+                {linkedin}
+              </Link>
             </li>
           )}
           {site.email && (
             <li>
-              <Link href={`mailto:${site.email}`}>{email}</Link>
+              <Link
+                href={`mailto:${site.email}`}
+                icon={<Mail aria-hidden="true" className="size-5 shrink-0" />}
+              >
+                {email}
+              </Link>
             </li>
           )}
           {site.cvPath[currentLocale] && (
             <li>
-              <Link href={site.cvPath[currentLocale]} target="_blank" srLabel={newTab}>{cv}</Link>
+              <Link
+                href={site.cvPath[currentLocale]}
+                target="_blank"
+                srLabel={newTab}
+                icon={<Page aria-hidden="true" className="size-5 shrink-0" />}
+              >
+                {cv}
+              </Link>
             </li>
           )}
         </ul>

@@ -2,7 +2,7 @@
 
 Hoja de ruta de specs, en orden de ejecución. Cada spec sigue el mismo bucle: **spec → tests → código → gates** (`pnpm lint`, `pnpm typecheck`, `pnpm test`, y `pnpm test:e2e` cuando toca idioma, tema, navegación o movimiento). Una spec está terminada solo cuando sus gates pasan.
 
-Las specs 01, 02 y 03 tocan capas transversales (tooling, i18n, tema y estilos globales): requieren aprobación explícita de Pedro antes de ejecutarse (ver `AGENTS.md`). Las specs 01 y 02 están aprobadas y completadas; la spec 02 se integró en el PR #12. La 03 está aprobada y pendiente de ejecución.
+Las specs 01, 02 y 03 tocan capas transversales (tooling, i18n, tema y estilos globales): requieren aprobación explícita de Pedro antes de ejecutarse (ver `AGENTS.md`). Las tres están aprobadas y completadas; la spec 02 se integró en el PR #12.
 
 Fuera de alcance por ahora: sección de proyectos y ruta `/projects/[slug]` (futurible, ver `content-brief.md`, sección 10).
 
@@ -12,8 +12,8 @@ Fuera de alcance por ahora: sección de proyectos y ruta `/projects/[slug]` (fut
 - [x] 02 i18n y rutas
 - [x] 03 Tema y tokens
 - [x] 04 Átomos de UI
-- [ ] 05 Movimiento de scroll (`Reveal`)
-- [ ] 06 Shell y Hero
+- [x] 05 Movimiento de scroll (`Reveal`)
+- [x] 06 Shell y Hero
 - [ ] 07 About
 - [ ] 08 Work
 - [ ] 09 Stack

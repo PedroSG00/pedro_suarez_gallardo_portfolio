@@ -114,6 +114,46 @@ test.describe('Hero: entrada, cursor, contorno y parallax (RF-7, RF-9, RF-10)', 
     await expect(h1(page)).toHaveCSS('-webkit-text-stroke-color', 'rgb(18, 17, 16)');
   });
 
+  test('outline and parallax preserve contrast in both themes and locales', async ({ page }) => {
+    for (const locale of ['en', 'es'] as const) {
+      for (const theme of ['light', 'dark'] as const) {
+        await loadHero(page, locale, theme);
+        await page.evaluate(() => {
+          document.body.style.minHeight = '300vh';
+        });
+        await page.waitForTimeout(700);
+
+        const expectedInk =
+          theme === 'light' ? 'rgb(18, 17, 16)' : 'rgb(242, 239, 230)';
+        const hero = page.locator('section[aria-labelledby="hero-name"]');
+        const name = h1(page);
+
+        await page.evaluate(() => window.scrollTo({ top: 600, behavior: 'instant' }));
+        await expect.poll(() => name.evaluate((element) => getComputedStyle(element).color)).toBe(
+          expectedInk,
+        );
+        await expect(name).toHaveCSS('-webkit-text-stroke-color', expectedInk);
+
+        const exitScrollY = await hero.evaluate(
+          (element) => window.scrollY + element.getBoundingClientRect().bottom + 1,
+        );
+        await page.evaluate(
+          (scrollY) => window.scrollTo({ top: scrollY, behavior: 'instant' }),
+          exitScrollY,
+        );
+        await expect.poll(() => name.evaluate((element) => getComputedStyle(element).color)).toBe(
+          'rgba(0, 0, 0, 0)',
+        );
+        await expect(name).toHaveCSS('-webkit-text-stroke-color', expectedInk);
+
+        await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+        await expect.poll(() => name.evaluate((element) => getComputedStyle(element).color)).toBe(
+          expectedInk,
+        );
+      }
+    }
+  });
+
   test('contorno y parallax reversibles, sin salir del hero ni solaparse', async ({ page }) => {
     await loadHero(page, 'en', 'light');
     await page.waitForTimeout(700);

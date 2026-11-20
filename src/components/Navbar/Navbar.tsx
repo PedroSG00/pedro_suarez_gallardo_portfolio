@@ -235,9 +235,19 @@ export default function Navbar({
           />
         </nav>
 
+        <div className="flex shrink-0 items-center gap-1 md:gap-2">
+          <ThemeControl label={themeToggleLabel} />
+          <LanguageSwitch
+            locale={currentLocale}
+            ariaLabelEn={langEnLabel}
+            ariaLabelEs={langEsLabel}
+          />
+        </div>
+
         <details
           ref={detailsRef}
           className="group shrink-0 md:hidden"
+          data-navbar-menu
           onToggle={(event) => {
             const open = event.currentTarget.open;
             setMenuOpen(open);
@@ -254,19 +264,10 @@ export default function Navbar({
               <path className="hidden group-open:block" d="m5 5 14 14M19 5 5 19" />
             </svg>
           </summary>
-          <nav aria-label={navLabel} className="absolute inset-x-0 top-full max-h-[calc(100dvh-var(--nav-height))] overflow-y-auto overscroll-contain border-b-(length:--line-width) border-line bg-surface px-(--grid-gutter) py-3">
+          <nav data-menu-panel aria-label={navLabel} className="absolute inset-x-0 top-full max-h-[calc(100dvh-var(--nav-height))] overflow-y-auto overscroll-contain border-b-(length:--line-width) border-line bg-surface px-(--grid-gutter) py-3">
             <NavLinks items={sectionItems} ariaLabel={navLabel} onNavigate={handleNavigate} />
           </nav>
         </details>
-
-        <div className="flex shrink-0 items-center gap-1 md:gap-2">
-          <ThemeControl label={themeToggleLabel} />
-          <LanguageSwitch
-            locale={currentLocale}
-            ariaLabelEn={langEnLabel}
-            ariaLabelEs={langEsLabel}
-          />
-        </div>
       </div>
     </header>
   );

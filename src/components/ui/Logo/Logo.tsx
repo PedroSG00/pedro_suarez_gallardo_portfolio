@@ -28,7 +28,7 @@ export default function Logo({ href, src, alt, children, onClick }: Props) {
           alt={alt ?? ''}
           width={64}
           height={64}
-          className="size-8 filter-[var(--logo-filter)]"
+          className="size-10 filter-[var(--logo-filter)]"
         />
       ) : children ? (
         children

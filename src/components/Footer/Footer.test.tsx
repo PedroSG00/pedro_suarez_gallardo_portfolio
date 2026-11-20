@@ -43,6 +43,23 @@ describe('Footer', () => {
     expect(screen.getByRole('link', { name: 'CV opens in a new tab' })).toBeInTheDocument();
   });
 
+  test('shows a decorative icon in each footer link without changing its accessible name', () => {
+    renderFooter();
+
+    for (const name of [
+      'GitHub opens in a new tab',
+      'LinkedIn opens in a new tab',
+      'Email',
+      'CV opens in a new tab',
+    ]) {
+      const link = screen.getByRole('link', { name });
+      // eslint-disable-next-line testing-library/no-node-access
+      const icon = link.querySelector('svg');
+      expect(icon).toBeInTheDocument();
+      expect(icon).toHaveAttribute('aria-hidden', 'true');
+    }
+  });
+
   test('GitHub, LinkedIn and CV open a new tab with rel and translated sr-only text', () => {
     renderFooter();
     const github = screen.getByRole('link', { name: 'GitHub opens in a new tab' });

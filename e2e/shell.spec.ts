@@ -66,6 +66,34 @@ test.describe('shell', () => {
     expect(await response.text()).toContain('#ffffff');
   });
 
+  test('footer destinations show their matching icons', async ({ page }) => {
+    await page.goto('/en');
+    const footer = page.getByRole('contentinfo');
+    for (const name of [
+      'GitHub opens in a new tab',
+      'LinkedIn opens in a new tab',
+      'Email',
+      'CV opens in a new tab',
+    ]) {
+      const link = footer.getByRole('link', { name });
+      await expect(link.locator('svg[aria-hidden="true"]')).toBeVisible();
+    }
+  });
+
+  test('footer is not sticky and both shell bars are omitted in print', async ({ page }) => {
+    await page.goto('/en');
+    const footer = page.getByRole('contentinfo');
+    await expect(footer).toHaveCSS('position', 'static');
+
+    await page.emulateMedia({ media: 'print' });
+    await expect(page.getByRole('banner')).toBeHidden();
+    await expect(footer).toBeHidden();
+    await expect(page.getByRole('heading', { level: 1, name: 'Pedro Suárez Gallardo' })).toHaveCSS(
+      'animation',
+      'none',
+    );
+  });
+
   test('skip link is the first focusable element and moves focus to #main', async ({
     page,
   }) => {

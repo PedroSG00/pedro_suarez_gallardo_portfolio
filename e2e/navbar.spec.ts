@@ -93,6 +93,11 @@ test.describe('Navbar navigation (RF-1, RF-2, RF-3, RF-4, RF-5, RF-6, RF-12, RF-
           await expect(langButtons).toHaveCount(1);
 
           await expect(themeBtn).toHaveAttribute('aria-pressed');
+          for (const control of [themeBtn, langBtn]) {
+            const box = await control.boundingBox();
+            expect(box?.width).toBeGreaterThanOrEqual(24);
+            expect(box?.height).toBeGreaterThanOrEqual(24);
+          }
         });
 
         test('changing language preserves anchor and destination', async ({ page }) => {
@@ -187,6 +192,67 @@ test.describe('Scroll behavior on reload and navigation', () => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await expect(page.locator('html')).toHaveCSS('scroll-behavior', 'auto');
   });
+
+  test('keeps the navbar hidden at the document end until the user scrolls up', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.goto('/en');
+    const navbar = page.getByRole('banner');
+
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(80);
+    await expect(navbar).toHaveAttribute('data-hidden');
+
+    await page.mouse.wheel(0, -160);
+    await expect(navbar).not.toHaveAttribute('data-hidden');
+
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await expect(navbar).toHaveAttribute('data-hidden');
+    await navbar.getByRole('link', { name: 'Pedro Suárez Gallardo' }).focus();
+    await expect(navbar).not.toHaveAttribute('data-hidden');
+  });
+});
+
+test.describe('Mobile navigation controls', () => {
+  test('the larger logo and hamburger follow the theme and language controls', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 780 });
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.goto('/en');
+
+    const banner = page.getByRole('banner');
+    const logo = banner.getByRole('img', { name: 'Pedro Suárez Gallardo' });
+    const theme = banner.getByRole('button', { name: /toggle theme|cambiar tema/i });
+    const language = banner.getByRole('button', { name: 'Español' });
+    const menu = banner.getByRole('button', { name: 'Open menu' });
+    await expect(logo).toHaveCSS('width', '40px');
+
+    for (const control of [theme, language, menu]) {
+      const box = await control.boundingBox();
+      expect(box?.width).toBeGreaterThanOrEqual(24);
+      expect(box?.height).toBeGreaterThanOrEqual(24);
+    }
+
+    const order = await page.evaluate(([theme, language, menu]) => {
+      const follows = (left: Element, right: Element) =>
+        Boolean(left.compareDocumentPosition(right) & Node.DOCUMENT_POSITION_FOLLOWING);
+      return follows(theme, language) && follows(language, menu);
+    }, [await theme.elementHandle(), await language.elementHandle(), await menu.elementHandle()]);
+    expect(order).toBe(true);
+  });
+
+  test('animates the menu when it opens and respects reduced motion', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 780 });
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.goto('/en');
+    await page.getByRole('button', { name: 'Open menu' }).click();
+    const panel = page.getByRole('navigation', { name: 'Main' });
+    await expect(panel).toBeVisible();
+    await expect.poll(() => panel.evaluate((element) => element.getAnimations().length)).toBeGreaterThan(0);
+
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await expect.poll(() => panel.evaluate((element) => element.getAnimations().length)).toBe(0);
+  });
 });
 
 test.describe('Navbar visibility on scroll (RF-3, no reduced motion)', () => {
@@ -205,6 +271,7 @@ test.describe('Navbar visibility on scroll (RF-3, no reduced motion)', () => {
           await page.waitForTimeout(100);
           const navbar = page.locator('header');
           await expect(navbar).toBeVisible();
+          await expect(navbar).toHaveCSS('transition-duration', '0.2s');
           const transform = await navbar.evaluate(
             (el) => new DOMMatrixReadOnly(getComputedStyle(el).transform).m42,
           );
@@ -303,6 +370,66 @@ test.describe('Mobile menu at 360px (RF-4)', () => {
       });
     });
   }
+
+  test('scrolling the open panel does not move the page or close the menu', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.setViewportSize({ width: 360, height: 240 });
+    await page.goto('/en');
+    await page.getByRole('button', { name: 'Open menu' }).click();
+
+    const panel = page.locator('[data-menu-panel]');
+    const scrollMetrics = await panel.evaluate((element) => ({
+      clientHeight: element.clientHeight,
+      scrollHeight: element.scrollHeight,
+    }));
+    expect(scrollMetrics.scrollHeight).toBeGreaterThan(scrollMetrics.clientHeight);
+
+    const pageScrollBefore = await page.evaluate(() => window.scrollY);
+    await panel.hover();
+    await page.mouse.wheel(0, 160);
+    await expect.poll(() => panel.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
+    expect(await page.evaluate(() => window.scrollY)).toBe(pageScrollBefore);
+    await expect(page.locator('[data-navbar-menu]')).toHaveAttribute('open', '');
+  });
+});
+
+test.describe('Keyboard focus visibility (RF-5, RF-12)', () => {
+  for (const { locale } of LOCALES) {
+    for (const theme of THEMES) {
+      test(`every tab stop has a visible focus outline on /${locale} in ${theme} mode`, async ({
+        page,
+      }) => {
+        await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: theme });
+        await page.setViewportSize({ width: 1280, height: 900 });
+        await page.goto(`/${locale}`);
+        await page.waitForLoadState('networkidle');
+
+        const focusableCount = await page
+          .locator('a[href], button:not([disabled]), summary')
+          .evaluateAll((elements) =>
+            elements.filter((element) => element.getClientRects().length > 0).length,
+          );
+
+        for (let index = 0; index < focusableCount; index += 1) {
+          await page.keyboard.press('Tab');
+          const focusStyle = await page.evaluate(() => {
+            const active = document.activeElement;
+            const style = active ? getComputedStyle(active) : null;
+            return {
+              outlineStyle: style?.outlineStyle,
+              outlineWidth: Number.parseFloat(style?.outlineWidth ?? '0'),
+            };
+          });
+          expect(focusStyle.outlineStyle, `Tab stop ${index + 1} should show an outline`).toBe(
+            'solid',
+          );
+          expect(focusStyle.outlineWidth, `Tab stop ${index + 1} should have a visible outline`).toBeGreaterThan(0);
+        }
+      });
+    }
+  }
 });
 
 test.describe('404 localized routes (RF-14)', () => {
@@ -326,6 +453,15 @@ test.describe('404 localized routes (RF-14)', () => {
           locale === 'en' ? 'Not found' : 'No encontrado',
         );
       });
+
+      test('activating a section link returns to the localized home and anchor', async ({
+        page,
+      }) => {
+        const aboutLabel = locale === 'en' ? 'About' : 'Sobre mí';
+        await page.getByRole('banner').getByRole('link', { name: aboutLabel }).click();
+        await expect(page).toHaveURL(`/${locale}#about`);
+        await expect(page.getByRole('heading', { level: 2, name: aboutLabel })).toBeFocused();
+      });
     });
   }
 });
@@ -343,6 +479,8 @@ test.describe('No JavaScript (RF-12, RF-14)', () => {
 
       // Navbar always visible
       await expect(page.locator('header')).toBeVisible();
+      await expect(page.getByRole('contentinfo')).toBeVisible();
+      await expect(page.locator('footer')).toContainText('© 2026 Pedro Suárez Gallardo');
 
       // Skip link works
       const skip = page.getByRole('link', { name: /skip to content/i });
@@ -366,5 +504,43 @@ test.describe('No JavaScript (RF-12, RF-14)', () => {
     } finally {
       await context.close();
     }
+  });
+
+  test('language switch remains a working native link without JavaScript', async ({ browser }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false });
+    const page = await context.newPage();
+    try {
+      await page.goto('/en');
+      await page.getByRole('button', { name: 'Español' }).click();
+      await expect(page).toHaveURL('/es');
+      await expect(page.locator('html')).toHaveAttribute('lang', 'es');
+      await expect(page.locator('body')).toContainText('Desarrollador full-stack');
+    } finally {
+      await context.close();
+    }
+  });
+
+  test('keyboard focus can leave the open mobile menu without being trapped', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.setViewportSize({ width: 360, height: 900 });
+    await page.goto('/en');
+
+    const menu = page.getByRole('button', { name: 'Open menu' });
+    await menu.focus();
+    await menu.press('Enter');
+    await page.keyboard.press('Tab');
+    await expect(page.getByRole('link', { name: 'About' })).toBeFocused();
+
+    for (const name of ['Work', 'Stack', 'Contact']) {
+      await page.keyboard.press('Tab');
+      await expect(page.getByRole('link', { name })).toBeFocused();
+    }
+
+    await page.keyboard.press('Tab');
+    expect(
+      await page.evaluate(() => document.activeElement?.closest('header') === null),
+    ).toBe(true);
   });
 });

@@ -26,6 +26,40 @@ test.describe('i18n routing', () => {
     expect(hydrationErrors).toEqual([]);
   });
 
+  test('switching locales does not render or execute the theme bootstrap script again', async ({
+    page,
+  }) => {
+    const scriptErrors: string[] = [];
+    const captureScriptWarning = (message: string) => {
+      if (/Encountered a script tag while rendering React component|Scripts inside React components/i.test(message)) {
+        scriptErrors.push(message);
+      }
+    };
+    page.on('console', (message) => {
+      if (message.type() === 'error') captureScriptWarning(message.text());
+    });
+    page.on('pageerror', (error) => captureScriptWarning(error.message));
+
+    await page.goto('/en');
+    await expect(page.locator('head script#theme-bootstrap')).toHaveAttribute(
+      'type',
+      'text/javascript',
+    );
+    const initialTimeOrigin = await page.evaluate(() => performance.timeOrigin);
+    await page.getByRole('button', { name: 'Español' }).click();
+    await expect(page).toHaveURL(/\/es$/);
+    await expect.poll(() => page.evaluate(() => performance.timeOrigin)).toBe(initialTimeOrigin);
+    await expect(page.locator('head script#theme-bootstrap')).toHaveAttribute(
+      'type',
+      'text/plain',
+    );
+    await page.getByRole('button', { name: 'English' }).click();
+    await expect(page).toHaveURL(/\/en$/);
+    await expect.poll(() => page.evaluate(() => performance.timeOrigin)).toBe(initialTimeOrigin);
+
+    expect(scriptErrors).toEqual([]);
+  });
+
   test('visiting / with Spanish cookie redirects to /es', async ({ page, context }) => {
     await context.addCookies([
       { name: 'psg_locale', value: 'es', url: 'http://127.0.0.1:3000' },
