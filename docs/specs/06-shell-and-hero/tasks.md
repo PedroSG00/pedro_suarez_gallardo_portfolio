@@ -535,7 +535,7 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
 
 ---
 
-## T19 — Home: hero y cuatro destinos reservados
+## T19 — Home: hero y cuatro destinos reservados ✅ COMPLETADA
 
 **Objetivo:** convertir la home en hero + cuatro destinos vacíos con encabezado, sin contenido de cuerpo y sin tocar la navegación.
 

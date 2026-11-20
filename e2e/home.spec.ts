@@ -1,12 +1,84 @@
 import { expect, test } from '@playwright/test';
 
-test('the home responds without page errors', async ({ page }) => {
-  const pageErrors: string[] = [];
-  page.on('pageerror', (error) => pageErrors.push(error.message));
+const DESTINATIONS = [
+  { id: 'about' },
+  { id: 'work' },
+  { id: 'stack' },
+  { id: 'contact' },
+];
 
-  const response = await page.goto('/');
+const H2_BY_LOCALE: Record<string, string[]> = {
+  en: ['About', 'Work', 'Stack', 'Contact'],
+  es: ['Sobre mí', 'Trabajo', 'Stack', 'Contacto'],
+};
 
-  expect(response, 'navigation should return a response').not.toBeNull();
-  expect(response?.status()).toBeLessThan(400);
-  expect(pageErrors).toEqual([]);
+test.describe('home smoke', () => {
+  test('the home responds without page errors', async ({ page }) => {
+    const pageErrors: string[] = [];
+    page.on('pageerror', (error) => pageErrors.push(error.message));
+
+    const response = await page.goto('/');
+
+    expect(response, 'navigation should return a response').not.toBeNull();
+    expect(response?.status()).toBeLessThan(400);
+    expect(pageErrors).toEqual([]);
+  });
+});
+
+test.describe('home structure', () => {
+  for (const [locale, expectedH2] of Object.entries(H2_BY_LOCALE)) {
+    test.describe(`/${locale}`, () => {
+      test('tiene un solo h1 (el nombre) y cuatro h2 con nombres accesibles en orden', async ({
+        page,
+      }) => {
+        await page.goto(`/${locale}`);
+
+        // un solo h1: el nombre del hero
+        await expect(
+          page.getByRole('heading', { level: 1, name: 'Pedro Suárez Gallardo' }),
+        ).toHaveCount(1);
+
+        // cuatro h2, uno por destino, nombre accesible solo la etiqueta y en orden
+        const headings = page.getByRole('heading', { level: 2 });
+        await expect(headings).toHaveCount(4);
+        for (const [index, expected] of expectedH2.entries()) {
+          await expect(headings.nth(index)).toHaveAccessibleName(expected);
+        }
+      });
+
+      test('el hero es el primer bloque y los destinos no tienen contenido de cuerpo', async ({
+        page,
+      }) => {
+        await page.goto(`/${locale}`);
+
+        // el hero es el primer bloque dentro de main
+        await expect(page.locator('main > section').first()).toHaveAttribute(
+          'aria-labelledby',
+          'hero-name',
+        );
+
+        // cada destino: id estable, aria-labelledby a su encabezado y sin cuerpo
+        for (const { id } of DESTINATIONS) {
+          const section = page.locator(`#${id}`);
+          await expect(section).toHaveCount(1);
+          const heading = section.locator('h2').first();
+          await expect(heading).toHaveCount(1);
+          const headingId = await heading.getAttribute('id');
+          expect(headingId).not.toBeNull();
+          await expect(section).toHaveAttribute('aria-labelledby', headingId!);
+          await expect(section.locator('p')).toHaveCount(0);
+          await expect(section.locator('h1, h3, h4, h5, h6')).toHaveCount(0);
+          await expect(section.locator('a')).toHaveCount(0);
+        }
+      });
+
+      test('no tiene enlaces a proyectos', async ({ page }) => {
+        await page.goto(`/${locale}`);
+        await expect(page.getByRole('link', { name: /project|proyecto/i })).toHaveCount(
+          0,
+        );
+        await expect(page.locator('a[href*="/projects"]')).toHaveCount(0);
+      });
+    });
+  }
 });
