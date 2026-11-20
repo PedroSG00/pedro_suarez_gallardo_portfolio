@@ -393,7 +393,7 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
 
 ---
 
-## T14 — `Navbar`: estructura, menú y controles
+## T14 — `Navbar`: estructura, menú y controles ✅ COMPLETADA
 
 **Objetivo:** construir la barra completa en estado visible: identidad, enlaces de escritorio, menú móvil nativo, control de tema y control de idioma.
 
