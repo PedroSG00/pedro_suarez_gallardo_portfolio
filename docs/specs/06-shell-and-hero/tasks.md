@@ -112,7 +112,7 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
 
 ---
 
-## T3 — Lógica de visibilidad de la barra
+## T3 — Lógica de visibilidad de la barra ✅ COMPLETADA
 
 **Objetivo:** decidir de forma pura cuándo la barra está visible u oculta, con todos los límites y excepciones de RF-3.
 
