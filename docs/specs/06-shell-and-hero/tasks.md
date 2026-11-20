@@ -590,7 +590,7 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
 
 ---
 
-## T21 — Entrada, cursor, contorno y parallax
+## T21 — Entrada, cursor, contorno y parallax ✅ COMPLETADA
 
 **Objetivo:** ejecutar el momento firma del hero solo con CSS: entrada escalonada, cursor terminal, paso a contorno y parallax reversible, con todos los fallbacks.
 
