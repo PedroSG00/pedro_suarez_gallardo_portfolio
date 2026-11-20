@@ -139,7 +139,7 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
 
 ---
 
-## T4 — Lógica de tamaño y ancho del nombre
+## T4 — Lógica de tamaño y ancho del nombre ✅ COMPLETADA
 
 **Objetivo:** calcular el tamaño y el ancho del nombre para cumplir el 90 % en 360, 768 y 1440 px, el tope de retícula y la ausencia de scroll horizontal.
 
