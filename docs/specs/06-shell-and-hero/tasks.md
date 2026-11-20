@@ -165,7 +165,7 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
 
 ---
 
-## T5 — Resolución de hash a destino
+## T5 — Resolución de hash a destino ✅ COMPLETADA
 
 **Objetivo:** validar un hash contra los cuatro destinos existentes sin navegar ni romper la página.
 
@@ -189,7 +189,7 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
 
 ---
 
-## T6 — Extensión de `Section`
+## T6 — Extensión de `Section` ✅ COMPLETADA
 
 **Objetivo:** permitir que los destinos tengan id estable y nombre accesible sin romper el contrato de la spec 04.
 

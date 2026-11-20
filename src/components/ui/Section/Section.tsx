@@ -5,15 +5,17 @@ import type { ReactNode } from 'react';
 type Props = {
   children: ReactNode;
   grid?: boolean;
+  id?: string;
+  labelledBy?: string;
 };
 
-export default function Section({ children, grid = true }: Props) {
+export default function Section({ children, grid = true, id, labelledBy }: Props) {
   if (!children) {
     return null;
   }
 
   return (
-    <section className="relative section">
+    <section id={id} aria-labelledby={labelledBy} className="relative section">
       {grid && (
         <div
           data-testid="section-grid"
