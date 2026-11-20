@@ -56,6 +56,16 @@ test.describe('shell', () => {
     await expect(banners).toHaveCount(1);
   });
 
+  test('uses the white brand mark as the browser icon', async ({ page }) => {
+    await page.goto('/en');
+    const iconHref = await page.locator('head link[rel="icon"]').first().getAttribute('href');
+    expect(iconHref).toMatch(/icon\.svg/);
+
+    const response = await page.request.get(new URL(iconHref!, page.url()).toString());
+    expect(response.ok()).toBe(true);
+    expect(await response.text()).toContain('#ffffff');
+  });
+
   test('skip link is the first focusable element and moves focus to #main', async ({
     page,
   }) => {

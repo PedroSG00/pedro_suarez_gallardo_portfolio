@@ -340,10 +340,12 @@ test.describe('theme first paint', () => {
     const themeBtn = page.getByRole('button', { name: /toggle theme|cambiar tema/i });
     await expect(themeBtn).toBeVisible();
     await expect(themeBtn).toHaveAttribute('aria-pressed', 'false');
+    await expect(themeBtn).toHaveAttribute('data-theme-icon', 'sun');
 
     // Switch to dark
     await themeBtn.click();
     await expect(themeBtn).toHaveAttribute('aria-pressed', 'true');
+    await expect(themeBtn).toHaveAttribute('data-theme-icon', 'moon');
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 
     // Persists after reload
@@ -354,6 +356,7 @@ test.describe('theme first paint', () => {
     // Switch back to light
     await themeBtn.click();
     await expect(themeBtn).toHaveAttribute('aria-pressed', 'false');
+    await expect(themeBtn).toHaveAttribute('data-theme-icon', 'sun');
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
   });
 

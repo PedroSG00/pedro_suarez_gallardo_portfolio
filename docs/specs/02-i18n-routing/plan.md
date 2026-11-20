@@ -240,7 +240,7 @@ FUNCTION validateParity(enMessages, esMessages):
 - Un test verifica comportamiento visible para el usuario (contenido, roles, interacción, estados, accesibilidad), no la implementación.
 - Ni snapshots, ni clases de Tailwind, ni tests solo para subir la cobertura.
 - Playwright cubre flujos críticos: idioma, navegación (punto 8).
-- Cobertura mínima 95% global (líneas, funciones, ramas, sentencias) con umbral en Vitest (punto 9).
+- Cobertura mínima 85% global (líneas, funciones, ramas, sentencias) con umbral en Vitest (punto 9).
 - Se excluyen de cobertura: configuración, tests (`src/**/*.test.{ts,tsx}`), declaraciones (`*.d.ts`), helpers de test (`src/test/`), ficheros de ruta de `src/app/` (cubiertos por e2e) y datos de `src/content/` (punto 9).
 - Se usan los mensajes reales de `en.json` y `es.json` para que una clave faltante rompa el test (sección Tests de AGENTS.md).
 

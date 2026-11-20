@@ -42,23 +42,38 @@ export default function Hero({
   const cursor = '█';
 
   return (
-    <section aria-labelledby={name ? 'hero-name' : undefined}>
+    <section
+      aria-labelledby={name ? 'hero-name' : undefined}
+      className="mx-auto min-h-dvh max-w-[calc(var(--grid-max-width)+2*var(--grid-gutter))] px-(--grid-gutter) pt-8 pb-14 md:pt-12"
+    >
       {name && (
-        <h1 id="hero-name" aria-label={name}>
-          {name.split(' ').map((word) => (
-            <span key={word} aria-hidden="true">{word}</span>
+        <h1 id="hero-name" aria-label={name} className="font-emphasis leading-(--text-display--line-height)">
+          {name.split(' ').map((word, index, words) => (
+            <span key={word} aria-hidden="true" data-hero-line>
+              <span aria-hidden="true">{word}</span>
+              {index === words.length - 1 && (
+                <span data-hero-cursor aria-hidden="true">{cursor}</span>
+              )}
+            </span>
           ))}
-          <span aria-hidden="true">{cursor}</span>
         </h1>
       )}
-      <Reveal variant="rise">{role && <p>{role}</p>}</Reveal>
-      <Reveal variant="rise">{pitch && <p>{pitch}</p>}</Reveal>
-      <Reveal variant="rise">{support && <p>{support}</p>}</Reveal>
-      <Reveal variant="rise">{meta && <p>{meta}</p>}</Reveal>
-      <RevealGroup variant="rise">
-        {ctaPrimary && <Link href={primaryHref}>{ctaPrimary}</Link>}
-        {ctaSecondary && <Link href={secondaryHref}>{ctaSecondary}</Link>}
-      </RevealGroup>
+      <div className="grid gap-4 border-t-(length:--line-width) border-line pt-5 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] md:gap-8">
+        <div className="grid content-start gap-2">
+          {role && <Reveal variant="rise"><p className="text-body font-emphasis">{role}</p></Reveal>}
+          {meta && <Reveal variant="rise"><p className="text-meta text-ink-muted">{meta}</p></Reveal>}
+        </div>
+        <div className="grid content-start gap-3">
+          {pitch && <Reveal variant="rise"><p className="max-w-prose text-body">{pitch}</p></Reveal>}
+          {support && <Reveal variant="rise"><p className="text-meta text-ink-muted">{support}</p></Reveal>}
+        </div>
+        <div className="flex flex-wrap gap-2 md:col-span-2">
+          <RevealGroup variant="rise">
+            {ctaPrimary && <Link href={primaryHref} tone="primary">{ctaPrimary}</Link>}
+            {ctaSecondary && <Link href={secondaryHref}>{ctaSecondary}</Link>}
+          </RevealGroup>
+        </div>
+      </div>
     </section>
   );
 }

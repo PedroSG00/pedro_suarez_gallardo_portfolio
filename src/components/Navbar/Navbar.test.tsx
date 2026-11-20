@@ -14,6 +14,10 @@ vi.mock('@/i18n/navigation', () => ({
     href === '/' ? `/${locale}` : `/${locale}${href}`,
 }));
 
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ replace: vi.fn() }),
+}));
+
 const site: SiteData = {
   name: 'Pedro Suárez Gallardo',
   email: 'suarezgallardopedro@gmail.com',
@@ -136,11 +140,11 @@ describe('Navbar', () => {
     expect(screen.getByRole('button', { name: 'Open menu' })).toBeInTheDocument();
   });
 
-  test('el summary anuncia Cerrar menú cuando el details está abierto', () => {
+  test('announces Close menu after the native menu opens', async () => {
     renderNavbar();
     const summary = screen.getByRole('button', { name: 'Open menu' });
     fireEvent.click(summary);
-    expect(screen.getByRole('button', { name: 'Close menu' })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'Close menu' })).toBeInTheDocument();
   });
 
   test('muestra ThemeControl y LanguageSwitch', () => {
@@ -206,12 +210,12 @@ describe('Navbar', () => {
     expect(screen.queryByRole('link', { name: 'Pedro Suárez Gallardo' })).not.toBeInTheDocument();
   });
 
-  test('el menú se cierra al navegar con JS', () => {
+  test('closes the mobile menu after following a section link', async () => {
     renderNavbar();
     const summary = screen.getByRole('button', { name: 'Open menu' });
     fireEvent.click(summary);
-    expect(screen.getByRole('button', { name: 'Close menu' })).toBeInTheDocument();
-    const workLink = screen.getAllByRole('link', { name: 'Work' })[0];
+    expect(await screen.findByRole('button', { name: 'Close menu' })).toBeInTheDocument();
+    const workLink = within(screen.getByRole('group')).getByRole('link', { name: 'Work' });
     fireEvent.click(workLink);
     expect(screen.getByRole('button', { name: 'Open menu' })).toBeInTheDocument();
   });
@@ -287,10 +291,11 @@ describe('Navbar — visibilidad por scroll y foco (RF-3, RF-4, RF-12)', () => {
     expect(screen.getByRole('banner')).not.toHaveAttribute('data-hidden');
   });
 
-  test('menú abierto lo mantiene visible', () => {
+  test('keeps the navbar visible while the native menu is open', async () => {
     renderNavbar();
     const summary = screen.getByRole('button', { name: 'Open menu' });
     fireEvent.click(summary);
+    await screen.findByRole('button', { name: 'Close menu' });
     mockScrollPosition(100);
     dispatchScroll();
     expect(screen.getByRole('banner')).not.toHaveAttribute('data-hidden');

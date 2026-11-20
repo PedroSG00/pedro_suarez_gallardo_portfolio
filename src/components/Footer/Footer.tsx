@@ -4,7 +4,6 @@ import { useLocale, useTranslations } from 'next-intl';
 import Link from '@/components/ui/Link/Link';
 import type { Locale } from '@/lib/locale';
 import type { SiteData } from '@/content/site';
-import styles from './Footer.module.css';
 
 type Props = {
   site: SiteData;
@@ -33,50 +32,34 @@ export default function Footer({ locale, site, labels }: Props) {
   const copyright = labels?.copyright ?? tFooter('copyright');
 
   return (
-    <footer className={styles.footer}>
-      <ul className={styles.list}>
-        {site.githubUrl && (
-          <li className={styles.item}>
-            <Link
-              href={site.githubUrl}
-              target="_blank"
-              srLabel={newTab}
-            >
-              {github}
-            </Link>
-          </li>
+    <footer className="border-t-(length:--line-width) border-line print:hidden">
+      <div className="mx-auto flex max-w-[calc(var(--grid-max-width)+2*var(--grid-gutter))] flex-wrap items-center justify-between gap-4 px-(--grid-gutter) py-8">
+        <ul className="flex flex-wrap gap-2">
+          {site.githubUrl && (
+            <li>
+              <Link href={site.githubUrl} target="_blank" srLabel={newTab}>{github}</Link>
+            </li>
+          )}
+          {site.linkedinUrl && (
+            <li>
+              <Link href={site.linkedinUrl} target="_blank" srLabel={newTab}>{linkedin}</Link>
+            </li>
+          )}
+          {site.email && (
+            <li>
+              <Link href={`mailto:${site.email}`}>{email}</Link>
+            </li>
+          )}
+          {site.cvPath[currentLocale] && (
+            <li>
+              <Link href={site.cvPath[currentLocale]} target="_blank" srLabel={newTab}>{cv}</Link>
+            </li>
+          )}
+        </ul>
+        {copyright && (
+          <p className="text-meta text-ink-muted">{copyright}</p>
         )}
-        {site.linkedinUrl && (
-          <li className={styles.item}>
-            <Link
-              href={site.linkedinUrl}
-              target="_blank"
-              srLabel={newTab}
-            >
-              {linkedin}
-            </Link>
-          </li>
-        )}
-        {site.email && (
-          <li className={styles.item}>
-            <Link href={`mailto:${site.email}`}>{email}</Link>
-          </li>
-        )}
-        {site.cvPath[currentLocale] && (
-          <li className={styles.item}>
-            <Link
-              href={site.cvPath[currentLocale]}
-              target="_blank"
-              srLabel={newTab}
-            >
-              {cv}
-            </Link>
-          </li>
-        )}
-      </ul>
-      {copyright && (
-        <p className={styles.copyright}>{copyright}</p>
-      )}
+      </div>
     </footer>
   );
 }

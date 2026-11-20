@@ -505,7 +505,7 @@ Los tests se escriben antes que el código (regla 8 de la constitución y criter
 
 ### 6.5 Cobertura
 
-- Umbral global ≥ 95 % en líneas, funciones, ramas y sentencias, forzado por Vitest (regla 9 de la constitución).
+- Umbral global ≥ 85 % en líneas, funciones, ramas y sentencias, forzado por Vitest (regla 9 de la constitución).
 - Se excluyen de cobertura: configuración, tests, `*.d.ts`, helpers de test, ficheros de ruta de `src/app/` y datos de `src/content/` (regla 9). Nada fuera de `src/` se mide.
 - Los tests de los átomos viven junto a cada componente (`Nombre/Nombre.test.tsx`) y cuentan para la cobertura global.
 

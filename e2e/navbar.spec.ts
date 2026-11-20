@@ -38,6 +38,10 @@ test.describe('Navbar navigation (RF-1, RF-2, RF-3, RF-4, RF-5, RF-6, RF-12, RF-
         });
 
         test('identity goes to home and clears hash', async ({ page }) => {
+          const identity = page.getByRole('link', { name: 'Pedro Suárez Gallardo' });
+          const logo = identity.getByRole('img', { name: 'Pedro Suárez Gallardo' });
+          await expect(logo).toHaveAttribute('src', '/logo.svg');
+          await expect(logo).toHaveCSS('filter', theme === 'dark' ? 'invert(1)' : 'none');
           await page.goto(`/${locale}#work`);
           await page.waitForLoadState('networkidle');
           await expect(page).toHaveURL(/#work$/);
@@ -97,9 +101,29 @@ test.describe('Navbar navigation (RF-1, RF-2, RF-3, RF-4, RF-5, RF-6, RF-12, RF-
           await expect(page.url()).toContain('#work');
 
           const otherLang = locale === 'en' ? 'Español' : 'English';
-          await page.getByRole('button', { name: otherLang }).click();
+          const label = locale === 'en' ? 'Work' : 'Trabajo';
+          const nextLabel = locale === 'en' ? 'Trabajo' : 'Work';
+          const previousHeadingTop = await page
+            .getByRole('heading', { level: 2, name: label })
+            .evaluate((heading) => heading.getBoundingClientRect().top);
+          const switchBox = await page.getByRole('button', { name: otherLang }).boundingBox();
+          await page.mouse.click(
+            switchBox!.x + switchBox!.width / 2,
+            switchBox!.y + switchBox!.height / 2,
+          );
           await page.waitForURL(/#work$/);
 
+          await expect
+            .poll(async () =>
+              Math.abs(
+                (await page
+                  .getByRole('heading', { level: 2, name: nextLabel })
+                  .evaluate((heading) => heading.getBoundingClientRect().top)) -
+                  previousHeadingTop,
+              ),
+            )
+            .toBeLessThan(1);
+          await expect(page.getByRole('heading', { level: 2, name: nextLabel })).toBeVisible();
           await expect(page.locator('body')).toContainText(
             locale === 'en' ? 'Desarrollador full-stack' : 'Full-stack developer'
           );
@@ -107,6 +131,62 @@ test.describe('Navbar navigation (RF-1, RF-2, RF-3, RF-4, RF-5, RF-6, RF-12, RF-
       });
     }
   }
+});
+
+test.describe('Scroll behavior on reload and navigation', () => {
+  test('reload restores the same scroll position without a second jump', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/en');
+    await page.evaluate(() => window.scrollTo({ top: 320, behavior: 'instant' }));
+    const beforeReload = await page.evaluate(() => window.scrollY);
+
+    await page.reload();
+    await page.waitForLoadState('networkidle');
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(beforeReload);
+    await page.waitForTimeout(150);
+    expect(await page.evaluate(() => window.scrollY)).toBe(beforeReload);
+  });
+
+  test('changing language preserves the current scroll position', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/en');
+    await page.evaluate(() => window.scrollTo({ top: 320, behavior: 'instant' }));
+    const beforeSwitch = await page.evaluate(() => window.scrollY);
+
+    const switchBox = await page.getByRole('button', { name: 'Español' }).boundingBox();
+    await page.mouse.click(
+      switchBox!.x + switchBox!.width / 2,
+      switchBox!.y + switchBox!.height / 2,
+    );
+    await page.waitForURL('/es');
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(beforeSwitch);
+  });
+
+  test('anchor navigation keeps the navbar visible; only a later user scroll can hide it', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.goto('/en');
+    const navbar = page.getByRole('banner');
+
+    await page.getByRole('link', { name: 'Work' }).click();
+    await expect(page).toHaveURL(/#work$/);
+    await expect(navbar).not.toHaveAttribute('data-hidden');
+
+    await page.mouse.wheel(0, 200);
+    await expect(navbar).toHaveAttribute('data-hidden');
+  });
+
+  test('uses native smooth scrolling only when reduced motion is not requested', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.goto('/en');
+    await expect(page.locator('html')).toHaveCSS('scroll-behavior', 'smooth');
+
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await expect(page.locator('html')).toHaveCSS('scroll-behavior', 'auto');
+  });
 });
 
 test.describe('Navbar visibility on scroll (RF-3, no reduced motion)', () => {
@@ -135,7 +215,8 @@ test.describe('Navbar visibility on scroll (RF-3, no reduced motion)', () => {
           await page.evaluate(() => window.scrollTo(0, 500));
           await page.waitForTimeout(500);
           const navbar = page.locator('header');
-          await expect(navbar).toHaveAttribute('data-hidden');
+          await expect.poll(() => navbar.evaluate((element) => element.getBoundingClientRect().bottom)).toBeLessThanOrEqual(1);
+          await expect(navbar).toHaveCSS('opacity', '1');
         });
 
         test('navbar shows again when scrolling up', async ({ page }) => {
@@ -152,8 +233,10 @@ test.describe('Navbar visibility on scroll (RF-3, no reduced motion)', () => {
           await page.waitForTimeout(500);
           await expect(page.locator('header')).toHaveAttribute('data-hidden');
           await page.keyboard.press('Tab');
-          await page.waitForTimeout(100);
-          await expect(page.locator('header')).not.toHaveAttribute('data-hidden');
+          await expect(page.getByRole('link', { name: /skip to content|saltar al contenido/i })).toBeFocused();
+          await page.keyboard.press('Tab');
+          await expect(page.getByRole('link', { name: 'Pedro Suárez Gallardo' })).toBeFocused();
+          await expect.poll(() => page.locator('header').evaluate((element) => element.getBoundingClientRect().top)).toBeGreaterThanOrEqual(-1);
         });
       });
     }
@@ -189,45 +272,34 @@ test.describe('Mobile menu at 360px (RF-4)', () => {
         await page.waitForLoadState('networkidle');
       });
 
-      test('menu opens, shows links, closes with control and with link, keeps navbar visible, no duplicates', async ({
+      test('menu responds to real clicks and replaces the desktop links below 768px', async ({
         page,
       }) => {
+        const navbar = page.getByRole('banner');
+        const open = navbar.getByRole('button', { name: /open menu|abrir menú/i });
+        const close = navbar.getByRole('button', { name: /close menu|cerrar menú/i });
+        const links = navbar.getByRole('link').filter({ hasText: /^(About|Sobre mí|Work|Trabajo|Stack|Contact|Contacto)$/ });
+        await expect(links).toHaveCount(0);
+        await open.click();
+        await expect(close).toBeVisible();
+        await expect(links).toHaveCount(4);
+        await close.press('Space');
+        await expect(links).toHaveCount(0);
+        await open.click();
+        await links.first().click();
+        await expect(page).toHaveURL(/#about$/);
+        await expect(open).toBeVisible();
+        await expect(links).toHaveCount(0);
 
-        // Open menu (click programmatically to avoid viewport issues at 360px)
-        await page.evaluate(() => {
-          const btn = document.querySelector('summary button') as HTMLElement;
-          if (btn) btn.click();
-        });
-        await page.waitForTimeout(100);
-        // Links are inside the mobile <details> panel; use details a to avoid desktop duplicates
-        await expect(page.locator('details a').filter({ hasText: locale === 'en' ? 'About' : 'Sobre mí' })).toBeVisible();
-        await expect(page.locator('details a').filter({ hasText: locale === 'en' ? 'Work' : 'Trabajo' })).toBeVisible();
-        await expect(page.locator('details a').filter({ hasText: 'Stack' })).toBeVisible();
-        await expect(page.locator('details a').filter({ hasText: locale === 'en' ? 'Contact' : 'Contacto' })).toBeVisible();
-
-        // Close with control
-        await page.evaluate(() => {
-          const btn = document.querySelector('summary button') as HTMLElement;
-          if (btn) btn.click();
-        });
-        await page.waitForTimeout(100);
-        await expect(page.locator('details a').filter({ hasText: locale === 'en' ? 'About' : 'Sobre mí' })).not.toBeVisible();
-
-        // Open again and close with link
-        await page.evaluate(() => {
-          const btn = document.querySelector('summary button') as HTMLElement;
-          if (btn) btn.click();
-        });
-        await page.waitForTimeout(100);
-        await page.locator('details a').filter({ hasText: locale === 'en' ? 'About' : 'Sobre mí' }).click();
-        await page.waitForTimeout(100);
-        await expect(page.locator('details')).not.toHaveAttribute('open');
-
-        // Navbar stays visible on scroll
-        await page.evaluate(() => window.scrollTo(0, 200));
-        await page.waitForTimeout(300);
-        const navbar = page.locator('header');
-        await expect(navbar).not.toHaveAttribute('data-hidden');
+        await open.click();
+        await page.setViewportSize({ width: 768, height: 900 });
+        await expect(links).toHaveCount(4);
+        await expect(close).toHaveCount(0);
+        const boxes = await Promise.all((await links.all()).map((link) => link.boundingBox()));
+        expect(boxes.every((box) => box && box.y === boxes[0]?.y)).toBe(true);
+        await page.setViewportSize({ width: 360, height: 900 });
+        await expect(open).toBeVisible();
+        await expect(links).toHaveCount(0);
       });
     });
   }
@@ -274,34 +346,25 @@ test.describe('No JavaScript (RF-12, RF-14)', () => {
 
       // Skip link works
       const skip = page.getByRole('link', { name: /skip to content/i });
-      await expect(skip).toBeVisible();
-      await skip.click();
+      await page.keyboard.press('Tab');
+      await expect(skip).toBeFocused();
+      await skip.press('Enter');
       await expect(page.locator('main#main')).toBeFocused();
 
       // Theme control does not appear
       await expect(page.getByRole('button', { name: /toggle theme/i })).not.toBeVisible();
 
       // Anchors work
-      await page.getByRole('link', { name: 'Work' }).click();
-      await expect(page.url()).toContain('#work');
-
-      // Menu opens and closes with control (native details)
-      await page.evaluate(() => {
-        const summary = document.querySelector('summary') as HTMLElement;
-        if (summary) summary.click();
-      });
-      await page.waitForTimeout(100);
-      await expect(page.locator('details')).toHaveAttribute('open');
-      await expect(page.locator('details a').filter({ hasText: 'About' })).toBeVisible();
-      await page.evaluate(() => {
-        const summary = document.querySelector('summary') as HTMLElement;
-        if (summary) summary.click();
-      });
-      await page.waitForTimeout(100);
-      await expect(page.locator('details')).not.toHaveAttribute('open');
+      const menu = page.getByRole('button', { name: 'Open menu' });
+      await menu.press('Enter');
+      const work = page.getByRole('link', { name: 'Work' });
+      await work.click();
+      await expect(page).toHaveURL(/#work$/);
+      await expect(work).toBeVisible();
+      await menu.press('Space');
+      await expect(work).toHaveCount(0);
     } finally {
       await context.close();
     }
   });
 });
-

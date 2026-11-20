@@ -4,10 +4,15 @@ import { renderWithIntl } from '@/test/render-with-intl';
 import enMessages from '../../../../messages/en.json';
 import LanguageSwitch from './LanguageSwitch';
 
+const { mockReplace } = vi.hoisted(() => ({ mockReplace: vi.fn() }));
 const mockUsePathname = vi.fn(() => '/about');
 
 vi.mock('@/i18n/navigation', () => ({
   usePathname: () => mockUsePathname(),
+}));
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ replace: mockReplace }),
 }));
 
 function setLocation(url: string) {
@@ -25,10 +30,12 @@ function setLocation(url: string) {
 describe('LanguageSwitch (toggler)', () => {
   beforeEach(() => {
     mockUsePathname.mockReturnValue('/about');
+    mockReplace.mockReset();
+    window.sessionStorage.removeItem('psg-locale-navigation');
     setLocation('http://localhost/en/about?utm=x#y');
   });
 
-  test('renders a single toggler button without visible text', () => {
+  test('renders one language control that shows the active locale', () => {
     renderWithIntl(
       <LanguageSwitch
         locale="en"
@@ -38,7 +45,7 @@ describe('LanguageSwitch (toggler)', () => {
     );
     const button = screen.getByRole('button');
     expect(button).toBeInTheDocument();
-    expect(button.textContent?.trim()).toBe('');
+    expect(button).toHaveTextContent('EN');
   });
 
   test('aria-pressed reflects the current language (true when English is active)', () => {
@@ -87,7 +94,8 @@ describe('LanguageSwitch (toggler)', () => {
     );
     const button = screen.getByRole('button');
     fireEvent.click(button);
-    expect(window.location.href).toBe('/es/about?utm=x#y');
+    expect(mockReplace).toHaveBeenCalledWith('/es/about?utm=x', { scroll: false });
+    expect(window.sessionStorage.getItem('psg-locale-navigation')).toContain('"hash":"#y"');
   });
 
   test('navigates to English preserving search and hash on click', () => {
@@ -100,7 +108,7 @@ describe('LanguageSwitch (toggler)', () => {
     );
     const button = screen.getByRole('button');
     fireEvent.click(button);
-    expect(window.location.href).toBe('/en/about?utm=x#y');
+    expect(mockReplace).toHaveBeenCalledWith('/en/about?utm=x', { scroll: false });
   });
 
   test('navigates on Enter key', () => {
@@ -114,7 +122,7 @@ describe('LanguageSwitch (toggler)', () => {
     const button = screen.getByRole('button');
     button.focus();
     fireEvent.keyDown(button, { key: 'Enter' });
-    expect(window.location.href).toBe('/es/about?utm=x#y');
+    expect(mockReplace).toHaveBeenCalledWith('/es/about?utm=x', { scroll: false });
   });
 
   test('navigates on Space key', () => {
@@ -128,7 +136,7 @@ describe('LanguageSwitch (toggler)', () => {
     const button = screen.getByRole('button');
     button.focus();
     fireEvent.keyDown(button, { key: ' ' });
-    expect(window.location.href).toBe('/es/about?utm=x#y');
+    expect(mockReplace).toHaveBeenCalledWith('/es/about?utm=x', { scroll: false });
   });
 
   test('has an href pointing to the other language (works without JS)', () => {

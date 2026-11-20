@@ -165,6 +165,8 @@ Valores de partida:
 
 Nota: los rangos son valores de partida ajustables (decisión b), incluido el del nombre del hero (``--text-hero-name``). La jerarquía display > titular de gran formato > titular de sección > cuerpo > metadato y los mínimos (12 px cualquier texto, 16 px cuerpo) son contrato.
 
+El nombre del hero usa además tokens de escala óptica y tracking (`--hero-name-scale`, `--hero-name-letter-spacing`) para reducir su altura visual sin bajar del ancho mínimo de la spec 06; estos valores no crean un nuevo rol tipográfico ni alteran la jerarquía.
+
 ### RF-10 — Espaciado y retícula
 
 Criterios de aceptación (EARS):

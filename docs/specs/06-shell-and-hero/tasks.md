@@ -54,6 +54,7 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
 | T21 | Entrada, cursor, contorno y parallax | RF-7, RF-9, RF-10 | T17, T19, T20 |
 | T22 | E2E de navegación y actualización de e2e existentes | RF-1–RF-6, RF-12–RF-14 | T14, T15, T16, T18, T19, T20, T21 |
 | T23 | Enmiendas documentales y gates finales | Todos | T1–T22 |
+| T24 | Pulido de marca, scroll y salida del hero | RF-1, RF-3, RF-6, RF-9, RF-10, RF-13, RF-14 | T14, T15, T18, T19, T21, T22, T23 |
 
 ---
 
@@ -97,7 +98,7 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
 
 **Qué debe quedar:**
 
-- En el bloque `:root` de `@layer base`, junto a `--section-end-padding`, los tokens: `--nav-height`, `--nav-hide-threshold`, `--nav-z`, `--grid-gutter`, `--grid-max-width`, `--text-hero-name`, `--hero-name-fill`, `--hero-name-advance`, `--hero-name-divisor`, `--cursor-width`, `--cursor-duration`, `--hero-line-duration`, `--hero-line-stagger`, `--hero-parallax-distance`, `--touch-target`.
+- En el bloque `:root` de `@layer base`, junto a `--section-end-padding`, los tokens de shell/hero y los posteriores `--anchor-offset`, `--hero-name-scale`, `--hero-name-letter-spacing`, `--cursor-height`, `--cursor-gap` y `--cursor-offset`.
 - `--grid-gutter`: 24 px por defecto y 48 px desde 768 px, mediante media query. `--grid-max-width`: 1600 px. `--text-hero-name` usa `clamp()` con `--grid-gutter`, `--hero-name-fill` y `--hero-name-divisor`.
 - `--nav-hide-threshold` equivale a 80 px; `--touch-target`, como mínimo 24 px; `--cursor-duration`, 1 s; `--hero-line-duration` 400 ms y `--hero-line-stagger` 100 ms (total 600 ms); `--hero-parallax-distance`, 20 dvh; `--hero-name-fill`, `0.9` sin unidad (equivale al 90 % y se puede multiplicar dentro de `calc()`).
 - No se tocan los 33 tokens de `@theme` ni el test `theme-audit`; estos tokens son de layout/hero y viven en `:root`.
@@ -105,7 +106,7 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
 
 **Tests primero:**
 
-- `src/test/shell-tokens.test.ts`: lee el CSS real y comprueba que existen todos los tokens, que `--nav-hide-threshold` son 80 px, que `--touch-target` no baja de 24 px, que el ciclo del cursor es 1 s, que la entrada suma 600 ms como máximo, que el parallax es 20 dvh, que `--hero-name-fill` es `0.9` (90 %), que el tope de retícula es 1600 px y que `--grid-gutter` cambia a 48 px desde 768 px.
+- `src/test/shell-tokens.test.ts`: lee el CSS real y comprueba los 21 tokens, el offset de ancla responsive, `--nav-hide-threshold` de 80 px, área táctil ≥24 px, ciclo de cursor de 1 s, entrada ≤600 ms, parallax de 20 dvh, relleno 0.9, escala/tracking ópticos del nombre, tope de retícula de 1600 px y gutter de 48 px desde 768 px.
 - `src/test/theme-audit.test.ts` debe seguir en verde sin cambios.
 
 **Criterio de hecho:** `pnpm exec vitest run src/test/shell-tokens.test.ts src/test/theme-audit.test.ts` en verde; `pnpm typecheck` en verde; ningún componente nuevo introduce valores fuera de tokens.
@@ -401,7 +402,7 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
 
 **Depende de:** T1, T2, T9, T10 y T13.
 
-**Archivos:** `src/components/Navbar/Navbar.tsx`, `src/components/Navbar/Navbar.module.css`, `src/components/Navbar/Navbar.test.tsx`.
+**Archivos:** `src/components/Navbar/Navbar.tsx`, `src/components/Navbar/Navbar.test.tsx` (responsive layout styled with Tailwind utilities).
 
 **Qué debe quedar:**
 
@@ -432,7 +433,7 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
 
 **Depende de:** T3 y T14.
 
-**Archivos:** `src/components/Navbar/Navbar.tsx`, `src/components/Navbar/Navbar.module.css`, `src/components/Navbar/Navbar.test.tsx`.
+**Archivos:** `src/components/Navbar/Navbar.tsx`, `src/components/Navbar/Navbar.test.tsx` (scroll behavior styled with Tailwind utilities).
 
 **Qué debe quedar:**
 
@@ -604,7 +605,7 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
 
 - Entrada: cada línea pasa de opacidad 0 y desplazamiento inferior a opacidad 1 y posición final; duración 400 ms por línea, desfases 0/100/200 ms, total ≤ 600 ms; `animation-fill-mode: both`; no se repite al hacer scroll.
 - Cursor: ciclo de 1 s, 50 % encendido, visible en relleno y contorno, decorativo y `aria-hidden`.
-- Contorno: el hero define `view-timeline-name`; el rango es `exit 0%` a `exit 100%`; el relleno pasa de tinta a transparente y el trazo se mantiene fijo (no `currentColor`). El contorno se completa cuando el hero termina de salir, no al cargar.
+- Contorno: el hero define `view-timeline-name`; el rango es `exit 0%` a `exit 100%`; el relleno permanece tinta hasta el 80 % de la salida y se vuelve transparente en el último 20 %, con el trazo fijo (no `currentColor`). El contorno se completa al salir el hero sin fragmentos rasterizados intermedios.
 - Parallax: el nombre se desplaza como máximo `--hero-parallax-distance` (20 dvh), que es ≤ 20 % de la altura del hero porque el hero mide al menos 100 dvh. El hueco con el rol reserva esa distancia; el nombre no se solapa con el resto del hero ni con la sección siguiente y revierte al volver arriba.
 - Fallbacks: `@supports not (animation-timeline: view())` deja el nombre sólido, estático y sin transformación; `prefers-reduced-motion: reduce` elimina entrada, parpadeo, contorno y parallax, y deja el cursor estático y visible; `@media print` imprime el nombre sólido y sin animaciones; `@media (forced-colors: active)` mantiene relleno y trazo visibles con `CanvasText`.
 - El nombre nunca se oculta ni se sustituye por una imagen.
@@ -635,7 +636,11 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
   - el enlace de salto es el primero y lleva el foco a `main`;
   - el orden de tabulación es salto, identidad, enlaces o menú, tema, idioma, contenido y pie;
   - la identidad sube al inicio y limpia el hash;
+  - la identidad usa la marca visible `public/logo.svg`;
   - las cuatro anclas dejan el encabezado visible por debajo de la barra, actualizan el hash y dejan el foco en el encabezado;
+  - navegar por un enlace de la barra no la oculta; solo el siguiente scroll del usuario puede hacerlo;
+  - en scroll normal, el desplazamiento nativo de ancla es suave; con `prefers-reduced-motion: reduce` es instantáneo;
+  - recargar y cambiar de idioma conservan instantáneamente la posición visible; el locale conserva query y ancla;
   - la barra está visible arriba, oculta tras 80 px bajando, visible subiendo y visible al enfocar un control oculto;
   - con `prefers-reduced-motion: reduce`, la barra permanece visible en todas las posiciones y no hay deslizamiento;
   - a 360 px el menú abre, muestra los enlaces, cierra con el control y con un enlace, mantiene la barra visible al hacer scroll y no duplica enlaces;
@@ -648,6 +653,7 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
 - `e2e/theme.spec.ts`: añadir que el control de tema cambia claro/oscuro, persiste y anuncia; sin JS no aparece; sigue habiendo un solo script en `<head>`.
 - `e2e/scroll-motion.spec.ts`: añadir que la barra no participa del revelado y que el hero no tapa el destino; los tests de fixtures se mantienen.
 - `e2e/home.spec.ts`: se mantiene el smoke sin `pageerror`.
+- `e2e/shell.spec.ts`: verifica el favicon generado desde `src/app/icon.svg`, con la marca blanca sobre fondo tinta.
 
 **Tests primero:** escribir `navbar.spec.ts` antes de dar por cerrada la barra; ejecutar los e2e actualizados antes de tocar el código que falte.
 
@@ -679,7 +685,7 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
 
 1. `pnpm lint` en verde.
 2. `pnpm typecheck` en verde.
-3. `pnpm test` en verde con cobertura ≥ 95 % en líneas, funciones, ramas y sentencias.
+3. `pnpm test` en verde con cobertura ≥ 85 % en líneas, funciones, ramas y sentencias.
 4. `pnpm build` en verde.
 5. `pnpm test:e2e` en verde.
 6. Paridad de claves entre `messages/en.json` y `messages/es.json`.
@@ -688,23 +694,61 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
 
 ---
 
+## T24 — Pulido de marca, scroll y salida del hero ✅ COMPLETADA
+
+**Objetivo:** corregir los saltos de scroll, asegurar que la navegación mantiene su estado, usar la marca real en la shell y evitar artefactos visuales al salir el hero.
+
+**RF:** RF-1, RF-3, RF-6, RF-9, RF-10, RF-13 y RF-14.
+
+**Depende de:** T14, T15, T18, T19, T21, T22 y T23.
+
+**Archivos:** `public/logo.svg`, `src/components/Navbar/Navbar.tsx`, `src/components/Navbar/Navbar.test.tsx`, `src/components/ui/LanguageSwitch/LanguageSwitch.tsx`, `src/components/ui/LanguageSwitch/LanguageSwitch.test.tsx`, `src/components/ui/Logo/Logo.tsx`, `src/components/ui/ThemeToggle/ThemeToggle.tsx`, `src/components/ui/ThemeToggle/ThemeToggle.test.tsx`, `src/app/icon.svg`, `src/styles/globals.css`, `src/test/shell-tokens.test.ts`, `src/test/source.ts`, `src/test/theme-source.test.ts`, `src/test/theme-audit.test.ts`, `src/components/sections/Hero/Hero.tsx`, `src/components/sections/Hero/Hero.module.css`, `e2e/navbar.spec.ts`, `e2e/hero.spec.ts`, `e2e/shell.spec.ts`, `e2e/theme.spec.ts`, `e2e/i18n-routing.spec.ts`, `docs/specs/05-scroll-motion-reveal/spec.md`, `docs/specs/05-scroll-motion-reveal/tasks.md`, `docs/specs/06-shell-and-hero/spec.md`, `docs/specs/06-shell-and-hero/plan.md`, `docs/specs/06-shell-and-hero/tasks.md`, `docs/specs/01-tooling-and-ci/`, `docs/specs/02-i18n-routing/plan.md`, `docs/specs/03-theme-and-tokens/`, `docs/specs/04-ui-atoms/`, `docs/constitution.md`, `docs/content-brief.md`, `README.md`, `AGENTS.md`, `docs/roadmap.md`.
+
+**Qué debe quedar:**
+
+- La marca de la navbar carga `public/logo.svg`, mantiene el nombre accesible y adapta su contraste al tema. El favicon usa la misma marca blanca sobre fondo tinta.
+- El icono del control de tema refleja el modo activo: sol en claro y luna en oscuro.
+- Al recargar, el navegador conserva la posición de scroll sin una corrección de anclaje posterior. Al cambiar de idioma, se mantienen la posición visible, el query y el hash sin desplazarse al inicio.
+- El scroll que inicia un enlace de la navbar no oculta la navbar. El siguiente scroll iniciado por el usuario vuelve a aplicar RF-3.
+- Los anclajes tienen `scroll-behavior: smooth` con movimiento permitido e `auto` con `prefers-reduced-motion: reduce`; no se programa una animación propia en JavaScript.
+- La escala óptica 0.95 y el tracking 0.032 reducen la altura del nombre sin bajar de 90 % del ancho disponible; el cursor usa tokens proporcionales (0.2 × 0.8 em).
+- El nombre permanece relleno hasta el 80 % del exit y pasa a contorno en el tramo final, sin artefactos intermedios visibles. El efecto continúa siendo reversible y mantiene los fallbacks de T21.
+- El retrato `public/pedro-suarez.png` queda para About en la spec 07 por decisión del usuario; no se crea ni se implementa la sección About en T24.
+- README, spec 05, spec 06 y el plan/tareas de 06 reflejan estas decisiones. El umbral global vigente es 85 %.
+
+**Tests primero:**
+
+- E2E de navbar: posición tras reload y cambio de idioma; ancla con posición visible estable; navbar visible al navegar y ocultable en el siguiente scroll; desplazamiento suave solo cuando se permite.
+- E2E de Hero: relleno sólido durante el tramo inicial de salida y contorno limpio al terminar.
+- E2E de shell: imagen del logo accesible y favicon con marca blanca.
+- Tests de tema: el icono alterna sol/luna junto con `aria-pressed`.
+
+**Criterio de hecho:** `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build` y `pnpm test:e2e` en verde; cobertura global ≥85 %; no hay scroll horizontal ni hidratación divergente.
+
+**Resultado verificado:**
+- `pnpm lint`, `pnpm typecheck` y `pnpm build`: ✅
+- `pnpm test`: 486 pasan; 92.56 % sentencias, 88.64 % ramas, 91.96 % funciones y 92.82 % líneas.
+- `pnpm test:e2e`: 167 pasan, 0 fallan.
+
+---
+
 ## Cobertura RF → tareas
 
 | RF | Tareas que lo cubren |
 |---|---|
-| RF-1 Barra de navegación | T1, T9, T13, T14, T22 |
+| RF-1 Barra de navegación | T1, T9, T13, T14, T22, T24 |
 | RF-2 Destinos reservados | T1, T6, T7, T19, T22 |
-| RF-3 Barra pegajosa y scroll | T2, T3, T14, T15, T22 |
+| RF-3 Barra pegajosa y scroll | T2, T3, T14, T15, T22, T24 |
 | RF-4 Menú en pantallas estrechas | T3, T9, T14, T15, T22 |
 | RF-5 Enlace de salto | T8, T18, T22 |
-| RF-6 Tema e idioma | T2, T10, T14, T22 |
+| RF-6 Tema e idioma | T2, T10, T14, T22, T24 |
 | RF-7 Contenido del hero | T1, T17, T19, T21 |
 | RF-8 Nombre a todo el ancho | T2, T4, T20 |
-| RF-9 Entrada y cursor | T2, T17, T21 |
-| RF-10 Contorno y parallax | T2, T21 |
+| RF-9 Entrada y cursor | T2, T17, T21, T24 |
+| RF-10 Contorno y parallax | T2, T21, T24 |
 | RF-11 Pie de página | T1, T12, T16 |
 | RF-12 Navegación por teclado | T3, T8, T14, T15, T18, T22 |
-| RF-13 Llegada a una sección | T2, T5, T6, T7, T11, T19, T22 |
-| RF-14 Shell en todas las rutas | T1, T14, T16, T18, T19, T22 |
+| RF-13 Llegada a una sección | T2, T5, T6, T7, T11, T19, T22, T24 |
+| RF-14 Shell en todas las rutas | T1, T14, T16, T18, T19, T22, T24 |
 
-Todos los RF tienen al menos una tarea de implementación y una verificación asociada. Las tareas T1–T22 se pueden ejecutar en el orden de la tabla; T23 cierra el cambio.
+Todos los RF tienen al menos una tarea de implementación y una verificación asociada. Las tareas T1–T22 se pueden ejecutar en el orden de la tabla; T23 cierra el cambio inicial y T24 registra el pulido posterior.

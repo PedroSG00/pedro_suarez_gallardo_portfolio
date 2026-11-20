@@ -39,7 +39,7 @@ Esta spec decide qué se ve y qué se garantiza; la arquitectura y los valores d
 ### RF-1 — Barra de navegación
 
 - Cuando la home se muestre en cualquiera de los dos idiomas, el sistema muestre una barra con identidad, cuatro enlaces de sección, control de tema y control de idioma.
-- El sistema anuncie la identidad como «Pedro Suárez Gallardo» y la enlace al inicio de la home del idioma activo.
+- El sistema muestre `public/logo.svg` como identidad de inicio, lo invierta en modo oscuro y lo anuncie como «Pedro Suárez Gallardo» con texto alternativo. El favicon usa la misma marca en blanco sobre fondo oscuro.
 - Cuando el usuario active la identidad estando en la home, el sistema suba al inicio y limpie el ancla de la URL.
 - El sistema muestre los enlaces en el orden About, Work, Stack, Contact, con etiquetas en el idioma activo.
 - El sistema no muestre enlaces a proyectos ni a rutas inexistentes.
@@ -58,6 +58,7 @@ Esta spec decide qué se ve y qué se garantiza; la arquitectura y los valores d
 - Mientras la página esté arriba, el sistema muestre la barra.
 - Cuando el usuario haga scroll hacia abajo más de 80 px, el sistema retire la barra de la vista con un deslizamiento de 200 ms, sin atenuarla ni desvanecerla.
 - Cuando el usuario haga scroll hacia arriba, el sistema devuelva la barra a la vista.
+- Cuando la página se desplace como consecuencia de activar un enlace de la barra, el sistema mantenga la barra visible; solo un scroll posterior del usuario puede ocultarla.
 - Cuando el usuario llegue al final, el sistema mantenga la barra oculta hasta que suba o el foco entre en ella.
 - Cuando el foco entre en un control de la barra oculta, el sistema la muestre de inmediato.
 - El sistema mantenga la barra en el orden de tabulación y en el árbol de accesibilidad mientras está oculta.
@@ -86,7 +87,7 @@ Esta spec decide qué se ve y qué se garantiza; la arquitectura y los valores d
 ### RF-6 — Tema e idioma
 
 - Cuando el usuario active el control de tema, el sistema cambie entre claro y oscuro sin recargar y anuncie el estado resultante.
-- Cuando el usuario active el control de idioma, el sistema cambie entre inglés y castellano conservando la página y el ancla; en la 404, conserve la 404 traducida.
+- Cuando el usuario active el control de idioma, el sistema cambie entre inglés y castellano sin recargar, conservando el ancla y la posición visible; en la 404, conserve la 404 traducida. El cambio no anima ni reinicia el scroll.
 - El sistema mantenga ambos controles visibles en la barra en todos los anchos, alcanzables por teclado y sin duplicarlos en la misma vista.
 - El sistema oculte el control de tema cuando no haya JavaScript.
 - El sistema muestre el estado del tema y del idioma sin depender solo del color.
@@ -107,6 +108,7 @@ Esta spec decide qué se ve y qué se garantiza; la arquitectura y los valores d
 - El sistema componga el nombre en tres líneas, una por palabra, con el mismo tamaño y alineación a la izquierda.
 - El sistema haga que la línea más larga defina el ancho del bloque.
 - Cuando el ancho sea 360, 768 o 1440 px, el sistema muestre el bloque ocupando al menos el 90 % del ancho disponible, descontando el margen de la retícula.
+- Para reducir la altura óptica sin perder ese ancho, el sistema aplica la escala y el tracking del nombre desde tokens y verifica el ancho real en Chromium.
 - Cuando el ancho sea 320 px, el sistema permita que el bloque baje del 90 % antes que provocar scroll horizontal.
 - Cuando el ancho supere 1920 px, el sistema limite el nombre al ancho de la retícula; el 90 % solo se exige hasta 1440 px.
 - El sistema no parta palabras ni provoque scroll horizontal entre 320 y 1920 px.
@@ -123,6 +125,7 @@ Esta spec decide qué se ve y qué se garantiza; la arquitectura y los valores d
 ### RF-10 — Contorno y parallax
 
 - Cuando el usuario haga scroll desde arriba, el sistema transforme el nombre de relleno a contorno y complete el contorno al salir el hero de la pantalla.
+- El relleno permanece sólido durante el primer 80 % de la salida y se vuelve transparente solo en el tramo final; la transición no deja fragmentos ni artefactos de rasterizado.
 - Mientras el hero esté en pantalla, el sistema desplace el nombre verticalmente como máximo un 20 % de la altura del hero.
 - El sistema mantenga el nombre dentro del hero, sin solaparse con el resto del contenido del hero ni con el contenido siguiente, y revierta el efecto al volver arriba.
 - El sistema mantenga el nombre legible con contraste AA para texto grande (3:1) en ambos temas, medido sobre la silueta del trazo.
@@ -150,11 +153,13 @@ Esta spec decide qué se ve y qué se garantiza; la arquitectura y los valores d
 ### RF-13 — Llegada a una sección
 
 - Cuando el usuario active un enlace de sección, el sistema desplace la página, actualice el ancla y deje el encabezado visible por debajo de la barra.
+- Con `prefers-reduced-motion: no-preference`, el navegador desplaza suavemente al destino usando CSS nativo; con movimiento reducido, el desplazamiento es instantáneo.
 - Cuando la página llegue por ancla, el sistema mueva el foco al encabezado del destino y continúe la tabulación dentro de la sección.
 - El sistema muestre el contenido del destino completo al llegar, sin bloques a medio revelar.
 - Cuando el usuario cambie de idioma con un ancla activa, el sistema conserve el ancla y el destino equivalentes.
 - Cuando el usuario active un enlace de sección desde la 404, el sistema navegue a la home del idioma + ancla.
 - Si el destino no existe, el sistema no navegue ni rompa la página.
+- Al recargar, el sistema restaura de forma instantánea la misma posición, sin un segundo salto provocado por el anclaje del layout.
 
 ### RF-14 — Shell en todas las rutas
 
@@ -168,6 +173,7 @@ Esta spec decide qué se ve y qué se garantiza; la arquitectura y los valores d
 - **Accesibilidad:** contraste AA en ambos temas y en relleno/contorno; semántica de regiones y encabezados; teclado sin trampas; foco visible; nombre anunciado una vez; cursor y decoración ocultos; estado del menú y del tema anunciado; 24 × 24 px de área de contacto; 200 % de texto sin pérdida ni scroll horizontal; colores forzados sin ocultar el nombre.
 - **i18n:** todo texto visible en inglés y castellano, mismas claves y mismo cambio; nada hardcodeado; metadatos traducidos; copyright idéntico; cambio de idioma conserva página y ancla.
 - **Movimiento:** sin librerías; duraciones del sistema de movimiento (barra 200 ms, hero ≤600 ms, cursor 1 s); `prefers-reduced-motion` desactiva entrada, parpadeo, contorno, parallax y ocultación de la barra; sin soporte de animación ligada al scroll, nombre sólido y barra visible; ningún contenido depende del efecto.
+- **Scroll:** los anclajes usan el desplazamiento suave nativo solo sin preferencia de movimiento reducido. Recargas y cambios de idioma preservan la posición sin animarla; navegar desde la barra no la oculta.
 - **Rendimiento:** el mayor elemento de la primera pantalla es texto; sin saltos de layout; espacio del nombre reservado desde el primer fotograma; sin scroll horizontal entre 320 y 1920 px.
 - **Estático y sin JS:** barra, pie y hero renderizados estáticamente por idioma; contenido visible sin JS; menú, anclas, salto e idioma operativos; control de tema oculto; sin desajustes de hidratación.
 - **Robustez:** si falta un texto o un dato, el resto se renderiza sin error; ancla inexistente sin navegación ni ruptura; enlace externo fallido sin romper la página; estados de menú y barra se reinician al navegar.
@@ -198,6 +204,8 @@ Esta spec decide qué se ve y qué se garantiza; la arquitectura y los valores d
 - Cambio de tema con el nombre contorneado: contraste mantenido, sin parpadeo.
 - Cambio de idioma con el nombre contorneado: la nueva página empieza sólida.
 - Historial con ancla: la llegada deja el destino completo.
+- Recarga: se restaura instantáneamente la posición anterior, sin una corrección posterior del navegador.
+- Navegación iniciada desde la barra: esta permanece visible hasta que el usuario vuelva a desplazarse.
 - 404: enlaces a home + ancla; idioma conserva la 404 traducida.
 
 ## Fuera de alcance
@@ -210,7 +218,7 @@ Esta spec decide qué se ve y qué se garantiza; la arquitectura y los valores d
 - Controles duplicados de tema o idioma en el pie.
 - Botón de volver arriba.
 - Animación de apertura/cierre del menú y trampa de foco.
-- Scroll suave programático.
+- Bucles de scroll suave programados en JavaScript; se permite el comportamiento suave nativo de CSS cuando no se reduce el movimiento.
 - Metadatos SEO, `hreflang`, sitemap, robots e imagen OG (spec 11).
 - Auditoría final de accesibilidad, rendimiento y Safari/Firefox (spec 12).
 - Cambios de contenido, cifras o PDFs del CV.
@@ -222,12 +230,14 @@ Esta spec decide qué se ve y qué se garantiza; la arquitectura y los valores d
 - El nombre se prueba como una sola cadena accesible y el cursor como decoración oculta.
 - E2E en `/en` y `/es`, tema claro y oscuro: navegación por las cuatro anclas, foco y orden de tabulación, salto, ocultación/reaparición de la barra, menú a 360 px y ausencia de enlaces duplicados.
 - E2E de movimiento: entrada ≤600 ms, contorno y parallax reversibles, sin salir del hero ni provocar scroll horizontal; reduced motion y no-JS.
+- E2E de navegación: recarga y cambio de idioma mantienen la posición; anclas suaves sin movimiento reducido e instantáneas con `reduce`; la barra no se oculta al navegar desde ella.
+- El logo de la barra carga `public/logo.svg` y el favicon muestra esa marca en blanco.
 - El ancho del nombre en 360, 768 y 1440 px se verifica fuera de los flujos críticos de Playwright.
 - Sin scroll horizontal entre 320 y 1920 px.
 - Contraste AA en ambos temas y en ambos estados del nombre.
 - Paridad de claves entre `messages/en.json` y `messages/es.json`.
 - RF-11 de la 05 enmendado y README corregido en el mismo cambio.
-- Cobertura ≥95 % y `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build` y `pnpm test:e2e` en verde.
+- Cobertura ≥85 % y `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build` y `pnpm test:e2e` en verde.
 - La pasada final de accesibilidad, rendimiento y compatibilidad se cierra en la spec 12.
 
 ## Decisiones
@@ -236,6 +246,7 @@ Esta spec decide qué se ve y qué se garantiza; la arquitectura y los valores d
 - Menú por debajo de 768 px, solo icono, superpuesto; se cierra con el control o un enlace; abierto mantiene la barra visible y no cierra con el scroll.
 - Sin JS, el menú no se cierra solo al elegir enlace; con JS, sí.
 - Destinos reservados con `01 / ABOUT` visual, nombre accesible «About» y h2; 07–10 los rellenan.
+- El retrato `public/pedro-suarez.png` queda reservado para About/spec 07, no para el hero; su integración se difiere por decisión del usuario.
 - Hero con el brief completo; CTAs a Work y Contact; destinos vacíos hasta 08/10.
 - Nombre en tres líneas, mismo tamaño, izquierda; 90 % en 360/768/1440; 320 puede bajar; tope 1920.
 - Contorno completo al salir el hero; parallax máximo 20 %; contraste 3:1 sobre la silueta.

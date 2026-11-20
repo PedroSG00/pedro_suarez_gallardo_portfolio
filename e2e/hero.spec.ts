@@ -46,7 +46,8 @@ test.describe('Hero: entrada, cursor, contorno y parallax (RF-7, RF-9, RF-10)', 
     await loadHero(page, 'en', 'light');
     await page.waitForTimeout(700);
 
-    const before = await h1(page).evaluate((el) => {
+    const firstLine = h1(page).getByText('Pedro', { exact: true });
+    const before = await firstLine.evaluate((el) => {
       const s = getComputedStyle(el);
       return { opacity: s.opacity, transform: new DOMMatrixReadOnly(s.transform).m42 };
     });
@@ -54,7 +55,7 @@ test.describe('Hero: entrada, cursor, contorno y parallax (RF-7, RF-9, RF-10)', 
     await page.evaluate(() => window.scrollTo(0, 500));
     await page.waitForTimeout(300);
 
-    const after = await h1(page).evaluate((el) => {
+    const after = await firstLine.evaluate((el) => {
       const s = getComputedStyle(el);
       return { opacity: s.opacity, transform: new DOMMatrixReadOnly(s.transform).m42 };
     });
@@ -67,11 +68,17 @@ test.describe('Hero: entrada, cursor, contorno y parallax (RF-7, RF-9, RF-10)', 
     await loadHero(page, 'en', 'light');
     await page.waitForTimeout(700);
 
-    const cursor = page.locator('h1#hero-name span[aria-hidden="true"]:last-child');
+    const cursor = page.locator('h1#hero-name [data-hero-cursor]');
     await expect(cursor).toHaveAttribute('aria-hidden', 'true');
+    const lastLine = h1(page).getByText('Gallardo', { exact: true });
+    const [lineBox, cursorBox] = await Promise.all([lastLine.boundingBox(), cursor.boundingBox()]);
+    expect(cursorBox!.y + cursorBox!.height).toBeLessThanOrEqual(lineBox!.y + lineBox!.height);
+    expect(cursorBox!.x).toBeGreaterThanOrEqual(lineBox!.x + lineBox!.width);
+    expect(cursorBox!.height).toBeGreaterThanOrEqual(lineBox!.height * 0.6);
+    expect(cursorBox!.width).toBeGreaterThanOrEqual(lineBox!.height * 0.15);
 
     const duration = await page.evaluate(() => {
-      const el = document.querySelector('h1#hero-name span[aria-hidden="true"]:last-child')!;
+      const el = document.querySelector('h1#hero-name [data-hero-cursor]')!;
       return getComputedStyle(el).animationDuration;
     });
     expect(duration).toBe('1s');
@@ -81,6 +88,30 @@ test.describe('Hero: entrada, cursor, contorno y parallax (RF-7, RF-9, RF-10)', 
     await page.waitForTimeout(500);
     const opacity2 = await cursor.evaluate((el) => Number(getComputedStyle(el).opacity));
     expect(opacity1).not.toBe(opacity2);
+  });
+
+  test('keeps the fill solid through most of exit before resolving to a clean outline', async ({
+    page,
+  }) => {
+    await loadHero(page, 'en', 'light');
+    await page.evaluate(() => {
+      document.body.style.minHeight = '300vh';
+    });
+    await page.waitForTimeout(700);
+
+    await page.evaluate(() => window.scrollTo({ top: 600, behavior: 'instant' }));
+    const fillAtMidExit = await h1(page).evaluate((element) => getComputedStyle(element).color);
+    expect(fillAtMidExit).toBe('rgb(18, 17, 16)');
+
+    const exitScrollY = await page
+      .locator('section[aria-labelledby="hero-name"]')
+      .evaluate((element) => window.scrollY + element.getBoundingClientRect().bottom + 1);
+    await page.evaluate((scrollY) => window.scrollTo({ top: scrollY, behavior: 'instant' }), exitScrollY);
+    await page.waitForTimeout(100);
+
+    const fillAtExit = await h1(page).evaluate((element) => getComputedStyle(element).color);
+    expect(fillAtExit).toMatch(/,\s*0\)$/);
+    await expect(h1(page)).toHaveCSS('-webkit-text-stroke-color', 'rgb(18, 17, 16)');
   });
 
   test('contorno y parallax reversibles, sin salir del hero ni solaparse', async ({ page }) => {
@@ -146,7 +177,7 @@ test.describe('Hero: entrada, cursor, contorno y parallax (RF-7, RF-9, RF-10)', 
     await expect(h1(page)).toHaveCSS('opacity', '1');
     await expect(h1(page)).toHaveCSS('transform', 'none');
 
-    const cursor = page.locator('h1#hero-name span[aria-hidden="true"]:last-child');
+    const cursor = page.locator('h1#hero-name [data-hero-cursor]');
     await expect(cursor).toBeVisible();
     await expect(cursor).toHaveCSS('animation', 'none');
   });
@@ -215,8 +246,7 @@ test.describe('Hero: entrada, cursor, contorno y parallax (RF-7, RF-9, RF-10)', 
         <h1 id="hero-name" aria-label="Pedro Suarez Gallardo">
           <span aria-hidden="true">Pedro</span>
           <span aria-hidden="true">Suarez</span>
-          <span aria-hidden="true">Gallardo</span>
-          <span aria-hidden="true">█</span>
+          <span aria-hidden="true" data-hero-line><span>Gallardo</span><span data-hero-cursor aria-hidden="true">█</span></span>
         </h1>
       </section>
     `);

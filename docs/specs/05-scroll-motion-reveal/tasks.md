@@ -319,12 +319,12 @@ Tareas pequeñas y ordenadas (T1 a T15). Cada tarea tiene objetivo, RF que cubre
 - Navegar por ancla a una sección → todos los bloques de esa sección muestran opacidad computada igual a 1 al llegar. ✅
 - Ningún bloque de la sección de destino aparece a medio revelar tras un salto por ancla. ✅
 
-**Criterio de hecho:** Los 2 tests pasan en Chromium. Se demostró que `scroll-padding-top` en `[data-reveal-root]` no funciona (no es contenedor de scroll); se movió a `html` en `globals.css` (CSS real de producción). El fixture conserva su propio `scroll-padding-top` inline porque no carga `globals.css`.
+**Criterio de hecho:** Los 2 tests pasan en Chromium. Se demostró que `scroll-padding-top` en `[data-reveal-root]` no funciona (no es contenedor de scroll); se movió a `html` en `globals.css` (CSS real de producción). El fixture conserva su propio `scroll-padding-top` inline porque no carga `globals.css`. La política actual de scroll nativo suave/instantáneo se especifica en RF-12 de `spec.md` y se aplica desde la spec 06.
 
 **Cambios en spec.md:** RF-12 anotada con la relajación aplicada (bloque de destino completo al llegar; no es posible "todos los bloques" solo con CSS porque un ancla que aterriza en el borde superior queda en fase de salida).
 
 **Archivos creados o modificados:**
-- `src/styles/globals.css` — `html { scroll-padding-top: calc(var(--spacing) * 75); }` (RF-12, CSS real).
+- `src/styles/globals.css` — `html { scroll-padding-top: ... }` adaptable (RF-12, CSS real); scroll suave nativo salvo `prefers-reduced-motion: reduce`.
 - `e2e/anchor-jump.spec.ts` — scroll-padding-top inline mantenido (fixture aislado).
 
 ---
@@ -387,5 +387,4 @@ Tareas pequeñas y ordenadas (T1 a T15). Cada tarea tiene objetivo, RF que cubre
 - `src/components/ui/Reveal/Reveal.test.tsx` — asserts de opacidad computada en lugar de estilo inline.
 
 ---
-
 

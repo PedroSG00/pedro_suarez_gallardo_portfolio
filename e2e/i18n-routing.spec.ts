@@ -6,6 +6,26 @@ test.describe('i18n routing', () => {
     await context.clearCookies();
   });
 
+  test('loads a localized hash without a hydration mismatch', async ({ page }) => {
+    const hydrationErrors: string[] = [];
+    const collectHydrationError = (message: string) => {
+      if (/hydration|hydrated|server rendered html/i.test(message)) {
+        hydrationErrors.push(message);
+      }
+    };
+    page.on('console', (message) => {
+      if (message.type() === 'error') collectHydrationError(message.text());
+    });
+    page.on('pageerror', (error) => collectHydrationError(error.message));
+
+    await page.goto('/en?source=portfolio#about');
+    await expect(page.getByRole('button', { name: 'Español' })).toHaveAttribute(
+      'href',
+      '/es?source=portfolio#about',
+    );
+    expect(hydrationErrors).toEqual([]);
+  });
+
   test('visiting / with Spanish cookie redirects to /es', async ({ page, context }) => {
     await context.addCookies([
       { name: 'psg_locale', value: 'es', url: 'http://127.0.0.1:3000' },

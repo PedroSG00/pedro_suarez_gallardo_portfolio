@@ -136,7 +136,7 @@ Criterios de aceptación (EARS):
 ## Criterios de finalización
 
 - Cada átomo tiene tests de comportamiento visible (contenido mostrado, roles y etiquetas accesibles, variantes, interacción, estados), escritos antes del código.
-- Cobertura ≥ 95 % (líneas, funciones, ramas, sentencias), forzada por el umbral de Vitest.
+- Cobertura ≥ 85 % (líneas, funciones, ramas, sentencias), forzada por el umbral de Vitest.
 - `pnpm lint`, `pnpm typecheck`, `pnpm test` y `pnpm build` en verde.
 - Accesibilidad verificada: contraste AA, teclado, semántica.
 

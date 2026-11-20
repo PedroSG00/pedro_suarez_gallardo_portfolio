@@ -9,7 +9,7 @@ const FONT_SERIF_RE = /\bfont-serif\b/;
 const DARK_VARIANT_RE = /\bdark:/;
 const ARBITRARY_SPACING_RE = /\b(?:p|m|px|py|pt|pr|pb|pl|gap|inset|translate)-\[[^\]]*\]/g;
 const HALF_FRACTION_RE = /\b(?:p|m|px|py|pt|pr|pb|pl|mx|my|gap|space-x|space-y|inset|mt|mr|mb|ml|size|w|h)-(0\.[0-9]*[1-9]|[0-9]+\.[0-9]*[1-9])\b/g;
-const CSS_SPACING_RE = /((?:padding|margin|gap|inset)(?:-[a-z]+)?)\s*:\s*([^;}]+)/gi;
+const CSS_SPACING_RE = /(?<![\w-])((?:scroll-)?(?:padding|margin|gap|inset)(?:-[a-z]+)?)\s*:\s*([^;}]+)/gi;
 
 function normalizePath(path: string): string {
   return path.replace(/\\/g, "/");
@@ -39,6 +39,7 @@ function isValidCssSpacing(value: string): boolean {
   const v = value.trim();
   if (v === "0") return true;
   if (v === "var(--spacing)") return true;
+  if (v === "var(--anchor-offset)") return true;
   if (v.startsWith("calc(") && v.includes("--spacing")) return true;
   const px = toPx(v);
   return px !== null && px % 4 === 0;

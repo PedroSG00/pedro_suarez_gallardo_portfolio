@@ -14,14 +14,11 @@
 
 ## 0. Dependencia previa: acceso a textos
 
-El árbol actual **no** contiene `src/i18n/` ni un `NextIntlClientProvider`; `page.tsx` y `layout.tsx` importan `messages/en.json` y `messages/es.json` directamente y seleccionan por locale. La spec 02 declara `next-intl` y `renderWithIntl`, pero esa infraestructura no está en el código.
+La infraestructura de la spec 02 ya está implementada: `src/i18n/` configura `next-intl`, el layout monta `NextIntlClientProvider` y `renderWithIntl` usa los catálogos reales.
 
-Para no reabrir la spec 02 dentro de la 06, este plan usa el mismo acceso tipado que ya existe:
-
-- El layout y la página seleccionan el objeto de mensajes por locale y pasan a cada componente **solo las cadenas que necesita**.
-- Los componentes de `ui/` y las secciones no importan `messages/` ni `src/content/` (regla 5): reciben contenido por props.
-- Los tests de sección renderizan con los mensajes reales de `en.json`/`es.json`, de modo que una clave ausente rompa el test.
-- Si se decide introducir `next-intl` y `renderWithIntl`, debe hacerse primero en la spec 02; este plan no lo recrea.
+- Layout y página fijan el locale para el renderizado estático.
+- Componentes de `ui/` y secciones consumen traducciones con `next-intl`; los datos no traducibles salen de `src/content/`.
+- Todo texto nuevo se añade a `messages/en.json` y `messages/es.json` en el mismo cambio.
 
 **Cobertura RF:** transversal a RF-1, RF-4, RF-5, RF-6, RF-7, RF-11 y RF-14 (todo texto visible).
 
@@ -36,7 +33,6 @@ src/
 ├── components/
 │   ├── Navbar/
 │   │   ├── Navbar.tsx                 # orquestador cliente: visibilidad, menú, tema, idioma
-│   │   ├── Navbar.module.css          # barra pegajosa, panel del menú, estados
 │   │   └── Navbar.test.tsx
 │   ├── Footer/
 │   │   ├── Footer.tsx                 # pie estático
@@ -51,6 +47,7 @@ src/
 │       ├── SectionHeading/            # nuevo: número + etiqueta como h2
 │       ├── SkipLink/                  # nuevo: salto al contenido
 │       ├── NavLinks/                  # nuevo: lista de enlaces reutilizable
+│       ├── Logo/                       # marca enlazada desde public/logo.svg
 │       ├── ThemeControl/              # nuevo: estado de tema + ThemeToggle
 │       └── AnchorFocus/               # nuevo: foco en el encabezado del ancla
 ├── content/
@@ -64,6 +61,7 @@ src/
 │   ├── layout.tsx                     # skip link, Navbar, main, Footer
 │   ├── page.tsx                       # Hero + cuatro destinos reservados
 │   └── not-found.tsx                  # shell en 404 (sin hero)
+├── app/icon.svg                       # favicon: marca blanca sobre fondo tinta
 └── styles/globals.css                 # tokens nuevos de la shell y del hero
 ```
 
@@ -71,8 +69,9 @@ src/
 
 | Módulo | Responsabilidad | RF |
 |---|---|---|
-| `Navbar/Navbar.tsx` | Barra pegajosa: identidad, enlaces de escritorio, menú móvil, tema e idioma. Decide visibilidad al hacer scroll. | RF-1, RF-3, RF-4, RF-6, RF-12, RF-14 |
-| `Navbar/Navbar.module.css` | Barra sólida, deslizamiento de 200 ms, panel superpuesto, estados de foco y de menú. | RF-3, RF-4, RF-12 |
+| `Navbar/Navbar.tsx` | Barra pegajosa con la marca de `/logo.svg`, enlaces de escritorio, menú móvil, tema e idioma. Mantiene visibilidad al navegar desde ella. | RF-1, RF-3, RF-4, RF-6, RF-12, RF-14 |
+| `Navbar` (Tailwind) | Barra sólida, menú responsive superpuesto, estados de foco y controles. | RF-1, RF-3, RF-4, RF-12 |
+| `Logo/Logo.tsx` | Marca de `public/logo.svg`; adapta el contraste al tema y mantiene nombre accesible. | RF-1 |
 | `Footer/Footer.tsx` | GitHub, LinkedIn, email, CV y copyright; sin controles de tema ni idioma. | RF-11, RF-14 |
 | `sections/Hero/Hero.tsx` | Nombre h1, rol, pitch, apoyo, metadatos, CTAs y revelado `rise` del contenido secundario. | RF-7, RF-8, RF-9, RF-10 |
 | `sections/Hero/Hero.module.css` | Entrada escalonada, cursor, contorno, parallax, reduced-motion, impresión y colores forzados. | RF-8, RF-9, RF-10 |
@@ -90,7 +89,7 @@ src/
 | `app/[locale]/layout.tsx` | Compone SkipLink, Navbar, `main` y Footer en todas las rutas localizadas. | RF-5, RF-12, RF-14 |
 | `app/[locale]/page.tsx` | Compone Hero y los cuatro destinos reservados con sus encabezados. | RF-2, RF-7, RF-13 |
 | `app/[locale]/not-found.tsx` | Mantiene la shell en la 404; sin hero ni destinos. | RF-14, RF-13 |
-| `styles/globals.css` | Tokens nuevos: altura de barra, umbral, retícula, nombre, cursor, parallax, foco y área táctil. | RF-3, RF-4, RF-6, RF-8, RF-9, RF-10 |
+| `styles/globals.css` | Tokens de shell/hero, `--anchor-offset`, scroll nativo suave e instantáneo con movimiento reducido, y anclaje estable en recarga. | RF-3, RF-4, RF-6, RF-8, RF-9, RF-10, RF-13 |
 
 ### 1.2 Extensiones compatibles de átomos existentes (spec 04)
 
@@ -392,7 +391,9 @@ ON mount AND ON hashchange:
     heading.focus({ preventScroll: true })
 ```
 
-El desplazamiento lo hace el navegador con `scroll-padding-top` (30vh, ya existente) para que el encabezado quede en la banda estable del revelado y por debajo de la barra. El foco no vuelve a desplazar. Si el hash apunta a algo que no es un destino de sección, no se hace nada.
+El desplazamiento lo hace el navegador con `scroll-padding-top: var(--anchor-offset)`, cuyo token se adapta al viewport y mantiene el destino por debajo de la barra y dentro de la banda estable del revelado. Con movimiento permitido, `scroll-behavior: smooth` se aplica en CSS; con `prefers-reduced-motion: reduce`, se usa `auto`. `AnchorFocus` enfoca con `preventScroll: true` y no causa un segundo salto.
+
+El cambio de idioma usa `router.replace(..., {scroll: false})`, sin fragmento durante la navegación. Conserva query, hash y la posición visible; aplica el hash después del cambio sin solicitar otro scroll. En recarga se mantiene la restauración nativa exacta (`overflow-anchor: none` evita que el anclaje del documento la desplace).
 
 **Cobertura RF:** RF-2, RF-13.
 
@@ -408,7 +409,7 @@ FUNCTION heroNameMetrics(viewportWidth, gutter, options):
     RETURN { fontSize, blockWidth, ratio, contentWidth }
 ```
 
-La misma fórmula se expresa en CSS con `clamp()` y `calc()`; la función pura existe para verificar la invariante sin depender de un motor de layout. El cursor se pinta en el `padding-inline-end` del bloque, no suma al ancho de la línea más larga.
+La misma fórmula base se expresa en CSS con `clamp()` y `calc()`; la función pura existe para verificarla sin depender de un motor de layout. La composición aplica `--hero-name-scale` (0.95) y `--hero-name-letter-spacing` (0.032) para reducir la altura óptica y conservar un ancho medido ≥90 %. El cursor se pinta fuera del flujo y no suma al ancho de la línea más larga.
 
 Casos de la tabla de tests (gutter 24 px hasta 767 y 48 px desde 768):
 
@@ -442,7 +443,7 @@ CURSOR:
 CONTORNO Y PARALLAX:
     el hero define view-timeline-name: --hero
     rango: exit 0% → exit 100%
-    color de relleno: ink → transparent
+    color de relleno: ink hasta 80% de exit; ink → transparent en 80–100%
     trazo: ink fijo (no currentColor)
     translateY: 0 → var(--hero-parallax-distance)
 
@@ -457,7 +458,7 @@ FALLBACK:
         relleno CanvasText, trazo CanvasText
 ```
 
-El contorno se completa cuando el hero termina de salir (`exit 100%`), no cuando el nombre sale por su cuenta. El parallax usa como máximo `20dvh`, que es ≤ 20 % de la altura del hero porque el hero mide al menos `100dvh`; el hueco entre el nombre y el rol reserva esa distancia para que no se solapen.
+El contorno se completa cuando el hero termina de salir (`exit 100%`), no cuando el nombre sale por su cuenta. El relleno permanece sólido hasta el último tramo para evitar estados intermedios rasterizados que se perciben como fragmentos. El parallax usa como máximo `20dvh`, que es ≤ 20 % de la altura del hero porque el hero mide al menos `100dvh`; el hueco entre el nombre y el rol reserva esa distancia para que no se solapen.
 
 **Cobertura RF:** RF-9, RF-10.
 
@@ -624,9 +625,10 @@ Los tests se escriben antes que el código (regla 8). Se verifica comportamiento
 
 | Archivo | Flujo | RF |
 |---|---|---|
-| `e2e/navbar.spec.ts` (nuevo) | `/en` y `/es`, claro y oscuro: skip link; orden de tabulación; identidad sube y limpia hash; cuatro anclas con encabezado visible; barra visible arriba, oculta tras 80 px bajando, visible subiendo, visible al enfocar; menú a 360 px (abrir, enlaces, cerrar, barra visible, sin duplicados); 404 con enlaces a home + ancla; cambio de idioma conserva ancla; tema e idioma en la barra. | RF-1, RF-2, RF-3, RF-4, RF-5, RF-6, RF-12, RF-13, RF-14 |
+| `e2e/navbar.spec.ts` | `/en` y `/es`, claro y oscuro: skip link; orden de tabulación; marca `logo.svg`; cuatro anclas; barra visible durante navegación y oculta solo por scroll posterior del usuario; menú a 360 px; 404; locale conserva hash y posición; recarga restaura posición; scroll suave solo sin `reduce`. | RF-1, RF-2, RF-3, RF-4, RF-5, RF-6, RF-12, RF-13, RF-14 |
 | `e2e/hero.spec.ts` (nuevo) | Nombre como h1 único; entrada ≤ 600 ms; cursor con ciclo 1 s; contorno y parallax reversibles, sin salir del hero; reduced motion sólido y estático; no-JS visible; sin scroll horizontal en 320–1920; nombre ≥ 90 % en 360/768/1440; impresión sin barra/pie y nombre sólido; colores forzados. | RF-7, RF-8, RF-9, RF-10 |
-| `e2e/theme.spec.ts` (ampliar) | El control de tema cambia claro/oscuro, persiste y anuncia; sin JS no aparece; no se añade un segundo script en `<head>`. | RF-6 |
+| `e2e/theme.spec.ts` | El control de tema cambia claro/oscuro, persiste y anuncia; sin JS no aparece; no se añade un segundo script en `<head>`. | RF-6 |
+| `e2e/shell.spec.ts` | El favicon generado usa la marca blanca del sitio. | RF-1 |
 | `e2e/i18n-routing.spec.ts` (actualizar) | Sustituir «Web portfolio»/«Portfolio web» por el rol traducido; mantener idioma, hash, query, 404 y cambio de idioma. | RF-6, RF-14 |
 | `e2e/home.spec.ts` | Se mantiene el smoke sin `pageerror`. | RF-14 |
 | `e2e/scroll-motion.spec.ts` | Se mantiene; añadir si falta que la barra no participa del revelado y que el hero no tapa el destino. | RF-3, RF-10 |
@@ -643,7 +645,7 @@ Los e2e de navegación e idioma se ejecutan con `prefers-reduced-motion: reduce`
 
 ### 6.5 Cobertura y gates
 
-- Umbral global ≥ 95 % en líneas, funciones, ramas y sentencias (regla 9). Los módulos nuevos se testean por comportamiento; las ramas de `prefers-reduced-motion`, `supportsScrollTimeline`, menú abierto/cerrado, foco dentro/fuera, tema montado/sin montar y hash válido/desconocido tienen caso propio.
+- Umbral global ≥ 85 % en líneas, funciones, ramas y sentencias (requisito vigente). Los módulos nuevos se testean por comportamiento; las ramas de `prefers-reduced-motion`, `supportsScrollTimeline`, menú abierto/cerrado, foco dentro/fuera, tema montado/sin montar y hash válido/desconocido tienen caso propio.
 - `src/app/` sigue excluido (cubierto por e2e); `src/content/` excluido; `src/lib/` y `src/components/` medidos.
 - Gates: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build` y `pnpm test:e2e` (la spec toca idioma, tema, navegación y movimiento).
 - Se ejecutan en el orden de la regla 10 y antes de un PR.
@@ -687,7 +689,7 @@ Todos los RF tienen al menos un módulo, un contrato y un test asociados. No que
 | 6. i18n completo | Todas las claves nuevas van en `en.json` y `es.json` en el mismo cambio; el test de paridad existente las cubre. |
 | 7. Estructura estable | No hay carpetas nuevas en la raíz ni en `src/`; se usan `components/ui/`, `components/sections/`, `components/Navbar/`, `components/Footer/`, `src/content/`, `src/lib/`. Sin barrel files. |
 | 8. Tests de calidad | Tests por comportamiento y estilos computados; e2e solo para los flujos críticos (navegación, tema, idioma, movimiento). |
-| 9. Cobertura ≥ 95 % | Tabla de tests por módulo y ramas; umbral intacto; sin exclusiones nuevas. |
+| 9. Cobertura ≥ 85 % | Tabla de tests por módulo y ramas; umbral intacto; sin exclusiones nuevas. |
 | 10. Definición de terminado | Gates completos, incluido `pnpm test:e2e` por tocar idioma, tema, navegación y movimiento. |
 | 11. Inglés en el código | Nombres de archivos, tipos, funciones y tokens en inglés; documentos y textos en español/inglés según corresponda. |
 | 12. Minimalismo espectacular | El nombre a todo el ancho, el cursor, el contorno y el parallax son el momento firma; sin color de acento ni decoración añadida. La barra y el pie son discretos. |

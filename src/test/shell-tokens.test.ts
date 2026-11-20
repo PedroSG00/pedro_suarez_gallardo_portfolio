@@ -72,13 +72,19 @@ const SHELL_TOKENS = [
   "--nav-height",
   "--nav-hide-threshold",
   "--nav-z",
+  "--anchor-offset",
   "--grid-gutter",
   "--grid-max-width",
   "--text-hero-name",
   "--hero-name-fill",
+  "--hero-name-scale",
+  "--hero-name-letter-spacing",
   "--hero-name-advance",
   "--hero-name-divisor",
   "--cursor-width",
+  "--cursor-height",
+  "--cursor-gap",
+  "--cursor-offset",
   "--cursor-duration",
   "--hero-line-duration",
   "--hero-line-stagger",
@@ -87,7 +93,7 @@ const SHELL_TOKENS = [
 ] as const;
 
 describe("shell and hero tokens in the base :root (RF-3, RF-4, RF-6, RF-8, RF-9, RF-10, RF-13)", () => {
-  test("all 15 tokens live next to --section-end-padding", () => {
+  test("all 21 tokens live next to --section-end-padding", () => {
     for (const token of SHELL_TOKENS) {
       expect(rootTokens[token]).toBeTruthy();
     }
@@ -102,13 +108,22 @@ describe("shell and hero tokens in the base :root (RF-3, RF-4, RF-6, RF-8, RF-9,
     expect(pxLength(rootTokens["--nav-hide-threshold"])).toBe(80);
   });
 
+  test("anchor scroll padding adapts to the viewport but never overlaps the navbar", () => {
+    expect(rootTokens["--anchor-offset"].replace(/\s+/g, " ")).toBe(
+      "clamp( var(--nav-height), 20dvh, calc(var(--spacing) * 50) )",
+    );
+  });
+
   test("the touch target is at least 24px", () => {
     expect(pxLength(rootTokens["--touch-target"])).toBeGreaterThanOrEqual(24);
   });
 
   test("the cursor cycle lasts 1s and the cursor has a width", () => {
     expect(ms(rootTokens["--cursor-duration"])).toBe(1000);
-    expect(rootTokens["--cursor-width"]).toMatch(/^(\d+(?:\.\d+)?)ch$/);
+    expect(Number(rootTokens["--cursor-width"])).toBeGreaterThan(0);
+    expect(Number(rootTokens["--cursor-height"])).toBeGreaterThan(0);
+    expect(Number(rootTokens["--cursor-gap"])).toBeGreaterThan(0);
+    expect(Number(rootTokens["--cursor-offset"])).toBeGreaterThan(0);
   });
 
   test("the staggered entrance is 400ms per line and adds up to at most 600ms", () => {
@@ -126,6 +141,13 @@ describe("shell and hero tokens in the base :root (RF-3, RF-4, RF-6, RF-8, RF-9,
   test("the hero name fill is 0.9 without a unit", () => {
     expect(rootTokens["--hero-name-fill"]).toBe("0.9");
     expect(rootTokens["--hero-name-fill"]).not.toContain("%");
+  });
+
+  test("hero name scale and tracking are dimensionless ratios", () => {
+    expect(Number(rootTokens["--hero-name-scale"])).toBeGreaterThan(0);
+    expect(Number(rootTokens["--hero-name-scale"])).toBeLessThan(1);
+    expect(Number(rootTokens["--hero-name-letter-spacing"])).toBeGreaterThan(0);
+    expect(rootTokens["--hero-name-letter-spacing"]).not.toContain("em");
   });
 
   test("the hero name advance and divisor are 0.6 and 4.8", () => {

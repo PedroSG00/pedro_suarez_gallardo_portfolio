@@ -1,36 +1,45 @@
-/* RF-8: nombre a todo el ancho. Selectores basados en id/atributo para que
-   se apliquen desde el primer fotograma (HTML servido), sin depender de que
-   el cliente aplique la clase hasheada del CSS module. El tamaño sale de
-   --text-hero-name (clamp impulsado por --grid-gutter, --hero-name-fill y
-   --hero-name-divisor). La línea más larga define el ancho del bloque; el
-   cursor se reserva en el padding sin sumar a esa línea. */
+/* RF-8: full-width name. ID/attribute selectors apply from the first frame
+   of server-rendered HTML, without relying on the client-applied CSS module
+   hash. Size comes from --text-hero-name, driven by the grid gutter, fill
+   ratio and divisor. The longest line defines block width; cursor space is
+   reserved in padding and does not add to that line. */
 
 #hero-name {
   display: block;
   width: max-content;
   white-space: nowrap;
-  font-size: var(--text-hero-name);
+  font-size: calc(var(--text-hero-name) * var(--hero-name-scale));
+  letter-spacing: calc(var(--hero-name-letter-spacing) * 1em);
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   margin: 0;
   position: relative;
   /* reserved space for the cursor; not part of the longest line */
-  padding-inline-end: var(--cursor-width);
+  padding-inline-end: calc(var(--cursor-width) * 1em);
 }
 
-#hero-name > span[aria-hidden="true"] {
+#hero-name > span[data-hero-line] {
   /* one word per line, left-aligned, content width */
   display: block;
   width: max-content;
 }
 
-/* cursor decorativo: se pinta en el espacio reservado del bloque
-   (heredado de T4/T17), fuera del flujo de la línea más larga.
-   Su animación de parpadeo es de T21. */
-#hero-name > span[aria-hidden="true"]:last-child {
+#hero-name > span[data-hero-line]:last-of-type {
+  position: relative;
+}
+
+#hero-name [data-hero-cursor] {
   position: absolute;
-  inset-inline-end: 0;
-  width: var(--cursor-width);
+  inset-inline-start: calc(100% + var(--cursor-gap) * 1em);
+  inset-block-start: calc(var(--cursor-offset) * 1em);
+  display: block;
+  inline-size: calc(var(--cursor-width) * 1em);
+  block-size: calc(var(--cursor-height) * 1em);
+  overflow: hidden;
+  background-color: var(--color-ink);
+  color: transparent;
+  font-size: 1em;
+  line-height: 1;
 }
 
 /* RF-9: staggered entry of each line (400 ms, offsets 0/100/200 ms,
@@ -42,7 +51,7 @@
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
   }
 }
 
@@ -61,7 +70,7 @@
   animation-delay: 200ms;
 }
 
-/* RF-9: cursor parpadeante, ciclo 1 s, 50 % encendido, decorativo. */
+/* RF-9: decorative blinking cursor, 1 s cycle, visible for 50%. */
 @keyframes hero-cursor-blink {
   0%, 50% {
     opacity: 1;
@@ -71,21 +80,19 @@
   }
 }
 
-#hero-name > span[aria-hidden="true"]:last-child {
+#hero-name [data-hero-cursor] {
   animation: hero-cursor-blink var(--cursor-duration) steps(2, jump-start) infinite both;
-  color: var(--color-ink);
-  -webkit-text-stroke: var(--line-width) var(--color-ink);
 }
 
-/* RF-10: el hero define el timeline de vista para el contorno y el parallax. */
+/* RF-10: the hero defines the view timeline for outline and parallax. */
 section[aria-labelledby="hero-name"] {
   view-timeline-name: --hero;
   view-timeline-axis: block;
 }
 
-/* RF-10: contorno (relleno tinta → transparente, trazo fijo) y parallax
-   (translateY hasta --hero-parallax-distance) sobre el rango de salida
-   exit 0% a exit 100%. Se completa al salir el hero, no al cargar. */
+/* RF-10: outline (ink fill → transparent, fixed stroke) and parallax
+   (translateY up to --hero-parallax-distance) over the exit 0% to exit 100%
+   range. It completes as the hero leaves, not on load. */
 @keyframes hero-parallax {
   from {
     transform: translateY(0);
@@ -97,6 +104,9 @@ section[aria-labelledby="hero-name"] {
 
 @keyframes hero-fill {
   from {
+    color: var(--color-ink);
+  }
+  80% {
     color: var(--color-ink);
   }
   to {
@@ -112,12 +122,12 @@ section[aria-labelledby="hero-name"] {
   animation-range:
     exit 0% exit 100%,
     exit 0% exit 100%;
-  /* trazo fijo, no currentColor: el relleno anima pero el trazo se mantiene */
+  /* Fixed stroke, not currentColor: only the fill animates. */
   -webkit-text-stroke: var(--line-width) var(--color-ink);
 }
 
-/* RF-8 / RF-10: el hueco entre el nombre y el rol reserva la distancia de
-   parallax para que el nombre no se solape al desplazarse. */
+/* RF-8 / RF-10: space between the name and role reserves parallax distance
+   so the name does not overlap the following content while moving. */
 #hero-name {
   padding-block-end: var(--hero-parallax-distance);
 }
@@ -126,16 +136,17 @@ section[aria-labelledby="hero-name"] {
    no transformation. */
 @supports not (animation-timeline: view()) {
   #hero-name {
+    padding-block-end: 0;
     animation: none !important;
     transform: none !important;
     color: var(--color-ink) !important;
   }
-  #hero-name > span[aria-hidden="true"] {
+  #hero-name > span[data-hero-line] {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
   }
-  #hero-name > span[aria-hidden="true"]:last-child {
+  #hero-name [data-hero-cursor] {
     animation: none !important;
     opacity: 1 !important;
   }
@@ -145,16 +156,17 @@ section[aria-labelledby="hero-name"] {
    no parallax; static visible cursor. */
 @media (prefers-reduced-motion: reduce) {
   #hero-name {
+    padding-block-end: 0;
     animation: none !important;
     transform: none !important;
     color: var(--color-ink) !important;
   }
-  #hero-name > span[aria-hidden="true"] {
+  #hero-name > span[data-hero-line] {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
   }
-  #hero-name > span[aria-hidden="true"]:last-child {
+  #hero-name [data-hero-cursor] {
     animation: none !important;
     opacity: 1 !important;
   }
@@ -167,7 +179,11 @@ section[aria-labelledby="hero-name"] {
     transform: none !important;
     color: var(--color-ink) !important;
   }
-  #hero-name > span[aria-hidden="true"] {
+  #hero-name > span[data-hero-line] {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+  #hero-name [data-hero-cursor] {
     animation: none !important;
     opacity: 1 !important;
   }
@@ -179,8 +195,7 @@ section[aria-labelledby="hero-name"] {
     color: CanvasText !important;
     -webkit-text-stroke-color: CanvasText !important;
   }
-  #hero-name > span[aria-hidden="true"]:last-child {
-    color: CanvasText !important;
-    -webkit-text-stroke-color: CanvasText !important;
+  #hero-name [data-hero-cursor] {
+    background-color: CanvasText !important;
   }
 }

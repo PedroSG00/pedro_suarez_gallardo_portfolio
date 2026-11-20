@@ -72,6 +72,26 @@ test.describe('home structure', () => {
         }
       });
 
+      test('the hero and footer share a readable, inset desktop layout', async ({ page }) => {
+        await page.setViewportSize({ width: 1440, height: 900 });
+        await page.emulateMedia({ reducedMotion: 'reduce' });
+        await page.goto(`/${locale}`);
+        const heading = page.getByRole('heading', { level: 1 });
+        const actions = page.getByRole('main').getByRole('link');
+        const footer = page.getByRole('contentinfo');
+        await expect(actions).toHaveCount(2);
+        const [title, primary, secondary, footerLink] = await Promise.all([
+          heading.boundingBox(),
+          actions.first().boundingBox(),
+          actions.last().boundingBox(),
+          footer.getByRole('link').first().boundingBox(),
+        ]);
+        expect(title?.x).toBeGreaterThan(0);
+        expect(primary?.x).toBe(title?.x);
+        expect(secondary?.y).toBe(primary?.y);
+        expect(footerLink?.x).toBe(title?.x);
+      });
+
       test('no tiene enlaces a proyectos', async ({ page }) => {
         await page.goto(`/${locale}`);
         await expect(page.getByRole('link', { name: /project|proyecto/i })).toHaveCount(

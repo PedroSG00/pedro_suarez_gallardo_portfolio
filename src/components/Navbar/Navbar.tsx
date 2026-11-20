@@ -1,8 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type MouseEvent } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { getPathname, usePathname, useRouter } from '@/i18n/navigation';
+import { getPathname, usePathname } from '@/i18n/navigation';
 
 import Logo from '@/components/ui/Logo/Logo';
 import NavLinks from '@/components/ui/NavLinks/NavLinks';
@@ -12,7 +12,6 @@ import { resolveNavbarVisibility } from '@/lib/nav-visibility';
 import type { Locale } from '@/lib/locale';
 import type { SiteData } from '@/content/site';
 import { buildSectionDestinations, type SectionDestination } from '@/content/sections';
-import styles from './Navbar.module.css';
 
 type Props = {
   site: SiteData;
@@ -39,10 +38,9 @@ export default function Navbar({
   const t = useTranslations('shared');
   const tNav = useTranslations('shared.nav');
   const pathname = usePathname();
-  const router = useRouter();
 
-  const isHome = pathname === '/' || pathname === '';
   const homePath = getPathname({ href: '/', locale: currentLocale });
+  const isHome = pathname === '/' || pathname === '' || pathname === homePath;
   const navLabel = labels?.nav ?? tNav('label');
   const openMenuLabel = labels?.openMenu ?? t('menu.open');
   const closeMenuLabel = labels?.closeMenu ?? t('menu.close');
@@ -70,6 +68,7 @@ export default function Navbar({
   const detailsRef = useRef<HTMLDetailsElement>(null);
   const previousScrollYRef = useRef(0);
   const focusCountRef = useRef(0);
+  const navigationInProgressRef = useRef(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [visibility, setVisibility] = useState<'visible' | 'hidden'>('visible');
 
@@ -117,13 +116,42 @@ export default function Navbar({
   const onScroll = useCallback(() => {
     const nextScrollY = currentScrollY();
     const previousScrollY = previousScrollYRef.current;
+    if (navigationInProgressRef.current) {
+      setVisibility('visible');
+      previousScrollYRef.current = nextScrollY;
+      return;
+    }
     recomputeVisibility(menuOpen, focusCountRef.current > 0, nextScrollY, previousScrollY);
     previousScrollYRef.current = nextScrollY;
   }, [recomputeVisibility, menuOpen]);
 
   useEffect(() => {
+    previousScrollYRef.current = currentScrollY();
+    const finishNavigation = () => {
+      navigationInProgressRef.current = false;
+      previousScrollYRef.current = currentScrollY();
+    };
+    const handleUserScrollIntent = () => {
+      navigationInProgressRef.current = false;
+    };
+    const handleScrollKey = (event: KeyboardEvent) => {
+      if (['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' '].includes(event.key)) {
+        handleUserScrollIntent();
+      }
+    };
+
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    window.addEventListener('scrollend', finishNavigation);
+    window.addEventListener('wheel', handleUserScrollIntent, { passive: true });
+    window.addEventListener('touchstart', handleUserScrollIntent, { passive: true });
+    window.addEventListener('keydown', handleScrollKey);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('scrollend', finishNavigation);
+      window.removeEventListener('wheel', handleUserScrollIntent);
+      window.removeEventListener('touchstart', handleUserScrollIntent);
+      window.removeEventListener('keydown', handleScrollKey);
+    };
   }, [onScroll]);
 
   useEffect(() => {
@@ -137,6 +165,10 @@ export default function Navbar({
     };
     const onFocusOut = () => {
       focusCountRef.current = Math.max(0, focusCountRef.current - 1);
+      if (navigationInProgressRef.current) {
+        setVisibility('visible');
+        return;
+      }
       if (focusCountRef.current === 0) {
         recomputeVisibility(
           menuOpen,
@@ -154,45 +186,22 @@ export default function Navbar({
     };
   }, [recomputeVisibility, menuOpen]);
 
-  const handleIdentityClick = useCallback(() => {
-    if (isHome) {
-      window.scrollTo({ top: 0, behavior: 'instant' });
-      window.history.replaceState(
-        null,
-        '',
-        window.location.pathname + window.location.search,
-      );
-    } else {
-      router.replace('/', { locale: currentLocale });
-    }
-  }, [isHome, router, currentLocale]);
-
-  const handleToggle = useCallback(() => {
-    setMenuOpen((prev) => {
-      const next = !prev;
-      if (detailsRef.current) {
-        detailsRef.current.open = next;
-      }
-      if (next) {
-        setVisibility('visible');
-      } else {
-        recomputeVisibility(
-          false,
-          focusCountRef.current > 0,
-          currentScrollY(),
-          previousScrollYRef.current,
-        );
-      }
-      return next;
-    });
-  }, [recomputeVisibility]);
-
   const handleNavigate = useCallback(() => {
+    navigationInProgressRef.current = true;
+    setVisibility('visible');
     if (detailsRef.current) {
       detailsRef.current.open = false;
       setMenuOpen(false);
     }
   }, []);
+
+  function handleIdentityClick(event: MouseEvent<HTMLAnchorElement>) {
+    if (!isHome || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    handleNavigate();
+    window.scrollTo({ top: 0, behavior: 'auto' });
+    window.history.replaceState(null, '', window.location.pathname + window.location.search);
+  }
 
   useEffect(() => {
     const media = window.matchMedia('(min-width: 768px)');
@@ -209,58 +218,56 @@ export default function Navbar({
   return (
     <header
       ref={headerRef}
-      className={styles.navbar}
+      className="sticky top-0 z-(--nav-z) border-b-(length:--line-width) border-line bg-surface text-ink transition-transform duration-(--duration-state) not-focus-within:data-hidden:-translate-y-full motion-reduce:transition-none print:hidden"
       data-hidden={visibility === 'hidden' ? '' : undefined}
     >
-      <Logo
-        href={homePath}
-        alt={site.name}
-        onClick={handleIdentityClick}
-      >
-        {site.name}
-      </Logo>
+      <div className="mx-auto flex min-h-(--nav-height) max-w-[calc(var(--grid-max-width)+2*var(--grid-gutter))] items-center gap-1 px-3 md:gap-3 md:px-(--grid-gutter)">
+        <div className="mr-auto flex min-w-0 items-center">
+          <Logo href={homePath} src="/logo.svg" alt={site.name} onClick={handleIdentityClick} />
+        </div>
 
-      <NavLinks
-        items={sectionItems}
-        ariaLabel={labels?.nav ?? navLabel}
-        onNavigate={handleNavigate}
-      />
-
-      <details ref={detailsRef} className={styles.mobileMenu}>
-        <summary className={styles.summary}>
-          <button
-            type="button"
-            aria-label={menuOpen ? closeMenuLabel : openMenuLabel}
-            aria-expanded={menuOpen}
-            onClick={handleToggle}
-            className={styles.summaryButton}
-          >
-            <span className={styles.menuIcon} aria-hidden="true">
-              <svg
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-                style={{ color: 'currentColor' }}
-              >
-                <path d="M3 6h18M3 12h18M3 18h18" />
-              </svg>
-            </span>
-          </button>
-        </summary>
-        <div className={styles.panel}>
+        <nav aria-label={navLabel} className="hidden flex-1 md:block">
           <NavLinks
             items={sectionItems}
-            ariaLabel={labels?.nav ?? navLabel}
+            ariaLabel={navLabel}
             onNavigate={handleNavigate}
+            inline
+          />
+        </nav>
+
+        <details
+          ref={detailsRef}
+          className="group shrink-0 md:hidden"
+          onToggle={(event) => {
+            const open = event.currentTarget.open;
+            setMenuOpen(open);
+            if (open) setVisibility('visible');
+          }}
+        >
+          <summary
+            role="button"
+            aria-label={menuOpen ? closeMenuLabel : openMenuLabel}
+            className="grid size-11 cursor-pointer list-none place-items-center border-(length:--line-width) border-line hover:bg-ink hover:text-surface [&::-webkit-details-marker]:hidden"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true" className="size-5">
+              <path className="group-open:hidden" d="M3 7h18M3 12h18M3 17h18" />
+              <path className="hidden group-open:block" d="m5 5 14 14M19 5 5 19" />
+            </svg>
+          </summary>
+          <nav aria-label={navLabel} className="absolute inset-x-0 top-full max-h-[calc(100dvh-var(--nav-height))] overflow-y-auto overscroll-contain border-b-(length:--line-width) border-line bg-surface px-(--grid-gutter) py-3">
+            <NavLinks items={sectionItems} ariaLabel={navLabel} onNavigate={handleNavigate} />
+          </nav>
+        </details>
+
+        <div className="flex shrink-0 items-center gap-1 md:gap-2">
+          <ThemeControl label={themeToggleLabel} />
+          <LanguageSwitch
+            locale={currentLocale}
+            ariaLabelEn={langEnLabel}
+            ariaLabelEs={langEsLabel}
           />
         </div>
-      </details>
-
-      <ThemeControl label={themeToggleLabel} />
-      <LanguageSwitch
-        locale={currentLocale}
-        ariaLabelEn={langEnLabel}
-        ariaLabelEs={langEsLabel}
-      />
+      </div>
     </header>
   );
 }
