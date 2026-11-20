@@ -85,7 +85,7 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
 
 ---
 
-## T2 — Tokens de shell y hero
+## T2 — Tokens de shell y hero ✅ COMPLETADA
 
 **Objetivo:** declarar los valores de layout, nombre, cursor, movimiento y área táctil en `globals.css`, una sola vez y con nombres de rol.
 

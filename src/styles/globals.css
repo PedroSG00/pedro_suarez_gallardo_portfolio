@@ -65,6 +65,47 @@
     /* RF-04: padding inferior de la última sección para que el último bloque
        alcance la zona estable al final de la página. (30vh = 75 * 0.25rem) */
     --section-end-padding: calc(var(--spacing) * 75);
+
+    /* RF-3: barra pegajosa. La altura y el umbral de ocultación (80px) son
+       contrato con lib/nav-visibility. */
+    --nav-height: calc(var(--spacing) * 16);
+    --nav-hide-threshold: calc(var(--spacing) * 20);
+    --nav-z: 10;
+
+    /* RF-8: retícula y nombre a todo el ancho. El nombre se calcula con
+       clamp() a partir del margen, el relleno (0.9 sin unidad) y el divisor. */
+    --grid-gutter: calc(var(--spacing) * 6);
+    --grid-max-width: 100rem;
+    --hero-name-fill: 0.9;
+    --hero-name-advance: 0.6;
+    --hero-name-divisor: 4.8;
+    --text-hero-name: clamp(
+      3rem,
+      calc(
+        var(--hero-name-fill) * (100vw - 2 * var(--grid-gutter)) /
+          var(--hero-name-divisor)
+      ),
+      18.75rem
+    );
+
+    /* RF-9: cursor terminal y entrada escalonada (400ms + 2 * 100ms = 600ms). */
+    --cursor-width: 0.5ch;
+    --cursor-duration: 1s;
+    --hero-line-duration: 400ms;
+    --hero-line-stagger: 100ms;
+
+    /* RF-10: desplazamiento máximo del parallax (<= 20% de la altura del hero). */
+    --hero-parallax-distance: 20dvh;
+
+    /* RF-6: área de contacto mínima de los controles. */
+    --touch-target: calc(var(--spacing) * 6);
+  }
+
+  /* RF-8: el margen lateral crece con el ancho; el nombre se recalcula solo. */
+  @media (min-width: 768px) {
+    :root {
+      --grid-gutter: calc(var(--spacing) * 12);
+    }
   }
 
   :root[data-theme="light"] {
