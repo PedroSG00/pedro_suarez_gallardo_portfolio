@@ -61,12 +61,25 @@
     color-scheme: light dark;
   }
 
+  :root {
+    /* RF-04: padding inferior de la última sección para que el último bloque
+       alcance la zona estable al final de la página. (30vh = 75 * 0.25rem) */
+    --section-end-padding: calc(var(--spacing) * 75);
+  }
+
   :root[data-theme="light"] {
     color-scheme: light;
   }
 
   :root[data-theme="dark"] {
     color-scheme: dark;
+  }
+
+  /* RF-12: al llegar por ancla a una sección, el objetivo se sitúa en la banda
+     estable del revelado en vez de en el borde superior, donde quedaría
+     atenuado por la fase de salida. Relajación contemplada en spec.md RF-12. */
+  html {
+    scroll-padding-top: calc(var(--spacing) * 75);
   }
 
   .inverted {

@@ -1,0 +1,183 @@
+@property --psg-reveal-entry-opacity {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+
+@property --psg-reveal-exit-opacity {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+
+@property --psg-reveal-entry-offset {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --psg-reveal-exit-offset {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --psg-reveal-entry-clip {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+
+@property --psg-reveal-exit-clip {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+
+.reveal {
+  position: relative;
+  opacity: 1;
+  transform: none;
+}
+
+.excluded {
+  opacity: 1;
+  transform: none;
+  clip-path: none;
+  animation: none;
+}
+
+[data-reveal-entry-marker],
+[data-reveal-exit-marker] {
+  position: absolute;
+  inline-size: 0;
+  block-size: 0;
+}
+
+[data-reveal-entry-marker] {
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  view-timeline-name: --reveal-entry;
+  view-timeline-axis: block;
+}
+
+[data-reveal-exit-marker] {
+  inset-block-end: 0;
+  inset-inline-start: 0;
+  view-timeline-name: --reveal-exit;
+  view-timeline-axis: block;
+}
+
+@keyframes reveal-enter {
+  from {
+    --psg-reveal-entry-opacity: 0;
+    --psg-reveal-entry-offset: var(--motion-distance, 0px);
+    --psg-reveal-entry-clip: 100%;
+  }
+
+  to {
+    --psg-reveal-entry-opacity: 1;
+    --psg-reveal-entry-offset: 0px;
+    --psg-reveal-entry-clip: 0%;
+  }
+}
+
+@keyframes reveal-exit {
+  from {
+    --psg-reveal-exit-opacity: 1;
+    --psg-reveal-exit-offset: 0px;
+    --psg-reveal-exit-clip: 0%;
+  }
+
+  to {
+    --psg-reveal-exit-opacity: 0;
+    --psg-reveal-exit-offset: calc(0px - var(--motion-distance, 0px));
+    --psg-reveal-exit-clip: 100%;
+  }
+}
+
+@supports
+  (animation-timeline: view())
+  and (view-timeline-name: --reveal-entry)
+  and (timeline-scope: --reveal-entry) {
+  .reveal {
+    timeline-scope: --reveal-entry, --reveal-exit;
+  }
+
+  [data-reveal-root] {
+    animation:
+      reveal-enter auto linear both,
+      reveal-exit auto linear both;
+    animation-timeline: --reveal-entry, --reveal-exit;
+    animation-range:
+      cover var(--psg-reveal-entry-start, 0%) cover 25%,
+      cover 75% cover 100%;
+    opacity: min(
+      var(--psg-reveal-entry-opacity),
+      var(--psg-reveal-exit-opacity)
+    );
+    transform: translateY(
+      calc(
+        var(--psg-reveal-entry-offset) +
+        var(--psg-reveal-exit-offset)
+      )
+    );
+  }
+}
+
+/* RF-04: bloques de la última sección solo animan la entrada (sin salida),
+   se quedan en opacity 1 al terminar (fill-mode forwards) y tienen padding
+   inferior para alcanzar la zona estable al final de la página. */
+[data-reveal-root][data-last-section] {
+  padding-bottom: calc(var(--spacing) * 75);
+  animation: reveal-enter auto linear both;
+  animation-timeline: --reveal-entry;
+  animation-range: cover var(--psg-reveal-entry-start, 0%) cover 25%;
+  animation-fill-mode: forwards;
+  opacity: var(--psg-reveal-entry-opacity);
+  transform: translateY(var(--psg-reveal-entry-offset));
+}
+
+/* Variant "clip": the block is uncovered by a bottom inset, no displacement. */
+  [data-reveal-root][data-reveal-variant="clip"] {
+    transform: none;
+    clip-path: inset(
+      0 0 calc(
+        var(--psg-reveal-entry-clip) +
+        var(--psg-reveal-exit-clip)
+      ) 0
+    );
+  }
+
+  /* Variant "fade": opacity only, no displacement or clipping. */
+  [data-reveal-root][data-reveal-variant="fade"] {
+    transform: none;
+  }
+}
+
+@supports not (animation-timeline: view()) {
+  [data-reveal-root] {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    clip-path: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal-root] {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    clip-path: none;
+  }
+}
+
+@media print {
+  [data-reveal-root] {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    clip-path: none;
+  }
+}

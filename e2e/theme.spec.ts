@@ -5,7 +5,7 @@ test.describe('theme first paint', () => {
     await context.clearCookies();
   });
 
-  test('HTML de /en trae <script> de tema en <head> sin data-theme en el servidor', async ({ page }) => {
+  test('HTML of /en brings theme <script> in <head> without data-theme on the server', async ({ page }) => {
     const response = await page.goto('/en');
     expect(response, 'navigation should return a response').not.toBeNull();
     expect(response?.status()).toBeLessThan(400);
@@ -21,7 +21,7 @@ test.describe('theme first paint', () => {
     expect(content).toContain('dataset.theme');
   });
 
-  test('HTML de /es trae <script> de tema en <head> sin data-theme en el servidor', async ({ page }) => {
+  test('HTML of /es brings theme <script> in <head> without data-theme on the server', async ({ page }) => {
     const response = await page.goto('/es');
     expect(response, 'navigation should return a response').not.toBeNull();
     expect(response?.status()).toBeLessThan(400);
@@ -37,7 +37,7 @@ test.describe('theme first paint', () => {
     expect(content).toContain('dataset.theme');
   });
 
-  test('<html> lleva la clase de la fuente mono y lang correcto, sin peticiones a Google Fonts', async ({ page }) => {
+  test('<html> carries mono font class and correct lang, without Google Fonts requests', async ({ page }) => {
     let googleFontRequests = 0;
     page.on('request', (request) => {
       if (
@@ -65,7 +65,7 @@ test.describe('theme first paint', () => {
     expect(fontVar).not.toBe('');
   });
 
-  test('sin prefers-reduced-motion ni elección sembrada, carga /en sin errores de hidratación', async ({ page }) => {
+  test('no reduced motion and no seeded choice, loads /en without hydration errors', async ({ page }) => {
     const pageErrors: string[] = [];
     const hydrateConsoleErrors: string[] = [];
     page.on('pageerror', (error) => pageErrors.push(error.message));
@@ -92,7 +92,7 @@ test.describe('theme first paint', () => {
     });
   }
 
-  test('elección sembrada oscura se aplica antes del primer pintado en /en con sistema claro', async ({ page }) => {
+  test('seeded dark choice applies before first paint on /en with light system', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'light' });
     const first = await page.goto('/en');
     expect(first?.status()).toBeLessThan(400);
@@ -108,7 +108,7 @@ test.describe('theme first paint', () => {
     expect(htmlBg).toBe(probeBg);
   });
 
-  test('elección sembrada clara se aplica antes del primer pintado en /es con sistema oscuro', async ({ page }) => {
+  test('seeded light choice applies before first paint on /es with dark system', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'dark' });
     const first = await page.goto('/es');
     expect(first?.status()).toBeLessThan(400);
@@ -124,7 +124,7 @@ test.describe('theme first paint', () => {
     expect(htmlBg).toBe(probeBg);
   });
 
-  test('persistencia: tras navegación el tema sigue aplicado y localStorage conserva el valor', async ({ page }) => {
+  test('persistence: theme stays applied after navigation and localStorage keeps the value', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'light' });
     const first = await page.goto('/en');
     expect(first?.status()).toBeLessThan(400);
@@ -136,7 +136,7 @@ test.describe('theme first paint', () => {
     expect(value).toBe('dark');
   });
 
-  test('sin fotograma contrario: data-theme se aplica una vez durante el parseo y no cambia tras load', async ({ page }) => {
+  test('no contrary frame: data-theme is applied once during parsing and does not change after load', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'light' });
 
     // Primera carga sin tema: no hay data-theme
@@ -145,14 +145,14 @@ test.describe('theme first paint', () => {
     await expect(page.locator('html')).not.toHaveAttribute('data-theme');
 
     // Sembrar localStorage y navegar de nuevo: el script inline establece
-    // data-theme durante el parseo (antes del primer pintado).
+    // data-theme during parsing (before first paint).
     await page.evaluate(() => localStorage.setItem('psg-theme', 'dark'));
     const second = await page.goto('/en');
     expect(second?.status()).toBeLessThan(400);
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 
-    // Tras load y dos frames de animación, data-theme no cambia: no hay
-    // fotograma con el tema contrario ni mutaciones posteriores.
+    // After load and two animation frames, data-theme does not change: there
+    // is no frame with the contrary theme nor later mutations.
     await page.waitForLoadState('load');
     await page.evaluate(() => {
       return new Promise<void>((resolve) => {
@@ -166,7 +166,7 @@ test.describe('theme first paint', () => {
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   });
 
-  test('sistema sin preferencia: se pinta en claro y sin data-theme', async ({ page }) => {
+  test('no system preference: paints light without data-theme', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'no-preference' });
     const response = await page.goto('/en');
     expect(response?.status()).toBeLessThan(400);
@@ -218,14 +218,14 @@ test.describe('theme first paint', () => {
       return getComputedStyle(div).borderColor;
     });
 
-    // El par fondo/texto del bloque es el contrario del de la página
+    // The block bg/text pair is the opposite of the page
     expect(blockBg).toBe(pageInk);
     expect(childColor).toBe(pageSurface);
-    // La línea conserva su tono
+    // The line keeps its tone
     expect(blockBorder).toBe(pageLine);
   }
 
-  test('bloque invertido: data-theme claro, sistema claro', async ({ page }) => {
+  test('inverted block: light data-theme, light system', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'light' });
     await page.goto('/en'); // establece origen para localStorage
     await page.evaluate(() => localStorage.setItem('psg-theme', 'light'));
@@ -235,7 +235,7 @@ test.describe('theme first paint', () => {
     await checkInvertedBlock(page);
   });
 
-  test('bloque invertido: data-theme oscuro, sistema claro', async ({ page }) => {
+  test('inverted block: dark data-theme, light system', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'light' });
     await page.goto('/en'); // establece origen para localStorage
     await page.evaluate(() => localStorage.setItem('psg-theme', 'dark'));
@@ -245,7 +245,7 @@ test.describe('theme first paint', () => {
     await checkInvertedBlock(page);
   });
 
-  test('bloque invertido: sin atributo, sistema claro', async ({ page }) => {
+  test('inverted block: no attribute, light system', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'light' });
     const response = await page.goto('/en');
     expect(response?.status()).toBeLessThan(400);
@@ -253,7 +253,7 @@ test.describe('theme first paint', () => {
     await checkInvertedBlock(page);
   });
 
-  test('bloque invertido: sin atributo, sistema oscuro', async ({ page }) => {
+  test('inverted block: no attribute, dark system', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'dark' });
     const response = await page.goto('/en');
     expect(response?.status()).toBeLessThan(400);
@@ -261,7 +261,7 @@ test.describe('theme first paint', () => {
     await checkInvertedBlock(page);
   });
 
-  test('movimiento reducido: duraciones de estado y tema en 0ms', async ({ page }) => {
+  test('reduced motion: state and theme durations in 0ms', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     const response = await page.goto('/en');
     expect(response?.status()).toBeLessThan(400);
@@ -279,7 +279,7 @@ test.describe('theme first paint', () => {
     expect(['0ms', '0s']).toContain(durationTheme);
   });
 
-  test('sin JavaScript: tema del sistema sin data-theme y contenido visible', async ({
+  test('no JavaScript: system theme without data-theme and visible content', async ({
     browser,
   }) => {
     const context = await browser.newContext({
@@ -291,19 +291,19 @@ test.describe('theme first paint', () => {
       const response = await page.goto('/en');
       expect(response?.status()).toBeLessThan(400);
       await expect(page.locator('html')).not.toHaveAttribute('data-theme');
-      // Fondo oscuro: superficie del modo oscuro (#121110 -> rgb(18, 17, 16))
+      // Dark background: dark-mode surface (#121110 -> rgb(18, 17, 16))
       await expect(page.locator('html')).toHaveCSS(
         'background-color',
         'rgb(18, 17, 16)'
       );
-      // El h1 localizado sigue visible (el contenido no depende de JS)
+      // The localized h1 is still visible (content does not depend on JS)
       await expect(page.locator('h1')).toBeVisible();
     } finally {
       await context.close();
     }
   });
 
-  test('pageshow persistido: cambia localStorage y actualiza el atributo', async ({ page }) => {
+  test('pageshow persisted: changing localStorage updates the attribute', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'light' });
     await page.goto('/en'); // establece origen para localStorage
     await page.evaluate(() => localStorage.setItem('psg-theme', 'dark'));
@@ -311,7 +311,7 @@ test.describe('theme first paint', () => {
     expect(first?.status()).toBeLessThan(400);
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 
-    // Cambiar localStorage y despachar pageshow con persisted: true (proxy de bfcache)
+    // Change localStorage and dispatch pageshow with persisted: true (bfcache proxy)
     await page.evaluate(() => {
       localStorage.setItem('psg-theme', 'light');
       const event = new Event('pageshow');
@@ -320,7 +320,7 @@ test.describe('theme first paint', () => {
     });
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
 
-    // Retirar la elección y despachar de nuevo: se retira el atributo
+    // Remove the choice and dispatch again: attribute is removed
     await page.evaluate(() => {
       localStorage.removeItem('psg-theme');
       const event = new Event('pageshow');
