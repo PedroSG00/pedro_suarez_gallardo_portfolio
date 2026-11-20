@@ -8,6 +8,7 @@ type Props = {
   target?: '_self' | '_blank';
   icon?: ReactNode;
   ariaLabel?: string;
+  srLabel?: string;
 };
 
 export default function Link({
@@ -16,6 +17,7 @@ export default function Link({
   target,
   icon,
   ariaLabel,
+  srLabel,
 }: Props) {
   if (!children || href === undefined) {
     return null;
@@ -26,16 +28,13 @@ export default function Link({
       e.preventDefault();
       return;
     }
-    if (target === '_blank') {
-      e.preventDefault();
-      window.open(href, '_blank');
-    }
   };
 
   return (
     <a
       href={href}
       target={target}
+      rel={target === '_blank' ? 'noreferrer noopener' : undefined}
       onClick={handleClick}
       aria-label={ariaLabel}
       className={`
@@ -49,7 +48,9 @@ export default function Link({
       `}
     >
       {icon}
-      {children}
+      {children} {target === '_blank' && srLabel ? (
+        <span className="sr-only">{srLabel}</span>
+      ) : null}
     </a>
   );
 }

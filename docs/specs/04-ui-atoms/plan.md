@@ -77,6 +77,7 @@ Ejemplo de instancia:
 | target | "_self" \| "_blank" | no | Contexto de navegación |
 | icon | ReactNode | no | Símbolo gráfico opcional de Iconoir |
 | ariaLabel | string | no | Etiqueta accesible si no hay texto visible |
+| srLabel | string | no | Texto anunciado solo a lectores de pantalla cuando `target="_blank"` |
 
 Ejemplo de instancia:
 
@@ -250,10 +251,7 @@ ON click:
     IF href_es_invalido_o_vacio(href):
         PREVENIR_NAVEGACIÓN()
         RETURN
-    IF target == "_blank":
-        ABRIR_EN_NUEVA_PESTAÑA(href)
-    ELSE:
-        NAVEGAR_A(href)
+    NAVEGAR_A(href)   // navegación nativa; target="_blank" abre en pestaña nueva con rel y srLabel, sin window.open
 
 ON focus (teclado):
     MOSTRAR_INDICADOR_FOCO()
@@ -368,9 +366,9 @@ Cada contrato declara: entradas (props), salidas (JSX renderizado y eventos) y e
 
 ### 4.2 Link
 
-- Entradas: `children` (ReactNode, obligatorio), `href` (string válido, obligatorio), `target` (opcional), `icon` (opcional), `ariaLabel` (opcional).
-- Salidas: elemento `<a>` con `href`, colores invertidos en hover, indicador de foco visible al enfoque por teclado, navegación al destino (misma pestaña o nueva según `target`).
-- Errores: si `href` es inválido o vacío, no navega y no rompe la página; si faltan `children` o `href`, renderiza `null`.
+- Entradas: `children` (ReactNode, obligatorio), `href` (string válido, obligatorio), `target` (opcional), `icon` (opcional), `ariaLabel` (opcional), `srLabel` (opcional).
+- Salidas: elemento `<a>` nativo con `href`; con `target="_blank"` añade `rel="noreferrer noopener"` y un span `sr-only` con `srLabel` (anuncio solo para lectores de pantalla, sin texto visible); colores invertidos en hover, indicador de foco visible al enfoque por teclado y navegación nativa al destino (misma pestaña o nueva según `target`).
+- Errores: si `href` es inválido o vacío, no navega y no rompe la página; si faltan `children` o `href`, renderiza `null`. Nunca usa `window.open`.
 
 ### 4.3 Heading
 

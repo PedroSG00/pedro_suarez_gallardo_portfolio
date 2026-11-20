@@ -21,11 +21,37 @@ describe('Link', () => {
     expect(openSpy).not.toHaveBeenCalled();
   });
 
-  test('target _blank opens destination in new tab', () => {
+  test('target _blank sets native target and rel="noreferrer noopener"', () => {
+    render(<Link href="https://example.com" target="_blank">External</Link>);
+    const link = screen.getByRole('link', { name: 'External' });
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', 'noreferrer noopener');
+  });
+
+  test('target _blank announces srLabel to screen readers, not as visible text', () => {
+    render(
+      <Link href="https://example.com" target="_blank" srLabel="opens in a new tab">
+        External
+      </Link>
+    );
+    const link = screen.getByRole('link');
+    expect(link).toHaveAccessibleName('External opens in a new tab');
+
+    const visible = screen.getAllByText('External');
+    expect(visible).toHaveLength(1);
+  });
+
+  test('target _blank click does not call window.open (native navigation)', () => {
     const openSpy = vi.spyOn(window, 'open');
     render(<Link href="https://example.com" target="_blank">External</Link>);
     fireEvent.click(screen.getByRole('link', { name: 'External' }));
-    expect(openSpy).toHaveBeenCalledWith('https://example.com', '_blank');
+    expect(openSpy).not.toHaveBeenCalled();
+  });
+
+  test('target _blank without srLabel keeps accessible name as the children', () => {
+    render(<Link href="https://example.com" target="_blank">External</Link>);
+    const link = screen.getByRole('link', { name: 'External' });
+    expect(link).toHaveAccessibleName('External');
   });
 
   test('empty href does not navigate and prevents default', () => {

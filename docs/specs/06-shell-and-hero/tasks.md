@@ -342,7 +342,7 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
 
 ---
 
-## T12 — Extensión de `Link`
+## T12 — Extensión de `Link` ✅ COMPLETADA
 
 **Objetivo:** abrir enlaces externos en pestaña nueva de forma nativa, con aviso solo para lectores de pantalla, sin `window.open`.
 

@@ -49,7 +49,8 @@ Criterios de aceptación (EARS):
 
 - Cuando el usuario active un Link con un destino válido, el sistema navegue a ese destino.
 - Cuando el usuario posicione el puntero sobre un Link, el sistema invierta los colores de fondo y texto.
-- Cuando el Link indique un target opcional, el sistema abra el destino en ese contexto de navegación.
+- Cuando el Link indique `target="_blank"`, el sistema abra el destino en pestaña nueva de forma nativa (`rel="noreferrer noopener"` en el `<a>`), permitiendo clic central y bloqueadores de ventanas emergentes, y anuncie `srLabel` solo a lectores de pantalla mediante un span `sr-only`, sin mostrarlo como texto visible.
+- Cuando el Link indique `target="_self"` o no indique target, el sistema navegue en la misma pestaña.
 - Cuando el destino del Link no sea válido, el sistema no navegue y no rompa la página.
 - Cuando el usuario enfoque un Link con el teclado, el sistema muestre un indicador de foco visible.
 - Cuando el contenido se pase por prop, el sistema lo muestre tal cual; ningún texto va hardcodeado dentro del componente.
