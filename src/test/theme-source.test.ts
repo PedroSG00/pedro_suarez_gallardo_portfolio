@@ -27,6 +27,23 @@ describe("scanSource: clean sources pass", () => {
     expect(violationsFor(files)).toEqual([]);
   });
 
+  test("semantic anchor scroll padding token is allowed", () => {
+    const files = [
+      FILE(
+        "src/styles/globals.css",
+        "--anchor-offset: clamp(var(--nav-height), 20dvh, calc(var(--spacing) * 50));\nhtml { scroll-padding-top: var(--anchor-offset); }",
+      ),
+    ];
+    expect(violationsFor(files)).toEqual([]);
+  });
+
+  test("custom token names containing a spacing word are not CSS properties", () => {
+    const files = [
+      FILE("src/styles/globals.css", "--cursor-gap: 0.08; --section-end-padding: calc(var(--spacing) * 75);"),
+    ];
+    expect(violationsFor(files)).toEqual([]);
+  });
+
   test("zero passes", () => {
     const files = [FILE("src/components/foo.tsx", '<div className="p-0 m-0">x</div>')];
     expect(violationsFor(files)).toEqual([]);

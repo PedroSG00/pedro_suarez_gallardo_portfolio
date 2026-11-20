@@ -1,16 +1,17 @@
 'use client';
 
 import Image from 'next/image';
-import type { ReactNode } from 'react';
+import type { MouseEventHandler, ReactNode } from 'react';
 
 type Props = {
   href: string;
   src?: string;
   alt?: string;
   children?: ReactNode;
+  onClick?: MouseEventHandler<HTMLAnchorElement>;
 };
 
-export default function Logo({ href, src, alt, children }: Props) {
+export default function Logo({ href, src, alt, children, onClick }: Props) {
   if (!href) {
     return null;
   }
@@ -20,9 +21,15 @@ export default function Logo({ href, src, alt, children }: Props) {
   }
 
   return (
-    <a href={href}>
+    <a href={href} onClick={onClick}>
       {src ? (
-        <Image src={src} alt={alt ?? ''} width={64} height={64} />
+        <Image
+          src={src}
+          alt={alt ?? ''}
+          width={64}
+          height={64}
+          className="size-10 filter-[var(--logo-filter)]"
+        />
       ) : children ? (
         children
       ) : (

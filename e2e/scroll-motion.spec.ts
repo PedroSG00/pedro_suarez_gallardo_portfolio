@@ -347,3 +347,55 @@ test.describe('Last section without exit (RF-04)', () => {
     expect(transformY).toBe(0);
   });
 });
+
+test.describe('Navbar does not participate in reveal (RF-3, RF-10)', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: 'light' });
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/en');
+    await page.waitForLoadState('networkidle');
+  });
+
+  test('navbar keeps opacity 1 and no displacement while scrolling', async ({
+    page,
+  }) => {
+    const navbar = page.locator('header');
+    await expect(navbar).toBeVisible();
+    await expect(navbar).toHaveCSS('opacity', '1');
+
+    await page.evaluate(() => window.scrollTo(0, 500));
+    await page.waitForTimeout(300);
+
+    await expect(navbar).toHaveCSS('opacity', '1');
+    const transform = await navbar.evaluate(
+      (el) => new DOMMatrixReadOnly(getComputedStyle(el).transform).m42,
+    );
+    expect(transform).toBe(0);
+  });
+});
+
+test.describe('Hero does not cover destination on anchor arrival (RF-10, RF-13)', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: 'light' });
+    await page.setViewportSize({ width: 1440, height: 900 });
+  });
+
+  for (const [locale, label] of [['en', 'Work'], ['es', 'Trabajo']]) {
+    test(`/${locale}: destination heading visible below navbar`, async ({ page }) => {
+      await page.goto(`/${locale}`);
+      await page.waitForLoadState('networkidle');
+
+      await page.getByRole('link', { name: label }).click();
+      await expect(page.url()).toBe(`http://127.0.0.1:3000/${locale}#work`);
+
+      const heading = page.getByRole('heading', { level: 2, name: label });
+      await expect(heading).toBeVisible();
+
+      // The heading is not covered by the hero: it sits below the navbar.
+      const navbar = page.locator('header');
+      const headingBox = await heading.boundingBox();
+      const navbarBox = await navbar.boundingBox();
+      expect(headingBox!.y).toBeGreaterThanOrEqual(navbarBox!.y + navbarBox!.height);
+    });
+  }
+});

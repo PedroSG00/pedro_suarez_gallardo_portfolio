@@ -199,7 +199,7 @@ describe("color-scheme rules (RF-5, RF-7)", () => {
   const css = readCssText();
 
   test(":root declares color-scheme: light dark", () => {
-    expect(css).toContain(":root {\n    color-scheme: light dark;\n  }");
+    expect(css).toContain(":root {\n    color-scheme: light dark;\n    --logo-filter: none;\n  }");
   });
 
   test(":root[data-theme='light'] declares color-scheme: light", () => {
@@ -210,7 +210,7 @@ describe("color-scheme rules (RF-5, RF-7)", () => {
 
   test(":root[data-theme='dark'] declares color-scheme: dark", () => {
     expect(css).toContain(
-      ':root[data-theme="dark"] {\n    color-scheme: dark;\n  }'
+      ':root[data-theme="dark"] {\n    color-scheme: dark;\n    --logo-filter: invert(1);\n  }'
     );
   });
 });
@@ -230,7 +230,7 @@ describe("inverted block (RF-5)", () => {
 
   test("override for system dark without attribute", () => {
     expect(css).toContain(
-      "@media (prefers-color-scheme: dark) {\n    :root:not([data-theme]) .inverted {\n      color-scheme: light;\n    }\n  }"
+      "@media (prefers-color-scheme: dark) {\n    :root:not([data-theme]) .inverted {\n      color-scheme: light;\n    }\n    :root:not([data-theme]) {\n      --logo-filter: invert(1);\n    }\n  }"
     );
   });
 
@@ -244,7 +244,7 @@ describe("base rules, focus and selection (RF-4, RF-5, RF-11)", () => {
   const css = readCssText();
 
   test("html applies surface, ink, font-mono, regular weight and tabular-nums", () => {
-    expect(css).toContain("html {\n    background-color: var(--color-surface);\n    color: var(--color-ink);\n    font-family: var(--font-mono);\n    font-weight: var(--font-weight-regular);\n    font-variant-numeric: tabular-nums;\n    -webkit-font-smoothing: antialiased;\n  }");
+    expect(css).toContain("html {\n    background-color: var(--color-surface);\n    color: var(--color-ink);\n    font-family: var(--font-mono);\n    font-weight: var(--font-weight-regular);\n    font-variant-numeric: tabular-nums;\n    -webkit-font-smoothing: antialiased;\n    overflow-anchor: none;\n  }");
   });
 
   test("body applies surface, ink and min-height", () => {

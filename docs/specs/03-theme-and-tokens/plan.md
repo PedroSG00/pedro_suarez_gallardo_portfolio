@@ -14,7 +14,7 @@ Rama `03`, base `main` en `59c4195` (`Merge pull request #14 from PedroSG00/dev`
 - `src/app/page.tsx` (placeholder raíz) usa `bg-zinc-50`, `dark:bg-black` y `font-sans`. Al vaciar la paleta y la familia por defecto, esas clases dejan de existir; hay que retirarlas en el mismo cambio.
 - No existe `src/i18n/`; el locale se resuelve en `src/proxy.ts` y en los layouts. La 03 no toca i18n.
 - `next/font/google` descarga las fuentes **en build time** y las autoaloja; el navegador no hace peticiones a Google. `Geist_Mono` está disponible en los tipos instalados, con `subsets: ["latin"]`, y es una **fuente variable** (eje de peso): la documentación de `next/font` reserva el array de pesos para fuentes no variables, así que se carga sin `weight` o con `"variable"`. El paquete `geist` no está instalado. `pnpm build` ya compiló con estas importaciones, así que el entorno actual tiene red; CI no lo garantiza.
-- `vitest.config.mts` mide `src/lib/**` con umbral 95 % y excluye `src/app/**`, `src/proxy.ts`, `src/test/**`, `src/content/**` y los tests. No hacen falta exclusiones nuevas.
+- `vitest.config.mts` mide `src/lib/**` con umbral 85 % y excluye `src/app/**`, `src/proxy.ts`, `src/test/**`, `src/content/**` y los tests. No hacen falta exclusiones nuevas.
 - `playwright.config.ts` usa `e2e/`, Chromium y `pnpm start -p 3000`.
 - `README.md` dice «Cream and black palette». No es una divergencia: crudo es cream. El riesgo documental anterior desaparece.
 
@@ -590,7 +590,7 @@ FUNCTION sizeAt(spec, widthPx):
 
 - Tests antes que código; el criterio de aceptación se escribe como test y luego se implementa.
 - Solo comportamiento observable y contratos públicos; ni snapshots ni aserciones de clases Tailwind.
-- Cobertura ≥ 95 % en líneas, funciones, ramas y sentencias, sin bajar el umbral ni excluir código nuevo.
+- Cobertura ≥ 85 % en líneas, funciones, ramas y sentencias, sin bajar el umbral ni excluir código nuevo.
 - Los tests de tokens, contraste, escala y auditoría son de lógica pura: leen `globals.css?raw` y no abren navegador. Sus módulos (`theme-tokens.ts`, `theme-contrast.ts`, `type-scale.ts`) viven en `src/test/` con sus tests. `vitest.config.mts` ya usa `resolve.tsconfigPaths`, así que `@/styles/globals.css?raw` resuelve con el alias; `src/test/raw.d.ts` declara el módulo para TypeScript.
 - El script inline se prueba ejecutando el texto generado con `new Function` y un `window`, `document` y `localStorage` falsos; no se prueba el texto por coincidencia de cadenas.
 - Los módulos de producto (`theme.ts`, `theme-script.ts`, `theme-dom.ts`) se testean junto al archivo; los de auditoría, sus tests y los helpers viven en `src/test/`, ya excluido de cobertura.

@@ -16,7 +16,7 @@ export function resolveLocaleForRoot(
   request: { headers?: { 'accept-language'?: string } },
   cookieStore?: { cookies?: Record<string, string> } | null
 ): Locale {
-  // 1. Elección explícita previa (cookie) tiene prioridad
+  // 1. Previous explicit choice (cookie) has priority
   const cookieLocale = cookieStore?.cookies?.[COOKIE_NAME];
   if (cookieLocale === 'en' || cookieLocale === 'es') {
     return cookieLocale;
@@ -28,6 +28,6 @@ export function resolveLocaleForRoot(
     return preferred[0];
   }
 
-  // 3. Fallback a inglés
+  // 3. Fallback to English
   return 'en';
 }

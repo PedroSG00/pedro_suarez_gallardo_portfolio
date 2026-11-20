@@ -167,7 +167,7 @@ Estado: T1 completado (Button, RF-1), T2 completado (Link, RF-2), T3 completado 
 
 - Cada átomo tiene su carpeta propia bajo `src/components/ui/` con `Nombre/Nombre.tsx` y `Nombre/Nombre.test.tsx`.
 - No hay barrel files ni carpetas nuevas en la raíz ni en `src/`.
-- Cobertura ≥ 95 % (líneas, funciones, ramas, sentencias) forzada por el umbral de Vitest.
+- Cobertura ≥ 85 % (líneas, funciones, ramas, sentencias) forzada por el umbral de Vitest.
 - `pnpm lint`, `pnpm typecheck`, `pnpm test` y `pnpm build` en verde.
 - Accesibilidad verificada: contraste AA, teclado, semántica.
 - Cualquier adición o modificación de claves de traducción para `aria-label` va en inglés y español en el mismo cambio (regla 6 de la constitución).

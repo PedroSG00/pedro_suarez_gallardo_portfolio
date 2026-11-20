@@ -115,9 +115,9 @@ test.describe('T18: JS desactivado — RF-05 página más corta que el viewport'
   }) => {
     await mountNoJsFixture(page, 'en', 'light', true, false, '0px');
     await scrollToEnd(page);
-    // Relajación T18: sin JS no existe selector CSS para detectar
-    // scrollHeight <= viewportHeight, así que el bloque puede quedar
-    // parcialmente atenuado. Verificamos que esté visible (no oculto).
+    // Relaxation T18: without JS there is no CSS selector to detect
+    // scrollHeight <= viewportHeight, so the block may remain
+    // partially dimmed. Verify it is visible (not hidden).
     const opacity = await computedOpacity(page, '[aria-label="Contact block"]');
     expect(opacity).toBeGreaterThan(0);
   });

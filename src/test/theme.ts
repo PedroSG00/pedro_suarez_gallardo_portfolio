@@ -32,7 +32,7 @@ export function runThemeScript(
   const keyMatch = script.match(/var\s+k\s*=\s*"([^"]+)"/);
   const key = keyMatch?.[1] ?? "psg-theme";
 
-  // Lectura inicial (misma lógica que el script inyectado)
+  // Initial read (same logic as injected script)
   try {
     const s = ls.getItem(key);
     if (s === "light" || s === "dark") {
@@ -40,7 +40,7 @@ export function runThemeScript(
     }
   } catch {}
 
-  // Listener de pageshow (misma lógica que el script inyectado)
+  // pageshow listener (same logic as injected script)
   w.addEventListener("pageshow", (e: unknown) => {
     const event = e as { persisted?: boolean };
     if (!event.persisted) return;

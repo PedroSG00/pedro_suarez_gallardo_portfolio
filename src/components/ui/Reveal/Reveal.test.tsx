@@ -563,8 +563,8 @@ describe('Reveal reversibility (RF-06)', () => {
       </Reveal>,
     );
 
-    // En fase de entrada, opacidad computada 1 en jsdom (sin animación de scroll
-    // timeline); lo importante es que no hay override forzado en el estilo inline.
+    // In entry phase, computed opacity 1 in jsdom (no scroll timeline
+    // animation); important is that there is no forced override on inline style.
     const stylesAtEntry = window.getComputedStyle(
       screen.getByRole('group', { name: 'Reveal content' }),
     );
@@ -633,7 +633,7 @@ describe('Reveal fast scroll (RF-07)', () => {
 
     const revealRegion = getRevealRegion({ isLastSection: true });
 
-    // En la fase de salida, la última sección mantiene opacidad 1 (forceVisible)
+    // In exit phase, last section keeps opacity 1 (forceVisible)
     expect(window.getComputedStyle(revealRegion).opacity).toBe('1');
 
     // Abrupt stop in the stable phase: the browser only emits scroll end

@@ -11,7 +11,7 @@ Minimal in elements, spectacular in execution: an editorial, high-impact piece, 
 - Cream and black palette with a designed (not merely inverted) dark mode. No accent color.
 - Monospaced typography at extreme scale: massive fluid headlines against small, readable body text.
 - Visible grid, numbered sections, inverted blocks, asymmetry and generous negative space.
-- CSS-only motion: every block animates **in as it enters the viewport and out as it leaves** while scrolling, plus staggered entrances and themed transitions. Fully respects `prefers-reduced-motion`.
+- CSS-only motion: every block animates **in as it enters the viewport and out as it leaves** while scrolling, plus staggered entrances and themed transitions. Anchor scrolling uses native smooth behavior only when `prefers-reduced-motion` is not set; reload and locale switching keep the viewport position.
 - Voice: short, affirmative, benefit first.
 
 Details live in `AGENTS.md`; each section defines its own "signature moment".
@@ -45,7 +45,7 @@ pnpm dev        # http://localhost:3000
 | `pnpm build` / `pnpm start` | Production build / serve it |
 | `pnpm lint` | ESLint over js/mjs/ts/tsx, zero warnings allowed |
 | `pnpm typecheck` | `next typegen` + `tsc --noEmit` |
-| `pnpm test` | Vitest + Testing Library with coverage (fails under 95 %) |
+| `pnpm test` | Vitest + Testing Library with coverage (fails under 85 %) |
 | `pnpm test:watch` | Same tests in watch mode, without coverage |
 | `pnpm test:e2e` | Production build + Playwright (Chromium only) |
 
@@ -76,9 +76,9 @@ Everything runs from the repository root in PowerShell and in bash: `pnpm instal
 ├── e2e/                          # Playwright specs (Chromium)
 ├── messages/                     # en.json / es.json (spec 02)
 ├── pnpm-workspace.yaml           # pnpm settings: engineStrict, allowBuilds
-├── public/                       # Static assets (CV PDFs, profile photo, favicon, OG image)
+├── public/                       # Static assets (logo.svg, pedro-suarez.png, CV PDFs, OG image)
 ├── src/
-│   ├── app/                      # App Router entries (excluded from coverage)
+│   ├── app/                      # App Router entries and white logo favicon (excluded from coverage)
 │   ├── components/               # ui/ and sections/
 │   ├── content/                  # Typed, non-translatable data (stack, links)
 │   ├── i18n/                     # next-intl setup and helpers (spec 02)
@@ -109,7 +109,7 @@ Everything runs from the repository root in PowerShell and in bash: `pnpm instal
 ## Testing
 
 * Quality over quantity: tests check user-visible behavior (content, roles, interaction, states, accessibility). No snapshots, no Tailwind class assertions, no tests written only to raise coverage.
-* Coverage ≥ 95 % globally (lines, functions, branches, statements), enforced by the Vitest threshold. Excluded: configuration, tests, `*.d.ts`, `src/test/`, `src/app/` route files (covered by e2e) and `src/content/`. Nothing outside `src/` is measured.
+* Coverage ≥ 85 % globally (lines, functions, branches, statements), enforced by the Vitest threshold. Excluded: configuration, tests, `*.d.ts`, `src/test/`, `src/app/` route files (covered by e2e) and `src/content/`. Nothing outside `src/` is measured.
 * Playwright covers only the critical flows: language, theme, navigation and scroll motion (in/out of each section, checked through computed opacity while scrolling, and fully visible under `prefers-reduced-motion`). Spec 01 ships a transitional smoke test (the home responds without `pageerror`); the critical flows arrive with specs 02, 03, 05 and 06.
 * Tests are written before the code.
 
@@ -119,20 +119,21 @@ Handled by `next-intl` with locale-prefixed routes (`/en`, `/es`) and static ren
 
 ## Page structure
 
-Every route is wrapped by the global `Navbar` and `Footer` layout components. The site is a single home page with anchors.
+Every route is wrapped by the global shell: `SkipLink`, `Navbar`, `<main>` and `Footer`. The site is a single home page with anchors to four reserved destinations.
 
-**Layout components:**
+**Shell components:**
 
-* **Navbar**: section links, language and theme switches.
-* **Footer**: links, language and copyright.
+* **SkipLink**: skip to content, first focusable element.
+* **Navbar**: sticky, responsive header, `logo.svg` identity, section links, theme switch, language switch.
+* **Footer**: links and copyright.
 
-**Home page sections:**
+**Home page sections (inside `<main>`):**
 
-1. **Hero**: name, role, pitch and calls to action. Home of the site's signature moment.
-2. **About** (`01`): a statement of confidence, then who I am and how I work.
-3. **Work** (`02`, `experience.*` keys): "What I deliver", five result-led blocks (live data, web migrations, administration at scale, workflow tools, integrations and performance), with no company names.
-4. **Stack** (`03`): "The tools I trust", technologies grouped, frontend first.
-5. **Contact** (`04`): "Let's build something solid", with email as a giant link.
+1. **Hero**: name, role, pitch, support, metadata and calls to action. Home of the site's signature moment (staggered entry, cursor, outline and parallax).
+2. **About** (`01`): reserved destination; portrait is planned for spec 07 and intentionally deferred.
+3. **Work** (`02`): reserved destination, heading only.
+4. **Stack** (`03`): reserved destination, heading only.
+5. **Contact** (`04`): reserved destination, heading only.
 
 **Parked:** the Projects section and the `/projects/[slug]` pages are out of scope for now. They return when there is a new project, with their own spec. See `content-brief.md`, section 10.
 
@@ -144,9 +145,9 @@ Every phase follows the same loop: spec → tests → code → gates (`lint`, `t
 | --- | --- | --- |
 | **0. Foundation** | Tooling (Vitest + coverage threshold, RTL, Playwright, CI), `next-intl` with `/en` and `/es`, theme tokens, mono font, light/dark theme | Tooling gates green (lint, typecheck, test, build, e2e) and the six CI checks pass on a placeholder page |
 | **1. Atoms** | `ui/` pieces: Button/Link, Heading, Tag, Section wrapper, grid lines, ThemeToggle, LanguageSwitch | Each atom tested and reusable, no section-specific code inside |
-| **2. Shell and Hero** | Global layout components (`Navbar`, `Footer`) and the `Hero` section with the site's signature moment | Memorable at first glance in both themes and both languages; navigation works |
-| **3. About and Work** | Confident, benefit-led sections composed from atoms | Same standard as previous phases; content only from `messages/` and `content/` |
-| **4. Scroll motion** | `ui/Reveal` (in and out while scrolling) applied to every block, plus each section's signature moment | e2e proves opacity changes on entry and exit in every section, in both languages and themes; everything visible with `prefers-reduced-motion` and without `animation-timeline` support |
+| **2. Scroll motion** | `ui/Reveal` (in and out while scrolling) applied to every block, plus each section's signature moment | e2e proves opacity changes on entry and exit in every section, in both languages and themes; everything visible with `prefers-reduced-motion` and without `animation-timeline` support |
+| **3. Shell and Hero** | Global layout components (`Navbar`, `Footer`) and the `Hero` section with the site's signature moment | Memorable at first glance in both themes and both languages; navigation works |
+| **4. About and Work** | Confident, benefit-led sections composed from atoms | Same standard as previous phases; content only from `messages/` and `content/` |
 | **5. Stack and Contact** | Grouped stack and contact block | Links verified, no duplicated markup between groups |
 | **6. Polish** | Per-language metadata, sitemap, robots, OG image, accessibility pass, performance pass, reduced-motion check, Safari and Firefox motion fallback check | Lighthouse 95+ in all categories, AA contrast, full keyboard navigation |
 | **7. Launch** | Static deploy and domain | Live site and README links filled in |

@@ -1,24 +1,32 @@
 import { Metadata } from 'next';
-import { Suspense } from 'react';
 import { locale } from 'next/root-params';
-import LanguageSwitch from '@/components/ui/LanguageSwitch/LanguageSwitch';
-import type { Locale } from '@/lib/locale';
+import { hasLocale, NextIntlClientProvider } from 'next-intl';
+import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
+import { notFound } from 'next/navigation';
 import { themeScript } from '@/lib/theme-script';
 import { THEME_STORAGE_KEY } from '@/lib/theme';
 import '@/styles/globals.css';
 import { Geist_Mono } from 'next/font/google';
+import SkipLink from '@/components/ui/SkipLink/SkipLink';
+import { ThemeBootstrapScript } from '@/components/ui/ThemeControl/ThemeBootstrapScript';
+import Navbar from '@/components/Navbar/Navbar';
+import Footer from '@/components/Footer/Footer';
+import AnchorFocus from '@/components/ui/AnchorFocus/AnchorFocus';
+import { SITE } from '@/content/site';
+import { routing } from '@/i18n/routing';
 
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
 });
 
-export const metadata: Metadata = {
-  title: 'Portfolio',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('hero');
+  return { title: `${t('name')} — ${t('role')}` };
+}
 
-export async function generateStaticParams() {
-  return [{ locale: 'en' }, { locale: 'es' }];
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
 }
 
 export default async function LocaleLayout({
@@ -27,28 +35,32 @@ export default async function LocaleLayout({
   children: React.ReactNode;
 }) {
   const lang = await locale();
+  if (!hasLocale(routing.locales, lang)) {
+    notFound();
+  }
+  setRequestLocale(lang);
+  const messages = await getMessages();
+  const themeBootstrapScript = `(${themeScript(THEME_STORAGE_KEY)})(window,document,localStorage)`;
+
   return (
-    <html lang={lang} suppressHydrationWarning className={`${geistMono.variable} h-full antialiased`}>
+    <html
+      lang={lang}
+      suppressHydrationWarning
+      className={`${geistMono.variable} h-full antialiased`}
+    >
       <head>
-        {/* El script se envuelve y se auto-invoca con los globales reales;
-            en los tests se ejecuta con new Function y deps inyectadas (T9). */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(${themeScript(THEME_STORAGE_KEY)})(window,document,localStorage)`,
-          }}
-        />
+        <ThemeBootstrapScript html={themeBootstrapScript} />
       </head>
       <body className="min-h-full flex flex-col">
-        <nav>
-          <Suspense fallback={null}>
-            <LanguageSwitch
-              locale={lang as Locale}
-              ariaLabelEn="Switch to English"
-              ariaLabelEs="Cambiar a español"
-            />
-          </Suspense>
-        </nav>
-        {children}
+        <NextIntlClientProvider locale={lang} messages={messages}>
+          <SkipLink />
+          <Navbar site={SITE} />
+          <main id="main" tabIndex={-1}>
+            {children}
+          </main>
+          <AnchorFocus sectionIds={['about', 'work', 'stack', 'contact']} />
+          <Footer site={SITE} />
+        </NextIntlClientProvider>
       </body>
     </html>
   );
