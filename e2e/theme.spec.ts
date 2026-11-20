@@ -329,4 +329,59 @@ test.describe('theme first paint', () => {
     });
     await expect(page.locator('html')).not.toHaveAttribute('data-theme');
   });
+
+  test('theme toggle changes light/dark, announces state and persists', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ colorScheme: 'light' });
+    const response = await page.goto('/en');
+    expect(response?.status()).toBeLessThan(400);
+
+    const themeBtn = page.getByRole('button', { name: /toggle theme|cambiar tema/i });
+    await expect(themeBtn).toBeVisible();
+    await expect(themeBtn).toHaveAttribute('aria-pressed', 'false');
+
+    // Switch to dark
+    await themeBtn.click();
+    await expect(themeBtn).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+
+    // Persists after reload
+    await page.reload();
+    await expect(themeBtn).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+
+    // Switch back to light
+    await themeBtn.click();
+    await expect(themeBtn).toHaveAttribute('aria-pressed', 'false');
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  });
+
+  test('no JavaScript: theme control does not appear', async ({ browser }) => {
+    const context = await browser.newContext({
+      javaScriptEnabled: false,
+      colorScheme: 'dark',
+    });
+    const page = await context.newPage();
+    try {
+      const response = await page.goto('/en');
+      expect(response?.status()).toBeLessThan(400);
+      // No theme toggle button without JS
+      await expect(
+        page.getByRole('button', { name: /toggle theme|cambiar tema/i })
+      ).not.toBeVisible();
+      // Content still visible
+      await expect(page.locator('h1')).toBeVisible();
+    } finally {
+      await context.close();
+    }
+  });
+
+  test('exactly one inline theme script in <head>', async ({ page }) => {
+    await page.goto('/en');
+    const inlineScripts = page.locator('head > script:not([src])');
+    await expect(inlineScripts).toHaveCount(1);
+    const content = await inlineScripts.first().textContent();
+    expect(content).toContain('psg-theme');
+  });
 });
