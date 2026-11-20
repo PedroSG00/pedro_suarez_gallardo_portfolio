@@ -14,6 +14,36 @@ describe('validateParity', () => {
     expect(result.extra).toEqual([]);
   });
 
+  test('About has matching content structure in both locales', () => {
+    const aboutKeys = (messages: typeof enMessages) => ({
+      fields: Object.keys(messages.about).sort(),
+      paragraphs: Object.keys(messages.about.paragraphs).sort(),
+      values: Object.keys(messages.about.values).sort(),
+    });
+
+    expect(aboutKeys(esMessages)).toEqual(aboutKeys(enMessages));
+    expect(Object.keys(enMessages.about).sort()).toEqual([
+      'intro',
+      'paragraphs',
+      'portraitAlt',
+      'statement',
+      'values',
+    ]);
+    expect(Object.keys(enMessages.about.paragraphs).sort()).toEqual([
+      'approach',
+      'background',
+      'experience',
+      'problem',
+    ]);
+    expect(Object.keys(enMessages.about.values).sort()).toEqual([
+      'analytical',
+      'autonomous',
+      'continuousLearning',
+      'detailOriented',
+      'teamwork',
+    ]);
+  });
+
   test('fails when a key is missing in es', () => {
     const en = { shared: { nav: { home: 'Home' } }, extra: { only: 'in en' } };
     const es = { shared: { nav: { home: 'Inicio' } } };

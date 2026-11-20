@@ -36,8 +36,22 @@
     "ctaSecondary": "Let's talk"
   },
   "about": {
-    "intro": "About me",
-    "values": "Values"
+    "intro": "About",
+    "statement": "Complexity is where I'm calmest.",
+    "paragraphs": {
+      "problem": "Large data sets, live updates, complex forms, and state people can rely on. That is the work teams trust me with—and the work I enjoy most.",
+      "experience": "I have more than three years of professional experience building and maintaining production web apps with React and TypeScript. I also work on the backend, building REST APIs in several languages and refactoring for speed and clarity.",
+      "approach": "I understand the problem before I touch it, care about the details, and deliver software that stays maintainable. I use AI tools such as Copilot every day to move faster, and I always review what they produce.",
+      "background": "I moved into web development through an intensive bootcamp and keep learning. Spanish is my native language."
+    },
+    "values": {
+      "detailOriented": "Detail-oriented",
+      "analytical": "Analytical",
+      "autonomous": "Autonomous",
+      "teamwork": "Teamwork",
+      "continuousLearning": "Continuous learning"
+    },
+    "portraitAlt": "Portrait of Pedro Suárez Gallardo"
   },
   "work": {
     "intro": "Experience",

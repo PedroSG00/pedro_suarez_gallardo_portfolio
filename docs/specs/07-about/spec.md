@@ -67,6 +67,26 @@ Esta spec define el contenido y el comportamiento observable de About. No decide
 - Cuando se anuncie la frase a un lector de pantalla, el sistema presenta la oración completa una sola vez, sin fragmentarla según el progreso visual.
 - La diferencia visual entre estados conserva el contraste AA y no depende únicamente del color.
 
+**Estados visuales**
+
+- Una palabra no iluminada usa el peso regular (400) y el color de texto secundario del tema activo.
+- Una palabra iluminada usa el peso fuerte (700) y el color principal de texto del tema activo.
+- En ambos temas y estados, el texto mantiene una relación de contraste mínima de 4,5:1 con el fondo. El peso tipográfico también distingue los estados; el color no es la única señal.
+
+**Límites del progreso**
+
+- El recorrido va del 0 % al 100 % del tramo de cobertura de la afirmación: 0 % cuando su borde inicial entra en el viewport por el borde inferior; 100 % cuando su borde final sale por el borde superior.
+- Para una frase de N palabras, numeradas desde 1, la palabra i se ilumina al alcanzar el límite `i / N` del recorrido. En ese límite están iluminadas las primeras i palabras y las posteriores siguen no iluminadas.
+- En 0 % no hay palabras iluminadas; en 100 % están iluminadas todas. Los límites se distribuyen uniformemente según el número de palabras de la frase localizada.
+- Al retroceder, los mismos límites se recorren en sentido inverso: al cruzar hacia atrás el límite `i / N`, la palabra i vuelve al estado no iluminado. No se conserva progreso al salir y volver a entrar; el estado corresponde siempre a la posición actual.
+
+**Criterios observables de prueba**
+
+- En `/en` y `/es`, en tema claro y oscuro, recorrer el inicio, una posición inmediatamente anterior y posterior a un límite entre palabras, un estado intermedio acumulado, el final y el retroceso sobre el mismo límite.
+- Determinar la iluminación mediante estilos computados: peso 400 y color secundario para no iluminada; peso 700 y color principal para iluminada. Comprobar el contraste mínimo 4,5:1 en ambos estados y temas. No consultar clases ni estructura interna.
+- Comprobar que en cada límite se ilumina la palabra correspondiente junto con todas las anteriores, y que al retroceder se desiluminan en orden inverso.
+- Comprobar por nombre accesible que la frase completa se anuncia una sola vez, sin cambios según el progreso visual.
+
 ### RF-3 — Cualidades profesionales
 
 - Cuando se muestre About en inglés, el sistema presenta las cualidades `Detail-oriented`, `Analytical`, `Autonomous`, `Teamwork` y `Continuous learning`.
@@ -143,4 +163,4 @@ Esta spec define el contenido y el comportamiento observable de About. No decide
 
 ## Dudas abiertas
 
-- [NECESITA ACLARACIÓN] Definir qué aspecto visual distingue una palabra «no iluminada» de una palabra «iluminada» y en qué tramo concreto del recorrido de scroll progresa cada palabra. La secuencia acumulativa, reversible y su estado final están definidos; no lo están esos límites visuales.
+No quedan dudas abiertas en esta versión.

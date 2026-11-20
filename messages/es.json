@@ -37,7 +37,21 @@
   },
   "about": {
     "intro": "Sobre mí",
-    "values": "Valores"
+    "statement": "La complejidad es donde estoy más tranquilo.",
+    "paragraphs": {
+      "problem": "Grandes conjuntos de datos, actualizaciones en tiempo real, formularios complejos y estados en los que se puede confiar. Ese es el trabajo que los equipos me confían y que más disfruto.",
+      "experience": "Tengo más de tres años de experiencia profesional creando y manteniendo aplicaciones web en producción con React y TypeScript. También trabajo en el backend, creando API REST en varios lenguajes y refactorizando para ganar velocidad y claridad.",
+      "approach": "Entiendo el problema antes de tocarlo, cuido los detalles y entrego software fácil de mantener. Uso herramientas de IA como Copilot a diario para avanzar más rápido y siempre reviso lo que generan.",
+      "background": "Me pasé al desarrollo web a través de un bootcamp intensivo y sigo aprendiendo. El español es mi lengua materna."
+    },
+    "values": {
+      "detailOriented": "Detallista",
+      "analytical": "Analítico",
+      "autonomous": "Autónomo",
+      "teamwork": "Trabajo en equipo",
+      "continuousLearning": "Aprendizaje continuo"
+    },
+    "portraitAlt": "Retrato de Pedro Suárez Gallardo"
   },
   "work": {
     "intro": "Experiencia",

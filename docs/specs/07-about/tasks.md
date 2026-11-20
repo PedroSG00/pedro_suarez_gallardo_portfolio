@@ -15,7 +15,7 @@
 | ID | Tarea | RF | Depende de |
 |---|---|---|---|
 | T1 | Cerrar el comportamiento visual de RF-2 | RF-2 | — |
-| T2 | Añadir contenido bilingüe y etiquetas de About | RF-1, RF-3, RF-7 | T1 |
+| T2 | Añadir contenido bilingüe y etiquetas de About | RF-1, RF-3, RF-7 | T1 (hecha) |
 | T3 | Crear el bloque accesible de la frase firma | RF-2, RF-6, RF-7 | T2 |
 | T4 | Implementar la progresión acumulativa de la frase | RF-2 | T1, T3 |
 | T5 | Integrar el retrato y su fallback | RF-4, RF-6, RF-7 | T2 |
@@ -31,6 +31,8 @@
 
 **Objetivo:** eliminar la aclaración pendiente de la spec sobre el estado visual iluminado/no iluminado y el tramo de scroll que recorre cada palabra.
 
+**Estado:** hecha.
+
 **RF:** RF-2.
 
 **Depende de:** nada.
@@ -39,8 +41,9 @@
 
 **Tests a escribir primero:**
 
-- No hay test ejecutable en esta tarea documental. Antes de actualizar la spec, fijar los casos que deberán convertirse en pruebas visibles: inicio de la frase, progreso entre palabras, acumulación, estado final y reversión.
-- Definir cómo se comprobará la diferencia de estado sin consultar clases ni estructura interna.
+- No hay test ejecutable en esta tarea documental. Casos fijados antes de actualizar la spec y convertibles en pruebas visibles: al iniciar el recorrido ninguna palabra está iluminada; al cruzar el primer límite se ilumina la primera; entre límites se conserva la acumulación; al final todas están iluminadas; al retroceder se revierte la misma palabra en orden inverso.
+- Repetir la matriz observable en inglés y castellano, y en tema claro y oscuro; comprobar el estado por estilos computados de color y peso tipográfico, nunca por clases ni estructura interna.
+- Comprobar que ambos estados conservan contraste AA en ambos temas y que la frase completa sigue siendo el único contenido anunciado.
 
 **Criterio de hecho:** `docs/specs/07-about/spec.md` define estados visuales, límites del progreso, comportamiento en ambos temas y criterios observables para las pruebas; no queda `[NECESITA ACLARACIÓN]` sobre RF-2. No se implementa la animación en esta tarea.
 
@@ -49,6 +52,8 @@
 ## T2 — Añadir contenido bilingüe y etiquetas de About
 
 **Objetivo:** incorporar el texto aprobado para implementación y las cinco cualidades en los catálogos EN/ES y presentar el contenido estático de About.
+
+**Estado:** hecha.
 
 **RF:** RF-1, RF-3, RF-7.
 
@@ -74,6 +79,8 @@
 ---
 
 ## T3 — Crear el bloque accesible de la frase firma
+
+**Estado:** hecha.
 
 **Objetivo:** separar la presentación accesible de la frase del movimiento general y mostrarla estática como base.
 

@@ -4,7 +4,7 @@
 
 **Cobertura:** RF-1 a RF-7 y todos los requisitos no funcionales de la spec.
 
-**Bloqueo previo a implementar RF-2:** la spec deja pendiente definir los estados visuales «iluminada/no iluminada» y el tramo de scroll que recorre cada palabra. El plan conserva la secuencia acumulativa y reversible ya acordada, pero no inventa esos límites. Antes de implementar o fijar aserciones visuales de RF-2, se debe cerrar esa aclaración en la spec.
+**Definición de RF-2:** la spec fija los estados visuales, sus requisitos de contraste y los límites uniformes de progreso dentro del tramo de cobertura. Las aserciones visuales de implementación deben seguir esos criterios observables.
 
 ---
 
@@ -105,12 +105,12 @@ No se persiste ningún estado de movimiento entre renders, locales o visitas.
 2. Derivar de esa única frase la secuencia ordenada de palabras visuales, conservando puntuación y espacios.
 3. Exponer la frase completa una sola vez en el árbol accesible; las piezas visuales de palabra no se anuncian de nuevo.
 4. Obtener el progreso visual únicamente de la posición del bloque respecto al scroll, mediante la capacidad CSS de animación ligada al scroll.
-5. Comparar el progreso con los límites ordenados de cada palabra. Las palabras cuyo límite ya se haya alcanzado permanecen iluminadas; las posteriores permanecen en su estado inicial.
-6. Al retroceder, recalcular desde la posición actual. Las palabras dejan de estar iluminadas en orden inverso, sin estado persistente en JavaScript.
+5. Normalizar el recorrido entre el borde inicial de la afirmación entrando por debajo del viewport (0 %) y su borde final saliendo por arriba (100 %). Para N palabras, iluminar la palabra i al alcanzar `i / N`; las palabras anteriores permanecen iluminadas.
+6. Al retroceder, recalcular desde la posición actual con los mismos límites. Las palabras dejan de estar iluminadas en orden inverso, sin estado persistente en JavaScript.
 7. Con movimiento reducido, sin soporte o sin JavaScript, presentar desde el primer render la frase completa, estática y totalmente iluminada.
-8. No implementar los límites ni los dos estados visuales hasta que se cierre la aclaración abierta de RF-2 en la spec.
+8. Usar los estados de RF-2: no iluminada con peso 400 y color secundario; iluminada con peso 700 y color principal. En ambos temas, cada estado mantiene contraste mínimo 4,5:1 y los estados difieren también por peso tipográfico.
 
-**Dependencia:** el orden acumulativo y reversible está definido. Los límites de progreso y la apariencia exacta de cada estado siguen pendientes en la spec; este algoritmo no fija porcentajes ni colores.
+**Contrato de verificación:** comprobar estado inicial, ambos lados de un límite, acumulación, final y reversión mediante estilos computados y nombre accesible, en ambos idiomas y temas. La spec define el contrato visual y los límites; la implementación no debe inventar otros.
 
 ### 3.3 Carga y fallo del retrato — RF-4
 
@@ -215,7 +215,7 @@ Los tests se escriben antes del código. Se consulta por rol, texto, nombre acce
 - Verificar que los párrafos, las etiquetas, la frase y el retrato participan del revelado general y están plenamente visibles en su fase estable.
 - Verificar contraste AA en tema claro y oscuro para la frase en ambos estados visuales y en combinación con el revelado general.
 - Verificar que `prefers-reduced-motion: reduce` deja el contenido estático y totalmente visible.
-- No escribir aserciones de progreso por porcentaje hasta cerrar los límites pendientes de RF-2 en la spec.
+- Verificar los límites `i / N` y los estilos computados definidos en RF-2, en ambos idiomas y temas, sin aserciones por clases ni estructura interna.
 
 **RF:** RF-2, RF-3, RF-5, RF-6.
 
@@ -262,7 +262,7 @@ Los gates se ejecutan sin reducir umbrales. Como la spec toca movimiento, e2e es
 | RF | Estructura / datos | Algoritmos | Contratos | Decisiones | Tests |
 |---|---|---|---|---|---|
 | RF-1 Contenido de About | `About`, mensajes bilingües, ejemplo de modelo | 3.1 | 4.1 | Mensajes fuera de UI; composición con piezas existentes | 6.1, 6.3 |
-| RF-2 Afirmación firma | `AboutStatement`, mensajes bilingües | 3.2 | 4.2 | Progresión CSS; texto visual derivado de una sola frase | 6.1, 6.2, 6.3; implementación bloqueada hasta resolver aclaración |
+| RF-2 Afirmación firma | `AboutStatement`, mensajes bilingües | 3.2 | 4.2 | Progresión CSS acumulativa y reversible; límites y estados visuales definidos en la spec; texto visual derivado de una sola frase | 6.1, 6.2, 6.3 |
 | RF-3 Cualidades | `About`, `Tag`, grupo de cinco valores en mensajes | 3.1 | 4.1, 4.4 | Reutilizar etiquetas; no crear interacción | 6.1, 6.3 |
 | RF-4 Retrato | `About`, ruta local, texto alternativo traducido | 3.3 | 4.1, 4.3 | Recurso local opcional respecto al texto | 6.1, 6.3 |
 | RF-5 Revelado | `About`, `Reveal`, `RevealGroup` | 3.2, 3.4 | 4.1, 4.2, 4.4 | Reutilizar movimiento existente | 6.2, 6.3 |
@@ -294,7 +294,7 @@ Los gates se ejecutan sin reducir umbrales. Como la spec toca movimiento, e2e es
 
 ## 9. Riesgos, dependencias y decisiones pendientes
 
-1. **Aclaración de RF-2.** La apariencia de los estados y los límites de progreso por palabra siguen marcados `[NECESITA ACLARACIÓN]` en la spec. No implementar ese aspecto ni fijar sus porcentajes hasta actualizar la spec.
+1. **Contraste de RF-2.** Los dos estados y los límites uniformes del progreso están definidos en la spec. Verificar que la implementación preserve contraste AA en ambos temas y siga el mismo recorrido al avanzar y retroceder.
 2. **Estado sin JavaScript.** La spec requiere About estático sin JavaScript, mientras el revelado existente usa animación CSS cuando el navegador la soporta. La prueba debe confirmar que la sección puede conservar ese contrato localmente. Si requiere modificar `Reveal` o estilos compartidos, detenerse y pedir aprobación por tratarse de una capa transversal.
 3. **Fallo del retrato sin JavaScript.** La sección y sus textos deben seguir visibles sin JavaScript. El comportamiento del navegador ante un recurso de imagen fallido también debe satisfacer la omisión sin error visual exigida por RF-4; se valida explícitamente y no se da por supuesto.
 4. **Contraste durante dos efectos simultáneos.** La frase combina el revelado general con el estado por palabra. Todas las combinaciones tienen que mantener AA; no se acepta una solución que oscurezca temporalmente el texto por debajo del contraste requerido.
