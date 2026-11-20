@@ -1,0 +1,34 @@
+/* RF-8: nombre a todo el ancho. Selectores basados en id/atributo para que
+   se apliquen desde el primer fotograma (HTML servido), sin depender de que
+   el cliente aplique la clase hasheada del CSS module. El tamaño sale de
+   --text-hero-name (clamp impulsado por --grid-gutter, --hero-name-fill y
+   --hero-name-divisor). La línea más larga define el ancho del bloque; el
+   cursor se reserva en el padding sin sumar a esa línea. */
+
+#hero-name {
+  display: block;
+  width: max-content;
+  white-space: nowrap;
+  font-size: var(--text-hero-name);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  margin: 0;
+  position: relative;
+  /* espacio reservado para el cursor; no forma parte de la línea más larga */
+  padding-inline-end: var(--cursor-width);
+}
+
+#hero-name > span[aria-hidden="true"] {
+  /* una palabra por línea, alineada a la izquierda, ancho del contenido */
+  display: block;
+  width: max-content;
+}
+
+/* cursor decorativo: se pinta en el espacio reservado del bloque
+   (heredado de T4/T17), fuera del flujo de la línea más larga.
+   Su animación de parpadeo es de T21. */
+#hero-name > span[aria-hidden="true"]:last-child {
+  position: absolute;
+  inset-inline-end: 0;
+  width: var(--cursor-width);
+}

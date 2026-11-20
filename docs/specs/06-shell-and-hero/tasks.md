@@ -479,7 +479,7 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
 
 ---
 
-## T17 — `Hero`: contenido y revelado
+## T17 — `Hero`: contenido y revelado ✅ COMPLETADA
 
 **Objetivo:** componer el hero completo con el nombre como único `h1`, el contenido del brief y las dos llamadas a la acción, con el revelado `rise` en el contenido secundario.
 
