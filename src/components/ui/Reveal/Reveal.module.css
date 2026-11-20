@@ -153,7 +153,6 @@
   [data-reveal-root][data-reveal-variant="fade"] {
     transform: none;
   }
-}
 
 @supports not (animation-timeline: view()) {
   [data-reveal-root] {
