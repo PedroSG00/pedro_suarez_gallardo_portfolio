@@ -156,7 +156,7 @@ Momento firma: el titular gigante entra con `clip`; el email es un enlace enorme
 | Título | Pedro Suárez Gallardo — Full-stack developer | Pedro Suárez Gallardo — Desarrollador full-stack |
 | Descripción | I build real-time, data-heavy web products with React, TypeScript and Node.js. Portfolio and contact. | Construyo productos web en tiempo real y con muchos datos con React, TypeScript y Node.js. Portfolio y contacto. |
 
-**Imagen OG:** nombre en tipografía masiva, crudo sobre negro, generada desde el propio diseño. La foto de perfil se incluirá en la web; no se usa en la imagen OG salvo que Pedro lo indique.
+**Imagen OG:** nombre en tipografía masiva, crudo sobre negro, generada desde el propio diseño. La foto `public/pedro-suarez.png` se integrará en About al abrir la spec 07; no se usa en la imagen OG salvo que Pedro lo indique.
 
 ---
 

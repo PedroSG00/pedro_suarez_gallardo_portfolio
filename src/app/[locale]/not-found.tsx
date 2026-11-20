@@ -1,17 +1,14 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
-import enMessages from '../../../messages/en.json';
-import esMessages from '../../../messages/es.json';
+import { useTranslations } from 'next-intl';
 
 export default function NotFound() {
-  const pathname = usePathname();
-  const locale = (pathname.split('/')[1] ?? 'en') as 'en' | 'es';
-  const messages = locale === 'es' ? esMessages : enMessages;
+  const t = useTranslations('shared.notFound');
+
   return (
-    <main>
-      <h1>{messages.shared.notFound.title}</h1>
-      <p>{messages.shared.notFound.message}</p>
-    </main>
+    <>
+      {t.has('title') && <h1>{t('title')}</h1>}
+      {t.has('message') && <p>{t('message')}</p>}
+    </>
   );
 }

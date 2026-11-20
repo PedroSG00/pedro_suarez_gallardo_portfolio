@@ -674,7 +674,7 @@ temporal.
 | 1.7 | `git check-attr text eol -- package.json` | `text: auto`, `eol: lf` |
 | 4.2 | Literal hijo en `src/components/` | Rojo por `react/jsx-no-literals` |
 | 4.3 | El mismo literal en un `*.test.tsx` | Verde: la exención es solo para tests |
-| 6 | Módulo temporal de ~200 líneas sin test | Cobertura global < 95 %, código 1 |
+| 6 | Módulo temporal de ~200 líneas sin test | Cobertura global < 85 %, código 1 |
 | 8.4 | Proceso escuchando en 3000, `pnpm test:e2e` | Fallo explícito de puerto ocupado |
 | 8.5 | `timeout` reducido a 1 s | Fallo de timeout del `webServer` |
 

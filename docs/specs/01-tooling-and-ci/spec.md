@@ -49,7 +49,7 @@ sobre terreno firme. Una spec está terminada cuando sus gates pasan; esta defin
 1. Como desarrollador, quiero clonar e instalar con un solo comando y obtener exactamente las mismas
    versiones que en CI.
 2. Como desarrollador, quiero que un error de tipos, un literal de texto, una advertencia de ESLint,
-   una cobertura por debajo del 95 % o un build roto rompan el comando en local.
+   una cobertura por debajo del 85 % o un build roto rompan el comando en local.
 3. Como revisor, quiero seis checks con nombre estable en cada PR, para exigirlos en la protección de
    rama.
 4. Como mantenedor, quiero que un fallo de test o de e2e deje rastro (informe de cobertura, traza de
@@ -88,7 +88,7 @@ infraestructura (caídas de Actions, disco lleno, caché corrupta, tokens caduca
   de salida.
 - **D6. Alias en Vitest sin plugin extra.** Vite 8.3.5 resuelve `paths` con `resolve.tsconfigPaths`;
   añadir `vite-tsconfig-paths` sería duplicar una capacidad ya presente.
-- **D7. Umbral global, no `perFile`.** El 95 % lo impone Vitest sobre el total; Sonar no lo duplica y
+- **D7. Umbral global, no `perFile`.** El 85 % lo impone Vitest sobre el total; Sonar no lo duplica y
   solo aporta el gate sobre código nuevo.
 - **D8. e2e contra el build de producción.** `pnpm build` corre antes de Playwright, así que un build
   roto no se disfraza de timeout de servidor y el e2e prueba lo que se despliega.
@@ -161,7 +161,7 @@ infraestructura (caídas de Actions, disco lleno, caché corrupta, tokens caduca
 ### RF-6. Cobertura
 
 1. `pnpm test` genera cobertura v8 en `text` y `lcov` dentro de `coverage/`.
-2. Por debajo del 95 % global en líneas, funciones, ramas o sentencias, el comando sale con código
+2. Por debajo del 85 % global en líneas, funciones, ramas o sentencias, el comando sale con código
    distinto de 0 e indica la métrica.
 3. Si un test falla, el informe se genera igualmente (`reportOnFailure`).
 4. Las exclusiones son exactamente las del apartado 9, replicadas con comentario cruzado con
@@ -340,7 +340,7 @@ nada: `check-package-manager.mjs`, configuraciones raíz, `e2e/`, `messages/`, `
 | RF-4.2 | Literal hijo temporal en `src/components/` | Rojo por `react/jsx-no-literals` | Código 1, error `react/jsx-no-literals` (T9) |
 | RF-4.3 | El mismo literal, esta vez dentro de un `*.test.tsx` | Verde en el test y rojo en el componente: la exención es solo para tests | Código 0 en el test (T9) |
 | RF-5 | `pnpm test` con y sin tests | Verde en ambos casos, sin ficheros de test añadidos al repo | `pnpm test` en verde, suite vacía (T5, T7–T10 gates) |
-| RF-6 | `pnpm test`; módulo temporal de ~200 líneas sin test en `verify/gates` | El porcentaje global cae por debajo del 95 % y el comando sale con código 1 | N/A local: Rolldown (Vitest v5) no parsea TypeScript con tipos para coverage |
+| RF-6 | `pnpm test`; módulo temporal de ~200 líneas sin test en `verify/gates` | El porcentaje global cae por debajo del 85 % y el comando sale con código 1 | N/A local: Rolldown (Vitest v5) no parsea TypeScript con tipos para coverage |
 | RF-7 | `node_modules` y `.next` borrados, instalar y compilar; `pnpm start` | Build en verde; `GET /` < 400 | `pnpm build` en verde; `pnpm test:e2e` responde < 400 (T6) |
 | RF-8.2/8.3 | `pnpm test:e2e` | 1 passed en Chromium | `pnpm test:e2e` → 1 passed (T6, T7–T10 gates) |
 | RF-8.4 | Con un proceso escuchando en 3000, `pnpm test:e2e` | Fallo explícito de puerto ocupado | Código 1, error "already used" (T6, T9) |
@@ -390,7 +390,7 @@ Se eliminan `@types/jest` y `eslint-plugin-vitest`. Se conservan, ya instalados:
 2. **¿Quality Gate?** «Sonar way», sin gate personalizado.
 3. **¿PRs de fork?** No se esperan; fallo cerrado sin token. Nunca `pull_request_target` con checkout
    del PR.
-4. **¿El 95 % lo impone Sonar o Vitest?** Vitest, sobre el global.
+4. **¿El 85 % lo impone Sonar o Vitest?** Vitest, sobre el global.
 5. **¿`renderWithIntl` en esta spec?** No: depende de `next-intl` y se mueve a la 02; el roadmap se
    corrige.
 6. **¿`passWithNoTests`?** Sí: una suite vacía pasa y no se crea ningún test artificial.

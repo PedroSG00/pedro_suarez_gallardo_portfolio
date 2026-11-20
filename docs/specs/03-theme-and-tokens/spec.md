@@ -156,13 +156,16 @@ Valores de partida:
 
 | Rol | Mínimo (360 px) | Máximo (1440 px) | Peso | Uso |
 | --- | --- | --- | --- | --- |
-| Display | 64 px | 176 px | Énfasis | Nombre del hero y titular de Contact |
+| Nombre del hero | 48 px | 300 px | Énfasis | Nombre del hero (token ``--text-hero-name``, rango ajustable) |
+| Display | 64 px | 176 px | Énfasis | Titular de Contact |
 | Titular de gran formato | 40 px | 96 px | Énfasis | Titulares de sección |
 | Titular de sección | 24 px | 48 px | Énfasis | Encabezados internos |
 | Cuerpo | 16 px | 20 px | Regular | Texto de lectura |
 | Metadato | 12 px | 14 px | Regular | Etiquetas, numeración y datos de apoyo |
 
-Nota: los rangos son valores de partida ajustables (decisión b). La jerarquía y los mínimos son contrato.
+Nota: los rangos son valores de partida ajustables (decisión b), incluido el del nombre del hero (``--text-hero-name``). La jerarquía display > titular de gran formato > titular de sección > cuerpo > metadato y los mínimos (12 px cualquier texto, 16 px cuerpo) son contrato.
+
+El nombre del hero usa además tokens de escala óptica y tracking (`--hero-name-scale`, `--hero-name-letter-spacing`) para reducir su altura visual sin bajar del ancho mínimo de la spec 06; estos valores no crean un nuevo rol tipográfico ni alteran la jerarquía.
 
 ### RF-10 — Espaciado y retícula
 

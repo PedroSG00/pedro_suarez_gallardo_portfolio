@@ -69,9 +69,9 @@ test.describe('T19: evidencia real por RF', () => {
       </section>
     `, '400px');
 
-    // Sin scroll: el bloque está en zona visible (padding-top 1000, viewport 1000,
-    // el bloque empieza en 1000, justo en el borde del viewport). Para asegurar que
-    // está en fase estable, lo ponemos más arriba.
+    // No scroll: block is in visible zone (padding-top 1000, viewport 1000,
+    // block starts at 1000, just at the viewport edge). To ensure it is in
+    // stable phase, we place it higher up.
     await scrollTo(page, 0);
 
     const opacity = await computedOpacity(page, '[aria-label="Bloque visible"]');
@@ -110,9 +110,9 @@ test.describe('T19: evidencia real por RF', () => {
 
     const opacity = await computedOpacity(page, '[aria-label="Bloque página corta"]');
 
-    // Con JS, isShortPage => forceVisible => opacidad 1. Sin JS (bloqueado),
-    // puede estar atenuado (relajación T18). Aquí JS está bloqueado, así que
-    // verificamos que sea visible (opacidad > 0), no necesariamente 1.
+    // With JS, isShortPage => forceVisible => opacity 1. Without JS (blocked),
+    // it may be dimmed (relaxation T18). JS is blocked here, so we verify
+    // it is visible (opacity > 0), not necessarily 1.
     expect(opacity).toBeGreaterThan(0);
   });
 
@@ -127,12 +127,12 @@ test.describe('T19: evidencia real por RF', () => {
       </section>
     `);
 
-    // Scroll rápido: varias posiciones rápidamente.
+    // Fast scroll: several positions rapidly.
     for (const y of [0, 2000, 500, 3000, 1000]) {
       await scrollTo(page, y);
     }
 
-    // Parada brusca: posición estable (borde superior en 400px del viewport).
+    // Abrupt stop: stable position (top edge at 400px of viewport).
     await scrollTo(page, 600);
 
     const opacity = await computedOpacity(page, '[aria-label="Bloque estable"]');

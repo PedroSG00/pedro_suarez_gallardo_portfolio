@@ -9,13 +9,30 @@ type Props = {
   icon?: ReactNode;
 };
 
-const DEFAULT_ICON = (
+const SUN_ICON = (
   <svg
     viewBox="0 0 24 24"
     aria-hidden="true"
-    style={{ color: 'currentColor' }}
+    className="size-5"
   >
-    <circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" />
+    <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" strokeWidth="1.5" />
+    <path d="M12 2v3m0 14v3M2 12h3m14 0h3M5 5l2 2m10 10 2 2M19 5l-2 2M7 17l-2 2" fill="none" stroke="currentColor" strokeWidth="1.5" />
+  </svg>
+);
+
+const MOON_ICON = (
+  <svg
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+    className="size-5"
+  >
+    <path
+      d="M20.2 15.3A8.5 8.5 0 0 1 8.7 3.8 8.5 8.5 0 1 0 20.2 15.3Z"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinejoin="round"
+    />
   </svg>
 );
 
@@ -47,16 +64,15 @@ export default function ThemeToggle({
       onKeyDown={handleKeyDown}
       aria-pressed={pressed}
       aria-label={ariaLabel}
+      data-theme-icon={pressed ? 'moon' : 'sun'}
       className={`
         inline-flex items-center justify-center
-        bg-[var(--color-surface)] text-[var(--color-ink)]
-        border [var(--line-width)] solid [var(--color-line)]
-        w-10 h-10 rounded-full
-        transition-colors duration-[var(--duration-state)]
-        focus-visible:outline-none
+        size-11 border-(length:--line-width) border-line bg-surface text-ink
+        hover:bg-ink hover:text-surface aria-pressed:bg-ink aria-pressed:text-surface
+        transition-colors duration-(--duration-state)
       `}
     >
-      {icon ?? DEFAULT_ICON}
+      {icon ?? (pressed ? MOON_ICON : SUN_ICON)}
     </button>
   );
 }

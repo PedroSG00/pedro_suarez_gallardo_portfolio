@@ -44,6 +44,19 @@ describe('ThemeToggle', () => {
     expect(screen.getByRole('button')).toHaveAttribute('aria-pressed', 'true');
   });
 
+  test('changes the visible theme icon with the active mode', () => {
+    const { rerender } = render(
+      <ThemeToggle onToggle={onToggle} pressed={false} ariaLabel="Switch theme" />
+    );
+    const button = screen.getByRole('button');
+    expect(button).toHaveAttribute('data-theme-icon', 'sun');
+
+    rerender(
+      <ThemeToggle onToggle={onToggle} pressed={true} ariaLabel="Switch theme" />
+    );
+    expect(button).toHaveAttribute('data-theme-icon', 'moon');
+  });
+
   test('aria-label is announced with the text passed by prop', () => {
     render(
       <ThemeToggle

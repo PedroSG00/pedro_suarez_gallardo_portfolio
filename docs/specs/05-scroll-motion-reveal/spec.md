@@ -137,10 +137,13 @@ Criterios de aceptación:
 
 **RF-11 — Exclusiones del reveal**
 
-Quedan fuera del sistema de revelado: la barra de navegación, el pie de página, el enlace de salto al contenido y cualquier elemento fijo o pegajoso. Ningún elemento fijo o pegajoso puede estar dentro de un bloque revelable. Estos elementos nunca se ocultan por scroll.
+Quedan fuera del sistema de revelado: la barra de navegación, el pie de página, el enlace de salto al contenido y cualquier elemento fijo o pegajoso. Ningún elemento fijo o pegajoso puede estar dentro de un bloque revelable.
+
+La barra de navegación puede salir de la vista al hacer scroll hacia abajo y volver al subir; nunca se atenúa ni se desvanece (su opacidad es siempre 1), no participa del revelado por scroll y sigue en el orden de tabulación y en el árbol de accesibilidad mientras está fuera de la vista. El pie de página, el enlace de salto al contenido y los demás elementos fijos o pegajosos que no son la barra nunca se ocultan por scroll y mantienen opacidad igual a 1 en todo momento.
 
 Criterios de aceptación:
-- La navegación, el pie de página, el enlace de salto al contenido y los elementos fijos o pegajosos mantienen opacidad igual a 1 en todo momento.
+- La barra de navegación puede ocultarse y reaparecer con el scroll; su opacidad computada es siempre 1, no participa en el revelado (entrada, centro o salida) y permanece en el orden de tabulación.
+- El pie de página, el enlace de salto al contenido y los elementos fijos o pegajosos que no son la barra mantienen opacidad igual a 1 en todo momento.
 - Ninguno de estos elementos participa en el revelado por scroll (entrada, centro o salida).
 - Ningún elemento fijo o pegajoso está contenido dentro de un bloque revelable.
 
@@ -148,7 +151,9 @@ Criterios de aceptación:
 
 Al saltar a una sección desde la navegación por anclas, todos los bloques de la sección de destino se ven completos al llegar, sin quedarse a medio revelar. Si el plan demuestra que esto no es posible solo con CSS, la regla se relaja a que el bloque de destino se ve completo al llegar, y esa relajación se anota en esta spec.
 
-**Relajación aplicada:** con animación por scroll pura (`animation-timeline: view()`), un objetivo de ancla que aterriza en el borde superior del viewport queda en la fase de salida (atenuado), por lo que no es posible garantizar que "todos los bloques" estén al 100 % solo con CSS. El sistema usa `scroll-padding-top` en los bloques revelables (`src/components/ui/Reveal/Reveal.module.css`) para que el objetivo de ancla se sitúe en la banda estable del revelado (opacidad 1) al llegar. Esta relajación está contemplada en esta spec.
+**Relajación aplicada:** con animación por scroll pura (`animation-timeline: view()`), un objetivo de ancla que aterriza en el borde superior del viewport queda en la fase de salida (atenuado), por lo que no es posible garantizar que "todos los bloques" estén al 100 % solo con CSS. El sistema usa `scroll-padding-top` adaptable en `html` (`src/styles/globals.css`) para que el destino se sitúe en la banda estable del revelado cuando el layout lo permite. Esta relajación está contemplada en esta spec.
+
+El desplazamiento de ancla usa `scroll-behavior: smooth` nativo únicamente con `prefers-reduced-motion: no-preference`. Con movimiento reducido, recarga, restauración del historial y cambio de idioma, el scroll es instantáneo y no reinicia la posición visible.
 
 Criterios de aceptación:
 - Cuando el usuario navega por ancla a una sección, todos los bloques de esa sección muestran opacidad igual a 1 al llegar.

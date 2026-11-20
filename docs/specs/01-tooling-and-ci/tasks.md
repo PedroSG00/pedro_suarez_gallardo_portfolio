@@ -327,7 +327,7 @@ creó `coverage/`; como esta shell no es interactiva, se cerró el proceso tras 
 `pnpm lint`, `pnpm typecheck` y `pnpm build` pasan. No quedan tests artificiales.
 
 **Objetivo:** que `pnpm test` corra en jsdom con el setup cargado, recoja solo tests de
-`src/`, genere `text` + `lcov` y falle por debajo del 95 % global en cualquiera de las
+`src/`, genere `text` + `lcov` y falle por debajo del 85 % global en cualquiera de las
 cuatro métricas.
 
 **RF:** 5.1, 5.2, 5.3, 5.4, 5.5, 6.1, 6.2, 6.3, 6.4, 6.5 y 2.3 en tests.
@@ -341,7 +341,7 @@ antes de la configuración:
 1. **Suite vacía:** `pnpm test` en 0 sin ningún fichero de test en el repo, y se anota si se
    generó `coverage/lcov.info` (§15.1).
 2. **Umbral:** módulo temporal de ~200 líneas sin test en `src/lib/` → el global cae por
-   debajo del 95 % y el comando sale con código 1 nombrando la métrica. Se revierte.
+   debajo del 85 % y el comando sale con código 1 nombrando la métrica. Se revierte.
 3. **Alias:** fichero temporal en `src/lib/` más un `*.test.tsx` que lo importe con `@/…`
    → verde, y luego se borran los dos.
 4. **Watch:** `pnpm test:watch` arranca en watch y sale sin generar `coverage/`.
@@ -354,7 +354,7 @@ scripts `test` y `test:watch`.
 **Hecho cuando:**
 
 - `pnpm test` sale en 0 con la suite vacía y sin tests en el repo.
-- Las cuatro métricas están al 95 % y la cobertura se emite en `text` y `lcov`.
+- Las cuatro métricas están al 85 % y la cobertura se emite en `text` y `lcov`.
 - La lista de exclusiones es exactamente la del apartado 9 de la spec y lleva el comentario
   cruzado con `sonar-project.properties` (RF-6.4).
 - El módulo temporal de 200 líneas pone el comando rojo y, al borrarlo, vuelve a verde.

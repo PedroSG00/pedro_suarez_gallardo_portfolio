@@ -8,6 +8,8 @@ type Props = {
   target?: '_self' | '_blank';
   icon?: ReactNode;
   ariaLabel?: string;
+  srLabel?: string;
+  tone?: 'primary' | 'default';
 };
 
 export default function Link({
@@ -16,6 +18,8 @@ export default function Link({
   target,
   icon,
   ariaLabel,
+  srLabel,
+  tone = 'default',
 }: Props) {
   if (!children || href === undefined) {
     return null;
@@ -26,30 +30,27 @@ export default function Link({
       e.preventDefault();
       return;
     }
-    if (target === '_blank') {
-      e.preventDefault();
-      window.open(href, '_blank');
-    }
   };
 
   return (
     <a
       href={href}
       target={target}
+      rel={target === '_blank' ? 'noreferrer noopener' : undefined}
       onClick={handleClick}
       aria-label={ariaLabel}
       className={`
-        inline-flex items-center gap-2
-        bg-[var(--color-surface)] text-[var(--color-ink)]
-        border [var(--line-width)] solid [var(--color-line)]
-        px-4 py-2
-        font-mono text-sm font-[var(--font-weight-regular)]
-        transition-colors duration-[var(--duration-state)]
-        hover:bg-[var(--color-ink)] hover:text-[var(--color-surface)]
+        inline-flex min-h-11 items-center gap-2 border-(length:--line-width) border-line px-4 py-2
+        font-mono text-meta transition-colors duration-(--duration-state)
+        ${tone === 'primary'
+          ? 'bg-ink font-emphasis text-surface hover:bg-surface hover:text-ink'
+          : 'bg-surface text-ink hover:bg-ink hover:text-surface'}
       `}
     >
       {icon}
-      {children}
+      {children} {target === '_blank' && srLabel ? (
+        <span className="sr-only">{srLabel}</span>
+      ) : null}
     </a>
   );
 }

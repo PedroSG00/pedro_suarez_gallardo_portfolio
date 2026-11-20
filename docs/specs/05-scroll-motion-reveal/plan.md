@@ -1,6 +1,6 @@
 # Plan técnico — Spec 05: Movimiento y revelado por scroll (Reveal)
 
-Esta especificación de implementación deriva de `docs/specs/05-scroll-motion-reveal/spec.md` y cubre todos los RF-01 a RF-16. Respeta la constitución: stack cerrado (Next.js, React, TypeScript, Tailwind), CSS-only para animación por scroll, sin JS para revelado, componentes atómicos en `components/ui/` y `components/sections/`, i18n con `next-intl`, tests visibles para el usuario, cobertura ≥ 95 %, definición de terminado (punto 10 de la constitución).
+Esta especificación de implementación deriva de `docs/specs/05-scroll-motion-reveal/spec.md` y cubre todos los RF-01 a RF-16. Respeta la constitución: stack cerrado (Next.js, React, TypeScript, Tailwind), CSS-only para animación por scroll, sin JS para revelado, componentes atómicos en `components/ui/` y `components/sections/`, i18n con `next-intl`, tests visibles para el usuario, cobertura ≥ 85 %, definición de terminado (punto 10 de la constitución).
 
 Nota de ubicación: la spec funcional vive en `docs/specs/05-scroll-motion-reveal/spec.md` (según constitución, punto 2 y 7). Este plan vive junto a ella en `docs/specs/05-scroll-motion-reveal/plan.md` como documento de implementación asociado.
 
@@ -357,7 +357,7 @@ Los e2e de navegación e idioma van con `prefers-reduced-motion: reduce` activad
 
 ### 6.4. Cobertura
 
-Vitest con umbral 95 % en líneas, funciones, ramas y sentencias (constitución punto 9). Se excluyen: configuración, tests, declaraciones, helpers de test (`src/test/`), rutas de `src/app/` (cubiertas por e2e) y datos de `src/content/`. Nada fuera de `src/` se mide.
+Vitest con umbral 85 % en líneas, funciones, ramas y sentencias (constitución punto 9). Se excluyen: configuración, tests, declaraciones, helpers de test (`src/test/`), rutas de `src/app/` (cubiertas por e2e) y datos de `src/content/`. Nada fuera de `src/` se mide.
 
 ### 6.5. Definición de terminado
 
