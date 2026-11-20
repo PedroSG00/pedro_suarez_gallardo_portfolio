@@ -238,7 +238,7 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
 
 ---
 
-## T8 — `SkipLink`
+## T8 — `SkipLink` ✅ COMPLETADA
 
 **Objetivo:** ofrecer el salto al contenido como primer elemento enfocable, oculto visualmente hasta recibir foco.
 
