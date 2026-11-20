@@ -107,6 +107,8 @@
 
 ## T4 — Implementar la progresión acumulativa de la frase
 
+**Estado:** hecha.
+
 **Objetivo:** iluminar las palabras en orden, mantener iluminadas las anteriores y revertir el progreso al desplazarse hacia atrás.
 
 **RF:** RF-2.
