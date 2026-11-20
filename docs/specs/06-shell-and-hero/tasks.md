@@ -563,7 +563,7 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
 
 ---
 
-## T20 — Nombre a todo el ancho
+## T20 — Nombre a todo el ancho ✅ COMPLETADA
 
 **Objetivo:** hacer que el nombre ocupe al menos el 90 % del ancho disponible en 360, 768 y 1440 px, con tope de retícula desde 1920 px, sin scroll horizontal entre 320 y 1920 px y con reflujo legible al 200 % de texto.
 
