@@ -289,7 +289,7 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
 
 ---
 
-## T10 — `ThemeControl`
+## T10 — `ThemeControl` ✅ COMPLETADA
 
 **Objetivo:** mostrar el control de tema solo cuando hay JavaScript y anunciar su estado sin depender del color.
 
