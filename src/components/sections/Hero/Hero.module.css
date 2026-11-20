@@ -32,3 +32,155 @@
   inset-inline-end: 0;
   width: var(--cursor-width);
 }
+
+/* RF-9: entrada escalonada de cada línea (400 ms, desfases 0/100/200 ms,
+   total 600 ms, fill-mode both, no se repite al scroll). */
+@keyframes hero-line-enter {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+#hero-name > span[aria-hidden="true"]:nth-child(1) {
+  animation: hero-line-enter var(--hero-line-duration) linear both;
+  animation-delay: 0ms;
+}
+
+#hero-name > span[aria-hidden="true"]:nth-child(2) {
+  animation: hero-line-enter var(--hero-line-duration) linear both;
+  animation-delay: 100ms;
+}
+
+#hero-name > span[aria-hidden="true"]:nth-child(3) {
+  animation: hero-line-enter var(--hero-line-duration) linear both;
+  animation-delay: 200ms;
+}
+
+/* RF-9: cursor parpadeante, ciclo 1 s, 50 % encendido, decorativo. */
+@keyframes hero-cursor-blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  50.01%, 100% {
+    opacity: 0;
+  }
+}
+
+#hero-name > span[aria-hidden="true"]:last-child {
+  animation: hero-cursor-blink var(--cursor-duration) steps(2, jump-start) infinite both;
+  color: var(--color-ink);
+  -webkit-text-stroke: var(--line-width) var(--color-ink);
+}
+
+/* RF-10: el hero define el timeline de vista para el contorno y el parallax. */
+section[aria-labelledby="hero-name"] {
+  view-timeline-name: --hero;
+  view-timeline-axis: block;
+}
+
+/* RF-10: contorno (relleno tinta → transparente, trazo fijo) y parallax
+   (translateY hasta --hero-parallax-distance) sobre el rango de salida
+   exit 0% a exit 100%. Se completa al salir el hero, no al cargar. */
+@keyframes hero-parallax {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(var(--hero-parallax-distance));
+  }
+}
+
+@keyframes hero-fill {
+  from {
+    color: var(--color-ink);
+  }
+  to {
+    color: transparent;
+  }
+}
+
+#hero-name {
+  animation:
+    hero-parallax linear both,
+    hero-fill linear both;
+  animation-timeline: --hero, --hero;
+  animation-range:
+    exit 0% exit 100%,
+    exit 0% exit 100%;
+  /* trazo fijo, no currentColor: el relleno anima pero el trazo se mantiene */
+  -webkit-text-stroke: var(--line-width) var(--color-ink);
+}
+
+/* RF-8 / RF-10: el hueco entre el nombre y el rol reserva la distancia de
+   parallax para que el nombre no se solape al desplazarse. */
+#hero-name {
+  padding-block-end: var(--hero-parallax-distance);
+}
+
+/* Fallback: sin soporte de animation-timeline → nombre sólido, estático,
+   sin transformación. */
+@supports not (animation-timeline: view()) {
+  #hero-name {
+    animation: none !important;
+    transform: none !important;
+    color: var(--color-ink) !important;
+  }
+  #hero-name > span[aria-hidden="true"] {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  #hero-name > span[aria-hidden="true"]:last-child {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+}
+
+/* Fallback: movimiento reducido → sin entrada, sin parpadeo, sin contorno,
+   sin parallax; cursor estático y visible. */
+@media (prefers-reduced-motion: reduce) {
+  #hero-name {
+    animation: none !important;
+    transform: none !important;
+    color: var(--color-ink) !important;
+  }
+  #hero-name > span[aria-hidden="true"] {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  #hero-name > span[aria-hidden="true"]:last-child {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+}
+
+/* Fallback: impresión → nombre sólido, sin animaciones. */
+@media print {
+  #hero-name {
+    animation: none !important;
+    transform: none !important;
+    color: var(--color-ink) !important;
+  }
+  #hero-name > span[aria-hidden="true"] {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+}
+
+/* Fallback: colores forzados → relleno y trazo visibles con CanvasText. */
+@media (forced-colors: active) {
+  #hero-name {
+    color: CanvasText !important;
+    -webkit-text-stroke-color: CanvasText !important;
+  }
+  #hero-name > span[aria-hidden="true"]:last-child {
+    color: CanvasText !important;
+    -webkit-text-stroke-color: CanvasText !important;
+  }
+}
