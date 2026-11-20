@@ -4,14 +4,10 @@ import { renderWithIntl } from '@/test/render-with-intl';
 import enMessages from '../../../../messages/en.json';
 import LanguageSwitch from './LanguageSwitch';
 
-const mockReplace = vi.fn();
 const mockUsePathname = vi.fn(() => '/about');
 
 vi.mock('@/i18n/navigation', () => ({
   usePathname: () => mockUsePathname(),
-  useRouter: () => ({ replace: mockReplace }),
-  getPathname: ({ href, locale }: { href: string; locale: string }) =>
-    href === '/' ? `/${locale}` : `/${locale}${href}`,
 }));
 
 function setLocation(url: string) {
@@ -28,7 +24,6 @@ function setLocation(url: string) {
 
 describe('LanguageSwitch (toggler)', () => {
   beforeEach(() => {
-    mockReplace.mockClear();
     mockUsePathname.mockReturnValue('/about');
     setLocation('http://localhost/en/about?utm=x#y');
   });
@@ -92,7 +87,7 @@ describe('LanguageSwitch (toggler)', () => {
     );
     const button = screen.getByRole('button');
     fireEvent.click(button);
-    expect(mockReplace).toHaveBeenCalledWith('/about?utm=x#y', { locale: 'es' });
+    expect(window.location.href).toBe('/es/about?utm=x#y');
   });
 
   test('navigates to English preserving search and hash on click', () => {
@@ -105,7 +100,7 @@ describe('LanguageSwitch (toggler)', () => {
     );
     const button = screen.getByRole('button');
     fireEvent.click(button);
-    expect(mockReplace).toHaveBeenCalledWith('/about?utm=x#y', { locale: 'en' });
+    expect(window.location.href).toBe('/en/about?utm=x#y');
   });
 
   test('navigates on Enter key', () => {
@@ -119,7 +114,7 @@ describe('LanguageSwitch (toggler)', () => {
     const button = screen.getByRole('button');
     button.focus();
     fireEvent.keyDown(button, { key: 'Enter' });
-    expect(mockReplace).toHaveBeenCalledWith('/about?utm=x#y', { locale: 'es' });
+    expect(window.location.href).toBe('/es/about?utm=x#y');
   });
 
   test('navigates on Space key', () => {
@@ -133,7 +128,7 @@ describe('LanguageSwitch (toggler)', () => {
     const button = screen.getByRole('button');
     button.focus();
     fireEvent.keyDown(button, { key: ' ' });
-    expect(mockReplace).toHaveBeenCalledWith('/about?utm=x#y', { locale: 'es' });
+    expect(window.location.href).toBe('/es/about?utm=x#y');
   });
 
   test('has an href pointing to the other language (works without JS)', () => {

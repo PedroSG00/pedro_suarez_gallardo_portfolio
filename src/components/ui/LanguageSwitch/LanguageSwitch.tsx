@@ -1,7 +1,7 @@
 'use client';
 
 import { useLocale, useTranslations } from 'next-intl';
-import { getPathname, usePathname, useRouter } from '@/i18n/navigation';
+import { usePathname } from '@/i18n/navigation';
 import type { Locale } from '@/lib/locale';
 
 type Props = {
@@ -20,18 +20,37 @@ const GLOBE = (
   </svg>
 );
 
+/** Ruta de destino al cambiar de idioma, sin duplicar el prefijo de locale. */
+function buildLanguageTarget(
+  currentLocale: Locale,
+  pathname: string,
+  search: string,
+  hash: string,
+): string {
+  const otherLang: Locale = currentLocale === 'en' ? 'es' : 'en';
+  const rest = pathname
+    .replace(new RegExp(`^/${currentLocale}`), '')
+    .replace(/^\//, '')
+    .replace(/\/$/, '');
+  return `/${otherLang}${rest ? '/' + rest : ''}${search}${hash}`;
+}
+
 export default function LanguageSwitch({
   locale,
   ariaLabelEn,
   ariaLabelEs,
 }: Props) {
   const hookLocale = useLocale();
-  const currentLocale = (locale ?? hookLocale) as Locale;
   const t = useTranslations('shared.langSwitch');
   const pathname = usePathname();
-  const router = useRouter();
   const enLabel = ariaLabelEn ?? t('en');
   const esLabel = ariaLabelEs ?? t('es');
+
+  // El locale actual se lee de la ruta (siempre correcta) y no de useLocale,
+  // que puede devolver el locale por defecto en lugar del de la ruta actual.
+  const localeFromPath = (pathname.match(/^\/([a-z]{2})(?:\/|$)/)?.[1] ??
+    hookLocale) as Locale;
+  const currentLocale = (locale ?? localeFromPath) as Locale;
 
   if (!currentLocale || !enLabel || !esLabel) {
     return null;
@@ -40,21 +59,35 @@ export default function LanguageSwitch({
   const search = typeof window !== 'undefined' ? window.location.search : '';
   const hash = typeof window !== 'undefined' ? window.location.hash : '';
 
-  const otherLang: Locale = currentLocale === 'en' ? 'es' : 'en';
-  const href = `${getPathname({ href: pathname, locale: otherLang })}${search}${hash}`;
-  const localizedPath = `${pathname}${search}${hash}`;
+  const target = buildLanguageTarget(currentLocale, pathname, search, hash);
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    router.replace(localizedPath, { locale: otherLang });
+    // Leer search/hash en el momento del clic por si cambiaron tras el render.
+    const clickTarget = buildLanguageTarget(
+      currentLocale,
+      pathname,
+      typeof window !== 'undefined' ? window.location.search : '',
+      typeof window !== 'undefined' ? window.location.hash : '',
+    );
+    window.location.href = clickTarget;
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLAnchorElement>) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      router.replace(localizedPath, { locale: otherLang });
+      const clickTarget = buildLanguageTarget(
+        currentLocale,
+        pathname,
+        typeof window !== 'undefined' ? window.location.search : '',
+        typeof window !== 'undefined' ? window.location.hash : '',
+      );
+      window.location.href = clickTarget;
     }
   };
+
+  // La href (sin JS) apunta al mismo destino ya calculado.
+  const href = target;
 
   return (
     <a

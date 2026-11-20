@@ -2,7 +2,6 @@ import { NextResponse, type NextRequest } from 'next/server';
 import createMiddleware from 'next-intl/middleware';
 
 import type { Locale } from '@/lib/locale';
-import { normalizePath } from '@/lib/normalize-path';
 import { COOKIE_NAME } from '@/lib/cookie-locale';
 import { resolveLocaleForRoot } from '@/lib/resolve-locale';
 import { routing } from '@/i18n/routing';
@@ -17,10 +16,13 @@ function isLocale(segment: string): segment is Locale {
 
 export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  const normalized = normalizePath(pathname);
+  const lowercased = pathname.toLowerCase();
+  const normalized = lowercased.replace(/\/$/, '') || '/';
 
-  // Redirect if normalization changed the path (e.g. /EN → /en, /es/ → /es)
-  if (normalized !== pathname) {
+  // Redirect only for case changes (e.g. /EN → /en). Trailing slashes are
+  // handled by next-intl middleware internally (rewrite, not redirect) to
+  // avoid redirect loops such as /es/ → /es → /es/.
+  if (lowercased !== pathname) {
     const url = request.nextUrl.clone();
     url.pathname = normalized;
     return NextResponse.redirect(url);
