@@ -424,7 +424,7 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
 
 ---
 
-## T15 — `Navbar`: visibilidad por scroll y foco
+## T15 — `Navbar`: visibilidad por scroll y foco ✅ COMPLETADA
 
 **Objetivo:** ocultar la barra al bajar más de 80 px y devolverla al subir o al recibir foco, sin atenuarla ni sacarla del orden de tabulación.
 
