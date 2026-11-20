@@ -317,7 +317,7 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
 
 ---
 
-## T11 — `AnchorFocus`
+## T11 — `AnchorFocus` ✅ COMPLETADA
 
 **Objetivo:** mover el foco al encabezado del destino cuando la página llega por ancla o cambia el hash, sin un segundo scroll.
 
