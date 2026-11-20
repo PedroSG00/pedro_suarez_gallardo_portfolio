@@ -453,7 +453,7 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
 
 ---
 
-## T16 — `Footer`
+## T16 — `Footer` ✅ COMPLETADA
 
 **Objetivo:** cerrar la página con GitHub, LinkedIn, email, CV del idioma activo y copyright, sin controles de tema ni idioma.
 
