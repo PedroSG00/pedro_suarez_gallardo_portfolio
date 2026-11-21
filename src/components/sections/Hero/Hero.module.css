@@ -8,7 +8,12 @@
   display: block;
   width: max-content;
   white-space: nowrap;
-  font-size: calc(var(--text-hero-name) * var(--hero-name-scale));
+  /* Preserve the one-word-per-line lockup while keeping its longest line
+     inside the grid gutter when rem-based text sizing is enlarged. */
+  font-size: min(
+    calc(var(--text-hero-name) * var(--hero-name-scale)),
+    calc((100vw - 2 * var(--grid-gutter)) / 5.5)
+  );
   letter-spacing: calc(var(--hero-name-letter-spacing) * 1em);
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
@@ -88,6 +93,7 @@
 section[aria-labelledby="hero-name"] {
   view-timeline-name: --hero;
   view-timeline-axis: block;
+  overflow-wrap: anywhere;
 }
 
 /* RF-10: outline (ink fill → transparent, fixed stroke) and parallax

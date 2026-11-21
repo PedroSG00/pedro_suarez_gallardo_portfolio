@@ -73,7 +73,19 @@ Everything runs from the repository root in PowerShell and in bash: `pnpm instal
 ├── .gitattributes                # LF line endings
 ├── .node-version                 # Exact Node version (single source)
 ├── check-package-manager.mjs     # preinstall guard: pnpm only
-├── e2e/                          # Playwright specs (Chromium)
+├── e2e/                          # Playwright specs (Chromium), organized by feature
+│   ├── about/                    # About section specs
+│   ├── hero/                     # Hero section specs
+│   ├── home/                     # Home page specs
+│   ├── navbar/                   # Navbar specs
+│   ├── i18n/                     # i18n routing specs
+│   ├── theme/                    # Theme specs
+│   ├── reveal/                   # Reveal primitive specs
+│   ├── scroll-motion/            # Scroll-motion reveal specs
+│   ├── shell/                    # Shell layout specs
+│   ├── no-js/                    # No-JavaScript fallback specs
+│   ├── anchors/                  # Anchor jump specs
+│   └── evidence/                 # RF evidence specs
 ├── messages/                     # en.json / es.json (spec 02)
 ├── pnpm-workspace.yaml           # pnpm settings: engineStrict, allowBuilds
 ├── public/                       # Static assets (logo.svg, pedro-suarez.png, CV PDFs, OG image)
@@ -130,7 +142,7 @@ Every route is wrapped by the global shell: `SkipLink`, `Navbar`, `<main>` and `
 **Home page sections (inside `<main>`):**
 
 1. **Hero**: name, role, pitch, support, metadata and calls to action. Home of the site's signature moment (staggered entry, cursor, outline and parallax).
-2. **About** (`01`): reserved destination; portrait is planned for spec 07 and intentionally deferred.
+2. **About** (`01`): reserved destination; implemented in spec 07 — portrait, biografía, cualidades, afirmación firma con progresión palabra a palabra, fallbacks de movimiento y sin JavaScript.
 3. **Work** (`02`): reserved destination, heading only.
 4. **Stack** (`03`): reserved destination, heading only.
 5. **Contact** (`04`): reserved destination, heading only.
@@ -147,7 +159,7 @@ Every phase follows the same loop: spec → tests → code → gates (`lint`, `t
 | **1. Atoms** | `ui/` pieces: Button/Link, Heading, Tag, Section wrapper, grid lines, ThemeToggle, LanguageSwitch | Each atom tested and reusable, no section-specific code inside |
 | **2. Scroll motion** | `ui/Reveal` (in and out while scrolling) applied to every block, plus each section's signature moment | e2e proves opacity changes on entry and exit in every section, in both languages and themes; everything visible with `prefers-reduced-motion` and without `animation-timeline` support |
 | **3. Shell and Hero** | Global layout components (`Navbar`, `Footer`) and the `Hero` section with the site's signature moment | Memorable at first glance in both themes and both languages; navigation works |
-| **4. About and Work** | Confident, benefit-led sections composed from atoms | Same standard as previous phases; content only from `messages/` and `content/` |
+| **4. About and Work** | Confident, benefit-led sections composed from atoms | About done in spec 07; Work reserved, heading only |
 | **5. Stack and Contact** | Grouped stack and contact block | Links verified, no duplicated markup between groups |
 | **6. Polish** | Per-language metadata, sitemap, robots, OG image, accessibility pass, performance pass, reduced-motion check, Safari and Firefox motion fallback check | Lighthouse 95+ in all categories, AA contrast, full keyboard navigation |
 | **7. Launch** | Static deploy and domain | Live site and README links filled in |

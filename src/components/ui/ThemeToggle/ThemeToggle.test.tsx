@@ -9,76 +9,38 @@ describe('ThemeToggle', () => {
     onToggle.mockClear();
   });
 
-  test('fires onToggle on click', () => {
+  test('activates by click, Enter and Space but ignores unrelated keys', () => {
     render(
       <ThemeToggle onToggle={onToggle} pressed={false} ariaLabel="Switch theme" />
     );
-    fireEvent.click(screen.getByRole('button'));
+    const button = screen.getByRole('button', { name: 'Switch theme' });
+    fireEvent.click(button);
     expect(onToggle).toHaveBeenCalledTimes(1);
-  });
-
-  test('fires onToggle on Enter key', () => {
-    render(
-      <ThemeToggle onToggle={onToggle} pressed={false} ariaLabel="Switch theme" />
-    );
-    const button = screen.getByRole('button');
     button.focus();
+    expect(button).toHaveFocus();
+    fireEvent.keyDown(button, { key: 'a' });
+    expect(onToggle).toHaveBeenCalledTimes(1);
     fireEvent.keyDown(button, { key: 'Enter' });
-    expect(onToggle).toHaveBeenCalledTimes(1);
-  });
-
-  test('fires onToggle on Space key', () => {
-    render(
-      <ThemeToggle onToggle={onToggle} pressed={false} ariaLabel="Switch theme" />
-    );
-    const button = screen.getByRole('button');
-    button.focus();
+    expect(onToggle).toHaveBeenCalledTimes(2);
     fireEvent.keyDown(button, { key: ' ' });
-    expect(onToggle).toHaveBeenCalledTimes(1);
+    expect(onToggle).toHaveBeenCalledTimes(3);
   });
 
-  test('aria-pressed reflects the value of pressed', () => {
-    render(
-      <ThemeToggle onToggle={onToggle} pressed={true} ariaLabel="Switch theme" />
-    );
-    expect(screen.getByRole('button')).toHaveAttribute('aria-pressed', 'true');
-  });
-
-  test('changes the visible theme icon with the active mode', () => {
+  test('announces the supplied label and state without visible text and updates the mode icon', () => {
     const { rerender } = render(
-      <ThemeToggle onToggle={onToggle} pressed={false} ariaLabel="Switch theme" />
+      <ThemeToggle onToggle={onToggle} pressed={false} ariaLabel="Cambiar a tema oscuro" />
     );
-    const button = screen.getByRole('button');
+    const button = screen.getByRole('button', { name: 'Cambiar a tema oscuro' });
+    expect(button).toHaveTextContent(/^$/);
+    expect(button).toHaveAttribute('aria-pressed', 'false');
     expect(button).toHaveAttribute('data-theme-icon', 'sun');
 
     rerender(
       <ThemeToggle onToggle={onToggle} pressed={true} ariaLabel="Switch theme" />
     );
+    expect(button).toHaveAccessibleName('Switch theme');
+    expect(button).toHaveAttribute('aria-pressed', 'true');
     expect(button).toHaveAttribute('data-theme-icon', 'moon');
-  });
-
-  test('aria-label is announced with the text passed by prop', () => {
-    render(
-      <ThemeToggle
-        onToggle={onToggle}
-        pressed={false}
-        ariaLabel="Cambiar a tema oscuro"
-      />
-    );
-    expect(screen.getByRole('button')).toHaveAttribute(
-      'aria-label',
-      'Cambiar a tema oscuro'
-    );
-  });
-
-  test('shows no visible text, only symbol and accessibility attributes', () => {
-    render(
-      <ThemeToggle onToggle={onToggle} pressed={false} ariaLabel="Switch theme" />
-    );
-    const button = screen.getByRole('button');
-    expect(button.textContent?.trim()).toBe('');
-    expect(button).toHaveAttribute('aria-label');
-    expect(button).toHaveAttribute('aria-pressed');
   });
 
   test('renders null when onToggle is missing', () => {

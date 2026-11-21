@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState, type MouseEvent } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type MouseEvent } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { getPathname, usePathname } from '@/i18n/navigation';
 
@@ -26,6 +26,9 @@ type Props = {
     langEs: string;
   }>;
 };
+
+// The localized layout remounts the navbar, but the document survives the switch.
+let lastMountedLocale: Locale | undefined;
 
 export default function Navbar({
   locale,
@@ -68,6 +71,9 @@ export default function Navbar({
   const detailsRef = useRef<HTMLDetailsElement>(null);
   const previousScrollYRef = useRef(0);
   const focusCountRef = useRef(0);
+  const keyboardFocusRef = useRef(false);
+  const lastInteractionWasKeyboardRef = useRef(false);
+  const userScrollIntentRef = useRef(false);
   const navigationInProgressRef = useRef(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [visibility, setVisibility] = useState<'visible' | 'hidden'>('visible');
@@ -116,40 +122,100 @@ export default function Navbar({
   const onScroll = useCallback(() => {
     const nextScrollY = currentScrollY();
     const previousScrollY = previousScrollYRef.current;
-    if (navigationInProgressRef.current) {
+    const hasUserScrollIntent = userScrollIntentRef.current;
+    if (hasUserScrollIntent) {
+      userScrollIntentRef.current = false;
+    }
+    if (navigationInProgressRef.current && !hasUserScrollIntent) {
       setVisibility('visible');
       previousScrollYRef.current = nextScrollY;
       return;
     }
-    recomputeVisibility(menuOpen, focusCountRef.current > 0, nextScrollY, previousScrollY);
+    if (!hasUserScrollIntent) {
+      recomputeVisibility(
+        menuOpen,
+        focusCountRef.current > 0 && keyboardFocusRef.current,
+        nextScrollY,
+        nextScrollY,
+      );
+      previousScrollYRef.current = nextScrollY;
+      return;
+    }
+    navigationInProgressRef.current = false;
+    recomputeVisibility(
+      menuOpen,
+      focusCountRef.current > 0 && keyboardFocusRef.current,
+      nextScrollY,
+      previousScrollY,
+    );
     previousScrollYRef.current = nextScrollY;
   }, [recomputeVisibility, menuOpen]);
+
+  useLayoutEffect(() => {
+    if (lastMountedLocale !== undefined && lastMountedLocale !== currentLocale) {
+      navigationInProgressRef.current = true;
+    }
+    lastMountedLocale = currentLocale;
+  }, [currentLocale]);
 
   useEffect(() => {
     previousScrollYRef.current = currentScrollY();
     const finishNavigation = () => {
       navigationInProgressRef.current = false;
+      userScrollIntentRef.current = false;
       previousScrollYRef.current = currentScrollY();
     };
-    const handleUserScrollIntent = () => {
+    const markUserScrollIntent = () => {
       navigationInProgressRef.current = false;
+      // Scroll delivery can lag behind animation frames; consume intent in onScroll.
+      userScrollIntentRef.current = true;
+    };
+    const isInsideMenuPanel = (target: EventTarget | null) =>
+      target instanceof Element && target.closest('[data-menu-panel]') !== null;
+    const handlePointerDown = () => {
+      userScrollIntentRef.current = false;
+      lastInteractionWasKeyboardRef.current = false;
+      keyboardFocusRef.current = false;
+    };
+    const handleWheel = (event: WheelEvent) => {
+      if (isInsideMenuPanel(event.target)) {
+        return;
+      }
+      lastInteractionWasKeyboardRef.current = false;
+      keyboardFocusRef.current = false;
+      markUserScrollIntent();
     };
     const handleScrollKey = (event: KeyboardEvent) => {
-      if (['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' '].includes(event.key)) {
-        handleUserScrollIntent();
+      lastInteractionWasKeyboardRef.current = true;
+      if (
+        !event.defaultPrevented &&
+        !isInsideMenuPanel(event.target) &&
+        ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' '].includes(event.key)
+      ) {
+        markUserScrollIntent();
       }
+    };
+    const handleTouchMove = (event: TouchEvent) => {
+      if (isInsideMenuPanel(event.target)) {
+        return;
+      }
+      lastInteractionWasKeyboardRef.current = false;
+      keyboardFocusRef.current = false;
+      markUserScrollIntent();
     };
 
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('scrollend', finishNavigation);
-    window.addEventListener('wheel', handleUserScrollIntent, { passive: true });
-    window.addEventListener('touchstart', handleUserScrollIntent, { passive: true });
+    window.addEventListener('pointerdown', handlePointerDown);
+    window.addEventListener('wheel', handleWheel, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
     window.addEventListener('keydown', handleScrollKey);
     return () => {
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('scrollend', finishNavigation);
-      window.removeEventListener('wheel', handleUserScrollIntent);
-      window.removeEventListener('touchstart', handleUserScrollIntent);
+      window.removeEventListener('pointerdown', handlePointerDown);
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('keydown', handleScrollKey);
     };
   }, [onScroll]);
@@ -161,6 +227,7 @@ export default function Navbar({
     }
     const onFocusIn = () => {
       focusCountRef.current += 1;
+      keyboardFocusRef.current = lastInteractionWasKeyboardRef.current;
       setVisibility('visible');
     };
     const onFocusOut = () => {
@@ -170,6 +237,7 @@ export default function Navbar({
         return;
       }
       if (focusCountRef.current === 0) {
+        keyboardFocusRef.current = false;
         recomputeVisibility(
           menuOpen,
           false,
@@ -188,6 +256,7 @@ export default function Navbar({
 
   const handleNavigate = useCallback(() => {
     navigationInProgressRef.current = true;
+    userScrollIntentRef.current = false;
     setVisibility('visible');
     if (detailsRef.current) {
       detailsRef.current.open = false;
@@ -218,10 +287,10 @@ export default function Navbar({
   return (
     <header
       ref={headerRef}
-      className="sticky top-0 z-(--nav-z) border-b-(length:--line-width) border-line bg-surface text-ink transition-transform duration-(--duration-state) not-focus-within:data-hidden:-translate-y-full motion-reduce:transition-none print:hidden"
+      className="sticky top-0 z-(--nav-z) border-b-(length:--line-width) border-line bg-surface text-ink transition-transform duration-(--duration-state) data-hidden:-translate-y-full motion-reduce:transition-none print:hidden"
       data-hidden={visibility === 'hidden' ? '' : undefined}
     >
-      <div className="mx-auto flex min-h-(--nav-height) max-w-[calc(var(--grid-max-width)+2*var(--grid-gutter))] items-center gap-1 px-3 md:gap-3 md:px-(--grid-gutter)">
+      <div className="mx-auto flex min-h-(--nav-height) max-w-[calc(var(--grid-max-width)+2*var(--grid-gutter))] flex-wrap items-center gap-1 px-2 md:flex-nowrap md:gap-3 md:px-(--grid-gutter)">
         <div className="mr-auto flex min-w-0 items-center">
           <Logo href={homePath} src="/logo.svg" alt={site.name} onClick={handleIdentityClick} />
         </div>
@@ -242,32 +311,31 @@ export default function Navbar({
             ariaLabelEn={langEnLabel}
             ariaLabelEs={langEsLabel}
           />
-        </div>
-
-        <details
-          ref={detailsRef}
-          className="group shrink-0 md:hidden"
-          data-navbar-menu
-          onToggle={(event) => {
-            const open = event.currentTarget.open;
-            setMenuOpen(open);
-            if (open) setVisibility('visible');
-          }}
-        >
-          <summary
-            role="button"
-            aria-label={menuOpen ? closeMenuLabel : openMenuLabel}
-            className="grid size-11 cursor-pointer list-none place-items-center border-(length:--line-width) border-line hover:bg-ink hover:text-surface [&::-webkit-details-marker]:hidden"
+          <details
+            ref={detailsRef}
+            className="group shrink-0 md:hidden"
+            data-navbar-menu
+            onToggle={(event) => {
+              const open = event.currentTarget.open;
+              setMenuOpen(open);
+              if (open) setVisibility('visible');
+            }}
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true" className="size-5">
-              <path className="group-open:hidden" d="M3 7h18M3 12h18M3 17h18" />
-              <path className="hidden group-open:block" d="m5 5 14 14M19 5 5 19" />
-            </svg>
-          </summary>
-          <nav data-menu-panel aria-label={navLabel} className="absolute inset-x-0 top-full max-h-[calc(100dvh-var(--nav-height))] overflow-y-auto overscroll-contain border-b-(length:--line-width) border-line bg-surface px-(--grid-gutter) py-3">
-            <NavLinks items={sectionItems} ariaLabel={navLabel} onNavigate={handleNavigate} />
-          </nav>
-        </details>
+            <summary
+              role="button"
+              aria-label={menuOpen ? closeMenuLabel : openMenuLabel}
+              className="grid size-11 cursor-pointer list-none place-items-center border-(length:--line-width) border-line hover:bg-ink hover:text-surface [&::-webkit-details-marker]:hidden"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true" className="size-5">
+                <path className="group-open:hidden" d="M3 7h18M3 12h18M3 17h18" />
+                <path className="hidden group-open:block" d="m5 5 14 14M19 5 5 19" />
+              </svg>
+            </summary>
+            <nav data-menu-panel aria-label={navLabel} className="absolute inset-x-0 top-full max-h-[calc(100dvh-var(--nav-height))] overflow-y-auto overscroll-contain border-b-(length:--line-width) border-line bg-surface px-(--grid-gutter) py-3">
+              <NavLinks items={sectionItems} ariaLabel={navLabel} onNavigate={handleNavigate} />
+            </nav>
+          </details>
+        </div>
       </div>
     </header>
   );

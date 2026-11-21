@@ -1,0 +1,61 @@
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view(block 0px)) and (animation-range: exit 0% exit 100%) {
+    [data-about-content] [data-reveal-root] {
+      /* Time both fades from the visible block, not the shared point markers. */
+      animation-timeline: view(block 0px), view(block 0px);
+      animation-range:
+        cover var(--psg-reveal-entry-start, 0%) cover 18%,
+        exit 30% exit 100%;
+    }
+  }
+}
+
+/* Let long localized words wrap rather than escape the reading column. */
+[data-about-content] {
+  overflow-wrap: anywhere;
+}
+
+/* When the portrait overlaps the text, it stays on top. Only affects About's
+   local composition; position is local so it never changes a global layer. */
+[data-about-portrait] {
+  position: relative;
+  z-index: 1;
+}
+
+/* Keep the longest localized statement word within the available gutter as
+   rem-based text sizing grows; the desktop display size remains unchanged. */
+[data-about-content] [data-about-statement] {
+  font-size: min(
+    var(--text-title),
+    calc((100vw - 2 * var(--grid-gutter)) / 7)
+  );
+}
+
+/*
+ * Without JavaScript the section is the static base state: motion and the
+ * portrait border are progressive enhancements. Keeping both overrides local
+ * avoids changing the shared Reveal contract. Browsers without the `scripting`
+ * media feature also lack scroll-driven animations, so the `@supports not`
+ * fallbacks already keep the content visible there.
+ */
+@media (scripting: none) {
+  [data-about-content] [data-reveal-root] {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    clip-path: none;
+  }
+
+  [data-about-content] [data-about-statement-word] {
+    animation: none;
+    color: var(--color-ink);
+    font-weight: 700;
+  }
+
+  /* A broken image must not leave a 2px border box behind. The ring keeps the
+     loaded portrait's 1px line without contributing to layout. */
+  [data-about-portrait] {
+    border-width: 0;
+    box-shadow: 0 0 0 var(--line-width) var(--color-line);
+  }
+}

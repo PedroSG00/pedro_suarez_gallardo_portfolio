@@ -1,0 +1,46 @@
+.statement,
+[data-about-statement] {
+  timeline-scope: --about-statement;
+  view-timeline-name: --about-statement;
+  view-timeline-axis: block;
+  /* Word boundaries refer to viewport edges, not the anchor scroll inset. */
+  view-timeline-inset: 0px;
+}
+
+.content,
+[data-about-statement-content] {
+  display: block;
+}
+
+@keyframes illuminate-word {
+  from {
+    color: var(--color-ink-muted);
+    font-weight: 400;
+  }
+
+  to {
+    color: var(--color-ink);
+    font-weight: 700;
+  }
+}
+
+@supports (animation-timeline: view()) {
+  [data-about-statement-word] {
+    color: var(--color-ink-muted);
+    font-weight: 400;
+    animation-name: illuminate-word;
+    animation-duration: auto;
+    animation-timing-function: steps(1, start);
+    animation-fill-mode: both;
+    animation-timeline: --about-statement;
+    animation-range: cover var(--about-statement-boundary) cover 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-about-statement-word] {
+    animation: none;
+    color: var(--color-ink);
+    font-weight: 700;
+  }
+}
