@@ -180,4 +180,88 @@ describe('LanguageSwitch (toggler)', () => {
     const { container } = renderWithIntl(<LanguageSwitch />, { messages });
     expect(container).toBeEmptyDOMElement();
   });
+
+  test('ignores invalid session storage pending navigation', () => {
+    window.sessionStorage.setItem('psg-locale-navigation', 'not-json');
+    renderWithIntl(
+      <LanguageSwitch
+        locale="en"
+        ariaLabelEn="Switch to English"
+        ariaLabelEs="Cambiar a español"
+      />,
+      { locale: 'en' },
+    );
+    const button = screen.getByRole('button');
+    expect(button).toBeInTheDocument();
+    fireEvent.click(button);
+    expect(mockReplace).toHaveBeenCalledWith('/es/about?utm=x', { scroll: false });
+  });
+
+  test('processes pending navigation from session storage', () => {
+    const scrollTo = vi.spyOn(window, 'scrollTo');
+    // Make requestAnimationFrame synchronous so the double rAF completes
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => cb());
+    const pending = {
+      locale: 'en',
+      search: '?utm=x',
+      hash: '#about',
+      scrollY: 100,
+      headingTop: null,
+      startedAt: Date.now() - 1000,
+    };
+    window.sessionStorage.setItem('psg-locale-navigation', JSON.stringify(pending));
+    setLocation('http://localhost/en/about#about');
+
+    renderWithIntl(
+      <LanguageSwitch
+        locale="en"
+        ariaLabelEn="Switch to English"
+        ariaLabelEs="Cambiar a español"
+      />,
+      { locale: 'en' },
+    );
+
+    expect(scrollTo).toHaveBeenCalled();
+    scrollTo.mockRestore();
+    window.sessionStorage.removeItem('psg-locale-navigation');
+  });
+
+  test('records activation position on pointer down', () => {
+    renderWithIntl(
+      <LanguageSwitch
+        locale="en"
+        ariaLabelEn="Switch to English"
+        ariaLabelEs="Cambiar a español"
+      />,
+      { locale: 'en' },
+    );
+    const button = screen.getByRole('button');
+    fireEvent.pointerDown(button);
+    fireEvent.click(button);
+    expect(mockReplace).toHaveBeenCalledWith('/es/about?utm=x', { scroll: false });
+  });
+
+  test('records activation position on pointer down with hash heading', () => {
+    setLocation('http://localhost/en/about#about');
+    const heading = document.createElement('h2');
+    heading.id = 'about';
+    heading.setAttribute('data-section-heading', '');
+    heading.style.position = 'absolute';
+    heading.style.top = '500px';
+    document.body.appendChild(heading);
+
+    renderWithIntl(
+      <LanguageSwitch
+        locale="en"
+        ariaLabelEn="Switch to English"
+        ariaLabelEs="Cambiar a español"
+      />,
+      { locale: 'en' },
+    );
+    const button = screen.getByRole('button');
+    fireEvent.pointerDown(button);
+    fireEvent.click(button);
+    expect(mockReplace).toHaveBeenCalledWith('/es/about', { scroll: false });
+    document.body.removeChild(heading);
+  });
 });

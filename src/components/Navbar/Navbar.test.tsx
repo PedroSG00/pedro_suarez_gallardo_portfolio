@@ -346,4 +346,134 @@ describe('Navbar — scroll visibility and focus (RF-3, RF-4, RF-12)', () => {
     dispatchUserScroll();
     expect(screen.getByRole('banner')).not.toHaveAttribute('data-hidden');
   });
+
+  test('scroll timeline unsupported keeps navbar visible', () => {
+    mockSupportsScrollTimeline(false);
+    renderNavbar();
+    mockScrollPosition(100);
+    dispatchUserScroll();
+    expect(screen.getByRole('banner')).not.toHaveAttribute('data-hidden');
+  });
+
+  test('navigation in progress keeps navbar visible on scroll', () => {
+    renderNavbar({ locale: 'en' }, 'en', '/');
+    mockScrollPosition(100);
+    dispatchUserScroll();
+    expect(screen.getByRole('banner')).toHaveAttribute('data-hidden');
+
+    // Switch locale triggers navigationInProgress via useLayoutEffect
+    renderNavbar({ locale: 'es' }, 'es', '/es');
+    const banners = screen.getAllByRole('banner');
+    const currentBanner = banners[banners.length - 1];
+    expect(currentBanner).not.toHaveAttribute('data-hidden');
+
+    // Scroll while navigation is in progress: navbar stays visible
+    fireEvent.scroll(window);
+    expect(currentBanner).not.toHaveAttribute('data-hidden');
+  });
+
+  test('locale change sets navigation in progress', () => {
+    renderNavbar({ locale: 'en' }, 'en', '/');
+    mockScrollPosition(100);
+    dispatchUserScroll();
+    expect(screen.getByRole('banner')).toHaveAttribute('data-hidden');
+
+    // Switch locale triggers navigationInProgress via useLayoutEffect
+    renderNavbar({ locale: 'es' }, 'es', '/es');
+    const banners = screen.getAllByRole('banner');
+    expect(banners[banners.length - 1]).not.toHaveAttribute('data-hidden');
+  });
+
+  test('pointerdown inside mobile menu sets keyboard intent', () => {
+    renderNavbar();
+    const summary = screen.getByRole('button', { name: 'Open menu' });
+    fireEvent.click(summary);
+    const menus = screen.getAllByRole('navigation', { name: 'Main' });
+    const menu = menus[menus.length - 1];
+    const link = within(menu).getByRole('link', { name: 'Work' });
+    fireEvent.pointerDown(link);
+    const banners = screen.getAllByRole('banner');
+    expect(banners[banners.length - 1]).not.toHaveAttribute('data-hidden');
+  });
+
+  test('wheel inside mobile menu does not hide navbar', () => {
+    renderNavbar();
+    const summary = screen.getByRole('button', { name: 'Open menu' });
+    fireEvent.click(summary);
+    const menus = screen.getAllByRole('navigation', { name: 'Main' });
+    const menu = menus[menus.length - 1];
+    fireEvent.wheel(menu, { deltaY: 120 });
+    fireEvent.scroll(window);
+    const banners = screen.getAllByRole('banner');
+    expect(banners[banners.length - 1]).not.toHaveAttribute('data-hidden');
+  });
+
+  test('touchmove inside mobile menu does not hide navbar', () => {
+    renderNavbar();
+    const summary = screen.getByRole('button', { name: 'Open menu' });
+    fireEvent.click(summary);
+    const menus = screen.getAllByRole('navigation', { name: 'Main' });
+    const menu = menus[menus.length - 1];
+    fireEvent.touchMove(menu);
+    fireEvent.scroll(window);
+    const banners = screen.getAllByRole('banner');
+    expect(banners[banners.length - 1]).not.toHaveAttribute('data-hidden');
+  });
+
+  test('scroll key inside mobile menu does not hide navbar', () => {
+    renderNavbar();
+    const summary = screen.getByRole('button', { name: 'Open menu' });
+    fireEvent.click(summary);
+    const menus = screen.getAllByRole('navigation', { name: 'Main' });
+    const menu = menus[menus.length - 1];
+    fireEvent.keyDown(menu, { key: 'ArrowDown' });
+    fireEvent.scroll(window);
+    const banners = screen.getAllByRole('banner');
+    expect(banners[banners.length - 1]).not.toHaveAttribute('data-hidden');
+  });
+
+  test('scroll key with defaultPrevented does not mark intent', () => {
+    renderNavbar();
+    const banner = screen.getByRole('banner');
+    const event = new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true });
+    Object.defineProperty(event, 'defaultPrevented', { value: true, configurable: true });
+    banner.dispatchEvent(event);
+    fireEvent.scroll(window);
+    expect(screen.getByRole('banner')).not.toHaveAttribute('data-hidden');
+  });
+
+  test('focusin shows navbar when hidden', () => {
+    renderNavbar();
+    mockScrollPosition(100);
+    dispatchUserScroll();
+    expect(screen.getByRole('banner')).toHaveAttribute('data-hidden');
+    fireEvent.focusIn(screen.getByRole('banner'));
+    expect(screen.getByRole('banner')).not.toHaveAttribute('data-hidden');
+  });
+
+  test('focusout with navigation in progress keeps visible', () => {
+    renderNavbar();
+    mockScrollPosition(100);
+    dispatchUserScroll();
+    expect(screen.getByRole('banner')).toHaveAttribute('data-hidden');
+
+    // Simulate navigation in progress by changing locale
+    renderNavbar({ locale: 'es' }, 'es', '/es');
+    const banners = screen.getAllByRole('banner');
+    fireEvent.focusOut(banners[banners.length - 1]);
+    expect(banners[banners.length - 1]).not.toHaveAttribute('data-hidden');
+  });
+
+  test('focusout with focus count greater than zero keeps visible', () => {
+    renderNavbar();
+    mockScrollPosition(100);
+    dispatchUserScroll();
+    expect(screen.getByRole('banner')).toHaveAttribute('data-hidden');
+
+    // Two focusins without focusout -> count > 0
+    fireEvent.focusIn(screen.getByRole('banner'));
+    fireEvent.focusIn(screen.getByRole('banner'));
+    fireEvent.focusOut(screen.getByRole('banner'));
+    expect(screen.getByRole('banner')).not.toHaveAttribute('data-hidden');
+  });
 });
