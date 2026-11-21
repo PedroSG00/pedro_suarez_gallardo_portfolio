@@ -72,6 +72,7 @@ Esta spec define el contenido y el comportamiento observable de About. No decide
 - Una palabra no iluminada usa el peso regular (400) y el color de texto secundario del tema activo.
 - Una palabra iluminada usa el peso fuerte (700) y el color principal de texto del tema activo.
 - En ambos temas y estados, el texto mantiene una relación de contraste mínima de 4,5:1 con el fondo. El peso tipográfico también distingue los estados; el color no es la única señal.
+- AA se exige con el reveal completado (opacidad 1) y, con movimiento reducido, desde el primer fotograma. Los estados intermedios de un fundido quedan fuera del criterio.
 
 **Límites del progreso**
 
@@ -107,7 +108,7 @@ Esta spec define el contenido y el comportamiento observable de About. No decide
 - En escritorio, el retrato queda a la izquierda y la biografía a la derecha, alineados por arriba. Las cualidades quedan debajo de la biografía. La medida de los párrafos no supera 65 caracteres monoespaciados.
 - El retrato lleva un borde de 1 px con el token de línea existente y ocupa menos espacio que la biografía. La composición evita huecos grandes que no ayuden a leer y conserva una lectura continua de los párrafos y las cualidades.
 - En los tamaños de escritorio y móvil verificados, el retrato no se solapa con el texto, no tapa información y no recorta contenido; About no provoca desplazamiento horizontal. No se añade una capa de apilado mientras no exista solapamiento.
-- En una columna, la biografía y las cualidades preceden al retrato. Si falta la foto, la biografía arranca en el borde interior de la retícula, sin reservar una columna para la imagen.
+- En una columna, el retrato precede a la biografía y las cualidades. Si falta la foto, la biografía arranca en el borde interior de la retícula, sin reservar una columna para la imagen.
 
 ### RF-5 — Revelado del contenido
 

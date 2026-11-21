@@ -37,7 +37,7 @@
   },
   "about": {
     "intro": "Sobre mí",
-    "statement": "La complejidad es donde estoy más tranquilo.",
+    "statement": "Me encargo de las partes que cuesta hacer bien.",
     "paragraphs": {
       "problem": "Grandes conjuntos de datos, actualizaciones en tiempo real, formularios complejos y estados en los que se puede confiar. Ese es el trabajo que los equipos me confían y que más disfruto.",
       "experience": "Tengo más de tres años de experiencia profesional creando y manteniendo aplicaciones web en producción con React y TypeScript. También trabajo en el backend, creando API REST en varios lenguajes y refactorizando para ganar velocidad y claridad.",

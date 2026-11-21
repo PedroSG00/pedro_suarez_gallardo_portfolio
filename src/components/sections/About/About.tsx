@@ -38,7 +38,25 @@ export default function About() {
         <div
           className={`grid items-start gap-6 md:gap-8 ${portraitFailed ? '' : 'lg:grid-cols-[max-content_minmax(0,1fr)]'}`}
         >
-          <div className="grid min-w-0 gap-4">
+          {!portraitFailed && (
+            <div className="lg:col-start-1 lg:row-start-1">
+              <Reveal variant="fade">
+                <Image
+                  alt=""
+                  aria-label={t('portraitAlt')}
+                  className="h-auto w-full max-w-sm aspect-auto border-(length:--line-width) border-line lg:max-w-md"
+                  data-about-portrait
+                  height={1278}
+                  onError={() => setPortraitFailed(true)}
+                  role="img"
+                  src={SITE.portraitSrc}
+                  unoptimized
+                  width={1230}
+                />
+              </Reveal>
+            </div>
+          )}
+          <div className={`grid min-w-0 gap-4 ${portraitFailed ? '' : 'lg:col-start-2 lg:row-start-1'}`}>
             <div className="grid max-w-prose gap-4 text-body">
               {PARAGRAPH_KEYS.map((key) => (
                 <Reveal key={key} variant="fade">
@@ -56,21 +74,6 @@ export default function About() {
               </RevealGroup>
             </div>
           </div>
-          {!portraitFailed && (
-            <div className="lg:col-start-1 lg:row-start-1">
-              <Reveal variant="fade">
-                <Image
-                  alt={t('portraitAlt')}
-                  className="h-auto w-full max-w-sm border-(length:--line-width) border-line lg:max-w-md"
-                  height={1278}
-                  onError={() => setPortraitFailed(true)}
-                  src={SITE.portraitSrc}
-                  unoptimized
-                  width={1230}
-                />
-              </Reveal>
-            </div>
-          )}
         </div>
       </div>
     </Section>

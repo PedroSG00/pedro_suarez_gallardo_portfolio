@@ -128,7 +128,7 @@ describe('Navbar', () => {
     expect(screen.getByRole('button', { name: 'Abrir menú' })).toBeInTheDocument();
   });
 
-  test('renderiza un NavLinks de escritorio y otro dentro de <details> móvil', () => {
+  test('renders a desktop NavLinks and another inside <details> mobile', () => {
     renderNavbar();
     expect(screen.getAllByRole('list', { name: 'Main' })).toHaveLength(2);
     const details = screen.getByRole('group');
@@ -136,7 +136,7 @@ describe('Navbar', () => {
     expect(within(details).getByRole('list')).toBeInTheDocument();
   });
 
-  test('el summary anuncia Abrir menú cuando está cerrado', () => {
+  test('the summary announces Open menu when closed', () => {
     renderNavbar();
     expect(screen.getByRole('button', { name: 'Open menu' })).toBeInTheDocument();
   });
@@ -202,7 +202,7 @@ describe('Navbar', () => {
     expect(projectLinks).toHaveLength(0);
   });
 
-  test('falta una etiqueta de sección y se omite ese enlace', () => {
+  test('omits the link when a section label is missing', () => {
     const incomplete: SectionDestination[] = [
       { id: 'about', index: '01', label: 'About' },
       { id: 'work', index: '02', label: '' },
@@ -231,7 +231,7 @@ describe('Navbar', () => {
   });
 });
 
-describe('Navbar — visibilidad por scroll y foco (RF-3, RF-4, RF-12)', () => {
+describe('Navbar — scroll visibility and focus (RF-3, RF-4, RF-12)', () => {
   function mockSupportsScrollTimeline(supported: boolean) {
     const original = CSS.supports.bind(CSS);
     vi.spyOn(CSS, 'supports').mockImplementation((prop: string) =>
@@ -270,14 +270,14 @@ describe('Navbar — visibilidad por scroll y foco (RF-3, RF-4, RF-12)', () => {
     expect(screen.getByRole('banner')).not.toHaveAttribute('data-hidden');
   });
 
-  test('scroll a 81 px bajando añade data-hidden', () => {
+  test('scroll 81 px down adds data-hidden', () => {
     renderNavbar();
     mockScrollPosition(81);
     dispatchUserScroll();
     expect(screen.getByRole('banner')).toHaveAttribute('data-hidden');
   });
 
-  test('subir lo quita', () => {
+  test('scrolling up removes it', () => {
     renderNavbar();
     mockScrollPosition(100);
     dispatchUserScroll();
@@ -287,7 +287,7 @@ describe('Navbar — visibilidad por scroll y foco (RF-3, RF-4, RF-12)', () => {
     expect(screen.getByRole('banner')).not.toHaveAttribute('data-hidden');
   });
 
-  test('scroll sin cambio mantiene el estado', () => {
+  test('scroll without change keeps the state', () => {
     renderNavbar();
     mockScrollPosition(100);
     dispatchUserScroll();

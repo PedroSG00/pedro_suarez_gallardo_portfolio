@@ -41,6 +41,30 @@ describe('About content', () => {
     expect(about.queryByText(/sound engineering|ingeniería de sonido/i)).not.toBeInTheDocument();
   });
 
+  test.each([
+    ['en', 'I build the parts that are hard to get right.'],
+    ['es', 'Me encargo de las partes que cuesta hacer bien.'],
+  ] as const)('renders the %s statement from the catalog', (locale, expectedStatement) => {
+    renderWithIntl(<About />, { locale });
+
+    expect(screen.getByRole('group', { name: expectedStatement })).toBeVisible();
+  });
+
+  test('places the portrait before the biography in the mobile flow', () => {
+    renderWithIntl(<About />, { locale: 'en' });
+
+    const about = within(screen.getByRole('region', { name: enMessages.about.intro }));
+    const portrait = about.getByRole('img', { name: enMessages.about.portraitAlt });
+    const firstParagraph = about.getByText(enMessages.about.paragraphs.problem, {
+      exact: true,
+    });
+
+    const position = firstParagraph.compareDocumentPosition(portrait);
+    expect(position & Node.DOCUMENT_POSITION_PRECEDING).toBe(
+      Node.DOCUMENT_POSITION_PRECEDING,
+    );
+  });
+
   test('keeps About content available while the portrait is pending', () => {
     renderWithIntl(<About />, { locale: 'en' });
 

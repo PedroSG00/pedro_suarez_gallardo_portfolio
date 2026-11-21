@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
 
 const LOCALES: Array<{ locale: 'en' | 'es'; role: string }> = [
   { locale: 'en', role: 'Full-stack developer' },
@@ -6,6 +6,46 @@ const LOCALES: Array<{ locale: 'en' | 'es'; role: string }> = [
 ];
 
 const THEMES: Array<'light' | 'dark'> = ['light', 'dark'];
+
+const SKIP_LINK = /skip to content|saltar al contenido/i;
+const IDENTITY = 'Pedro Suárez Gallardo';
+
+/** Resolves once the window scroll position is identical across two polls. */
+async function waitForScrollSettled(page: Page): Promise<void> {
+  let previous = Number.NaN;
+  await expect
+    .poll(
+      async () => {
+        const current = await page.evaluate(() => window.scrollY);
+        const settled = current === previous;
+        previous = current;
+        return settled;
+      },
+      { intervals: [100] },
+    )
+    .toBe(true);
+}
+
+/**
+ * Clicks the center of a control with a raw pointer, after its box stops
+ * moving. Needed for sticky controls that Playwright would otherwise scroll.
+ */
+async function clickCenter(page: Page, target: Locator): Promise<void> {
+  let previous = '';
+  await expect
+    .poll(
+      async () => {
+        const key = JSON.stringify(await target.boundingBox());
+        const settled = key === previous && key !== 'null';
+        previous = key;
+        return settled;
+      },
+      { intervals: [50, 100] },
+    )
+    .toBe(true);
+  const box = (await target.boundingBox())!;
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+}
 
 test.describe('Navbar navigation (RF-1, RF-2, RF-3, RF-4, RF-5, RF-6, RF-12, RF-13, RF-14)', () => {
   for (const { locale, role } of LOCALES) {
@@ -17,10 +57,8 @@ test.describe('Navbar navigation (RF-1, RF-2, RF-3, RF-4, RF-5, RF-6, RF-12, RF-
           await page.waitForLoadState('networkidle');
         });
 
-        test('skip link is first focusable and moves focus to main', async ({
-          page,
-        }) => {
-          const skip = page.getByRole('link', { name: /skip to content|saltar al contenido/i });
+        test('skip link is first focusable and moves focus to main', async ({ page }) => {
+          const skip = page.getByRole('link', { name: SKIP_LINK });
           await expect(skip).toBeVisible();
           await skip.focus();
           await skip.press('Enter');
@@ -29,49 +67,48 @@ test.describe('Navbar navigation (RF-1, RF-2, RF-3, RF-4, RF-5, RF-6, RF-12, RF-
 
         test('tab order: skip link first, identity second', async ({ page }) => {
           await page.keyboard.press('Tab');
-          await expect(
-            page.getByRole('link', { name: /skip to content|saltar al contenido/i })
-          ).toBeFocused();
+          await expect(page.getByRole('link', { name: SKIP_LINK })).toBeFocused();
 
           await page.keyboard.press('Tab');
-          await expect(page.getByRole('link', { name: 'Pedro Suárez Gallardo' })).toBeFocused();
+          await expect(page.getByRole('link', { name: IDENTITY })).toBeFocused();
         });
 
-        test('identity goes to home and clears hash', async ({ page }) => {
-          const identity = page.getByRole('link', { name: 'Pedro Suárez Gallardo' });
-          const logo = identity.getByRole('img', { name: 'Pedro Suárez Gallardo' });
+        test('identity goes to home and clears hash', async ({ baseURL, page }) => {
+          const identity = page.getByRole('link', { name: IDENTITY });
+          const logo = identity.getByRole('img', { name: IDENTITY });
           await expect(logo).toHaveAttribute('src', '/logo.svg');
           await expect(logo).toHaveCSS('filter', theme === 'dark' ? 'invert(1)' : 'none');
           await page.goto(`/${locale}#work`);
           await page.waitForLoadState('networkidle');
           await expect(page).toHaveURL(/#work$/);
 
-          await page.getByRole('link', { name: 'Pedro Suárez Gallardo' }).click();
-          await expect(page.url()).toBe(`http://127.0.0.1:3000/${locale}`);
+          await page.getByRole('link', { name: IDENTITY }).click();
+          await expect(page).toHaveURL(new URL(`/${locale}`, baseURL).toString());
           await expect(page.locator('body')).toContainText(role);
         });
 
         test('four anchors show heading below navbar, update hash and focus heading', async ({
+          baseURL,
           page,
         }) => {
           const anchors =
             locale === 'en'
               ? [
-                  { id: 'about', label: 'About' },
-                  { id: 'work', label: 'Work' },
-                  { id: 'stack', label: 'Stack' },
-                  { id: 'contact', label: 'Contact' },
-                ]
+                { id: 'about', label: 'About' },
+                { id: 'work', label: 'Work' },
+                { id: 'stack', label: 'Stack' },
+                { id: 'contact', label: 'Contact' },
+              ]
               : [
-                  { id: 'about', label: 'Sobre mí' },
-                  { id: 'work', label: 'Trabajo' },
-                  { id: 'stack', label: 'Stack' },
-                  { id: 'contact', label: 'Contacto' },
-                ];
+                { id: 'about', label: 'Sobre mí' },
+                { id: 'work', label: 'Trabajo' },
+                { id: 'stack', label: 'Stack' },
+                { id: 'contact', label: 'Contacto' },
+              ];
 
           for (const { id, label } of anchors) {
             await page.getByRole('link', { name: label }).click();
-            await expect(page.url()).toBe(`http://127.0.0.1:3000/${locale}#${id}`);
+            await expect(page).toHaveURL(new URL(`/${locale}#${id}`, baseURL).toString());
             const heading = page.getByRole('heading', { level: 2, name: label });
             await expect(heading).toBeVisible();
             await expect(heading).toBeFocused();
@@ -86,11 +123,8 @@ test.describe('Navbar navigation (RF-1, RF-2, RF-3, RF-4, RF-5, RF-6, RF-12, RF-
 
           await expect(themeBtn).toBeVisible();
           await expect(langBtn).toBeVisible();
-
-          const themeButtons = page.getByRole('button', { name: /toggle theme|cambiar tema/i });
-          const langButtons = page.getByRole('button', { name: /English|Español/ });
-          await expect(themeButtons).toHaveCount(1);
-          await expect(langButtons).toHaveCount(1);
+          await expect(themeBtn).toHaveCount(1);
+          await expect(langBtn).toHaveCount(1);
 
           await expect(themeBtn).toHaveAttribute('aria-pressed');
           for (const control of [themeBtn, langBtn]) {
@@ -100,10 +134,10 @@ test.describe('Navbar navigation (RF-1, RF-2, RF-3, RF-4, RF-5, RF-6, RF-12, RF-
           }
         });
 
-        test('changing language preserves anchor and destination', async ({ page }) => {
-          await page.goto(`http://127.0.0.1:3000/${locale}#work`);
+        test('changing language preserves anchor and destination', async ({ baseURL, page }) => {
+          await page.goto(new URL(`/${locale}#work`, baseURL).toString());
           await page.waitForLoadState('networkidle');
-          await expect(page.url()).toContain('#work');
+          await expect(page).toHaveURL(/#work$/);
 
           const otherLang = locale === 'en' ? 'Español' : 'English';
           const label = locale === 'en' ? 'Work' : 'Trabajo';
@@ -111,11 +145,8 @@ test.describe('Navbar navigation (RF-1, RF-2, RF-3, RF-4, RF-5, RF-6, RF-12, RF-
           const previousHeadingTop = await page
             .getByRole('heading', { level: 2, name: label })
             .evaluate((heading) => heading.getBoundingClientRect().top);
-          const switchBox = await page.getByRole('button', { name: otherLang }).boundingBox();
-          await page.mouse.click(
-            switchBox!.x + switchBox!.width / 2,
-            switchBox!.y + switchBox!.height / 2,
-          );
+
+          await clickCenter(page, page.getByRole('button', { name: otherLang }));
           await page.waitForURL(/#work$/);
 
           await expect
@@ -124,13 +155,13 @@ test.describe('Navbar navigation (RF-1, RF-2, RF-3, RF-4, RF-5, RF-6, RF-12, RF-
                 (await page
                   .getByRole('heading', { level: 2, name: nextLabel })
                   .evaluate((heading) => heading.getBoundingClientRect().top)) -
-                  previousHeadingTop,
+                previousHeadingTop,
               ),
             )
             .toBeLessThan(1);
           await expect(page.getByRole('heading', { level: 2, name: nextLabel })).toBeVisible();
           await expect(page.locator('body')).toContainText(
-            locale === 'en' ? 'Desarrollador full-stack' : 'Full-stack developer'
+            locale === 'en' ? 'Desarrollador full-stack' : 'Full-stack developer',
           );
         });
       });
@@ -210,6 +241,7 @@ test.describe('Scroll behavior on reload and navigation', () => {
     await page.reload();
     await page.waitForLoadState('networkidle');
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(beforeReload);
+    // Negative assertion: there is no event to wait for, so give a late jump time to show up.
     await page.waitForTimeout(150);
     expect(await page.evaluate(() => window.scrollY)).toBe(beforeReload);
   });
@@ -220,11 +252,7 @@ test.describe('Scroll behavior on reload and navigation', () => {
     await page.evaluate(() => window.scrollTo({ top: 320, behavior: 'instant' }));
     const beforeSwitch = await page.evaluate(() => window.scrollY);
 
-    const switchBox = await page.getByRole('button', { name: 'Español' }).boundingBox();
-    await page.mouse.click(
-      switchBox!.x + switchBox!.width / 2,
-      switchBox!.y + switchBox!.height / 2,
-    );
+    await clickCenter(page, page.getByRole('button', { name: 'Español' }));
     await page.waitForURL('/es');
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(beforeSwitch);
   });
@@ -254,15 +282,16 @@ test.describe('Scroll behavior on reload and navigation', () => {
       await page.emulateMedia({ reducedMotion: 'no-preference' });
       await page.goto(`/${locale}`);
       const navbar = page.getByRole('banner');
-      await Promise.all([
-        page.evaluate(() => new Promise<void>((resolve) => {
-          window.addEventListener('scrollend', () => resolve(), { once: true });
-        })),
-        navbar.getByRole('link', { name: aboutLabel[locale] }).click(),
-      ]);
+
+      await navbar.getByRole('link', { name: aboutLabel[locale] }).click();
       await expect(page).toHaveURL(`/${locale}#about`);
+      // Smooth scrolling may or may not emit `scrollend` (e.g. when already in
+      // place), so wait for the position itself to stop changing.
+      await waitForScrollSettled(page);
+
       const headingTop = (language: 'en' | 'es') =>
-        page.getByRole('region', { name: aboutLabel[language] })
+        page
+          .getByRole('region', { name: aboutLabel[language] })
           .getByRole('heading', { name: aboutLabel[language] })
           .evaluate((heading) => heading.getBoundingClientRect().top);
       const readingTop = await headingTop(locale);
@@ -271,18 +300,19 @@ test.describe('Scroll behavior on reload and navigation', () => {
       for (const language of [otherLocale, locale] as const) {
         const switcher = navbar.getByRole('button', { name: languageLabel[language] });
         await expect(switcher).toBeInViewport();
-        const box = (await switcher.boundingBox())!;
-        // Use a pointer click without Playwright repositioning the sticky control.
-        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+        // Pointer click without Playwright repositioning the sticky control.
+        await clickCenter(page, switcher);
         await expect(page).toHaveURL(`/${language}#about`);
-        await expect.poll(async () => Math.abs(await headingTop(language) - readingTop))
+        await expect
+          .poll(async () => Math.abs((await headingTop(language)) - readingTop))
           .toBeLessThanOrEqual(1);
         await navbar.evaluate(async (header) => {
           // Allow the locale's deferred scroll restoration to paint before measuring.
           for (let frame = 0; frame < 4; frame += 1) {
             await new Promise(requestAnimationFrame);
           }
-          await Promise.all(header.getAnimations().map((animation) => animation.finished));
+          // A cancelled animation rejects `finished`; that is not a failure here.
+          await Promise.allSettled(header.getAnimations().map((animation) => animation.finished));
         });
         await expect(navbar).toBeInViewport({ ratio: 0.95 });
       }
@@ -323,7 +353,7 @@ test.describe('Scroll behavior on reload and navigation', () => {
 
     await page.mouse.wheel(0, 4000);
     await expect(navbar).toHaveAttribute('data-hidden');
-    await navbar.getByRole('link', { name: 'Pedro Suárez Gallardo' }).focus();
+    await navbar.getByRole('link', { name: IDENTITY }).focus();
     await expect(navbar).not.toHaveAttribute('data-hidden');
   });
 });
@@ -335,7 +365,7 @@ test.describe('Mobile navigation controls', () => {
     await page.goto('/en');
 
     const banner = page.getByRole('banner');
-    const logo = banner.getByRole('img', { name: 'Pedro Suárez Gallardo' });
+    const logo = banner.getByRole('img', { name: IDENTITY });
     const theme = banner.getByRole('button', { name: /toggle theme|cambiar tema/i });
     const language = banner.getByRole('button', { name: 'Español' });
     const menu = banner.getByRole('button', { name: 'Open menu' });
@@ -362,7 +392,9 @@ test.describe('Mobile navigation controls', () => {
     await page.getByRole('button', { name: 'Open menu' }).click();
     const panel = page.getByRole('navigation', { name: 'Main' });
     await expect(panel).toBeVisible();
-    await expect.poll(() => panel.evaluate((element) => element.getAnimations().length)).toBeGreaterThan(0);
+    await expect
+      .poll(() => panel.evaluate((element) => element.getAnimations().length))
+      .toBeGreaterThan(0);
 
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await expect.poll(() => panel.evaluate((element) => element.getAnimations().length)).toBe(0);
@@ -382,14 +414,14 @@ test.describe('Navbar visibility on scroll (RF-3, no reduced motion)', () => {
 
         test('navbar is visible at the top', async ({ page }) => {
           await page.evaluate(() => window.scrollTo(0, 0));
-          await page.waitForTimeout(100);
           const navbar = page.locator('header');
           await expect(navbar).toBeVisible();
           await expect(navbar).toHaveCSS('transition-duration', '0.2s');
-          const transform = await navbar.evaluate(
-            (el) => new DOMMatrixReadOnly(getComputedStyle(el).transform).m42,
-          );
-          expect(transform).toBe(0);
+          await expect
+            .poll(() =>
+              navbar.evaluate((el) => new DOMMatrixReadOnly(getComputedStyle(el).transform).m42),
+            )
+            .toBe(0);
         });
 
         test('navbar hides after scrolling 80px down', async ({ page }) => {
@@ -398,7 +430,9 @@ test.describe('Navbar visibility on scroll (RF-3, no reduced motion)', () => {
           await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(80);
           const navbar = page.locator('header');
           await expect(navbar).toHaveAttribute('data-hidden');
-          await expect.poll(() => navbar.evaluate((element) => element.getBoundingClientRect().bottom)).toBeLessThanOrEqual(1);
+          await expect
+            .poll(() => navbar.evaluate((element) => element.getBoundingClientRect().bottom))
+            .toBeLessThanOrEqual(1);
           await expect(navbar).toHaveCSS('opacity', '1');
         });
 
@@ -416,10 +450,14 @@ test.describe('Navbar visibility on scroll (RF-3, no reduced motion)', () => {
           await page.mouse.wheel(0, 500);
           await expect(page.locator('header')).toHaveAttribute('data-hidden');
           await page.keyboard.press('Tab');
-          await expect(page.getByRole('link', { name: /skip to content|saltar al contenido/i })).toBeFocused();
+          await expect(page.getByRole('link', { name: SKIP_LINK })).toBeFocused();
           await page.keyboard.press('Tab');
-          await expect(page.getByRole('link', { name: 'Pedro Suárez Gallardo' })).toBeFocused();
-          await expect.poll(() => page.locator('header').evaluate((element) => element.getBoundingClientRect().top)).toBeGreaterThanOrEqual(-1);
+          await expect(page.getByRole('link', { name: IDENTITY })).toBeFocused();
+          await expect
+            .poll(() =>
+              page.locator('header').evaluate((element) => element.getBoundingClientRect().top),
+            )
+            .toBeGreaterThanOrEqual(-1);
         });
       });
     }
@@ -436,12 +474,13 @@ test.describe('Navbar with reduced motion (RF-3, RF-12)', () => {
 
   test('navbar stays visible at all scroll positions', async ({ page }) => {
     await page.evaluate(() => window.scrollTo(0, 200));
-    await page.waitForTimeout(300);
+    await waitForScrollSettled(page);
     const navbar = page.locator('header');
-    const transform = await navbar.evaluate(
-      (el) => new DOMMatrixReadOnly(getComputedStyle(el).transform).m42,
-    );
-    expect(transform).toBe(0);
+    await expect
+      .poll(() =>
+        navbar.evaluate((el) => new DOMMatrixReadOnly(getComputedStyle(el).transform).m42),
+      )
+      .toBe(0);
   });
 });
 
@@ -461,7 +500,9 @@ test.describe('Mobile menu at 360px (RF-4)', () => {
         const navbar = page.getByRole('banner');
         const open = navbar.getByRole('button', { name: /open menu|abrir menú/i });
         const close = navbar.getByRole('button', { name: /close menu|cerrar menú/i });
-        const links = navbar.getByRole('link').filter({ hasText: /^(About|Sobre mí|Work|Trabajo|Stack|Contact|Contacto)$/ });
+        const links = navbar
+          .getByRole('link')
+          .filter({ hasText: /^(About|Sobre mí|Work|Trabajo|Stack|Contact|Contacto)$/ });
         await expect(links).toHaveCount(0);
         await open.click();
         await expect(close).toBeVisible();
@@ -478,8 +519,13 @@ test.describe('Mobile menu at 360px (RF-4)', () => {
         await page.setViewportSize({ width: 768, height: 900 });
         await expect(links).toHaveCount(4);
         await expect(close).toHaveCount(0);
-        const boxes = await Promise.all((await links.all()).map((link) => link.boundingBox()));
-        expect(boxes.every((box) => box && box.y === boxes[0]?.y)).toBe(true);
+        // Fractional layout: compare rows with a tolerance, not strict equality.
+        await expect
+          .poll(async () => {
+            const boxes = await Promise.all((await links.all()).map((link) => link.boundingBox()));
+            return boxes.every((box) => box && Math.abs(box.y - boxes[0]!.y) < 1);
+          })
+          .toBe(true);
         await page.setViewportSize({ width: 360, height: 900 });
         await expect(open).toBeVisible();
         await expect(links).toHaveCount(0);
@@ -487,9 +533,7 @@ test.describe('Mobile menu at 360px (RF-4)', () => {
     });
   }
 
-  test('scrolling the open panel does not move the page or close the menu', async ({
-    page,
-  }) => {
+  test('scrolling the open panel does not move the page or close the menu', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.setViewportSize({ width: 360, height: 240 });
     await page.goto('/en');
@@ -524,8 +568,8 @@ test.describe('Keyboard focus visibility (RF-5, RF-12)', () => {
 
         const focusableCount = await page
           .locator('a[href], button:not([disabled]), summary')
-          .evaluateAll((elements) =>
-            elements.filter((element) => element.getClientRects().length > 0).length,
+          .evaluateAll(
+            (elements) => elements.filter((element) => element.getClientRects().length > 0).length,
           );
 
         for (let index = 0; index < focusableCount; index += 1) {
@@ -541,7 +585,10 @@ test.describe('Keyboard focus visibility (RF-5, RF-12)', () => {
           expect(focusStyle.outlineStyle, `Tab stop ${index + 1} should show an outline`).toBe(
             'solid',
           );
-          expect(focusStyle.outlineWidth, `Tab stop ${index + 1} should have a visible outline`).toBeGreaterThan(0);
+          expect(
+            focusStyle.outlineWidth,
+            `Tab stop ${index + 1} should have a visible outline`,
+          ).toBeGreaterThan(0);
         }
       });
     }
@@ -560,11 +607,10 @@ test.describe('404 localized routes (RF-14)', () => {
       test('shows navbar and footer with links to home + anchor', async ({ page }) => {
         await expect(page.locator('header')).toBeVisible();
         await expect(page.locator('footer')).toBeVisible();
-        await expect(page.getByRole('link', { name: 'Pedro Suárez Gallardo' })).toBeVisible();
-        await expect(page.getByRole('link', { name: locale === 'en' ? 'About' : 'Sobre mí' })).toHaveAttribute(
-          'href',
-          `/${locale}#about`,
-        );
+        await expect(page.getByRole('link', { name: IDENTITY })).toBeVisible();
+        await expect(
+          page.getByRole('link', { name: locale === 'en' ? 'About' : 'Sobre mí' }),
+        ).toHaveAttribute('href', `/${locale}#about`);
         await expect(page.locator('body')).toContainText(
           locale === 'en' ? 'Not found' : 'No encontrado',
         );
@@ -636,9 +682,7 @@ test.describe('No JavaScript (RF-12, RF-14)', () => {
     }
   });
 
-  test('keyboard focus can leave the open mobile menu without being trapped', async ({
-    page,
-  }) => {
+  test('keyboard focus can leave the open mobile menu without being trapped', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.setViewportSize({ width: 360, height: 900 });
     await page.goto('/en');
@@ -655,8 +699,8 @@ test.describe('No JavaScript (RF-12, RF-14)', () => {
     }
 
     await page.keyboard.press('Tab');
-    expect(
-      await page.evaluate(() => document.activeElement?.closest('header') === null),
-    ).toBe(true);
+    expect(await page.evaluate(() => document.activeElement?.closest('header') === null)).toBe(
+      true,
+    );
   });
 });

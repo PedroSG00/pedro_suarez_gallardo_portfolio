@@ -381,12 +381,12 @@ test.describe('Hero does not cover destination on anchor arrival (RF-10, RF-13)'
   });
 
   for (const [locale, label] of [['en', 'Work'], ['es', 'Trabajo']]) {
-    test(`/${locale}: destination heading visible below navbar`, async ({ page }) => {
+    test(`/${locale}: destination heading visible below navbar`, async ({ baseURL, page }) => {
       await page.goto(`/${locale}`);
       await page.waitForLoadState('networkidle');
 
       await page.getByRole('link', { name: label }).click();
-      await expect(page.url()).toBe(`http://127.0.0.1:3000/${locale}#work`);
+      await expect(page.url()).toBe(new URL(`/${locale}#work`, baseURL).toString());
 
       const heading = page.getByRole('heading', { level: 2, name: label });
       await expect(heading).toBeVisible();

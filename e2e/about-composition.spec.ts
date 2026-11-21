@@ -159,8 +159,8 @@ for (const { locale, name, messages } of LOCALES) {
         });
         expect(portraitStyle.borderWidth).toBe(tokenBorder.width);
         expect(portraitStyle.borderColor).toBe(tokenBorder.color);
-        expect(portraitStyle.position).toBe('static');
-        expect(portraitStyle.zIndex).toBe('auto');
+        expect(portraitStyle.position).toBe('relative');
+        expect(portraitStyle.zIndex).toBe('1');
         expect(portraitStyle.naturalWidth).toBeGreaterThan(0);
         expect(portraitStyle.scrollWidth).toBeLessThanOrEqual(portraitStyle.clientWidth);
         expect(portraitBox!.width).toBeGreaterThan(viewport.previousPortraitMax);
@@ -236,8 +236,9 @@ for (const { locale, name, messages } of LOCALES) {
             viewport.compactGap,
           );
         } else {
-          expect(lastParagraphBox!.y + lastParagraphBox!.height).toBeLessThan(valuesBox!.y);
-          expect(valuesBox!.y + valuesBox!.height).toBeLessThan(portraitBox!.y);
+          expect(portraitBox!.y + portraitBox!.height).toBeLessThanOrEqual(
+            firstParagraphBox!.y,
+          );
         }
 
         for (let index = 1; index < composition.paragraphRects.length; index += 1) {

@@ -12,7 +12,7 @@
 
 Se reutilizan los componentes existentes de sección y UI. No se añaden dependencias, carpetas en la raíz ni niveles adicionales bajo `components/`.
 
-**Ajuste local previo a T8:** `About` mantiene la frase en todo el ancho y organiza el resto con biografía y cualidades antes del retrato en el orden de lectura. En escritorio el retrato toma la columna izquierda; si se omite, la biografía ocupa la primera posición sin crecer más allá de la medida de lectura. El retrato lleva un borde de 1 px con el token de línea existente y una huella visual menor que la biografía. La composición reduce huecos innecesarios y mantiene los textos continuos, sin solapamiento, recorte ni desplazamiento horizontal en los tamaños verificados. El estilo local mantiene una entrada temprana y retrasa la salida de About; el CSS compartido amplía la banda legible del resto de bloques sin cambiar los contratos de `Reveal`/`RevealGroup`, la retícula global ni la progresión de palabras. Las pruebas integradas comprueban geometría, recuperación tras fallo y opacidad en entrada, lectura y salida por idioma y tema.
+**Ajuste local previo a T8:** `About` mantiene la frase en todo el ancho y organiza el resto con el retrato primero en móvil y la biografía y las cualidades después; en escritorio el retrato toma la columna izquierda y, si se omite, la biografía ocupa la primera posición sin crecer más allá de la medida de lectura. El retrato lleva un borde de 1 px con el token de línea existente y una huella visual menor que la biografía. La composición reduce huecos innecesarios y mantiene los textos continuos, sin solapamiento, recorte ni desplazamiento horizontal en los tamaños verificados. El estilo local mantiene una entrada temprana y retrasa la salida de About; el CSS compartido amplía la banda legible del resto de bloques sin cambiar los contratos de `Reveal`/`RevealGroup`, la retícula global ni la progresión de palabras. Las pruebas integradas comprueban geometría, recuperación tras fallo y opacidad en entrada, lectura y salida por idioma y tema.
 
 | Módulo | Responsabilidad | RF |
 |---|---|---|
@@ -29,7 +29,7 @@ Se reutilizan los componentes existentes de sección y UI. No se añaden depende
 | `src/content/site.ts` | Añadir la ruta del retrato a los datos locales del sitio; no contiene texto traducible. | RF-4 |
 | `messages/en.json` y `messages/es.json` | Incorporar la frase, los párrafos, las cualidades y el texto alternativo con claves equivalentes. | RF-1, RF-2, RF-3, RF-4, RF-7 |
 | `src/app/[locale]/page.tsx` | Sustituir el cuerpo reservado de About por la sección completa, conservando el destino y el orden existentes. | RF-1, RF-5, RF-7 |
-| `e2e/about.spec.ts`, `e2e/about-composition.spec.ts` | Verificar en navegador el movimiento, fallos del retrato, composición, idiomas, temas, fallbacks y adaptación de About. | RF-1 a RF-7 |
+| `e2e/about-statement.spec.ts`, `e2e/about-reading.spec.ts`, `e2e/about-layout.spec.ts`, `e2e/about-fallbacks.spec.ts`, `e2e/about-composition.spec.ts`, `e2e/about-a11y.spec.ts` | Verificar en navegador el movimiento, fallos del retrato, composición, idiomas, temas, fallbacks y adaptación de About. | RF-1 a RF-7 |
 | Prueba existente de paridad de mensajes | Verificar que los catálogos conservan el mismo conjunto de claves. | RF-7 |
 
 **Cobertura RF:** todos los RF tienen al menos un módulo asociado; la trazabilidad completa está en la sección 7.
@@ -215,7 +215,7 @@ Los tests se escriben antes del código. Se consulta por rol, texto, nombre acce
 - Verificar la progresión acumulativa: una palabra anterior permanece iluminada cuando avanza la siguiente; al retroceder, la progresión se revierte.
 - Verificar la frase completa como una sola unidad accesible, independientemente del estado visual.
 - Verificar que los párrafos, las etiquetas, la frase y el retrato participan del revelado general y están plenamente visibles en su fase estable.
-- Verificar contraste AA en tema claro y oscuro para la frase en ambos estados visuales y en combinación con el revelado general.
+- Verificar contraste AA en tema claro y oscuro para ambos estados visuales de la frase en el tramo de lectura (opacidad 1, sin transición activa).
 - Verificar que `prefers-reduced-motion: reduce` deja el contenido estático y totalmente visible.
 - Verificar los límites `i / N` y los estilos computados definidos en RF-2, en ambos idiomas y temas, sin aserciones por clases ni estructura interna.
 
@@ -230,8 +230,8 @@ La spec introduce movimiento ligado al scroll; se requiere e2e. La suite de Abou
 | Contenido localizado | `/en` y `/es`: contenido, cualidades, encabezado y texto alternativo correctos. | RF-1, RF-3, RF-4, RF-7 |
 | Movimiento de frase | Estado inicial, progreso entre palabras, acumulación, estado final y reversibilidad al volver atrás. | RF-2 |
 | Revelado general | En About, cada bloque entra, alcanza estado estable y sale al desplazarse; no queda contenido oculto al detener el scroll. | RF-5 |
-| Tema | Verificar texto y estados visuales en claro y oscuro, manteniendo contraste AA. | RF-2, RF-5 |
-| Movimiento reducido | Todo contenido visible y estático; frase completa e iluminada. | RF-5, RF-6 |
+| Tema | Verificar contraste AA del texto y de ambos estados de la frase en claro y oscuro en el tramo de lectura, no durante fundidos. | RF-2, RF-5 |
+| Movimiento reducido | Todo contenido visible y estático; frase completa e iluminada y contraste AA desde el primer fotograma. | RF-5, RF-6 |
 | Sin soporte de animación ligada al scroll | Simular el fallback en Chromium y comprobar contenido visible y frase estática completa. Safari/Firefox reales se verifican en la pasada transversal prevista por la spec 12. | RF-5, RF-6 |
 | Sin JavaScript | Contenido completo, estático y visible; sin progresión animada. | RF-1, RF-2, RF-5, RF-6, RF-7 |
 | Fallo del retrato | Interceptar el recurso para provocar fallo; comprobar que no queda imagen rota visible y que todo el texto continúa disponible. | RF-4, RF-6 |
@@ -299,5 +299,5 @@ Los gates se ejecutan sin reducir umbrales. Como la spec toca movimiento, e2e es
 1. **Contraste de RF-2.** Los dos estados y los límites uniformes del progreso están definidos en la spec. Verificar que la implementación preserve contraste AA en ambos temas y siga el mismo recorrido al avanzar y retroceder.
 2. **Estado sin JavaScript.** La spec requiere About estático sin JavaScript, mientras el revelado existente usa animación CSS cuando el navegador la soporta. La prueba debe confirmar que la sección puede conservar ese contrato localmente. Si requiere modificar `Reveal` o estilos compartidos, detenerse y pedir aprobación por tratarse de una capa transversal.
 3. **Fallo del retrato sin JavaScript.** La sección y sus textos deben seguir visibles sin JavaScript. El comportamiento del navegador ante un recurso de imagen fallido también debe satisfacer la omisión sin error visual exigida por RF-4; se valida explícitamente y no se da por supuesto.
-4. **Contraste durante dos efectos simultáneos.** La frase combina el revelado general con el estado por palabra. Todas las combinaciones tienen que mantener AA; no se acepta una solución que oscurezca temporalmente el texto por debajo del contraste requerido.
+4. **Contraste en lectura.** La frase combina el revelado general con el estado por palabra. Comprobar AA cuando el revelado está completado y desde el primer fotograma con movimiento reducido; los estados intermedios del fundido no se miden.
 5. **Revisión editorial.** Se trabaja con los textos propuestos durante la implementación. La revisión final de esos textos queda como última tarea de Pedro, antes de dar About por terminada.

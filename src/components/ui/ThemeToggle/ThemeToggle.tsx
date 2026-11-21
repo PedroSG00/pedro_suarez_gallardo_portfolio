@@ -66,7 +66,7 @@ export default function ThemeToggle({
       aria-label={ariaLabel}
       data-theme-icon={pressed ? 'moon' : 'sun'}
       className={`
-        inline-flex items-center justify-center
+        inline-flex items-center justify-center cursor-pointer
         size-11 border-(length:--line-width) border-line bg-surface text-ink
         hover:bg-ink hover:text-surface aria-pressed:bg-ink aria-pressed:text-surface
         transition-colors duration-(--duration-state)

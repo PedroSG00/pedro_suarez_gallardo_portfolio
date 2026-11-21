@@ -92,28 +92,28 @@ async function checkAllBlocks(page: Page): Promise<void> {
   }
 }
 
-test.describe('RF-10: fallback sin animation-timeline', () => {
-  test('en claro / en', async ({ page }) => {
+test.describe('RF-10: fallback without animation-timeline', () => {
+  test('light / en', async ({ page }) => {
     await mountFallbackFixture(page, 'en', 'light', true);
     await checkAllBlocks(page);
   });
 
-  test('en oscuro / en', async ({ page }) => {
+  test('dark / en', async ({ page }) => {
     await mountFallbackFixture(page, 'en', 'dark', true);
     await checkAllBlocks(page);
   });
 
-  test('en claro / es', async ({ page }) => {
+  test('light / es', async ({ page }) => {
     await mountFallbackFixture(page, 'es', 'light', true);
     await checkAllBlocks(page);
   });
 
-  test('en oscuro / es', async ({ page }) => {
+  test('dark / es', async ({ page }) => {
     await mountFallbackFixture(page, 'es', 'dark', true);
     await checkAllBlocks(page);
   });
 
-  test('SIN fallback: al menos un bloque queda atenuado (opacidad < 1)', async ({
+  test('without fallback: at least one block remains dimmed (opacity < 1)', async ({
     page,
   }) => {
     await mountFallbackFixture(page, 'en', 'light', false);

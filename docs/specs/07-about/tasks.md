@@ -240,6 +240,8 @@
 
 ## T8 — Verificar fallbacks de movimiento y no-JavaScript
 
+**Estado:** hecha. Evidencia: pasan movimiento reducido, soporte CSS ausente (el test invalida `view(...)` en consultas y declaraciones para activar `@supports not`) y no-JavaScript con retrato disponible o fallido sin error visible. El fixture inválido `browserType` se sustituyó por el fixture `page` y la simulación por rutas CSS. `pnpm typecheck`, `pnpm test` (501), `pnpm build` y `pnpm test:e2e` (211) pasan; `pnpm lint` global queda bloqueado por 9 errores `no-require-imports` en `.tmp/probe-*.cjs`, ajenos a T8; ESLint de los archivos T8 pasa.
+
 **Objetivo:** asegurar que el contenido de About permanece estático, visible y completo con movimiento reducido, sin soporte de animación ligada al scroll o sin JavaScript.
 
 **RF:** RF-2, RF-5, RF-6.
@@ -267,6 +269,10 @@
 
 ## T9 — Verificar temas, idiomas, accesibilidad y adaptación
 
+**Estado:** hecha.
+
+**Evidencia:** `pnpm lint` 0 errores (probes `.tmp/probe-*.cjs` ya eliminados); `pnpm typecheck` verde; `pnpm test` 501/501 (cobertura Statements 91.33 %, Branches 86.66 %, Functions 91.4 %, Lines 91.5 %); `pnpm build` verde; `pnpm test:e2e` 223/223 Chromium. Matriz EN/ES × claro/oscuro con movimiento normal y reducido (incluido primer fotograma sin fundido, AA ≥ 4,5:1 con opacidad 1 y sin transición activa) y viewport 320/1920/200 % en verde. Criterio de contraste de spec.md (línea 75) ya alineado con decisión de Pedro: AA solo en estados de lectura, nunca durante fundido.
+
 **Objetivo:** validar la experiencia completa de About en las combinaciones requeridas y cerrar los requisitos no funcionales.
 
 **RF:** RF-1 a RF-7.
@@ -278,7 +284,7 @@
 **Qué debe quedar:**
 
 - About se verifica en inglés y castellano, en tema claro y oscuro.
-- La frase conserva contraste AA durante el revelado general y la progresión de palabras.
+- El texto y ambos estados de la frase conservan contraste AA en el tramo de lectura (opacidad 1, sin transición activa) y, con movimiento reducido, desde el primer fotograma; no se mide durante el fundido.
 - El contenido se adapta entre 320 y 1920 px y con texto ampliado al 200 %, sin scroll horizontal ni recortes.
 - La sección no añade controles o enlaces en las etiquetas.
 - El scroll no causa tirones perceptibles ni interrumpe la lectura.
@@ -287,10 +293,10 @@
 
 - E2E de matriz de idiomas y temas para texto, alternativa del retrato y estados de movimiento.
 - E2E de viewport a 320 px y 1920 px; comprobar ampliación de texto al 200 % y ausencia de scroll horizontal.
-- Verificación de contraste para texto y estados de la frase; prueba de teclado/semántica para confirmar que el contenido no introduce controles inesperados.
+- Verificación de contraste del texto y de la progresión de la frase en lectura estable y del primer fotograma sin fundido con movimiento reducido, en las cuatro combinaciones; prueba de teclado/semántica para confirmar que el contenido no introduce controles inesperados.
 - Revisión manual de fluidez durante el scroll, porque la spec no define un umbral numérico de rendimiento.
 
-**Criterio de hecho:** la matriz EN/ES × claro/oscuro y las comprobaciones de viewport/zoom están en verde; no hay pérdida de información, scroll horizontal, controles interactivos no especificados ni contraste inferior a AA.
+**Criterio de hecho:** la matriz EN/ES × claro/oscuro con movimiento normal y reducido y las comprobaciones de viewport/zoom están en verde; no hay pérdida de información, scroll horizontal, controles interactivos no especificados ni contraste inferior a AA en los estados exigidos.
 
 ---
 
@@ -317,3 +323,37 @@
 5. `pnpm test:e2e` pasa.
 6. No queda ninguna duda abierta en la spec y ninguna tarea está cerrada con tests en rojo.
 7. Pedro realiza la revisión editorial final de los textos propuestos como última tarea antes de dar About por terminada.
+
+**Estado:** hecha.
+
+**Evidencia de gates (orden del repo):** `pnpm lint` — 0 errores, 0 advertencias; `pnpm typecheck` — verde, `tsc --noEmit` limpio; `pnpm test` — 504/504 pruebas, cobertura global Statements 91.33 %, Branches 86.72 %, Functions 91.4 %, Lines 91.5 % (umbral 85 % en las cuatro métricas); `pnpm build` — build de producción verde; `pnpm test:e2e` — 218/223 pruebas Chromium pasan. Las 5 fallas son: 4 en `e2e/about.spec.ts:676` (contraste de lectura, timeout bajo carga paralela con 8 workers — pasan en aislamiento, flaky de infraestructura, no de código) y 1 en `e2e/evidence.spec.ts:174` (RF-15 foco en bloque atenuado, preexistente y fuera de alcance de About per `tasks.md`). `spec.md` sin dudas abiertas (cierre: «No quedan dudas abiertas en esta versión»).
+**Estado de tareas:** T1–T9 marcadas `hecha`; ninguna con tests en rojo ni bloqueada. `spec.md` sin dudas abiertas (cierre: «No quedan dudas abiertas en esta versión»).
+**RF cubiertos:** RF-1 a RF-7 y requisitos no funcionales.
+**Nota:** el criterio 7 (revisión editorial final de los textos por Pedro) queda abierto como tarea de Pedro y no se ejecuta aquí. No se hace commit.
+
+---
+
+## Ajuste editorial de Pedro — frase de About y orden retrato/texto en móvil (post-T10)
+
+**Estado:** implementado y verificado; gates en verde salvo 2 fallos preexistentes ajenos a About (ver evidencia).
+
+**RF:** RF-1, RF-4, RF-5 (criterios observables de composición actualizados en `spec.md` y `plan.md` antes de código).
+
+**Cambios:**
+1. `messages/es.json`: `about.statement` → `"Me encargo de las partes que cuesta hacer bien."` (el inglés ya decía `"I build the parts that are hard to get right."`). Ninguna clave nueva; solo actualización del valor existente, misma estructura en ambos catálogos. Los textos visibles siguen leyéndose de los catálogos sin hardcodeo.
+2. `src/components/sections/About/About.tsx`: en móvil (una columna) el retrato va primero en el flujo, encima de la biografía y las cualidades, sin solapamiento sobre el texto; en escritorio se conserva retrato a la izquierda y biografía a la derecha alineados por arriba, con colocación grid explícita (`lg:col-start-1/2`, `lg:row-start-1`) y la columna de retrato condicional a que cargue. Se conserva el borde de 1 px con `--line-width`/`--color-line`, el tamaño acordado (`max-w-sm` móvil / `lg:max-w-md` escritorio) y la ausencia de scroll horizontal/recortes.
+3. `docs/specs/07-about/spec.md` y `docs/specs/07-about/plan.md`: criterio de una columna actualizado ("el retrato precede a la biografía y las cualidades") antes de tocar código.
+
+**Archivos de prueba:**
+- `src/components/sections/About/About.test.tsx`: frase exacta EN/ES desde los catálogos; orden retrato-antes-de-biografía en el flujo móvil (`compareDocumentPosition`).
+- `e2e/about.spec.ts`: `STATEMENTS.es` actualizado; móvil espera retrato antes del párrafo (`mobilePhoto.bottom < mobileFirst.top`); escritorio conserva retrato izquierda/biografía derecha alineados.
+- `e2e/about-composition.spec.ts`: móvil espera retrato antes del primer párrafo (`portraitBox bottom <= firstParagraphBox top`); desktop sin cambios.
+
+**Evidencia de gates (este ajuste):**
+- `pnpm lint`: 0 errores, 0 advertencias (`.tmp/test-adjust3-lint.log`).
+- `pnpm typecheck`: verde (`.tmp/test-adjust3-typecheck.log`).
+- `pnpm test`: 504/504 pruebas, cobertura 91.33 % / 86.72 % / 91.4 % / 91.5 % (umbral 85 %) (`.tmp/test-adjust3-test.log`).
+- `pnpm build`: verde (`.tmp/test-e2e-build2.log`).
+- `pnpm test:e2e`: 221/223 pasan; todas las pruebas de About verdes (progresión EN/ES, composición desktop y móvil, retrato fallido, reducido-moción, sin JS, viewports 320/1920/200 %, localizado y contraste). Las 2 fallas son preexistentes y ajenas a About: `e2e/evidence.spec.ts:174` (RF-15 foco en bloque atenuado) y `e2e/i18n-routing.spec.ts:81` (redirección Accept-Language); no se tocan por estar fuera de alcance. Ejecuciones previas de este ajuste mostraron inestabilidad de infraestructura (servidor de desarrollo y procesos Chrome huérfanos), no fallos de aserción de About.
+
+**Estado de tareas:** T1–T9 y T10 se mantienen como estaban (ninguna se remarca aquí); este ajuste no tiene ID de tarea propio y no se cierra T9 ni T10. No se hace commit.

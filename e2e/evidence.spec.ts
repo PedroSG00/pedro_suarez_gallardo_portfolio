@@ -56,16 +56,16 @@ async function scrollTo(page: Page, y: number): Promise<void> {
   );
 }
 
-test.describe('T19: evidencia real por RF', () => {
+test.describe('T19: real evidence per RF', () => {
 
-  test('RF-03: bloque visible al cargar, opacidad 1 en el primer fotograma', async ({
+  test('RF-03: block visible on load, opacity 1 on first frame', async ({
     page,
   }) => {
     await mountFixture(page, `
-      <section class="reveal" data-reveal-root role="region" aria-label="Bloque visible">
+      <section class="reveal" data-reveal-root role="region" aria-label="Block visible on load">
         <span data-reveal-entry-marker aria-hidden="true"></span>
         <span data-reveal-exit-marker aria-hidden="true"></span>
-        <h2>Visible al cargar</h2>
+        <h2>Visible on load</h2>
       </section>
     `, '400px');
 
@@ -74,14 +74,14 @@ test.describe('T19: evidencia real por RF', () => {
     // stable phase, we place it higher up.
     await scrollTo(page, 0);
 
-    const opacity = await computedOpacity(page, '[aria-label="Bloque visible"]');
-    const transformY = await computedTransformY(page, '[aria-label="Bloque visible"]');
+    const opacity = await computedOpacity(page, '[aria-label="Block visible on load"]');
+    const transformY = await computedTransformY(page, '[aria-label="Block visible on load"]');
 
     expect(opacity).toBe(1);
     expect(transformY).toBe(0);
   });
 
-  test('RF-05: viewport más alto que la página, todo con opacidad 1', async ({
+  test('RF-05: viewport taller than the page, everything at opacity 1', async ({
     page,
   }) => {
     await page.setViewportSize({ width: 1280, height: 2000 });
@@ -97,10 +97,10 @@ test.describe('T19: evidencia real por RF', () => {
         [data-reveal-root] { height: ${BLOCK_HEIGHT}px; }
       </style>
       <main>
-        <section class="reveal" data-reveal-root role="region" aria-label="Bloque página corta">
+        <section class="reveal" data-reveal-root role="region" aria-label="Short page block">
           <span data-reveal-entry-marker aria-hidden="true"></span>
           <span data-reveal-exit-marker aria-hidden="true"></span>
-          <h2>Página corta</h2>
+          <h2>Short page</h2>
         </section>
       </main>
     `);
@@ -108,7 +108,7 @@ test.describe('T19: evidencia real por RF', () => {
 
     await scrollTo(page, 0);
 
-    const opacity = await computedOpacity(page, '[aria-label="Bloque página corta"]');
+    const opacity = await computedOpacity(page, '[aria-label="Short page block"]');
 
     // With JS, isShortPage => forceVisible => opacity 1. Without JS (blocked),
     // it may be dimmed (relaxation T18). JS is blocked here, so we verify
@@ -116,14 +116,14 @@ test.describe('T19: evidencia real por RF', () => {
     expect(opacity).toBeGreaterThan(0);
   });
 
-  test('RF-07: scroll rápido y parada brusca, bloques estables opacidad 1', async ({
+  test('RF-07: fast scroll and abrupt stop, stable blocks opacity 1', async ({
     page,
   }) => {
     await mountFixture(page, `
-      <section class="reveal" data-reveal-root role="region" aria-label="Bloque estable">
+      <section class="reveal" data-reveal-root role="region" aria-label="Stable block">
         <span data-reveal-entry-marker aria-hidden="true"></span>
         <span data-reveal-exit-marker aria-hidden="true"></span>
-        <h2>Bloque estable</h2>
+        <h2>Stable block</h2>
       </section>
     `);
 
@@ -135,66 +135,61 @@ test.describe('T19: evidencia real por RF', () => {
     // Abrupt stop: stable position (top edge at 400px of viewport).
     await scrollTo(page, 600);
 
-    const opacity = await computedOpacity(page, '[aria-label="Bloque estable"]');
-    const transformY = await computedTransformY(page, '[aria-label="Bloque estable"]');
+    const opacity = await computedOpacity(page, '[aria-label="Stable block"]');
+    const transformY = await computedTransformY(page, '[aria-label="Stable block"]');
 
     expect(opacity).toBe(1);
     expect(transformY).toBe(0);
   });
 
-  test('RF-11: nav, footer y skip link con opacidad 1 en todas las fases', async ({
+  test('RF-11: nav, footer and skip link at opacity 1 in all phases', async ({
     page,
   }) => {
     await mountFixture(page, `
-      <nav class="excluded" role="navigation" aria-label="Nav excluida">
+      <nav class="excluded" role="navigation" aria-label="Nav excluded">
         <a href="#skip">Skip link</a>
       </nav>
-      <section class="reveal" data-reveal-root role="region" aria-label="Bloque medio">
+      <section class="reveal" data-reveal-root role="region" aria-label="Middle block">
         <span data-reveal-entry-marker aria-hidden="true"></span>
         <span data-reveal-exit-marker aria-hidden="true"></span>
-        <h2>Bloque medio</h2>
+        <h2>Middle block</h2>
       </section>
-      <footer class="excluded" role="contentinfo" aria-label="Footer excluido">
+      <footer class="excluded" role="contentinfo" aria-label="Footer excluded">
         <p>Footer</p>
       </footer>
     `);
 
-    // Scroll por entrada, centro y salida.
+    // Scroll through entry, center and exit.
     for (const y of [500, 1500, 2500]) {
       await scrollTo(page, y);
 
-      const navOpacity = await computedOpacity(page, '[aria-label="Nav excluida"]');
-      const footerOpacity = await computedOpacity(page, '[aria-label="Footer excluido"]');
+      const navOpacity = await computedOpacity(page, '[aria-label="Nav excluded"]');
+      const footerOpacity = await computedOpacity(page, '[aria-label="Footer excluded"]');
 
       expect(navOpacity).toBe(1);
       expect(footerOpacity).toBe(1);
     }
   });
 
-  test('RF-15: foco por teclado (Tab) dentro de un bloque atenuado', async ({
-    page,
-  }) => {
+  test('RF-15: keyboard focus inside a dimmed block keeps it fully visible', async ({ page }) => {
     await mountFixture(page, `
-      <section class="reveal" data-reveal-root role="region" aria-label="Bloque con foco">
-        <span data-reveal-entry-marker aria-hidden="true"></span>
-        <span data-reveal-exit-marker aria-hidden="true"></span>
-        <h2>Bloque con foco</h2>
-        <button type="button">Acción</button>
-      </section>
-    `);
+    <section class="reveal" data-reveal-root role="region" aria-label="Block with focus">
+      <span data-reveal-entry-marker aria-hidden="true"></span>
+      <span data-reveal-exit-marker aria-hidden="true"></span>
+      <h2>Block with focus</h2>
+      <button type="button">Action</button>
+    </section>
+  `);
 
-    // Posicionar el bloque en fase de entrada (atenuado).
-    await scrollTo(page, 2800);
+    // Block top at 950px of a 1000px viewport: entry phase, so it is dimmed.
+    await scrollTo(page, 50);
+    const selector = '[aria-label="Block with focus"]';
+    expect(await computedOpacity(page, selector)).toBeLessThan(1);
 
-    const block = page.locator('[aria-label="Bloque con foco"]');
-    const button = block.locator('button');
+    await page.keyboard.press('Tab');
+    await expect(page.getByRole('button', { name: 'Action' })).toBeFocused();
 
-    await button.focus();
-
-    const blockOpacity = await computedOpacity(page, '[aria-label="Bloque con foco"]');
-    const buttonOpacity = await computedOpacity(page, 'button');
-
-    expect(blockOpacity).toBe(1);
-    expect(buttonOpacity).toBe(1);
+    await expect.poll(() => computedOpacity(page, selector)).toBe(1);
+    await expect.poll(() => computedOpacity(page, 'button')).toBe(1);
   });
 });

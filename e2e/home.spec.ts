@@ -86,7 +86,7 @@ test.describe('home structure', () => {
         await expect(page.getByRole('heading', { name: expectedH2[0] })).toHaveCount(1);
       });
 
-      test('la navegación conserva el destino About y deja visible su encabezado', async ({
+      test('navigation keeps the About destination and leaves its heading visible', async ({
         page,
       }) => {
         await page.emulateMedia({ reducedMotion: 'reduce' });

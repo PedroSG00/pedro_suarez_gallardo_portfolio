@@ -302,7 +302,7 @@ export default function Navbar({
       className="sticky top-0 z-(--nav-z) border-b-(length:--line-width) border-line bg-surface text-ink transition-transform duration-(--duration-state) data-hidden:-translate-y-full motion-reduce:transition-none print:hidden"
       data-hidden={visibility === 'hidden' ? '' : undefined}
     >
-      <div className="mx-auto flex min-h-(--nav-height) max-w-[calc(var(--grid-max-width)+2*var(--grid-gutter))] items-center gap-1 px-3 md:gap-3 md:px-(--grid-gutter)">
+      <div className="mx-auto flex min-h-(--nav-height) max-w-[calc(var(--grid-max-width)+2*var(--grid-gutter))] flex-wrap items-center gap-1 px-2 md:flex-nowrap md:gap-3 md:px-(--grid-gutter)">
         <div className="mr-auto flex min-w-0 items-center">
           <Logo href={homePath} src="/logo.svg" alt={site.name} onClick={handleIdentityClick} />
         </div>
@@ -323,32 +323,31 @@ export default function Navbar({
             ariaLabelEn={langEnLabel}
             ariaLabelEs={langEsLabel}
           />
-        </div>
-
-        <details
-          ref={detailsRef}
-          className="group shrink-0 md:hidden"
-          data-navbar-menu
-          onToggle={(event) => {
-            const open = event.currentTarget.open;
-            setMenuOpen(open);
-            if (open) setVisibility('visible');
-          }}
-        >
-          <summary
-            role="button"
-            aria-label={menuOpen ? closeMenuLabel : openMenuLabel}
-            className="grid size-11 cursor-pointer list-none place-items-center border-(length:--line-width) border-line hover:bg-ink hover:text-surface [&::-webkit-details-marker]:hidden"
+          <details
+            ref={detailsRef}
+            className="group shrink-0 md:hidden"
+            data-navbar-menu
+            onToggle={(event) => {
+              const open = event.currentTarget.open;
+              setMenuOpen(open);
+              if (open) setVisibility('visible');
+            }}
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true" className="size-5">
-              <path className="group-open:hidden" d="M3 7h18M3 12h18M3 17h18" />
-              <path className="hidden group-open:block" d="m5 5 14 14M19 5 5 19" />
-            </svg>
-          </summary>
-          <nav data-menu-panel aria-label={navLabel} className="absolute inset-x-0 top-full max-h-[calc(100dvh-var(--nav-height))] overflow-y-auto overscroll-contain border-b-(length:--line-width) border-line bg-surface px-(--grid-gutter) py-3">
-            <NavLinks items={sectionItems} ariaLabel={navLabel} onNavigate={handleNavigate} />
-          </nav>
-        </details>
+            <summary
+              role="button"
+              aria-label={menuOpen ? closeMenuLabel : openMenuLabel}
+              className="grid size-11 cursor-pointer list-none place-items-center border-(length:--line-width) border-line hover:bg-ink hover:text-surface [&::-webkit-details-marker]:hidden"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true" className="size-5">
+                <path className="group-open:hidden" d="M3 7h18M3 12h18M3 17h18" />
+                <path className="hidden group-open:block" d="m5 5 14 14M19 5 5 19" />
+              </svg>
+            </summary>
+            <nav data-menu-panel aria-label={navLabel} className="absolute inset-x-0 top-full max-h-[calc(100dvh-var(--nav-height))] overflow-y-auto overscroll-contain border-b-(length:--line-width) border-line bg-surface px-(--grid-gutter) py-3">
+              <NavLinks items={sectionItems} ariaLabel={navLabel} onNavigate={handleNavigate} />
+            </nav>
+          </details>
+        </div>
       </div>
     </header>
   );

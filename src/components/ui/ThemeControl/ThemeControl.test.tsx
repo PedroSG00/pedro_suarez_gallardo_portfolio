@@ -67,7 +67,7 @@ function mountSync(label = enMessages.shared.theme.toggle) {
 }
 
 describe('ThemeControl', () => {
-  test('sin montar no renderiza botón; reserva el espacio', () => {
+  test('does not render button when not mounted; reserves the space', () => {
     const { container, root } = mountSync();
     // eslint-disable-next-line testing-library/no-node-access
     expect(container.querySelector('button')).toBeNull();
@@ -132,7 +132,7 @@ describe('ThemeControl', () => {
     expect(button).toHaveAttribute('aria-pressed', 'false');
   });
 
-  test('etiqueta ausente no renderiza botón', () => {
+  test('missing label does not render button', () => {
     renderControl('');
     expect(screen.queryAllByRole('button')).toHaveLength(0);
   });

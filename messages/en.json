@@ -37,7 +37,7 @@
   },
   "about": {
     "intro": "About",
-    "statement": "Complexity is where I'm calmest.",
+    "statement": "I build the parts that are hard to get right.",
     "paragraphs": {
       "problem": "Large data sets, live updates, complex forms, and state people can rely on. That is the work teams trust me with—and the work I enjoy most.",
       "experience": "I have more than three years of professional experience building and maintaining production web apps with React and TypeScript. I also work on the backend, building REST APIs in several languages and refactoring for speed and clarity.",

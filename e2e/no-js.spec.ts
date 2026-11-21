@@ -79,29 +79,29 @@ async function scrollToEnd(page: Page): Promise<void> {
   );
 }
 
-test.describe('T18: JS desactivado — RF-04 Contact al final', () => {
-  test('en claro / en: opacidad 1 al llegar al final', async ({ page }) => {
+test.describe('T18: JS disabled — RF-04 Contact at the end', () => {
+  test('light / en: opacity 1 when reaching the end', async ({ page }) => {
     await mountNoJsFixture(page, 'en', 'light', false, true);
     await scrollToEnd(page);
     expect(await computedOpacity(page, '[aria-label="Contact block"]')).toBe(1);
     expect(await computedTransformY(page, '[aria-label="Contact block"]')).toBe(0);
   });
 
-  test('en oscuro / en: opacidad 1 al llegar al final', async ({ page }) => {
+  test('dark / en: opacity 1 when reaching the end', async ({ page }) => {
     await mountNoJsFixture(page, 'en', 'dark', false, true);
     await scrollToEnd(page);
     expect(await computedOpacity(page, '[aria-label="Contact block"]')).toBe(1);
     expect(await computedTransformY(page, '[aria-label="Contact block"]')).toBe(0);
   });
 
-  test('en claro / es: opacidad 1 al llegar al final', async ({ page }) => {
+  test('light / es: opacity 1 when reaching the end', async ({ page }) => {
     await mountNoJsFixture(page, 'es', 'light', false, true);
     await scrollToEnd(page);
     expect(await computedOpacity(page, '[aria-label="Contact block"]')).toBe(1);
     expect(await computedTransformY(page, '[aria-label="Contact block"]')).toBe(0);
   });
 
-  test('en oscuro / es: opacidad 1 al llegar al final', async ({ page }) => {
+  test('dark / es: opacity 1 when reaching the end', async ({ page }) => {
     await mountNoJsFixture(page, 'es', 'dark', false, true);
     await scrollToEnd(page);
     expect(await computedOpacity(page, '[aria-label="Contact block"]')).toBe(1);
@@ -109,8 +109,8 @@ test.describe('T18: JS desactivado — RF-04 Contact al final', () => {
   });
 });
 
-test.describe('T18: JS desactivado — RF-05 página más corta que el viewport', () => {
-  test('en claro / en: todos los bloques visibles (relajación T18: sin JS no hay forceVisible)', async ({
+test.describe('T18: JS disabled — RF-05 page shorter than the viewport', () => {
+  test('light / en: all blocks visible (T18 relaxation: no JS no forceVisible)', async ({
     page,
   }) => {
     await mountNoJsFixture(page, 'en', 'light', true, false, '0px');
@@ -122,7 +122,7 @@ test.describe('T18: JS desactivado — RF-05 página más corta que el viewport'
     expect(opacity).toBeGreaterThan(0);
   });
 
-  test('en oscuro / en: todos los bloques visibles (relajación T18)', async ({
+  test('dark / en: all blocks visible (T18 relaxation)', async ({
     page,
   }) => {
     await mountNoJsFixture(page, 'en', 'dark', true, false, '0px');
@@ -131,7 +131,7 @@ test.describe('T18: JS desactivado — RF-05 página más corta que el viewport'
     expect(opacity).toBeGreaterThan(0);
   });
 
-  test('en claro / es: todos los bloques visibles (relajación T18)', async ({
+  test('light / es: all blocks visible (T18 relaxation)', async ({
     page,
   }) => {
     await mountNoJsFixture(page, 'es', 'light', true, false, '0px');
@@ -140,7 +140,7 @@ test.describe('T18: JS desactivado — RF-05 página más corta que el viewport'
     expect(opacity).toBeGreaterThan(0);
   });
 
-  test('en oscuro / es: todos los bloques visibles (relajación T18)', async ({
+  test('dark / es: all blocks visible (T18 relaxation)', async ({
     page,
   }) => {
     await mountNoJsFixture(page, 'es', 'dark', true, false, '0px');

@@ -3,6 +3,8 @@
   timeline-scope: --about-statement;
   view-timeline-name: --about-statement;
   view-timeline-axis: block;
+  /* Word boundaries refer to viewport edges, not the anchor scroll inset. */
+  view-timeline-inset: 0px;
 }
 
 .content,
