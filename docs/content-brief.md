@@ -44,28 +44,32 @@ Momento firma: el nombre ocupa todo el ancho; las líneas suben escalonadas al c
 
 **Frase de afirmación (bloque invertido)**
 
-- **EN:** Complexity is where I'm calmest.
-- **ES:** La complejidad es donde estoy más tranquilo.
+- **EN:** I build the parts that are hard to get right.
+- **ES:** Me encargo de las partes que cuesta hacer bien.
 
 **EN**
 
-> Large data sets, live updates, complex forms, state that must never surprise you. That is the work I'm trusted with, and the work I enjoy most.
+> **Complexity is where I'm calmest.**
 >
-> I have more than three years of professional experience building and maintaining production web apps with React and TypeScript, and I work on the backend too: REST APIs in several languages and refactors for speed and clarity.
+> Large data sets, live updates, complex forms, and state people can rely on. That is the work teams trust me with—and the work I enjoy most.
 >
-> I understand the problem before touching it, I pay attention to the details, and I deliver software that stays maintainable. I use AI tools such as Copilot every day to move faster, and I always review what they produce.
+> I have more than three years of professional experience building and maintaining production web apps with React and TypeScript. I also work on the backend, building REST APIs in several languages and refactoring for speed and clarity.
 >
-> I started in sound engineering, switched to web development through an intensive bootcamp, and I keep learning. Spanish is my native language.
+> I understand the problem before I touch it, care about the details, and deliver software that stays maintainable. I use AI tools such as Copilot every day to move faster, and I always review what they produce.
+>
+> I moved into web development through an intensive bootcamp and keep learning. Spanish is my native language.
 
 **ES**
 
-> Grandes volúmenes de datos, actualizaciones en directo, formularios complejos, un estado que nunca debe sorprender. Ese es el trabajo que me confían y el que más disfruto.
+> **La complejidad es donde estoy más tranquilo.**
 >
-> Tengo más de tres años de experiencia profesional construyendo y manteniendo aplicaciones web en producción con React y TypeScript, y también trabajo en el backend: APIs REST en varios lenguajes y refactors para ganar velocidad y claridad.
+> Grandes volúmenes de datos, actualizaciones en tiempo real, formularios complejos y estados en los que se puede confiar. Ese es el trabajo que los equipos me confían y que más disfruto.
 >
-> Entiendo el problema antes de tocarlo, cuido los detalles y entrego software que sigue siendo mantenible. Uso a diario herramientas de IA como Copilot para avanzar más rápido, y reviso siempre lo que generan.
+> Tengo más de tres años de experiencia profesional creando y manteniendo aplicaciones web en producción con React y TypeScript. También trabajo en el backend, creando API REST en varios lenguajes y refactorizando para ganar velocidad y claridad.
 >
-> Empecé en ingeniería de sonido, di el salto al desarrollo web con un bootcamp intensivo y sigo aprendiendo. El castellano es mi lengua nativa.
+> Entiendo el problema antes de tocarlo, cuido los detalles y entrego software fácil de mantener. Uso herramientas de IA como Copilot a diario para avanzar más rápido y siempre reviso lo que generan.
+>
+> Me pasé al desarrollo web a través de un bootcamp intensivo y sigo aprendiendo. El español es mi lengua materna.
 
 Valores (etiquetas cortas): *Detail-oriented · Analytical · Autonomous · Teamwork · Continuous learning* / *Detallista · Analítico · Autónomo · Trabajo en equipo · Aprendizaje continuo*
 
