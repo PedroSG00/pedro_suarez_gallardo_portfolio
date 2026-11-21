@@ -79,32 +79,32 @@ Momento firma: la frase invertida se ilumina palabra a palabra con el scroll.
 
 ## 3. Work — `02 / WORK` · `02 / TRABAJO`
 
-Titular de la sección: **What I deliver.** / **Lo que entrego.**
-Se cuenta a través de resultados, sin nombres de empleadores ni fechas. Cinco entradas: titular de resultado, una frase y tecnologías. Las claves siguen siendo `experience.*`. La mención a IA aparece solo en About.
+Titular de la sección: **What I've built.** / **Lo que he construido.**
+Tono: titulares descriptivos que nombran lo que es, sin promesas ni adjetivos de marketing. La frase de debajo aporta el dato que lo demuestra. Sin nombres de empleadores ni fechas. Cinco entradas: titular, una frase y tecnologías. Las claves siguen siendo `experience.*`. La mención a IA aparece solo en About.
 
 ### 01
-- **EN:** **Desktop software, now on the web.** I led the migration of two contact-center applications with a redesigned multilanguage interface. Both are in production and actively maintained.
-- **ES:** **Software de escritorio, ahora en la web.** Lideré la migración de dos aplicaciones de contact center con una interfaz multidioma rediseñada. Ambas están en producción y en mantenimiento activo.
+- **EN:** **Desktop apps, moved to the web.** I migrated two contact-center applications and redesigned their multilanguage interface. Both are in production and actively maintained.
+- **ES:** **Aplicaciones de escritorio, llevadas a la web.** Migré dos aplicaciones de contact center y rediseñé su interfaz multidioma. Ambas están en producción y en mantenimiento activo.
 - **Tech:** React, TypeScript
 
 ### 02
-- **EN:** **Live data you can trust.** A supervision app that follows agent activity in real time, with customizable dashboards and charts over hundreds of thousands of records.
-- **ES:** **Datos en vivo en los que confiar.** Una aplicación de supervisión que sigue la actividad de los agentes al instante, con paneles y gráficas personalizables sobre cientos de miles de registros.
+- **EN:** **A real-time supervision dashboard.** Tracks agent activity live, with customizable views and charts over hundreds of thousands of records.
+- **ES:** **Un panel de supervisión en tiempo real.** Sigue la actividad de los agentes al instante, con vistas y gráficas personalizables sobre cientos de miles de registros.
 - **Tech:** React, TypeScript
 
 ### 03
-- **EN:** **Control at scale.** An administration suite with dozens of sections, custom reporting, and complex forms and tables with advanced validation.
-- **ES:** **Control a escala.** Una suite de administración con decenas de secciones, informes a medida y formularios y tablas complejos con validación avanzada.
+- **EN:** **An admin suite with dozens of sections.** Custom reporting, plus complex forms and tables with advanced validation.
+- **ES:** **Una suite de administración con decenas de secciones.** Informes a medida, y formularios y tablas complejos con validación avanzada.
 - **Tech:** React, TypeScript
 
 ### 04
-- **EN:** **Complex flows, made buildable.** A visual workflow system for chatbots and voice menus (IVR), plus the frontend of a real-time live chat.
-- **ES:** **Flujos complejos, al alcance de cualquiera.** Un sistema visual de flujos para chatbots y menús de voz (IVR), y el frontend de un chat en vivo en tiempo real.
+- **EN:** **A visual flow editor.** A workflow system for chatbots and voice menus (IVR), plus the frontend of a real-time live chat.
+- **ES:** **Un editor visual de flujos.** Un sistema de flujos para chatbots y menús de voz (IVR), y el frontend de un chat en vivo en tiempo real.
 - **Tech:** React, TypeScript, WebSockets
 
 ### 05
-- **EN:** **Systems that talk to each other, and run faster.** Messaging and CRM integrations through REST APIs and third-party SDKs, REST APIs in Node.js (Express), C# and PHP, Python automation, and backend refactors for speed and clarity.
-- **ES:** **Sistemas que se hablan entre sí, y van más rápido.** Integraciones de mensajería y CRM mediante APIs REST y SDKs de terceros, APIs REST en Node.js (Express), C# y PHP, automatización en Python y refactors del backend para ganar velocidad y claridad.
+- **EN:** **Integrations and backend APIs.** Messaging and CRM integrations through REST APIs and third-party SDKs, REST APIs in Node.js (Express), C# and PHP, Python automation, and backend refactors for speed and clarity.
+- **ES:** **Integraciones y APIs de backend.** Integraciones de mensajería y CRM mediante APIs REST y SDKs de terceros, APIs REST en Node.js (Express), C# y PHP, automatización en Python y refactors del backend para ganar velocidad y claridad.
 - **Tech:** Node.js, Express, C#, PHP, Python, REST
 
 Momento firma: cada fila entra con su número tabular; en hover se invierte (crudo ↔ negro).

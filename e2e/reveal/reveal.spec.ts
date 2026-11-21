@@ -11,20 +11,25 @@ const BLOCK_HEIGHT = 200;
 const BLOCK_DOCUMENT_TOP = 1000;
 const MOTION_DISTANCE = '24px';
 
-async function mountRevealFixture(page: Page, blockHeight = BLOCK_HEIGHT): Promise<void> {
+async function mountRevealFixture(
+  page: Page,
+  blockHeight = BLOCK_HEIGHT,
+  variant = 'rise',
+): Promise<void> {
   const revealStyles = await readFile(REVEAL_STYLES_PATH, 'utf8');
 
   await page.setViewportSize({ width: 1280, height: VIEWPORT_HEIGHT });
   await page.setContent(`
     <style>
       html, body { margin: 0; }
+      html { scroll-padding-top: 96px; }
       :root { --motion-distance: ${MOTION_DISTANCE}; }
       body { min-height: 3000px; }
-      main { min-height: 3000px; padding-top: ${BLOCK_DOCUMENT_TOP}px; }
+      main { min-height: 3000px; padding-top: ${BLOCK_DOCUMENT_TOP}px; padding-bottom: ${VIEWPORT_HEIGHT * 2}px; }
       [data-reveal-root] { height: ${blockHeight}px; }
     </style>
     <main>
-      <section class="reveal" data-reveal-root role="group" aria-label="Scroll content">
+      <section class="reveal" data-reveal-root data-reveal-ready data-reveal-variant="${variant}" role="group" aria-label="Scroll content">
         <span data-reveal-entry-marker aria-hidden="true"></span>
         <span data-reveal-exit-marker aria-hidden="true"></span>
         <h2>Scroll content</h2>
@@ -43,7 +48,9 @@ async function scrollBlockTopTo(
     BLOCK_DOCUMENT_TOP - viewportPosition,
   );
   await page.evaluate(
-    () => new Promise<void>((resolveFrame) => requestAnimationFrame(() => resolveFrame())),
+    () => new Promise<void>((resolveFrame) =>
+      requestAnimationFrame(() => requestAnimationFrame(() => resolveFrame())),
+    ),
   );
 
   const reveal = page.getByRole('group', { name: 'Scroll content' });
@@ -110,7 +117,7 @@ test.describe('Reveal edge-based opacity', () => {
     }
 
     const exitOpacities: number[] = [];
-    for (const bottomPosition of [0.3, 0.2, 0.1, 0.05]) {
+    for (const bottomPosition of [0.2, 0.15, 0.1, 0.05]) {
       exitOpacities.push(
         (
           await scrollBlockTopTo(
@@ -129,4 +136,29 @@ test.describe('Reveal edge-based opacity', () => {
       expect(exitOpacities[index]).toBeLessThan(exitOpacities[index - 1]);
     }
   });
+
+  for (const variant of ['rise', 'clip', 'fade']) {
+    test(`${variant}: keeps all portions of a six-viewport block fully readable before a reversible edge-based exit`, async ({ page }) => {
+      const height = VIEWPORT_HEIGHT * 6;
+      await mountRevealFixture(page, height, variant);
+      const block = page.getByRole('group', { name: 'Scroll content' });
+      // Every viewport-sized portion, including the trailing content, gets a
+      // stable interval. The exit must depend on the bottom edge, not height.
+      for (const top of [650, -500, -1500, -2500, -3500, -4500, 250 - height]) {
+        const state = await scrollBlockTopTo(page, top);
+        expect(state).toEqual({ opacity: 1, translateY: 0 });
+        await expect(block).toHaveCSS('clip-path', variant === 'clip' ? 'inset(0px 0px 0%)' : 'none');
+      }
+      const exit = await scrollBlockTopTo(page, 100 - height);
+      expect(exit.opacity).toBeGreaterThan(0);
+      expect(exit.opacity).toBeLessThan(1);
+      if (variant === 'rise') expect(exit.translateY).toBeLessThan(0);
+      else expect(exit.translateY).toBe(0);
+      expect(await scrollBlockTopTo(page, 500 - height))
+        .toEqual({ opacity: 1, translateY: 0 });
+      const reversedExit = await scrollBlockTopTo(page, 100 - height);
+      expect(reversedExit.opacity).toBeCloseTo(exit.opacity, 4);
+      expect(reversedExit.translateY).toBeCloseTo(exit.translateY, 4);
+    });
+  }
 });

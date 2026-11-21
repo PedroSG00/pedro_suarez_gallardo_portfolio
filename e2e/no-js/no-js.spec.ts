@@ -110,42 +110,39 @@ test.describe('T18: JS disabled — RF-04 Contact at the end', () => {
 });
 
 test.describe('T18: JS disabled — RF-05 page shorter than the viewport', () => {
-  test('light / en: all blocks visible (T18 relaxation: no JS no forceVisible)', async ({
+  test('light / en: all blocks fully visible without JavaScript', async ({
     page,
   }) => {
     await mountNoJsFixture(page, 'en', 'light', true, false, '0px');
     await scrollToEnd(page);
-    // Relaxation T18: without JS there is no CSS selector to detect
-    // scrollHeight <= viewportHeight, so the block may remain
-    // partially dimmed. Verify it is visible (not hidden).
     const opacity = await computedOpacity(page, '[aria-label="Contact block"]');
-    expect(opacity).toBeGreaterThan(0);
+    expect(opacity).toBe(1);
   });
 
-  test('dark / en: all blocks visible (T18 relaxation)', async ({
+  test('dark / en: all blocks fully visible without JavaScript', async ({
     page,
   }) => {
     await mountNoJsFixture(page, 'en', 'dark', true, false, '0px');
     await scrollToEnd(page);
     const opacity = await computedOpacity(page, '[aria-label="Contact block"]');
-    expect(opacity).toBeGreaterThan(0);
+    expect(opacity).toBe(1);
   });
 
-  test('light / es: all blocks visible (T18 relaxation)', async ({
+  test('light / es: all blocks fully visible without JavaScript', async ({
     page,
   }) => {
     await mountNoJsFixture(page, 'es', 'light', true, false, '0px');
     await scrollToEnd(page);
     const opacity = await computedOpacity(page, '[aria-label="Contact block"]');
-    expect(opacity).toBeGreaterThan(0);
+    expect(opacity).toBe(1);
   });
 
-  test('dark / es: all blocks visible (T18 relaxation)', async ({
+  test('dark / es: all blocks fully visible without JavaScript', async ({
     page,
   }) => {
     await mountNoJsFixture(page, 'es', 'dark', true, false, '0px');
     await scrollToEnd(page);
     const opacity = await computedOpacity(page, '[aria-label="Contact block"]');
-    expect(opacity).toBeGreaterThan(0);
+    expect(opacity).toBe(1);
   });
 });

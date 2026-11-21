@@ -25,7 +25,7 @@ test.describe('Scroll motion reveal (RF-01, RF-02, RF-06)', () => {
         [data-reveal-root] { height: ${blockHeight}px; }
       </style>
       <main>
-        <section class="reveal" data-reveal-root role="group" aria-label="Scroll content">
+        <section class="reveal" data-reveal-root data-reveal-ready role="group" aria-label="Scroll content">
           <span data-reveal-entry-marker aria-hidden="true"></span>
           <span data-reveal-exit-marker aria-hidden="true"></span>
           <h2>Scroll content</h2>
@@ -108,7 +108,7 @@ test.describe('Reduced motion (RF-10)', () => {
         [data-reveal-root] { height: ${BLOCK_HEIGHT}px; }
       </style>
       <main>
-        <section class="reveal" data-reveal-root role="group" aria-label="Scroll content">
+        <section class="reveal" data-reveal-root data-reveal-ready role="group" aria-label="Scroll content">
           <span data-reveal-entry-marker aria-hidden="true"></span>
           <span data-reveal-exit-marker aria-hidden="true"></span>
           <h2>Scroll content</h2>
@@ -155,7 +155,7 @@ test.describe('Print mode (RF-16)', () => {
         [data-reveal-root] { height: ${BLOCK_HEIGHT}px; }
       </style>
       <main>
-        <section class="reveal" data-reveal-root role="group" aria-label="Scroll content">
+        <section class="reveal" data-reveal-root data-reveal-ready role="group" aria-label="Scroll content">
           <span data-reveal-entry-marker aria-hidden="true"></span>
           <span data-reveal-exit-marker aria-hidden="true"></span>
           <h2>Scroll content</h2>
@@ -201,7 +201,7 @@ test.describe('Resize and rotation (RF-08)', () => {
         [data-reveal-root] { height: ${BLOCK_HEIGHT}px; }
       </style>
       <main>
-        <section class="reveal" data-reveal-root role="group" aria-label="Scroll content">
+        <section class="reveal" data-reveal-root data-reveal-ready role="group" aria-label="Scroll content">
           <span data-reveal-entry-marker aria-hidden="true"></span>
           <span data-reveal-exit-marker aria-hidden="true"></span>
           <h2>Scroll content</h2>
@@ -263,7 +263,7 @@ test.describe('Language and theme change (RF-09)', () => {
         [data-reveal-root] { height: ${BLOCK_HEIGHT}px; }
       </style>
       <main>
-        <section class="reveal" data-reveal-root role="group" aria-label="Scroll content">
+        <section class="reveal" data-reveal-root data-reveal-ready role="group" aria-label="Scroll content">
           <span data-reveal-entry-marker aria-hidden="true"></span>
           <span data-reveal-exit-marker aria-hidden="true"></span>
           <h2>Scroll content</h2>
@@ -316,7 +316,7 @@ test.describe('Last section without exit (RF-04)', () => {
         [data-reveal-root] { height: ${BLOCK_HEIGHT}px; }
       </style>
       <main>
-        <section class="reveal" data-reveal-root role="group" aria-label="Last section">
+        <section class="reveal" data-reveal-root data-reveal-ready role="group" aria-label="Last section">
           <span data-reveal-entry-marker aria-hidden="true"></span>
           <span data-reveal-exit-marker aria-hidden="true"></span>
           <h2>Last section</h2>
