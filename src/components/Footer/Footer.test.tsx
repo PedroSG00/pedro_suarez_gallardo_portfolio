@@ -13,6 +13,7 @@ const site: SiteData = {
   githubUrl: 'https://github.com/PedroSG00',
   linkedinUrl: 'https://linkedin.com/in/pedro-suarez-gallardo',
   cvPath: { en: '/EN_Pedro_Suarez_Gallardo_CV.pdf', es: '/ES_Pedro_Suarez_Gallardo_CV.pdf' },
+  portraitSrc: '/pedro-suarez.png',
 };
 
 const labelsEn = {
@@ -132,6 +133,7 @@ describe('Footer', () => {
       githubUrl: '',
       linkedinUrl: '',
       cvPath: { en: '', es: '' },
+      portraitSrc: '',
     };
     renderFooter('en', { site: emptySite });
     expect(screen.getByText(enMessages.footer.copyright)).toBeInTheDocument();
@@ -145,6 +147,7 @@ describe('Footer', () => {
       githubUrl: '',
       linkedinUrl: '',
       cvPath: { en: '', es: '' },
+      portraitSrc: '',
     };
     renderFooter('en', { site: partialSite });
     expect(screen.getByRole('link', { name: 'Email' })).toBeInTheDocument();

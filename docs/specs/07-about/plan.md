@@ -12,6 +12,8 @@
 
 Se reutilizan los componentes existentes de sección y UI. No se añaden dependencias, carpetas en la raíz ni niveles adicionales bajo `components/`.
 
+**Ajuste local previo a T8:** `About` mantiene la frase en todo el ancho y organiza el resto con biografía y cualidades antes del retrato en el orden de lectura. En escritorio el retrato toma la columna izquierda; si se omite, la biografía ocupa la primera posición sin crecer más allá de la medida de lectura. El retrato lleva un borde de 1 px con el token de línea existente y una huella visual menor que la biografía. La composición reduce huecos innecesarios y mantiene los textos continuos, sin solapamiento, recorte ni desplazamiento horizontal en los tamaños verificados. El estilo local mantiene una entrada temprana y retrasa la salida de About; el CSS compartido amplía la banda legible del resto de bloques sin cambiar los contratos de `Reveal`/`RevealGroup`, la retícula global ni la progresión de palabras. Las pruebas integradas comprueban geometría, recuperación tras fallo y opacidad en entrada, lectura y salida por idioma y tema.
+
 | Módulo | Responsabilidad | RF |
 |---|---|---|
 | `src/components/sections/About/About.tsx` | Componer el destino About, su encabezado, biografía, cualidades y retrato. Lee los textos del idioma activo y consume los datos locales del retrato. | RF-1, RF-3, RF-4, RF-5, RF-6, RF-7 |
@@ -27,7 +29,7 @@ Se reutilizan los componentes existentes de sección y UI. No se añaden depende
 | `src/content/site.ts` | Añadir la ruta del retrato a los datos locales del sitio; no contiene texto traducible. | RF-4 |
 | `messages/en.json` y `messages/es.json` | Incorporar la frase, los párrafos, las cualidades y el texto alternativo con claves equivalentes. | RF-1, RF-2, RF-3, RF-4, RF-7 |
 | `src/app/[locale]/page.tsx` | Sustituir el cuerpo reservado de About por la sección completa, conservando el destino y el orden existentes. | RF-1, RF-5, RF-7 |
-| `e2e/about.spec.ts` | Verificar en navegador el movimiento, fallos del retrato, idiomas, temas, fallbacks y adaptación de About. | RF-1 a RF-7 |
+| `e2e/about.spec.ts`, `e2e/about-composition.spec.ts` | Verificar en navegador el movimiento, fallos del retrato, composición, idiomas, temas, fallbacks y adaptación de About. | RF-1 a RF-7 |
 | Prueba existente de paridad de mensajes | Verificar que los catálogos conservan el mismo conjunto de claves. | RF-7 |
 
 **Cobertura RF:** todos los RF tienen al menos un módulo asociado; la trazabilidad completa está en la sección 7.

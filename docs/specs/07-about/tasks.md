@@ -1,6 +1,6 @@
 # Tareas — 07 About
 
-**Estado:** Pendiente de ejecución. Se deriva de `docs/specs/07-about/spec.md` y `docs/specs/07-about/plan.md`, y debe respetar `docs/constitution.md`.
+**Estado:** En curso. Se deriva de `docs/specs/07-about/spec.md` y `docs/specs/07-about/plan.md`, y debe respetar `docs/constitution.md`.
 
 **Alcance:** RF-1 a RF-7 y sus requisitos no funcionales. Cada tarea se implementa y verifica por separado; ninguna se cierra con sus pruebas en rojo.
 
@@ -19,9 +19,10 @@
 | T3 | Crear el bloque accesible de la frase firma | RF-2, RF-6, RF-7 | T2 |
 | T4 | Implementar la progresión acumulativa de la frase | RF-2 | T1, T3 |
 | T5 | Integrar el retrato y su fallback | RF-4, RF-6, RF-7 | T2 |
-| T6 | Integrar About en la home conservando el destino | RF-1, RF-7 | T2, T3, T5 |
+| T6 | Integrar About en la home conservando el destino y re-verificar T5 | RF-1, RF-4, RF-6, RF-7 | T2, T3, T5 (implementación y unitarias listas; e2e se re-verifica en T6) |
 | T7 | Aplicar el revelado general a los bloques de About | RF-3, RF-5, RF-6 | T4, T6 |
-| T8 | Verificar fallbacks de movimiento y no-JavaScript | RF-2, RF-5, RF-6 | T7 |
+| T7.1 | Ajustar la composición de About y el tramo de lectura | RF-1 a RF-6 | T7 |
+| T8 | Verificar fallbacks de movimiento y no-JavaScript | RF-2, RF-5, RF-6 | T7, T7.1 |
 | T9 | Verificar temas, idiomas, accesibilidad y adaptación | RF-1–RF-7 | T6, T8 |
 | T10 | Ejecutar gates y revisión editorial final | Todos | T1–T9 |
 
@@ -136,6 +137,8 @@
 
 ## T5 — Integrar el retrato y su fallback
 
+**Estado:** hecha. La aceptación integrada se re-verificó en T6: el e2e de fallo omite el retrato sin ocultar el contenido ni dejar una imagen rota; los tests unitarios confirman texto alternativo por idioma, contenido disponible mientras carga y degradación ante error. La imagen local `/pedro-suarez.png` existe y se muestra cuando está disponible.
+
 **Objetivo:** presentar el retrato local con su alternativa traducida y omitirlo si falla sin afectar el contenido.
 
 **RF:** RF-4, RF-6, RF-7.
@@ -156,15 +159,17 @@
 - `About.test.tsx`: comprobar la alternativa en inglés y castellano, el contenido mientras la imagen está pendiente y la omisión del retrato tras un error simulado.
 - Añadir un caso e2e que intercepte el recurso del retrato y simule un fallo de carga.
 
-**Criterio de hecho:** la imagen se muestra cuando está disponible; al simular fallo, solo desaparece el retrato y el resto del contenido sigue accesible. `pnpm lint`, `pnpm typecheck` y `pnpm build` están en verde.
+**Criterio de hecho:** para habilitar T6, la imagen se muestra cuando está disponible; las pruebas unitarias comprueban que, al simular fallo, solo desaparece el retrato y el resto del contenido sigue accesible; `pnpm lint`, `pnpm typecheck` y `pnpm build` están en verde. El e2e de fallo debe estar escrito, pero puede aplazarse porque la sección aún no está integrada. Su ejecución exitosa y la re-revisión completa de estos criterios son obligatorias como parte de T6; hasta entonces, la aceptación integrada de T5 queda pendiente.
 
 ---
 
 ## T6 — Integrar About en la home conservando el destino
 
-**Objetivo:** reemplazar el cuerpo reservado de About por la sección completa sin cambiar el ancla, el orden ni los destinos de las otras secciones.
+**Estado:** hecha. Verificado en `/en` y `/es`; About conserva su destino y único encabezado antes de Work, Stack y Contact. E2E de home y About: 16 pasan, incluido el fallo de retrato; lint, typecheck, unitarias (500) y build pasan.
 
-**RF:** RF-1, RF-7.
+**Objetivo:** reemplazar el cuerpo reservado de About por la sección completa sin cambiar el ancla, el orden ni los destinos de las otras secciones; aprovechar la integración para re-verificar y cerrar la aceptación pendiente de T5.
+
+**RF:** RF-1, RF-4, RF-6, RF-7.
 
 **Depende de:** T2, T3 y T5.
 
@@ -176,17 +181,21 @@
 - Work, Stack y Contact mantienen su orden, encabezados y destinos.
 - La navegación existente lleva al encabezado de About sin duplicar el destino ni el encabezado.
 - El contenido localizado se integra en `/en` y `/es`.
+- **Re-revisión de T5:** ejecutar el e2e ya escrito que simula el fallo del retrato; confirmar que solo se omite la imagen, que no queda marcador ni espacio vacío y que el resto de About sigue accesible. Revisar de nuevo todos los criterios de T5 en la página integrada y actualizar allí su estado/evidencia.
 
 **Tests a escribir primero:**
 
 - E2E de home: verificar un solo encabezado About accesible por idioma, el contenido bajo el destino correcto y la existencia/orden de Work, Stack y Contact.
 - E2E de ancla: navegar a About y comprobar que el encabezado queda visible y que el destino se conserva.
+- Re-ejecutar el e2e de fallo del retrato de T5 en el contexto integrado.
 
-**Criterio de hecho:** la home conserva los cuatro destinos y sus ids; About queda en el primero, aparece en ambos idiomas y los tests de home y anclas pasan. `pnpm build` está en verde.
+**Criterio de hecho:** la home conserva los cuatro destinos y sus ids; About queda en el primero, aparece en ambos idiomas y los tests de home y anclas pasan. El e2e de retrato falla/controlado pasa y la re-revisión de T5 confirma todos sus criterios; se actualiza su evidencia como cerrada. Si falla la re-revisión, T6 no se da por hecha y no se inicia T7. `pnpm build` está en verde.
 
 ---
 
 ## T7 — Aplicar el revelado general a los bloques de About
+
+**Estado:** hecha. Los selectores compartidos de Reveal ahora cubren los atributos de estado emitidos en producción, evitando que la ausencia de la clase CSS Module deje los bloques ocultos. Validado en build de producción: 500 unitarias y 193 e2e pasan; lint, typecheck, test y build pasan.
 
 **Objetivo:** hacer que cada bloque de la sección entre, llegue a un estado plenamente visible y salga con el scroll, reutilizando el revelado existente.
 
@@ -213,13 +222,29 @@
 
 ---
 
+## T7.1 — Ajustar la composición de About y el tramo de lectura
+
+**Estado:** Implementación hecha; con autorización expresa se ajustó solo el timeline CSS compartido de Reveal, sin cambiar contratos ni otras capas. El cierre de gates está pendiente por el bloqueo preexistente de T8 (`browserType` en `e2e/about.spec.ts:454`, sin modificar). `pnpm test` pasa con 500 unitarias; 31 e2e dirigidas pasan y `pnpm lint` pasa. Un intento más amplio con el servidor de desarrollo en `:5173` tuvo dos fallos ajenos al cambio: las pruebas de ancla esperan `:3000`. La suite `about.spec.ts` tampoco se pudo descubrir por el fixture de T8.
+
+**Objetivo:** disponer la frase a ancho interior completo y, en escritorio, alinear por arriba el retrato a la izquierda y la biografía a la derecha, con las cualidades bajo el texto. En móvil, el texto precede al retrato; cuando el retrato falla, no queda una columna vacía. La revisión visual añade un borde de 1 px con el token de línea, calibra el retrato a un tamaño mayor que el último ajuste sin desperdiciar espacio y compacta lo que no ayude a leer.
+
+**RF:** RF-1 a RF-6.
+
+**Depende de:** T7.
+
+**Tests a escribir primero:** comprobar la composición en escritorio y móvil, el borde y el tamaño del retrato, ausencia de solapamiento/recortes/scroll horizontal, la realineación de la biografía tras un fallo de imagen y la opacidad/reversibilidad en ambos límites de lectura, en ambos idiomas y temas y con movimiento reducido.
+
+**Criterio de hecho:** las pruebas y los gates pasan sin cambios en T8/T9; el único ajuste transversal permitido aquí es el timeline CSS compartido de Reveal, expresamente autorizado y sin modificar su contrato.
+
+---
+
 ## T8 — Verificar fallbacks de movimiento y no-JavaScript
 
 **Objetivo:** asegurar que el contenido de About permanece estático, visible y completo con movimiento reducido, sin soporte de animación ligada al scroll o sin JavaScript.
 
 **RF:** RF-2, RF-5, RF-6.
 
-**Depende de:** T7.
+**Depende de:** T7, T7.1.
 
 **Archivos:** `e2e/about.spec.ts`, `e2e/no-js.spec.ts` si se amplía la cobertura de no-JS existente.
 

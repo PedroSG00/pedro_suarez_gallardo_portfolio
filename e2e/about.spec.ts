@@ -12,8 +12,19 @@ const STATEMENT_DOCUMENT_TOP = 1000;
 
 const STATEMENTS = {
   en: "Complexity is where I'm calmest.",
-  es: 'La complejidad es donde estoy tranquilo.',
+  es: 'La complejidad es donde estoy más tranquilo.',
 } as const;
+
+const ABOUT_PROBLEM =
+  'Large data sets, live updates, complex forms, and state people can rely on. That is the work teams trust me with—and the work I enjoy most.';
+const ABOUT_VALUES = [
+  'Detail-oriented',
+  'Analytical',
+  'Autonomous',
+  'Teamwork',
+  'Continuous learning',
+];
+const PORTRAIT_NAME = 'Portrait of Pedro Suárez Gallardo';
 
 const THEME_COLORS = {
   light: {
@@ -99,13 +110,70 @@ async function scrollToProgress(page: Page, progress: number): Promise<void> {
     STATEMENT_DOCUMENT_TOP -
     VIEWPORT_HEIGHT +
     progress * (VIEWPORT_HEIGHT + STATEMENT_HEIGHT);
-  await page.evaluate((position) => window.scrollTo(0, position), scrollY);
+  await page.evaluate(
+    (position) => window.scrollTo({ top: position, behavior: 'instant' }),
+    scrollY,
+  );
   await page.evaluate(
     () =>
       new Promise<void>((resolveFrame) =>
         requestAnimationFrame(() => requestAnimationFrame(() => resolveFrame())),
       ),
   );
+}
+
+type ScrollTargetGeometry = {
+  documentTop: number;
+  height: number;
+  viewportHeight: number;
+};
+
+async function getScrollTargetGeometry(
+  element: ReturnType<Page['getByText']>,
+): Promise<ScrollTargetGeometry> {
+  return element.evaluate((node) => {
+    const rect = node.getBoundingClientRect();
+    return {
+      documentTop: rect.top + window.scrollY,
+      height: rect.height,
+      viewportHeight: window.innerHeight,
+    };
+  });
+}
+
+async function scrollElementToProgress(
+  page: Page,
+  { documentTop, height, viewportHeight }: ScrollTargetGeometry,
+  progress: number,
+): Promise<void> {
+  const scrollY =
+    documentTop - viewportHeight + progress * (viewportHeight + height);
+  await page.evaluate(
+    (position) => window.scrollTo({ top: position, behavior: 'instant' }),
+    scrollY,
+  );
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolveFrame) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolveFrame())),
+      ),
+  );
+}
+
+async function getEffectiveOpacity(
+  element: ReturnType<Page['getByText']>,
+): Promise<number> {
+  return element.evaluate((node) => {
+    let opacity = 1;
+    let current: HTMLElement | null = node as HTMLElement;
+
+    while (current) {
+      opacity *= Number.parseFloat(window.getComputedStyle(current).opacity);
+      current = current.parentElement;
+    }
+
+    return opacity;
+  });
 }
 
 async function getVisualState(page: Page, text: string): Promise<Array<{
@@ -210,3 +278,210 @@ for (const [locale, text] of Object.entries(STATEMENTS)) {
     });
   }
 }
+
+async function openAbout(page: Page, locale: string) {
+  await page.setViewportSize({ width: 1280, height: VIEWPORT_HEIGHT });
+  await page.goto(`/${locale}`);
+  await page.evaluate(() => {
+    // The following sections are placeholders; leave enough runway to verify
+    // that About's final block can exit before the page itself ends.
+    document.body.style.minHeight = '400vh';
+  });
+
+  return page.getByRole('region', { name: locale === 'en' ? 'About' : 'Sobre mí' });
+}
+
+for (const [locale, text] of Object.entries(STATEMENTS)) {
+  for (const colorScheme of ['light', 'dark'] as const) {
+    test(`About keeps content at full opacity while reading in ${locale}/${colorScheme}`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({ colorScheme, reducedMotion: 'no-preference' });
+      const about = await openAbout(page, locale);
+      const statement = about.getByRole('group', { name: text });
+      const paragraphs = about.getByRole('paragraph');
+      const qualities = about.getByRole('listitem');
+      const portrait = about.getByRole('img');
+
+      await expect(statement).toBeVisible();
+      await expect(paragraphs).toHaveCount(4);
+      await expect(qualities).toHaveCount(5);
+      await expect(portrait).toBeVisible();
+      await page.evaluate(() => document.fonts.ready);
+
+      const targets = [statement, ...await paragraphs.all(), ...await qualities.all(), portrait];
+      for (const target of targets) {
+        const label = (await target.textContent())?.trim() || 'portrait';
+        const geometry = await getScrollTargetGeometry(target);
+        const progressAtTop = geometry.viewportHeight / (geometry.viewportHeight + geometry.height);
+        const beforeTop = (geometry.viewportHeight - 4) / (geometry.viewportHeight + geometry.height);
+        const halfwayOut = (1 + progressAtTop) / 2;
+
+        await scrollElementToProgress(page, geometry, 0.05);
+        const entering = await getEffectiveOpacity(target);
+        expect(entering, `${label}: entering`).toBeLessThan(1);
+        for (const progress of [0.2, 0.5, beforeTop]) {
+          await scrollElementToProgress(page, geometry, progress);
+          expect(await getEffectiveOpacity(target), `${label}: reading at ${progress}`).toBe(1);
+        }
+        await scrollElementToProgress(page, geometry, halfwayOut);
+        expect(await getEffectiveOpacity(target), `${label}: exiting`).toBeLessThan(1);
+        await scrollElementToProgress(page, geometry, beforeTop);
+        expect(await getEffectiveOpacity(target), `${label}: reading again`).toBe(1);
+        await scrollElementToProgress(page, geometry, 0.05);
+        expect(await getEffectiveOpacity(target), `${label}: back to entry`).toBeCloseTo(entering, 2);
+      }
+
+      const geometry = await getScrollTargetGeometry(statement);
+      await scrollElementToProgress(page, geometry, 0.15);
+      const initialWords = await getVisualState(page, text);
+      await scrollElementToProgress(page, geometry, 0.55);
+      expect(await getVisualState(page, text)).not.toEqual(initialWords);
+      await scrollElementToProgress(page, geometry, 0.15);
+      expect(await getVisualState(page, text)).toEqual(initialWords);
+
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      for (const progress of [0.05, 0.5, 0.99]) {
+        await scrollElementToProgress(page, geometry, progress);
+        for (const target of targets) {
+          expect(await getEffectiveOpacity(target)).toBe(1);
+        }
+      }
+      expect(await getVisualState(page, text)).toEqual(
+        text.split(/\s+/).map(() => ({ color: THEME_COLORS[colorScheme].ink, fontWeight: '700' })),
+      );
+    });
+  }
+}
+
+test('About lays out the statement above the portrait and biography on desktop, with text first on mobile', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const about = await openAbout(page, 'en');
+  const statement = about.getByRole('group', { name: STATEMENTS.en });
+  const portrait = about.getByRole('img', { name: PORTRAIT_NAME });
+  const firstParagraph = about.getByRole('paragraph').first();
+  const lastParagraph = about.getByRole('paragraph').last();
+  const qualities = about.getByRole('list');
+  const bounds = async () => Promise.all(
+    [statement, portrait, firstParagraph, lastParagraph, qualities].map((target) =>
+      target.evaluate((node) => node.getBoundingClientRect().toJSON() as DOMRect),
+    ),
+  );
+
+  await page.evaluate(() => document.fonts.ready);
+  const [headline, photo, first, last, tags] = await bounds();
+  expect(headline.bottom).toBeLessThan(photo.top);
+  expect(headline.left).toBeCloseTo(photo.left);
+  expect(headline.right).toBeGreaterThanOrEqual(first.right);
+  expect(photo.right).toBeLessThan(first.left);
+  expect(photo.top).toBeCloseTo(first.top);
+  expect(last.bottom).toBeLessThan(tags.top);
+  expect(tags.left).toBeCloseTo(first.left);
+  const charactersPerLine = await firstParagraph.evaluate((node) => {
+    const style = getComputedStyle(node);
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d')!;
+    context.font = `${style.fontSize} ${style.fontFamily}`;
+    return node.getBoundingClientRect().width / context.measureText('0').width;
+  });
+  expect(charactersPerLine).toBeLessThanOrEqual(65.1);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  const [mobileHeadline, mobilePhoto, mobileFirst, mobileLast, mobileTags] = await bounds();
+  expect(mobileHeadline.bottom).toBeLessThan(mobileFirst.top);
+  expect(mobileLast.bottom).toBeLessThan(mobileTags.top);
+  expect(mobileTags.bottom).toBeLessThan(mobilePhoto.top);
+});
+
+test('omits a failed local portrait while keeping About available', async ({ page }) => {
+  let portraitRequestFailed = false;
+  await page.route('**/pedro-suarez.png', async (route) => {
+    portraitRequestFailed = true;
+    await route.abort();
+  });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const about = await openAbout(page, 'en');
+  const problemParagraph = about.getByText(ABOUT_PROBLEM);
+
+  await expect.poll(() => portraitRequestFailed).toBe(true);
+  await expect(about.getByRole('img')).toHaveCount(0);
+  await expect(problemParagraph).toBeVisible();
+  await expect(about.getByRole('heading', { name: 'About' })).toHaveCount(1);
+  await expect(about.getByRole('group', { name: "Complexity is where I'm calmest." })).toBeVisible();
+  await expect(about.locator('p')).toHaveCount(5);
+  const statement = about.getByRole('group', { name: STATEMENTS.en });
+  const [headline, paragraph] = await Promise.all([statement.boundingBox(), problemParagraph.boundingBox()]);
+  expect(paragraph!.x).toBeCloseTo(headline!.x);
+});
+
+async function expectStaticAbout(page: Page, withPortrait: boolean): Promise<void> {
+  const about = page.getByRole('region', { name: 'About' });
+  const heading = about.getByRole('heading', { name: 'About' });
+  const statement = about.getByRole('group', { name: STATEMENTS.en });
+  const paragraphs = about.getByRole('paragraph');
+  const qualities = ABOUT_VALUES.map((value) => about.getByText(value, { exact: true }));
+
+  await expect(about.getByText(ABOUT_PROBLEM, { exact: true })).toBeVisible();
+  await expect(paragraphs).toHaveCount(4);
+  const targets = [heading, statement, ...(await paragraphs.all()), ...qualities];
+  if (withPortrait) targets.push(about.getByRole('img', { name: PORTRAIT_NAME }));
+
+  await Promise.all(targets.map((target) => expect(target).toBeVisible()));
+  const geometry = await getScrollTargetGeometry(statement);
+  for (const position of [0.1, 0.5]) {
+    await scrollElementToProgress(page, geometry, position);
+    expect(await about.evaluate((node) => node.getAnimations({ subtree: true }).length)).toBe(0);
+    for (const target of targets) {
+      expect(await getEffectiveOpacity(target)).toBe(1);
+    }
+    expect(await getVisualState(page, STATEMENTS.en)).toEqual(
+      STATEMENTS.en.split(/\s+/).map(() => ({
+        color: THEME_COLORS.light.ink,
+        fontWeight: '700',
+      })),
+    );
+  }
+}
+
+test('About is static with reduced motion', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/en');
+  await expectStaticAbout(page, true);
+});
+
+test('About is static without scroll-driven animation support', async ({ browserType, baseURL }) => {
+  const browser = await browserType.launch({ args: ['--disable-blink-features=ScrollTimeline'] });
+  try {
+    const page = await browser.newPage({ baseURL });
+    await page.goto('/en');
+    expect(await page.evaluate(() => CSS.supports('animation-timeline', 'view()'))).toBe(false);
+    await expectStaticAbout(page, true);
+  } finally {
+    await browser.close();
+  }
+});
+
+test.describe('with JavaScript disabled', () => {
+  test.use({ javaScriptEnabled: false });
+
+  test('About is static and includes the portrait when available', async ({ page }) => {
+    await page.goto('/en');
+    await expectStaticAbout(page, true);
+  });
+
+  test('About stays static and omits a failed portrait without a visual error', async ({ page }) => {
+    const failedRequest = page.waitForEvent('requestfailed', {
+      predicate: (request) => request.url().endsWith('/pedro-suarez.png'),
+    });
+    await page.route('**/pedro-suarez.png', (route) => route.abort());
+    await page.goto('/en');
+    await failedRequest;
+
+    const about = page.getByRole('region', { name: 'About' });
+    await expect(about.getByRole('img')).not.toBeVisible();
+    await expect(about.getByText(PORTRAIT_NAME, { exact: true })).not.toBeVisible();
+    await expectStaticAbout(page, false);
+  });
+});

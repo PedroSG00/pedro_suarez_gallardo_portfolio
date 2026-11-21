@@ -34,13 +34,15 @@
   initial-value: 0%;
 }
 
-.reveal {
+.reveal,
+[data-reveal-root] {
   position: relative;
   opacity: 1;
   transform: none;
 }
 
-.excluded {
+.excluded,
+[data-reveal-excluded] {
   opacity: 1;
   transform: none;
   clip-path: none;
@@ -97,10 +99,12 @@
 }
 
 @supports
-  (animation-timeline: view())
+  (animation-timeline: view(block 0px))
+  and (animation-range: cover 80% cover 100%)
   and (view-timeline-name: --reveal-entry)
   and (timeline-scope: --reveal-entry) {
-  .reveal {
+  .reveal,
+  [data-reveal-root] {
     timeline-scope: --reveal-entry, --reveal-exit;
   }
 
@@ -108,10 +112,10 @@
     animation:
       reveal-enter auto linear both,
       reveal-exit auto linear both;
-    animation-timeline: --reveal-entry, --reveal-exit;
+    animation-timeline: --reveal-entry, view(block 0px);
     animation-range:
-      cover var(--psg-reveal-entry-start, 0%) cover 25%,
-      cover 75% cover 100%;
+      cover var(--psg-reveal-entry-start, 0%) cover 18%,
+      cover 80% cover 100%;
     opacity: min(
       var(--psg-reveal-entry-opacity),
       var(--psg-reveal-exit-opacity)
@@ -132,7 +136,7 @@
   padding-bottom: calc(var(--spacing) * 75);
   animation: reveal-enter auto linear both;
   animation-timeline: --reveal-entry;
-  animation-range: cover var(--psg-reveal-entry-start, 0%) cover 25%;
+  animation-range: cover var(--psg-reveal-entry-start, 0%) cover 18%;
   animation-fill-mode: forwards;
   opacity: var(--psg-reveal-entry-opacity);
   transform: translateY(var(--psg-reveal-entry-offset));

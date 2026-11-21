@@ -115,6 +115,7 @@ export default function Reveal({
       ref={revealRef}
       className={isExcluded ? styles.excluded : styles.reveal}
       data-reveal-root={isExcluded ? undefined : ''}
+      data-reveal-excluded={isExcluded ? '' : undefined}
       data-reveal-variant={isExcluded ? undefined : resolveVariant(variant)}
       data-last-section={isLastSection ? '' : undefined}
       role={role}

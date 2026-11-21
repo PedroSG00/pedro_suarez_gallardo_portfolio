@@ -18,7 +18,7 @@ export default function AboutStatement({ text }: AboutStatementProps) {
     <p
       role="group"
       aria-label={text}
-      className={`${styles.statement} max-w-prose text-title font-emphasis`}
+      className={`${styles.statement} text-title font-emphasis`}
       data-about-statement
     >
       <span className={styles.content} data-about-statement-content aria-hidden="true">

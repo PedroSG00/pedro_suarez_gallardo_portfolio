@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState, type MouseEvent } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type MouseEvent } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { getPathname, usePathname } from '@/i18n/navigation';
 
@@ -26,6 +26,9 @@ type Props = {
     langEs: string;
   }>;
 };
+
+// The localized layout remounts the navbar, but the document survives the switch.
+let lastMountedLocale: Locale | undefined;
 
 export default function Navbar({
   locale,
@@ -68,6 +71,10 @@ export default function Navbar({
   const detailsRef = useRef<HTMLDetailsElement>(null);
   const previousScrollYRef = useRef(0);
   const focusCountRef = useRef(0);
+  const keyboardFocusRef = useRef(false);
+  const lastInteractionWasKeyboardRef = useRef(false);
+  const userScrollIntentRef = useRef(false);
+  const clearUserScrollIntentFrameRef = useRef<number | null>(null);
   const navigationInProgressRef = useRef(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [visibility, setVisibility] = useState<'visible' | 'hidden'>('visible');
@@ -116,14 +123,45 @@ export default function Navbar({
   const onScroll = useCallback(() => {
     const nextScrollY = currentScrollY();
     const previousScrollY = previousScrollYRef.current;
-    if (navigationInProgressRef.current) {
+    const hasUserScrollIntent = userScrollIntentRef.current;
+    if (hasUserScrollIntent) {
+      userScrollIntentRef.current = false;
+      if (clearUserScrollIntentFrameRef.current !== null) {
+        window.cancelAnimationFrame(clearUserScrollIntentFrameRef.current);
+        clearUserScrollIntentFrameRef.current = null;
+      }
+    }
+    if (navigationInProgressRef.current && !hasUserScrollIntent) {
       setVisibility('visible');
       previousScrollYRef.current = nextScrollY;
       return;
     }
-    recomputeVisibility(menuOpen, focusCountRef.current > 0, nextScrollY, previousScrollY);
+    if (!hasUserScrollIntent) {
+      recomputeVisibility(
+        menuOpen,
+        focusCountRef.current > 0 && keyboardFocusRef.current,
+        nextScrollY,
+        nextScrollY,
+      );
+      previousScrollYRef.current = nextScrollY;
+      return;
+    }
+    navigationInProgressRef.current = false;
+    recomputeVisibility(
+      menuOpen,
+      focusCountRef.current > 0 && keyboardFocusRef.current,
+      nextScrollY,
+      previousScrollY,
+    );
     previousScrollYRef.current = nextScrollY;
   }, [recomputeVisibility, menuOpen]);
+
+  useLayoutEffect(() => {
+    if (lastMountedLocale !== undefined && lastMountedLocale !== currentLocale) {
+      navigationInProgressRef.current = true;
+    }
+    lastMountedLocale = currentLocale;
+  }, [currentLocale]);
 
   useEffect(() => {
     previousScrollYRef.current = currentScrollY();
@@ -131,26 +169,67 @@ export default function Navbar({
       navigationInProgressRef.current = false;
       previousScrollYRef.current = currentScrollY();
     };
-    const handleUserScrollIntent = () => {
+    const markUserScrollIntent = () => {
       navigationInProgressRef.current = false;
+      userScrollIntentRef.current = true;
+      if (clearUserScrollIntentFrameRef.current !== null) {
+        window.cancelAnimationFrame(clearUserScrollIntentFrameRef.current);
+      }
+      clearUserScrollIntentFrameRef.current = window.requestAnimationFrame(() => {
+        userScrollIntentRef.current = false;
+        clearUserScrollIntentFrameRef.current = null;
+      });
+    };
+    const isInsideMenuPanel = (target: EventTarget | null) =>
+      target instanceof Element && target.closest('[data-menu-panel]') !== null;
+    const handlePointerDown = () => {
+      lastInteractionWasKeyboardRef.current = false;
+      keyboardFocusRef.current = false;
+    };
+    const handleWheel = (event: WheelEvent) => {
+      if (isInsideMenuPanel(event.target)) {
+        return;
+      }
+      lastInteractionWasKeyboardRef.current = false;
+      keyboardFocusRef.current = false;
+      markUserScrollIntent();
     };
     const handleScrollKey = (event: KeyboardEvent) => {
-      if (['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' '].includes(event.key)) {
-        handleUserScrollIntent();
+      lastInteractionWasKeyboardRef.current = true;
+      if (
+        !event.defaultPrevented &&
+        !isInsideMenuPanel(event.target) &&
+        ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' '].includes(event.key)
+      ) {
+        markUserScrollIntent();
       }
+    };
+    const handleTouchMove = (event: TouchEvent) => {
+      if (isInsideMenuPanel(event.target)) {
+        return;
+      }
+      lastInteractionWasKeyboardRef.current = false;
+      keyboardFocusRef.current = false;
+      markUserScrollIntent();
     };
 
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('scrollend', finishNavigation);
-    window.addEventListener('wheel', handleUserScrollIntent, { passive: true });
-    window.addEventListener('touchstart', handleUserScrollIntent, { passive: true });
+    window.addEventListener('pointerdown', handlePointerDown);
+    window.addEventListener('wheel', handleWheel, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
     window.addEventListener('keydown', handleScrollKey);
     return () => {
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('scrollend', finishNavigation);
-      window.removeEventListener('wheel', handleUserScrollIntent);
-      window.removeEventListener('touchstart', handleUserScrollIntent);
+      window.removeEventListener('pointerdown', handlePointerDown);
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('keydown', handleScrollKey);
+      if (clearUserScrollIntentFrameRef.current !== null) {
+        window.cancelAnimationFrame(clearUserScrollIntentFrameRef.current);
+        clearUserScrollIntentFrameRef.current = null;
+      }
     };
   }, [onScroll]);
 
@@ -161,6 +240,7 @@ export default function Navbar({
     }
     const onFocusIn = () => {
       focusCountRef.current += 1;
+      keyboardFocusRef.current = lastInteractionWasKeyboardRef.current;
       setVisibility('visible');
     };
     const onFocusOut = () => {
@@ -170,6 +250,7 @@ export default function Navbar({
         return;
       }
       if (focusCountRef.current === 0) {
+        keyboardFocusRef.current = false;
         recomputeVisibility(
           menuOpen,
           false,
@@ -218,7 +299,7 @@ export default function Navbar({
   return (
     <header
       ref={headerRef}
-      className="sticky top-0 z-(--nav-z) border-b-(length:--line-width) border-line bg-surface text-ink transition-transform duration-(--duration-state) not-focus-within:data-hidden:-translate-y-full motion-reduce:transition-none print:hidden"
+      className="sticky top-0 z-(--nav-z) border-b-(length:--line-width) border-line bg-surface text-ink transition-transform duration-(--duration-state) data-hidden:-translate-y-full motion-reduce:transition-none print:hidden"
       data-hidden={visibility === 'hidden' ? '' : undefined}
     >
       <div className="mx-auto flex min-h-(--nav-height) max-w-[calc(var(--grid-max-width)+2*var(--grid-gutter))] items-center gap-1 px-3 md:gap-3 md:px-(--grid-gutter)">

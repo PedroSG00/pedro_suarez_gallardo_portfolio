@@ -1,0 +1,11 @@
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view(block 0px)) and (animation-range: exit 0% exit 100%) {
+    [data-about-content] [data-reveal-root] {
+      /* Time both fades from the visible block, not the shared point markers. */
+      animation-timeline: view(block 0px), view(block 0px);
+      animation-range:
+        cover var(--psg-reveal-entry-start, 0%) cover 18%,
+        exit 30% exit 100%;
+    }
+  }
+}

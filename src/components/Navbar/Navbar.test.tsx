@@ -24,6 +24,7 @@ const site: SiteData = {
   githubUrl: 'https://github.com/PedroSG00',
   linkedinUrl: 'https://linkedin.com/in/pedro-suarez-gallardo',
   cvPath: { en: '/EN_Pedro_Suarez_Gallardo_CV.pdf', es: '/ES_Pedro_Suarez_Gallardo_CV.pdf' },
+  portraitSrc: '/pedro-suarez.png',
 };
 
 const sections: SectionDestination[] = [
@@ -250,6 +251,11 @@ describe('Navbar — visibilidad por scroll y foco (RF-3, RF-4, RF-12)', () => {
     fireEvent.scroll(window);
   }
 
+  function dispatchUserScroll() {
+    fireEvent.wheel(window, { deltaY: 120 });
+    dispatchScroll();
+  }
+
   beforeEach(() => {
     mockSupportsScrollTimeline(true);
     mockScrollPosition(0);
@@ -267,33 +273,44 @@ describe('Navbar — visibilidad por scroll y foco (RF-3, RF-4, RF-12)', () => {
   test('scroll a 81 px bajando añade data-hidden', () => {
     renderNavbar();
     mockScrollPosition(81);
-    dispatchScroll();
+    dispatchUserScroll();
     expect(screen.getByRole('banner')).toHaveAttribute('data-hidden');
   });
 
   test('subir lo quita', () => {
     renderNavbar();
     mockScrollPosition(100);
-    dispatchScroll();
+    dispatchUserScroll();
     expect(screen.getByRole('banner')).toHaveAttribute('data-hidden');
     mockScrollPosition(50);
-    dispatchScroll();
+    dispatchUserScroll();
     expect(screen.getByRole('banner')).not.toHaveAttribute('data-hidden');
   });
 
   test('scroll sin cambio mantiene el estado', () => {
     renderNavbar();
     mockScrollPosition(100);
-    dispatchScroll();
+    dispatchUserScroll();
     expect(screen.getByRole('banner')).toHaveAttribute('data-hidden');
     dispatchScroll();
+    expect(screen.getByRole('banner')).toHaveAttribute('data-hidden');
+  });
+
+  test('programmatic scroll restoration stays visible until the first user scroll', () => {
+    renderNavbar();
+    mockScrollPosition(320);
+    dispatchScroll();
+    expect(screen.getByRole('banner')).not.toHaveAttribute('data-hidden');
+
+    mockScrollPosition(400);
+    dispatchUserScroll();
     expect(screen.getByRole('banner')).toHaveAttribute('data-hidden');
   });
 
   test('focusin lo quita', () => {
     renderNavbar();
     mockScrollPosition(100);
-    dispatchScroll();
+    dispatchUserScroll();
     expect(screen.getByRole('banner')).toHaveAttribute('data-hidden');
     const banner = screen.getByRole('banner');
     fireEvent.focusIn(banner);
@@ -306,7 +323,7 @@ describe('Navbar — visibilidad por scroll y foco (RF-3, RF-4, RF-12)', () => {
     fireEvent.click(summary);
     await screen.findByRole('button', { name: 'Close menu' });
     mockScrollPosition(100);
-    dispatchScroll();
+    dispatchUserScroll();
     expect(screen.getByRole('banner')).not.toHaveAttribute('data-hidden');
   });
 
@@ -326,7 +343,7 @@ describe('Navbar — visibilidad por scroll y foco (RF-3, RF-4, RF-12)', () => {
     });
     renderNavbar();
     mockScrollPosition(100);
-    dispatchScroll();
+    dispatchUserScroll();
     expect(screen.getByRole('banner')).not.toHaveAttribute('data-hidden');
   });
 });

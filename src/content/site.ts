@@ -6,6 +6,7 @@ export interface SiteData {
   githubUrl: string;
   linkedinUrl: string;
   cvPath: Record<Locale, string>;
+  portraitSrc: string;
 }
 
 export const SITE: SiteData = {
@@ -17,4 +18,5 @@ export const SITE: SiteData = {
     en: '/EN_Pedro_Suarez_Gallardo_CV.pdf',
     es: '/ES_Pedro_Suarez_Gallardo_CV.pdf',
   },
+  portraitSrc: '/pedro-suarez.png',
 };

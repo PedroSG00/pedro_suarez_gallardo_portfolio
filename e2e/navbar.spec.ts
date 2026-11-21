@@ -139,6 +139,68 @@ test.describe('Navbar navigation (RF-1, RF-2, RF-3, RF-4, RF-5, RF-6, RF-12, RF-
 });
 
 test.describe('Scroll behavior on reload and navigation', () => {
+  test('a theme change does not hide or freeze the navbar before real downward scrolling', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference', colorScheme: 'light' });
+    await page.goto('/en');
+    const navbar = page.getByRole('banner');
+    const theme = page.getByRole('button', { name: /toggle theme/i });
+    const initialPressed = await theme.getAttribute('aria-pressed');
+    const initialScrollY = await page.evaluate(() => window.scrollY);
+
+    await theme.click();
+
+    await expect(theme).not.toHaveAttribute('aria-pressed', initialPressed!);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(initialScrollY);
+    await expect(navbar).not.toHaveAttribute('data-hidden');
+
+    await page.mouse.move(500, 400);
+    await page.mouse.wheel(0, 160);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(80);
+    await expect(navbar).toHaveAttribute('data-hidden');
+  });
+
+  test('reload at the top keeps the navbar visible and the first user scroll can hide it', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.goto('/en');
+    await page.reload();
+
+    const navbar = page.getByRole('banner');
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+    await expect(navbar).not.toHaveAttribute('data-hidden');
+
+    await page.mouse.move(500, 400);
+    await page.mouse.wheel(0, 160);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(80);
+    await expect(navbar).toHaveAttribute('data-hidden');
+  });
+
+  test('reload with restored scroll keeps the navbar visible until a later user scroll', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.goto('/en');
+    await page.evaluate(() => window.scrollTo({ top: 320, behavior: 'instant' }));
+    const beforeReload = await page.evaluate(() => window.scrollY);
+    expect(beforeReload).toBeGreaterThan(80);
+
+    await page.reload();
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(beforeReload);
+    const navbar = page.getByRole('banner');
+    await expect(navbar).not.toHaveAttribute('data-hidden');
+
+    await page.mouse.move(500, 400);
+    await page.mouse.wheel(0, 160);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(beforeReload);
+    await expect(navbar).toHaveAttribute('data-hidden');
+
+    await page.mouse.wheel(0, -160);
+    await expect(navbar).not.toHaveAttribute('data-hidden');
+  });
+
   test('reload restores the same scroll position without a second jump', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/en');
@@ -182,6 +244,57 @@ test.describe('Scroll behavior on reload and navigation', () => {
     await expect(navbar).toHaveAttribute('data-hidden');
   });
 
+  for (const { locale } of LOCALES) {
+    test(`two locale switches in About keep the reading position and navbar visible from /${locale}`, async ({
+      page,
+    }) => {
+      const aboutLabel = { en: 'About', es: 'Sobre mí' };
+      const languageLabel = { en: 'English', es: 'Español' };
+      const otherLocale = locale === 'en' ? 'es' : 'en';
+      await page.emulateMedia({ reducedMotion: 'no-preference' });
+      await page.goto(`/${locale}`);
+      const navbar = page.getByRole('banner');
+      await Promise.all([
+        page.evaluate(() => new Promise<void>((resolve) => {
+          window.addEventListener('scrollend', () => resolve(), { once: true });
+        })),
+        navbar.getByRole('link', { name: aboutLabel[locale] }).click(),
+      ]);
+      await expect(page).toHaveURL(`/${locale}#about`);
+      const headingTop = (language: 'en' | 'es') =>
+        page.getByRole('region', { name: aboutLabel[language] })
+          .getByRole('heading', { name: aboutLabel[language] })
+          .evaluate((heading) => heading.getBoundingClientRect().top);
+      const readingTop = await headingTop(locale);
+      await expect(navbar).toBeInViewport({ ratio: 0.95 });
+
+      for (const language of [otherLocale, locale] as const) {
+        const switcher = navbar.getByRole('button', { name: languageLabel[language] });
+        await expect(switcher).toBeInViewport();
+        const box = (await switcher.boundingBox())!;
+        // Use a pointer click without Playwright repositioning the sticky control.
+        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+        await expect(page).toHaveURL(`/${language}#about`);
+        await expect.poll(async () => Math.abs(await headingTop(language) - readingTop))
+          .toBeLessThanOrEqual(1);
+        await navbar.evaluate(async (header) => {
+          // Allow the locale's deferred scroll restoration to paint before measuring.
+          for (let frame = 0; frame < 4; frame += 1) {
+            await new Promise(requestAnimationFrame);
+          }
+          await Promise.all(header.getAnimations().map((animation) => animation.finished));
+        });
+        await expect(navbar).toBeInViewport({ ratio: 0.95 });
+      }
+
+      await page.mouse.move(500, 400);
+      await page.mouse.wheel(0, 200);
+      await expect(navbar).not.toBeInViewport();
+      await page.mouse.wheel(0, -160);
+      await expect(navbar).toBeInViewport({ ratio: 0.95 });
+    });
+  }
+
   test('uses native smooth scrolling only when reduced motion is not requested', async ({
     page,
   }) => {
@@ -200,14 +313,15 @@ test.describe('Scroll behavior on reload and navigation', () => {
     await page.goto('/en');
     const navbar = page.getByRole('banner');
 
-    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await page.mouse.move(500, 400);
+    await page.mouse.wheel(0, 4000);
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(80);
     await expect(navbar).toHaveAttribute('data-hidden');
 
     await page.mouse.wheel(0, -160);
     await expect(navbar).not.toHaveAttribute('data-hidden');
 
-    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await page.mouse.wheel(0, 4000);
     await expect(navbar).toHaveAttribute('data-hidden');
     await navbar.getByRole('link', { name: 'Pedro Suárez Gallardo' }).focus();
     await expect(navbar).not.toHaveAttribute('data-hidden');
@@ -279,25 +393,27 @@ test.describe('Navbar visibility on scroll (RF-3, no reduced motion)', () => {
         });
 
         test('navbar hides after scrolling 80px down', async ({ page }) => {
-          await page.evaluate(() => window.scrollTo(0, 500));
-          await page.waitForTimeout(500);
+          await page.mouse.move(500, 400);
+          await page.mouse.wheel(0, 500);
+          await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(80);
           const navbar = page.locator('header');
+          await expect(navbar).toHaveAttribute('data-hidden');
           await expect.poll(() => navbar.evaluate((element) => element.getBoundingClientRect().bottom)).toBeLessThanOrEqual(1);
           await expect(navbar).toHaveCSS('opacity', '1');
         });
 
         test('navbar shows again when scrolling up', async ({ page }) => {
-          await page.evaluate(() => window.scrollTo(0, 500));
-          await page.waitForTimeout(500);
-          await page.evaluate(() => window.scrollTo(0, 40));
-          await page.waitForTimeout(500);
+          await page.mouse.move(500, 400);
+          await page.mouse.wheel(0, 500);
           const navbar = page.locator('header');
+          await expect(navbar).toHaveAttribute('data-hidden');
+          await page.mouse.wheel(0, -160);
           await expect(navbar).not.toHaveAttribute('data-hidden');
         });
 
         test('navbar shows when focusing a control while hidden', async ({ page }) => {
-          await page.evaluate(() => window.scrollTo(0, 500));
-          await page.waitForTimeout(500);
+          await page.mouse.move(500, 400);
+          await page.mouse.wheel(0, 500);
           await expect(page.locator('header')).toHaveAttribute('data-hidden');
           await page.keyboard.press('Tab');
           await expect(page.getByRole('link', { name: /skip to content|saltar al contenido/i })).toBeFocused();

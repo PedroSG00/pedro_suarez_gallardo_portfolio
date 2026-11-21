@@ -101,12 +101,20 @@ Esta spec define el contenido y el comportamiento observable de About. No decide
 - Cuando la foto cargue correctamente, el sistema la muestra.
 - Si la carga falla o la imagen no puede mostrarse, el sistema omite la foto sin marcador, espacio vacío ni error visible; el resto de About permanece disponible.
 
+### Composición de About — RF-1, RF-2, RF-3 y RF-4
+
+- La afirmación firma ocupa el ancho interior de la sección por encima del resto del contenido.
+- En escritorio, el retrato queda a la izquierda y la biografía a la derecha, alineados por arriba. Las cualidades quedan debajo de la biografía. La medida de los párrafos no supera 65 caracteres monoespaciados.
+- El retrato lleva un borde de 1 px con el token de línea existente y ocupa menos espacio que la biografía. La composición evita huecos grandes que no ayuden a leer y conserva una lectura continua de los párrafos y las cualidades.
+- En los tamaños de escritorio y móvil verificados, el retrato no se solapa con el texto, no tapa información y no recorta contenido; About no provoca desplazamiento horizontal. No se añade una capa de apilado mientras no exista solapamiento.
+- En una columna, la biografía y las cualidades preceden al retrato. Si falta la foto, la biografía arranca en el borde interior de la retícula, sin reservar una columna para la imagen.
+
 ### RF-5 — Revelado del contenido
 
 - Cuando el visitante se desplace por About, los párrafos, las cualidades y la foto participan en el revelado general de la sección: cada bloque entra, alcanza un estado plenamente visible y sale con el scroll.
 - La afirmación participa en el mismo revelado general y, además, cumple la progresión palabra a palabra definida en RF-2.
 - Cuando el visitante vuelva atrás, el revelado y la progresión de la afirmación son reversibles.
-- En las posiciones estables del recorrido, todo el contenido de About se muestra plenamente visible.
+- Cada bloque alcanza opacidad plena durante el primer quinto de su recorrido por el viewport y la conserva desde el tramo de lectura hasta que su borde superior alcanza el borde superior del viewport. La salida comienza solo al cruzar ese borde. Este tramo no modifica los límites de iluminación de RF-2.
 
 ### RF-6 — Fallback y movimiento reducido
 
