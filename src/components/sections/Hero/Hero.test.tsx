@@ -47,47 +47,31 @@ function isInsideReveal(text: string): HTMLElement | null {
 }
 
 describe('Hero content and reveal', () => {
-  test('renders a single h1 whose accessible name is the full name', () => {
+  test('announces the name once as the section heading and hides decorative lines and cursor', () => {
     mountHero();
     expect(screen.getByRole('heading', { level: 1, name: 'Pedro Suárez Gallardo' })).toBeInTheDocument();
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
-  });
-
-  test('announces the section by the hero-name id', () => {
-    mountHero();
     const section = screen.getByRole('region', { name: 'Pedro Suárez Gallardo' });
     expect(section).toHaveAttribute('aria-labelledby', 'hero-name');
     expect(screen.getByRole('heading', { level: 1, name: 'Pedro Suárez Gallardo' })).toHaveAttribute(
       'id',
       'hero-name',
     );
-  });
-
-  test('renders three lines each hidden from assistive technology', () => {
-    mountHero();
     const lines = screen.getAllByText(/^Pedro$|^Suárez$|^Gallardo$/);
     expect(lines).toHaveLength(3);
     for (const line of lines) {
       expect(line).toHaveAttribute('aria-hidden', 'true');
     }
-  });
-
-  test('renders a decorative cursor hidden from assistive technology', () => {
-    mountHero();
     const cursor = screen.getByText('█', { selector: '[aria-hidden="true"]' });
     expect(cursor).toHaveAttribute('aria-hidden', 'true');
   });
 
-  test('renders role, pitch, support and meta as visible plain text', () => {
+  test('shows the English copy and links its calls to action to Work and Contact', () => {
     mountHero();
     expect(screen.getByText(enMessages.hero.role)).toBeVisible();
     expect(screen.getByText(enMessages.hero.pitch)).toBeVisible();
     expect(screen.getByText(enMessages.hero.support)).toBeVisible();
     expect(screen.getByText(enMessages.hero.meta)).toBeVisible();
-  });
-
-  test('renders CTAs to #work and #contact', () => {
-    mountHero();
     expect(screen.getByRole('link', { name: enMessages.hero.ctaPrimary })).toHaveAttribute(
       'href',
       '#work',

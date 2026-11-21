@@ -74,7 +74,6 @@ export default function Navbar({
   const keyboardFocusRef = useRef(false);
   const lastInteractionWasKeyboardRef = useRef(false);
   const userScrollIntentRef = useRef(false);
-  const clearUserScrollIntentFrameRef = useRef<number | null>(null);
   const navigationInProgressRef = useRef(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [visibility, setVisibility] = useState<'visible' | 'hidden'>('visible');
@@ -126,10 +125,6 @@ export default function Navbar({
     const hasUserScrollIntent = userScrollIntentRef.current;
     if (hasUserScrollIntent) {
       userScrollIntentRef.current = false;
-      if (clearUserScrollIntentFrameRef.current !== null) {
-        window.cancelAnimationFrame(clearUserScrollIntentFrameRef.current);
-        clearUserScrollIntentFrameRef.current = null;
-      }
     }
     if (navigationInProgressRef.current && !hasUserScrollIntent) {
       setVisibility('visible');
@@ -167,22 +162,18 @@ export default function Navbar({
     previousScrollYRef.current = currentScrollY();
     const finishNavigation = () => {
       navigationInProgressRef.current = false;
+      userScrollIntentRef.current = false;
       previousScrollYRef.current = currentScrollY();
     };
     const markUserScrollIntent = () => {
       navigationInProgressRef.current = false;
+      // Scroll delivery can lag behind animation frames; consume intent in onScroll.
       userScrollIntentRef.current = true;
-      if (clearUserScrollIntentFrameRef.current !== null) {
-        window.cancelAnimationFrame(clearUserScrollIntentFrameRef.current);
-      }
-      clearUserScrollIntentFrameRef.current = window.requestAnimationFrame(() => {
-        userScrollIntentRef.current = false;
-        clearUserScrollIntentFrameRef.current = null;
-      });
     };
     const isInsideMenuPanel = (target: EventTarget | null) =>
       target instanceof Element && target.closest('[data-menu-panel]') !== null;
     const handlePointerDown = () => {
+      userScrollIntentRef.current = false;
       lastInteractionWasKeyboardRef.current = false;
       keyboardFocusRef.current = false;
     };
@@ -226,10 +217,6 @@ export default function Navbar({
       window.removeEventListener('wheel', handleWheel);
       window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('keydown', handleScrollKey);
-      if (clearUserScrollIntentFrameRef.current !== null) {
-        window.cancelAnimationFrame(clearUserScrollIntentFrameRef.current);
-        clearUserScrollIntentFrameRef.current = null;
-      }
     };
   }, [onScroll]);
 
@@ -269,6 +256,7 @@ export default function Navbar({
 
   const handleNavigate = useCallback(() => {
     navigationInProgressRef.current = true;
+    userScrollIntentRef.current = false;
     setVisibility('visible');
     if (detailsRef.current) {
       detailsRef.current.open = false;

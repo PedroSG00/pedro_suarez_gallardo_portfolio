@@ -200,7 +200,10 @@ describe('LanguageSwitch (toggler)', () => {
   test('processes pending navigation from session storage', () => {
     const scrollTo = vi.spyOn(window, 'scrollTo');
     // Make requestAnimationFrame synchronous so the double rAF completes
-    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => cb());
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
+      cb(0);
+      return 0;
+    });
     const pending = {
       locale: 'en',
       search: '?utm=x',

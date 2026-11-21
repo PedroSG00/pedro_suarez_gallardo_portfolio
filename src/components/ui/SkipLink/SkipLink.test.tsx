@@ -1,14 +1,25 @@
-import { describe, expect, test, vi } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import { screen, fireEvent } from '@testing-library/react';
 import { renderWithIntl } from '@/test/render-with-intl';
 import SkipLink from './SkipLink';
 
 describe('SkipLink', () => {
-  test('renders a link with the label as accessible name and href="#main" by default', () => {
-    renderWithIntl(<SkipLink />);
+  test('exposes a focusable skip link and transfers focus to main when activated', () => {
+    renderWithIntl(
+      <>
+        <SkipLink />
+        <main id="main" tabIndex={-1}>Main content</main>
+      </>,
+    );
     const link = screen.getByRole('link', { name: 'Skip to content' });
-    expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute('href', '#main');
+    expect(link.tagName).toBe('A');
+    expect(link).not.toHaveAttribute('aria-hidden');
+    expect(link).not.toHaveAttribute('tabindex', '-1');
+    link.focus();
+    expect(link).toHaveFocus();
+    fireEvent.click(link);
+    expect(screen.getByRole('main')).toHaveFocus();
   });
 
   test('accepts a custom href', () => {
@@ -19,25 +30,6 @@ describe('SkipLink', () => {
     expect(link).toHaveAttribute('href', '#section');
   });
 
-  test('renders an anchor element, not a button', () => {
-    renderWithIntl(<SkipLink />);
-    const link = screen.getByRole('link', { name: 'Skip to content' });
-    expect(link.tagName).toBe('A');
-  });
-
-  test('is not aria-hidden', () => {
-    renderWithIntl(<SkipLink />);
-    const link = screen.getByRole('link', { name: 'Skip to content' });
-    expect(link).not.toHaveAttribute('aria-hidden');
-  });
-
-  test('is focusable and does not have tabIndex -1', () => {
-    renderWithIntl(<SkipLink />);
-    const link = screen.getByRole('link', { name: 'Skip to content' });
-    expect(link).not.toHaveAttribute('tabindex', '-1');
-    expect(link).toBeInTheDocument();
-  });
-
   test('renders null when label is missing', () => {
     const { container } = renderWithIntl(<SkipLink label="" href="#main" />);
     expect(container).toBeEmptyDOMElement();
@@ -46,18 +38,6 @@ describe('SkipLink', () => {
   test('uses the active locale for its accessible name', () => {
     renderWithIntl(<SkipLink />, { locale: 'es' });
     expect(screen.getByRole('link', { name: 'Saltar al contenido' })).toBeInTheDocument();
-  });
-
-  test('click focuses the target element when it exists', () => {
-    const target = document.createElement('div');
-    target.id = 'main';
-    document.body.appendChild(target);
-    const focusSpy = vi.spyOn(target, 'focus');
-
-    renderWithIntl(<SkipLink href="#main" />);
-    const link = screen.getByRole('link', { name: 'Skip to content' });
-    fireEvent.click(link);
-    expect(focusSpy).toHaveBeenCalled();
   });
 
   test('click does not throw when target does not exist', () => {

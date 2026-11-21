@@ -57,20 +57,17 @@ test.describe('Navbar navigation (RF-1, RF-2, RF-3, RF-4, RF-5, RF-6, RF-12, RF-
           await page.waitForLoadState('networkidle');
         });
 
-        test('skip link is first focusable and moves focus to main', async ({ page }) => {
+        test('tabs through skip link and identity, then skips navigation to main', async ({ page }) => {
           const skip = page.getByRole('link', { name: SKIP_LINK });
           await expect(skip).toBeVisible();
-          await skip.focus();
-          await skip.press('Enter');
-          await expect(page.locator('main#main')).toBeFocused();
-        });
-
-        test('tab order: skip link first, identity second', async ({ page }) => {
           await page.keyboard.press('Tab');
-          await expect(page.getByRole('link', { name: SKIP_LINK })).toBeFocused();
-
+          await expect(skip).toBeFocused();
           await page.keyboard.press('Tab');
           await expect(page.getByRole('link', { name: IDENTITY })).toBeFocused();
+          await page.keyboard.press('Shift+Tab');
+          await expect(skip).toBeFocused();
+          await skip.press('Enter');
+          await expect(page.locator('main#main')).toBeFocused();
         });
 
         test('identity goes to home and clears hash', async ({ baseURL, page }) => {
@@ -170,6 +167,40 @@ test.describe('Navbar navigation (RF-1, RF-2, RF-3, RF-4, RF-5, RF-6, RF-12, RF-
 });
 
 test.describe('Scroll behavior on reload and navigation', () => {
+  for (const { locale } of LOCALES) {
+    test(`the navbar follows wheel scrolling delivered after animation frames on /${locale}`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({ reducedMotion: 'no-preference', colorScheme: 'light' });
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await page.goto(`/${locale}`);
+      const navbar = page.getByRole('banner');
+      await expect(navbar.getByRole('button', { name: /toggle theme|cambiar tema/i })).toBeVisible();
+
+      await page.evaluate(() => {
+        // Reproduce a compositor scroll delivered after the input frame.
+        window.addEventListener('wheel', (event) => {
+          event.preventDefault();
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              window.scrollBy({ top: event.deltaY, behavior: 'instant' });
+            });
+          });
+        }, { passive: false });
+      });
+
+      await expect(navbar).toBeInViewport({ ratio: 0.95 });
+      await page.mouse.move(500, 400);
+      await page.mouse.wheel(0, 500);
+      await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(500);
+      await expect(navbar).not.toBeInViewport();
+
+      await page.mouse.wheel(0, -160);
+      await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(340);
+      await expect(navbar).toBeInViewport({ ratio: 0.95 });
+    });
+  }
+
   test('a theme change does not hide or freeze the navbar before real downward scrolling', async ({
     page,
   }) => {
@@ -264,11 +295,15 @@ test.describe('Scroll behavior on reload and navigation', () => {
     await page.goto('/en');
     const navbar = page.getByRole('banner');
 
-    await page.getByRole('link', { name: 'Work' }).click();
-    await expect(page).toHaveURL(/#work$/);
+    await page.getByRole('link', { name: 'About', exact: true }).click();
+    await expect(page).toHaveURL(/#about$/);
+    await waitForScrollSettled(page);
     await expect(navbar).not.toHaveAttribute('data-hidden');
 
+    const beforeWheel = await page.evaluate(() => window.scrollY);
+    await page.mouse.move(500, 400);
     await page.mouse.wheel(0, 200);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(beforeWheel);
     await expect(navbar).toHaveAttribute('data-hidden');
   });
 
@@ -412,7 +447,7 @@ test.describe('Navbar visibility on scroll (RF-3, no reduced motion)', () => {
           await page.waitForLoadState('networkidle');
         });
 
-        test('navbar is visible at the top', async ({ page }) => {
+        test('navbar is visible at the top, slides out downward and returns on upward scrolling', async ({ page }) => {
           await page.evaluate(() => window.scrollTo(0, 0));
           const navbar = page.locator('header');
           await expect(navbar).toBeVisible();
@@ -422,27 +457,20 @@ test.describe('Navbar visibility on scroll (RF-3, no reduced motion)', () => {
               navbar.evaluate((el) => new DOMMatrixReadOnly(getComputedStyle(el).transform).m42),
             )
             .toBe(0);
-        });
-
-        test('navbar hides after scrolling 80px down', async ({ page }) => {
           await page.mouse.move(500, 400);
           await page.mouse.wheel(0, 500);
           await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(80);
-          const navbar = page.locator('header');
           await expect(navbar).toHaveAttribute('data-hidden');
           await expect
             .poll(() => navbar.evaluate((element) => element.getBoundingClientRect().bottom))
             .toBeLessThanOrEqual(1);
           await expect(navbar).toHaveCSS('opacity', '1');
-        });
-
-        test('navbar shows again when scrolling up', async ({ page }) => {
-          await page.mouse.move(500, 400);
-          await page.mouse.wheel(0, 500);
-          const navbar = page.locator('header');
-          await expect(navbar).toHaveAttribute('data-hidden');
+          await waitForScrollSettled(page);
+          const beforeUpwardScroll = await page.evaluate(() => window.scrollY);
           await page.mouse.wheel(0, -160);
+          await expect.poll(() => page.evaluate(() => window.scrollY)).toBeLessThan(beforeUpwardScroll);
           await expect(navbar).not.toHaveAttribute('data-hidden');
+          await expect(navbar).toBeInViewport({ ratio: 0.95 });
         });
 
         test('navbar shows when focusing a control while hidden', async ({ page }) => {

@@ -33,29 +33,20 @@ test.describe('home smoke', () => {
 test.describe('home structure', () => {
   for (const [locale, expectedH2] of Object.entries(H2_BY_LOCALE)) {
     test.describe(`/${locale}`, () => {
-      test('tiene un solo h1 (el nombre) y cuatro h2 con nombres accesibles en orden', async ({
+      test('shows the localized heading hierarchy and ordered sections without project links', async ({
         page,
       }) => {
         await page.goto(`/${locale}`);
 
-        // un solo h1: el nombre del hero
         await expect(
           page.getByRole('heading', { level: 1, name: 'Pedro Suárez Gallardo' }),
         ).toHaveCount(1);
 
-        // cuatro h2, uno por destino, nombre accesible solo la etiqueta y en orden
         const headings = page.getByRole('heading', { level: 2 });
         await expect(headings).toHaveCount(4);
         for (const [index, expected] of expectedH2.entries()) {
           await expect(headings.nth(index)).toHaveAccessibleName(expected);
         }
-      });
-
-      test('el hero y los destinos aparecen en orden con About bajo su destino', async ({
-        page,
-      }) => {
-        await page.goto(`/${locale}`);
-
         await expect(page.locator('main > section').first()).toHaveAttribute(
           'aria-labelledby',
           'hero-name',
@@ -84,6 +75,8 @@ test.describe('home structure', () => {
         await expect(about.locator('p')).toHaveCount(5);
         await expect(page.locator('#about')).toHaveCount(1);
         await expect(page.getByRole('heading', { name: expectedH2[0] })).toHaveCount(1);
+        await expect(page.getByRole('link', { name: /project|proyecto/i })).toHaveCount(0);
+        await expect(page.locator('a[href*="/projects"]')).toHaveCount(0);
       });
 
       test('navigation keeps the About destination and leaves its heading visible', async ({
@@ -121,13 +114,6 @@ test.describe('home structure', () => {
         expect(footerLink?.x).toBe(title?.x);
       });
 
-      test('no tiene enlaces a proyectos', async ({ page }) => {
-        await page.goto(`/${locale}`);
-        await expect(page.getByRole('link', { name: /project|proyecto/i })).toHaveCount(
-          0,
-        );
-        await expect(page.locator('a[href*="/projects"]')).toHaveCount(0);
-      });
     });
   }
 });

@@ -69,6 +69,7 @@ function sectionLinks() {
 
 beforeEach(() => {
   currentPathname = '/';
+  window.history.replaceState(null, '', '/');
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
     value: vi.fn().mockImplementation((query) => ({
@@ -89,14 +90,10 @@ afterEach(() => {
 });
 
 describe('Navbar', () => {
-  test('muestra la identidad con nombre accesible y enlace al inicio', () => {
+  test('shows the home identity and the four section destinations in order without project links', () => {
     renderNavbar();
     const link = screen.getByRole('link', { name: 'Pedro Suárez Gallardo' });
     expect(link).toHaveAttribute('href', '/en');
-  });
-
-  test('muestra cuatro enlaces en orden About, Work, Stack, Contact', () => {
-    renderNavbar();
     const links = sectionLinks().slice(0, 4);
     expect(links).toHaveLength(4);
     expect(links.map((l) => l.textContent)).toEqual([
@@ -105,6 +102,9 @@ describe('Navbar', () => {
     expect(links.map((l) => l.getAttribute('href'))).toEqual([
       '#about', '#work', '#stack', '#contact',
     ]);
+    expect(screen.getAllByRole('link').filter((link) =>
+      (link.getAttribute('href') ?? '').includes('/projects'),
+    )).toHaveLength(0);
   });
 
   test('renders Spanish section labels from the Spanish message catalog', () => {
@@ -136,24 +136,6 @@ describe('Navbar', () => {
     expect(within(details).getByRole('list')).toBeInTheDocument();
   });
 
-  test('the summary announces Open menu when closed', () => {
-    renderNavbar();
-    expect(screen.getByRole('button', { name: 'Open menu' })).toBeInTheDocument();
-  });
-
-  test('announces Close menu after the native menu opens', async () => {
-    renderNavbar();
-    const summary = screen.getByRole('button', { name: 'Open menu' });
-    fireEvent.click(summary);
-    expect(await screen.findByRole('button', { name: 'Close menu' })).toBeInTheDocument();
-  });
-
-  test('muestra ThemeControl y LanguageSwitch', () => {
-    renderNavbar();
-    expect(screen.getByRole('button', { name: 'Toggle theme' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Español' })).toBeInTheDocument();
-  });
-
   test('shows the hamburger after the theme and language controls on mobile', () => {
     renderNavbar();
     const theme = screen.getByRole('button', { name: 'Toggle theme' });
@@ -163,24 +145,14 @@ describe('Navbar', () => {
     expect(language.compareDocumentPosition(menu) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
-  test('onClick de la identidad navega a / en la home', () => {
-    const onClick = vi.fn();
-    renderNavbar({ site: { ...site, name: 'Pedro Suárez Gallardo' } });
+  test('activating the home identity scrolls to the top and clears the hash while keeping the query', () => {
+    window.history.replaceState(null, '', '/en?source=cv#about');
+    const scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
+    renderNavbar();
     const link = screen.getByRole('link', { name: 'Pedro Suárez Gallardo' });
     fireEvent.click(link);
-    expect(onClick).not.toHaveBeenCalled();
-  });
-
-  test('los enlaces usan #id en la home', () => {
-    renderNavbar();
-    const aboutLinks = screen.getAllByRole('link', { name: 'About' });
-    expect(aboutLinks[0]).toHaveAttribute('href', '#about');
-    const workLinks = screen.getAllByRole('link', { name: 'Work' });
-    expect(workLinks[0]).toHaveAttribute('href', '#work');
-    const stackLinks = screen.getAllByRole('link', { name: 'Stack' });
-    expect(stackLinks[0]).toHaveAttribute('href', '#stack');
-    const contactLinks = screen.getAllByRole('link', { name: 'Contact' });
-    expect(contactLinks[0]).toHaveAttribute('href', '#contact');
+    expect(scrollTo).toHaveBeenCalledWith({ top: 0, behavior: 'auto' });
+    expect(window.location.pathname + window.location.search + window.location.hash).toBe('/en?source=cv');
   });
 
   test('los enlaces usan /{locale}#id fuera de la home', () => {
@@ -193,13 +165,6 @@ describe('Navbar', () => {
     renderNavbar({ locale: 'es', sections: sectionsEs }, 'es', '/es/ruta-inexistente');
     const aboutLinks = screen.getAllByRole('link', { name: 'Sobre mí' });
     expect(aboutLinks[0]).toHaveAttribute('href', '/es#about');
-  });
-
-  test('no hay enlaces a proyectos ni a rutas inexistentes', () => {
-    renderNavbar();
-    const allLinks = screen.getAllByRole('link');
-    const projectLinks = allLinks.filter((l) => (l.getAttribute('href') ?? '').includes('/projects'));
-    expect(projectLinks).toHaveLength(0);
   });
 
   test('omits the link when a section label is missing', () => {
@@ -220,7 +185,7 @@ describe('Navbar', () => {
     expect(screen.queryByRole('link', { name: 'Pedro Suárez Gallardo' })).not.toBeInTheDocument();
   });
 
-  test('closes the mobile menu after following a section link', async () => {
+  test('announces the menu state and closes it after following a section link', async () => {
     renderNavbar();
     const summary = screen.getByRole('button', { name: 'Open menu' });
     fireEvent.click(summary);
@@ -265,35 +230,17 @@ describe('Navbar — scroll visibility and focus (RF-3, RF-4, RF-12)', () => {
     vi.restoreAllMocks();
   });
 
-  test('estado inicial visible', () => {
+  test('stays visible at the top, hides scrolling down, ignores stationary scroll and returns scrolling up', () => {
     renderNavbar();
     expect(screen.getByRole('banner')).not.toHaveAttribute('data-hidden');
-  });
-
-  test('scroll 81 px down adds data-hidden', () => {
-    renderNavbar();
     mockScrollPosition(81);
-    dispatchUserScroll();
-    expect(screen.getByRole('banner')).toHaveAttribute('data-hidden');
-  });
-
-  test('scrolling up removes it', () => {
-    renderNavbar();
-    mockScrollPosition(100);
-    dispatchUserScroll();
-    expect(screen.getByRole('banner')).toHaveAttribute('data-hidden');
-    mockScrollPosition(50);
-    dispatchUserScroll();
-    expect(screen.getByRole('banner')).not.toHaveAttribute('data-hidden');
-  });
-
-  test('scroll without change keeps the state', () => {
-    renderNavbar();
-    mockScrollPosition(100);
     dispatchUserScroll();
     expect(screen.getByRole('banner')).toHaveAttribute('data-hidden');
     dispatchScroll();
     expect(screen.getByRole('banner')).toHaveAttribute('data-hidden');
+    mockScrollPosition(50);
+    dispatchUserScroll();
+    expect(screen.getByRole('banner')).not.toHaveAttribute('data-hidden');
   });
 
   test('programmatic scroll restoration stays visible until the first user scroll', () => {
