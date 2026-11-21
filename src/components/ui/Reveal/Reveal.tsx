@@ -43,6 +43,7 @@ export default function Reveal({
   offsetPoints,
 }: RevealProps) {
   const revealRef = useRef<HTMLDivElement>(null);
+  const [isMotionReady, setIsMotionReady] = useState(false);
   const [hasFocus, setHasFocus] = useState(false);
   const [isShortPage, setIsShortPage] = useState(false);
   const [hasFixedOrStickyDescendant, setHasFixedOrStickyDescendant] = useState(false);
@@ -79,6 +80,7 @@ export default function Reveal({
     };
 
     check();
+    setIsMotionReady(true);
     window.addEventListener('scroll', check, { passive: true });
     window.addEventListener('scrollend', check);
     window.addEventListener('resize', check, { passive: true });
@@ -115,6 +117,7 @@ export default function Reveal({
       ref={revealRef}
       className={isExcluded ? styles.excluded : styles.reveal}
       data-reveal-root={isExcluded ? undefined : ''}
+      data-reveal-ready={!isExcluded && isMotionReady ? '' : undefined}
       data-reveal-excluded={isExcluded ? '' : undefined}
       data-reveal-variant={isExcluded ? undefined : resolveVariant(variant)}
       data-last-section={isLastSection ? '' : undefined}

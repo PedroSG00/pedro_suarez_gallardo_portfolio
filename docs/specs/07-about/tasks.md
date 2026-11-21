@@ -1,6 +1,6 @@
 # Tareas — 07 About
 
-**Estado:** En curso. Se deriva de `docs/specs/07-about/spec.md` y `docs/specs/07-about/plan.md`, y debe respetar `docs/constitution.md`.
+**Estado:** Hecha. Se deriva de `docs/specs/07-about/spec.md` y `docs/specs/07-about/plan.md`, y debe respetar `docs/constitution.md`.
 
 **Alcance:** RF-1 a RF-7 y sus requisitos no funcionales. Cada tarea se implementa y verifica por separado; ninguna se cierra con sus pruebas en rojo.
 

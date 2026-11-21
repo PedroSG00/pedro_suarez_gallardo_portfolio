@@ -52,6 +52,26 @@ describe('validateParity', () => {
     expect(result.missing).toContain('extra.only');
   });
 
+  test.each([
+    ['en', enMessages],
+    ['es', esMessages],
+  ])('Work has the complete approved message structure in %s', (_locale, messages) => {
+    expect(Object.keys(messages.experience).sort()).toEqual(['items', 'title']);
+    expect(Object.keys(messages.experience.items).sort()).toEqual([
+      'adminSuite',
+      'desktopAppsToWeb',
+      'integrationsAndBackendApis',
+      'liveSupervisionDashboard',
+      'visualFlowEditor',
+    ]);
+    expect(messages.experience.title.trim()).not.toBe('');
+    for (const entry of Object.values(messages.experience.items)) {
+      expect(Object.keys(entry).sort()).toEqual(['result', 'title']);
+      expect(entry.title.trim()).not.toBe('');
+      expect(entry.result.trim()).not.toBe('');
+    }
+  });
+
   test('fails when a key is extra in es', () => {
     const en = { shared: { nav: { home: 'Home' } } };
     const es = { shared: { nav: { home: 'Inicio', extra: 'only in es' } } };

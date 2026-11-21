@@ -17,6 +17,11 @@ const ABOUT_CONTENT_BY_LOCALE: Record<string, string> = {
   es: 'Grandes conjuntos de datos, actualizaciones en tiempo real, formularios complejos y estados en los que se puede confiar.',
 };
 
+const WORK_TITLE_BY_LOCALE: Record<string, string> = {
+  en: "What I've built.",
+  es: 'Lo que he construido.',
+};
+
 test.describe('home smoke', () => {
   test('the home responds without page errors', async ({ page }) => {
     const pageErrors: string[] = [];
@@ -36,6 +41,7 @@ test.describe('home structure', () => {
       test('shows the localized heading hierarchy and ordered sections without project links', async ({
         page,
       }) => {
+        await page.emulateMedia({ reducedMotion: 'reduce' });
         await page.goto(`/${locale}`);
 
         await expect(
@@ -67,8 +73,34 @@ test.describe('home structure', () => {
           expect(headingId).not.toBeNull();
           await expect(section).toHaveAttribute('aria-labelledby', headingId!);
           await expect(section.locator('h2')).toHaveCount(1);
-          await expect(section.locator('h1, h3, h4, h5, h6')).toHaveCount(0);
+          if (id === 'work') {
+            await expect(section.getByRole('heading', {
+              level: 3,
+              name: WORK_TITLE_BY_LOCALE[locale],
+              exact: true,
+            })).toHaveCount(1);
+            await expect(section.getByRole('heading', { level: 4 })).toHaveCount(5);
+          } else {
+            await expect(section.locator('h1, h3, h4, h5, h6')).toHaveCount(0);
+          }
         }
+
+        const work = page.getByRole('region', { name: expectedH2[1], exact: true });
+        await expect(work).toHaveCount(1);
+        const workHeading = work.getByRole('heading', { level: 2, name: expectedH2[1] });
+        await expect(workHeading).toHaveText(`02 / ${expectedH2[1]}`);
+        await expect(page.getByRole('heading', {
+          level: 2,
+          name: expectedH2[1],
+          exact: true,
+        })).toHaveCount(1);
+        await expect(work.getByRole('heading', {
+          level: 3,
+          name: WORK_TITLE_BY_LOCALE[locale],
+          exact: true,
+        })).toBeVisible();
+        await expect(work.getByRole('list')).toHaveCount(1);
+        await expect(work.getByRole('listitem')).toHaveCount(5);
 
         const about = page.getByRole('region', { name: expectedH2[0] });
         await expect(about.getByText(ABOUT_CONTENT_BY_LOCALE[locale])).toBeVisible();
@@ -79,20 +111,27 @@ test.describe('home structure', () => {
         await expect(page.locator('a[href*="/projects"]')).toHaveCount(0);
       });
 
-      test('navigation keeps the About destination and leaves its heading visible', async ({
-        page,
-      }) => {
-        await page.emulateMedia({ reducedMotion: 'reduce' });
-        await page.goto(`/${locale}`);
-        await page.getByRole('link', { name: expectedH2[0], exact: true }).first().click();
+      for (const [index, id] of ['about', 'work'].entries()) {
+        test(`navigation keeps the ${id} destination and leaves its heading accessible`, async ({
+          page,
+        }) => {
+          await page.emulateMedia({ reducedMotion: 'reduce' });
+          await page.goto(`/${locale}`);
+          await page.getByRole('navigation').getByRole('link', {
+            name: expectedH2[index],
+            exact: true,
+          }).click();
 
-        await expect(page).toHaveURL(new RegExp(`#about$`));
-        await expect(
-          page.getByRole('region', { name: expectedH2[0] }).getByRole('heading', {
-            name: expectedH2[0],
-          }),
-        ).toBeInViewport();
-      });
+          await expect(page).toHaveURL(new RegExp(`#${id}$`));
+          const heading = page.getByRole('region', {
+            name: expectedH2[index],
+            exact: true,
+          }).getByRole('heading', { level: 2, name: expectedH2[index], exact: true });
+          await expect(heading).toBeVisible();
+          await expect(heading).toBeInViewport();
+          await expect(heading).toBeFocused();
+        });
+      }
 
       test('the hero and footer share a readable, inset desktop layout', async ({ page }) => {
         await page.setViewportSize({ width: 1440, height: 900 });

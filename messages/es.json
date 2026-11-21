@@ -53,9 +53,30 @@
     },
     "portraitAlt": "Retrato de Pedro Suárez Gallardo"
   },
-  "work": {
-    "intro": "Experiencia",
-    "results": "Resultados"
+  "experience": {
+    "title": "Lo que he construido.",
+    "items": {
+      "desktopAppsToWeb": {
+        "title": "Aplicaciones de escritorio, llevadas a la web.",
+        "result": "Migré dos aplicaciones de contact center y rediseñé su interfaz multidioma. Ambas están en producción y en mantenimiento activo."
+      },
+      "liveSupervisionDashboard": {
+        "title": "Un panel de supervisión en tiempo real.",
+        "result": "Sigue la actividad de los agentes al instante, con vistas y gráficas personalizables sobre cientos de miles de registros."
+      },
+      "adminSuite": {
+        "title": "Una suite de administración con decenas de secciones.",
+        "result": "Informes a medida, y formularios y tablas complejos con validación avanzada."
+      },
+      "visualFlowEditor": {
+        "title": "Un editor visual de flujos.",
+        "result": "Un sistema de flujos para chatbots y menús de voz (IVR), y el frontend de un chat en vivo en tiempo real."
+      },
+      "integrationsAndBackendApis": {
+        "title": "Integraciones y APIs de backend.",
+        "result": "Integraciones de mensajería y CRM mediante APIs REST y SDKs de terceros, APIs REST en Node.js (Express), C# y PHP, automatización en Python y refactors del backend para ganar velocidad y claridad."
+      }
+    }
   },
   "stack": {
     "intro": "Stack"
