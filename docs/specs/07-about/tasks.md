@@ -346,8 +346,7 @@
 
 **Archivos de prueba:**
 - `src/components/sections/About/About.test.tsx`: frase exacta EN/ES desde los catálogos; orden retrato-antes-de-biografía en el flujo móvil (`compareDocumentPosition`).
-- `e2e/about.spec.ts`: `STATEMENTS.es` actualizado; móvil espera retrato antes del párrafo (`mobilePhoto.bottom < mobileFirst.top`); escritorio conserva retrato izquierda/biografía derecha alineados.
-- `e2e/about-composition.spec.ts`: móvil espera retrato antes del primer párrafo (`portraitBox bottom <= firstParagraphBox top`); desktop sin cambios.
+- `e2e/about/about-composition.spec.ts`: `STATEMENTS.es` actualizado; móvil espera retrato antes del párrafo (`portraitBox bottom <= firstParagraphBox top`); escritorio conserva retrato izquierda/biografía derecha alineados.
 
 **Evidencia de gates (este ajuste):**
 - `pnpm lint`: 0 errores, 0 advertencias (`.tmp/test-adjust3-lint.log`).
