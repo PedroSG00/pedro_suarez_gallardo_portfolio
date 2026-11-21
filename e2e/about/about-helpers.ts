@@ -1,8 +1,8 @@
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { expect, type Locator, type Page } from '@playwright/test';
-import enMessages from '../messages/en.json';
-import esMessages from '../messages/es.json';
+import enMessages from '../../messages/en.json';
+import esMessages from '../../messages/es.json';
 
 export const STATEMENT_STYLES_PATH = resolve(
   process.cwd(),
