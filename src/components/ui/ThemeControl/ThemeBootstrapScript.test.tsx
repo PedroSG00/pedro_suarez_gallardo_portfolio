@@ -1,16 +1,39 @@
-import { describe, expect, test, vi } from 'vitest';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import { render } from '@testing-library/react';
 import { ThemeBootstrapScript } from './ThemeBootstrapScript';
 
 describe('ThemeBootstrapScript', () => {
-  test('renders an inert script during client rendering to avoid rerunning it on locale navigation', () => {
-    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+  const originalWindow = global.window;
 
-    render(
-      <ThemeBootstrapScript html="document.documentElement.dataset.theme = 'dark'" />,
-    );
+  afterEach(() => {
+    global.window = originalWindow;
+    vi.restoreAllMocks();
+  });
 
-    expect(consoleError).not.toHaveBeenCalled();
-    consoleError.mockRestore();
+  test('renders client script type when window is defined', () => {
+    const { container } = render(<ThemeBootstrapScript html="const x = 1;" />);
+    const script = container.querySelector('script')!;
+    expect(script.getAttribute('type')).toBe('text/plain');
+    expect(script.getAttribute('id')).toBe('theme-bootstrap');
+  });
+
+  test('renders server script type when window is undefined', () => {
+    global.window = undefined as unknown as Window;
+    const { container } = render(<ThemeBootstrapScript html="const x = 1;" />);
+    const script = container.querySelector('script')!;
+    expect(script.getAttribute('type')).toBe('text/javascript');
+  });
+
+  test('suppresses hydration warning', () => {
+    const { container } = render(<ThemeBootstrapScript html="const x = 1;" />);
+    const script = container.querySelector('script')!;
+    expect(script).toHaveAttribute('suppress-hydration-warning');
+  });
+
+  test('sets innerHTML from html prop', () => {
+    const html = 'document.documentElement.dataset.theme = "dark"';
+    const { container } = render(<ThemeBootstrapScript html={html} />);
+    const script = container.querySelector('script')!;
+    expect(script.innerHTML).toBe(html);
   });
 });
