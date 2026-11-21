@@ -7,25 +7,27 @@ describe('Link', () => {
     vi.restoreAllMocks();
   });
 
-  test('renders children passed by prop and does not hardcode internal text', () => {
-    render(<Link href="/en#contact">Contact me</Link>);
-    const link = screen.getByRole('link', { name: 'Contact me' });
-    expect(link).toBeInTheDocument();
-    expect(link).toHaveAttribute('href', '/en#contact');
-  });
-
-  test('click on valid href does not prevent navigation (natural anchor behavior)', () => {
+  test('exposes its destination, takes focus and allows native navigation', () => {
     const openSpy = vi.spyOn(window, 'open');
     render(<Link href="/en#contact">Contact me</Link>);
-    fireEvent.click(screen.getByRole('link', { name: 'Contact me' }));
+    const link = screen.getByRole('link', { name: 'Contact me' });
+    expect(link).toHaveAttribute('href', '/en#contact');
+    link.focus();
+    expect(link).toHaveFocus();
+    expect(fireEvent.click(link)).toBe(true);
     expect(openSpy).not.toHaveBeenCalled();
   });
 
-  test('target _blank sets native target and rel="noreferrer noopener"', () => {
+  test('opens external links natively with safe rel and no invented announcement', () => {
+    const openSpy = vi.spyOn(window, 'open');
     render(<Link href="https://example.com" target="_blank">External</Link>);
     const link = screen.getByRole('link', { name: 'External' });
+    expect(link).toHaveAttribute('href', 'https://example.com');
     expect(link).toHaveAttribute('target', '_blank');
     expect(link).toHaveAttribute('rel', 'noreferrer noopener');
+    expect(link).toHaveAccessibleName('External');
+    expect(fireEvent.click(link)).toBe(true);
+    expect(openSpy).not.toHaveBeenCalled();
   });
 
   test('target _blank announces srLabel to screen readers, not as visible text', () => {
@@ -41,32 +43,12 @@ describe('Link', () => {
     expect(visible).toHaveLength(1);
   });
 
-  test('target _blank click does not call window.open (native navigation)', () => {
-    const openSpy = vi.spyOn(window, 'open');
-    render(<Link href="https://example.com" target="_blank">External</Link>);
-    fireEvent.click(screen.getByRole('link', { name: 'External' }));
-    expect(openSpy).not.toHaveBeenCalled();
-  });
-
-  test('target _blank without srLabel keeps accessible name as the children', () => {
-    render(<Link href="https://example.com" target="_blank">External</Link>);
-    const link = screen.getByRole('link', { name: 'External' });
-    expect(link).toHaveAccessibleName('External');
-  });
-
   test('empty href does not navigate and prevents default', () => {
     const openSpy = vi.spyOn(window, 'open');
     render(<Link href="">Contact me</Link>);
     const link = screen.getByText('Contact me');
-    fireEvent.click(link);
+    expect(fireEvent.click(link)).toBe(false);
     expect(openSpy).not.toHaveBeenCalled();
-  });
-
-  test('shows visible focus indicator when focused with keyboard', () => {
-    render(<Link href="/en#contact">Contact me</Link>);
-    const link = screen.getByRole('link', { name: 'Contact me' });
-    link.focus();
-    expect(link).toHaveFocus();
   });
 
   test('renders null when children is missing', () => {
@@ -81,13 +63,4 @@ describe('Link', () => {
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
   });
 
-  test('handles hover events on enabled link without error', () => {
-    render(<Link href="/en#contact">Contact me</Link>);
-    const link = screen.getByRole('link', { name: 'Contact me' });
-    expect(() => {
-      fireEvent.mouseEnter(link);
-      fireEvent.mouseLeave(link);
-    }).not.toThrow();
-    expect(link).toBeInTheDocument();
-  });
 });

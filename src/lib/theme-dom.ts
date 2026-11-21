@@ -43,7 +43,7 @@ export function setTheme(theme: Theme, deps: ThemeDeps = {}): void {
   try {
     storage?.setItem(THEME_STORAGE_KEY, theme);
   } catch {
-    // RF-7: si el almacenamiento falla al escribir, no hay error ni bloqueo
+    // RF-7: if storage fails to write, there is no error nor blocking
   }
 
   let applied = false;

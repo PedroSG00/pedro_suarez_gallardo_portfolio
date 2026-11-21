@@ -31,40 +31,40 @@ afterEach(() => {
 });
 
 describe("readStoredTheme", () => {
-  test("devuelve 'light' con un valor válido", () => {
+  test("returns 'light' for a valid value", () => {
     const storage = { getItem: () => "light" };
     expect(readStoredTheme(storage)).toBe("light");
   });
 
-  test("devuelve 'dark' con un valor válido", () => {
+  test("returns 'dark' for a valid value", () => {
     const storage = { getItem: () => "dark" };
     expect(readStoredTheme(storage)).toBe("dark");
   });
 
-  test("devuelve null sin valor guardado", () => {
+  test("returns null with no saved value", () => {
     const storage = { getItem: () => null };
     expect(readStoredTheme(storage)).toBeNull();
   });
 
-  test("devuelve null con un valor inválido", () => {
+  test("returns null for an invalid value", () => {
     for (const value of ["auto", "", "Dark", "LIGHT", null]) {
       const storage = { getItem: () => value };
       expect(readStoredTheme(storage)).toBeNull();
     }
   });
 
-  test("devuelve null si el almacenamiento lanza", () => {
+  test("returns null if storage throws", () => {
     const storage = { getItem: () => {
       throw new Error("blocked");
     } };
     expect(readStoredTheme(storage)).toBeNull();
   });
 
-  test("devuelve null si el almacenamiento es null", () => {
+  test("returns null if storage is null", () => {
     expect(readStoredTheme(null)).toBeNull();
   });
 
-  test("sin argumento lee el valor guardado de localStorage", () => {
+  test("without argument reads the saved value from localStorage", () => {
     window.localStorage.setItem(THEME_STORAGE_KEY, "dark");
     expect(readStoredTheme()).toBe("dark");
   });
@@ -82,7 +82,7 @@ describe("readStoredTheme", () => {
 });
 
 describe("applyTheme", () => {
-  test("escribe solo data-theme y no añade clases ni otros atributos", () => {
+  test("writes only data-theme and adds no classes or other attributes", () => {
     const root = document.documentElement;
     const before = Array.from(root.attributes).map((attr) => attr.name);
     applyTheme(root, "dark");
@@ -101,7 +101,7 @@ describe("applyTheme", () => {
 });
 
 describe("currentTheme", () => {
-  test("prefiere el atributo data-theme válido sobre el sistema", () => {
+  test("prefers a valid data-theme attribute over the system", () => {
     const root = document.documentElement;
     root.dataset.theme = "dark";
     expect(currentTheme(root, false)).toBe("dark");
@@ -109,13 +109,13 @@ describe("currentTheme", () => {
     expect(currentTheme(root, true)).toBe("light");
   });
 
-  test("sin atributo cae a la preferencia del sistema", () => {
+  test("falls back to the system preference without an attribute", () => {
     const root = document.documentElement;
     expect(currentTheme(root, true)).toBe("dark");
     expect(currentTheme(root, false)).toBe("light");
   });
 
-  test("con atributo inválido cae a la preferencia del sistema", () => {
+  test("falls back to the system preference with an invalid attribute", () => {
     const root = document.documentElement;
     root.dataset.theme = "auto";
     expect(currentTheme(root, true)).toBe("dark");
@@ -204,7 +204,7 @@ describe("setTheme", () => {
     expect((root as unknown as { writes: number }).writes).toBe(1);
   });
 
-  test("sin startViewTransition disponible, aplica directo", () => {
+  test("applies directly without startViewTransition available", () => {
     const root = makeRootMock();
     const storage = makeStorageMock();
     setTheme("dark", { root, storage, startViewTransition: undefined });
@@ -271,13 +271,13 @@ describe("setTheme", () => {
     expect(storage.value).toBe("dark");
   });
 
-  test("tras setTheme, readStoredTheme devuelve el valor nuevo", () => {
+  test("after setTheme, readStoredTheme returns the new value", () => {
     const storage = makeStorageMock();
     setTheme("light", { storage });
     expect(readStoredTheme(storage)).toBe("light");
   });
 
-  test("setTheme con valor inválido no escribe nada", () => {
+  test("setTheme with an invalid value writes nothing", () => {
     const root = makeRootMock();
     const storage = makeStorageMock();
     setTheme("invalid" as Theme, { root, storage });
@@ -286,7 +286,7 @@ describe("setTheme", () => {
     expect(storage.value).toBeNull();
   });
 
-  test("la llamada pública setTheme(theme) sin dependencias funciona con document y localStorage reales", () => {
+  test("the public setTheme(theme) call without dependencies works with real document and localStorage", () => {
     const root = document.documentElement;
     resetRoot();
     expect(() => setTheme("dark")).not.toThrow();
@@ -294,7 +294,7 @@ describe("setTheme", () => {
     expect(window.localStorage.getItem(THEME_STORAGE_KEY)).toBe("dark");
   });
 
-  test("localStorage bloqueado: setTheme no lanza y aplica directo", () => {
+  test("localStorage blocked: setTheme does not throw and applies directly", () => {
     const root = makeRootMock();
     const original = window.localStorage;
     try {

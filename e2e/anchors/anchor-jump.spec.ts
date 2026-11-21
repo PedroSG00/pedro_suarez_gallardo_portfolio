@@ -66,20 +66,7 @@ async function computedTransformY(page: Page, selector: string): Promise<number>
 }
 
 test.describe('Anchor jump: destination section complete (RF-12)', () => {
-  test('all destination blocks have computed opacity 1 when arriving by anchor', async ({
-    page,
-  }) => {
-    await mountAnchorFixture(page);
-    await page.getByRole('link', { name: 'Go to destination' }).click();
-    await page.waitForURL(/#destino/);
-    await page.evaluate(() =>
-      new Promise<void>((resolveFrame) => requestAnimationFrame(() => resolveFrame())),
-    );
-
-    expect(await computedOpacity(page, '#destino')).toBe(1);
-  });
-
-  test('no destination block appears half-revealed after an anchor jump', async ({
+  test('anchor arrival leaves the destination fully opaque and undisplaced', async ({
     page,
   }) => {
     await mountAnchorFixture(page);

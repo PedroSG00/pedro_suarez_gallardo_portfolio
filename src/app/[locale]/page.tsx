@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { buildSectionDestinations } from '@/content/sections';
+import About from '@/components/sections/About/About';
 import Hero from '@/components/sections/Hero/Hero';
 import Section from '@/components/ui/Section/Section';
 import SectionHeading from '@/components/ui/SectionHeading/SectionHeading';
@@ -17,13 +18,17 @@ export default async function LocalePage() {
     <>
       <Hero primaryHref="#work" secondaryHref="#contact" />
       {sections.map((section) => (
-        <Section key={section.id} id={section.id} labelledBy={`${section.id}-heading`}>
-          <SectionHeading
-            id={`${section.id}-heading`}
-            index={section.index}
-            label={section.label}
-          />
-        </Section>
+        section.id === 'about' ? (
+          <About key={section.id} />
+        ) : (
+          <Section key={section.id} id={section.id} labelledBy={`${section.id}-heading`}>
+            <SectionHeading
+              id={`${section.id}-heading`}
+              index={section.index}
+              label={section.label}
+            />
+          </Section>
+        )
       ))}
     </>
   );

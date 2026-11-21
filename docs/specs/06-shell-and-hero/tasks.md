@@ -734,6 +734,10 @@ El plan contiene algunos detalles de implementación que conviene fijar antes de
 - `pnpm test`: 486 pasan; 92.56 % sentencias, 88.64 % ramas, 91.96 % funciones y 92.82 % líneas.
 - `pnpm test:e2e`: 167 pasan, 0 fallan.
 
+**Regresión RF-3 en About — corregida y verificada en Chromium:** EN→ES→EN y ES→EN→ES conservan `#about` y la posición de lectura. La barra no se oculta al restaurar la posición; vuelve a ocultarse al bajar y reaparece al subir con la rueda. Pasan los 7 E2E dirigidos en desarrollo. La verificación de producción sigue bloqueada por el fixture preexistente `browserType` de `e2e/about.spec.ts`.
+
+**Regresión RF-3 de tema y recarga — verificada:** el cambio de tema no desplaza ni oculta la barra; el siguiente scroll manual hacia abajo sí la oculta. Recargar arriba o con posición restaurada conserva la barra visible hasta el primer scroll manual; subir o enfocar la revela. Pasan los 5 E2E dirigidos, incluidos EN→ES→EN y ES→EN→ES. `pnpm test` pasa (501 tests); typecheck/build y el E2E de producción siguen bloqueados por `e2e/about.spec.ts:454` (`browserType`), sin cambios en About/Reveal.
+
 ---
 
 ## T25 — Afinar controles de tema e idioma y menú móvil ✅ COMPLETADA

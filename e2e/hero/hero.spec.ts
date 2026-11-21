@@ -30,7 +30,7 @@ test.describe('Hero: entrada, cursor, contorno y parallax (RF-7, RF-9, RF-10)', 
     }
   });
 
-  test('entrada <= 600 ms y estado final estable', async ({ page }) => {
+  test('entry <= 600 ms and final state stable', async ({ page }) => {
     await loadHero(page, 'en', 'light');
 
     // After entry animations (600 ms), opacity 1 and no displacement.
@@ -65,8 +65,8 @@ test.describe('Hero: entrada, cursor, contorno y parallax (RF-7, RF-9, RF-10)', 
   });
 
   test('cursor: ciclo 1 s, 50 % encendido, aria-hidden', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
     await loadHero(page, 'en', 'light');
-    await page.waitForTimeout(700);
 
     const cursor = page.locator('h1#hero-name [data-hero-cursor]');
     await expect(cursor).toHaveAttribute('aria-hidden', 'true');
@@ -77,17 +77,28 @@ test.describe('Hero: entrada, cursor, contorno y parallax (RF-7, RF-9, RF-10)', 
     expect(cursorBox!.height).toBeGreaterThanOrEqual(lineBox!.height * 0.6);
     expect(cursorBox!.width).toBeGreaterThanOrEqual(lineBox!.height * 0.15);
 
-    const duration = await page.evaluate(() => {
-      const el = document.querySelector('h1#hero-name [data-hero-cursor]')!;
-      return getComputedStyle(el).animationDuration;
+    const blink = await cursor.evaluate(async (element) => {
+      const [animation] = element.getAnimations();
+      if (!animation?.effect) throw new Error('Expected an animation on the cursor itself');
+      await animation.ready;
+      const { duration, iterations } = animation.effect.getTiming();
+      const running = animation.playState;
+      // Read computed opacity at fixed times around both half-cycle boundaries.
+      // A wall-clock wait cannot guarantee the interval between rendered frames.
+      animation.pause();
+      await animation.ready;
+      const opacities = [0, 250, 499, 501, 750, 999, 1000, 1499, 1501].map((time) => {
+        animation.currentTime = time;
+        return Number(getComputedStyle(element).opacity);
+      });
+      return { duration, loops: iterations === Infinity, running, opacities };
     });
-    expect(duration).toBe('1s');
-
-    // 50 % encendido: en dos momentos distintos debe alternar visible/oculto.
-    const opacity1 = await cursor.evaluate((el) => Number(getComputedStyle(el).opacity));
-    await page.waitForTimeout(500);
-    const opacity2 = await cursor.evaluate((el) => Number(getComputedStyle(el).opacity));
-    expect(opacity1).not.toBe(opacity2);
+    expect(blink).toEqual({
+      duration: 1000,
+      loops: true,
+      running: 'running',
+      opacities: [1, 1, 1, 0, 0, 0, 1, 1, 0],
+    });
   });
 
   test('keeps the fill solid through most of exit before resolving to a clean outline', async ({
