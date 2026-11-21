@@ -27,7 +27,7 @@ async function mountFixture(
       [data-reveal-root] { height: ${BLOCK_HEIGHT}px; }
     </style>
     <main>
-      ${html}
+      ${html.replaceAll('data-reveal-root', 'data-reveal-root data-reveal-ready')}
     </main>
   `);
   await page.addStyleTag({ content: revealStyles });
@@ -110,10 +110,8 @@ test.describe('T19: real evidence per RF', () => {
 
     const opacity = await computedOpacity(page, '[aria-label="Short page block"]');
 
-    // With JS, isShortPage => forceVisible => opacity 1. Without JS (blocked),
-    // it may be dimmed (relaxation T18). JS is blocked here, so we verify
-    // it is visible (opacity > 0), not necessarily 1.
-    expect(opacity).toBeGreaterThan(0);
+    // Without JavaScript the shared Reveal must remain fully static.
+    expect(opacity).toBe(1);
   });
 
   test('RF-07: fast scroll and abrupt stop, stable blocks opacity 1', async ({

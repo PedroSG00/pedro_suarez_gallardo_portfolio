@@ -68,6 +68,7 @@
   inset-inline-start: 0;
   view-timeline-name: --reveal-exit;
   view-timeline-axis: block;
+  view-timeline-inset: 0px;
 }
 
 @keyframes reveal-enter {
@@ -112,7 +113,8 @@
     animation:
       reveal-enter auto linear both,
       reveal-exit auto linear both;
-    animation-timeline: --reveal-entry, view(block 0px);
+    /* Edge markers keep the reading interval independent of block height. */
+    animation-timeline: --reveal-entry, --reveal-exit;
     animation-range:
       cover var(--psg-reveal-entry-start, 0%) cover 18%,
       cover 80% cover 100%;
@@ -157,6 +159,15 @@
   [data-reveal-root][data-reveal-variant="fade"] {
     transform: none;
   }
+
+/* Server-rendered content stays static until this block confirms hydration.
+   JavaScript availability is independent of scroll-timeline support. */
+[data-reveal-root]:not([data-reveal-ready]) {
+  animation: none;
+  opacity: 1;
+  transform: none;
+  clip-path: none;
+}
 
 @supports not (animation-timeline: view()) {
   [data-reveal-root] {

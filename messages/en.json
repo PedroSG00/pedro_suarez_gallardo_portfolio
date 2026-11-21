@@ -53,9 +53,30 @@
     },
     "portraitAlt": "Portrait of Pedro Suárez Gallardo"
   },
-  "work": {
-    "intro": "Experience",
-    "results": "Results"
+  "experience": {
+    "title": "What I've built.",
+    "items": {
+      "desktopAppsToWeb": {
+        "title": "Desktop apps, moved to the web.",
+        "result": "I migrated two contact-center applications and redesigned their multilanguage interface. Both are in production and actively maintained."
+      },
+      "liveSupervisionDashboard": {
+        "title": "A real-time supervision dashboard.",
+        "result": "Tracks agent activity live, with customizable views and charts over hundreds of thousands of records."
+      },
+      "adminSuite": {
+        "title": "An admin suite with dozens of sections.",
+        "result": "Custom reporting, plus complex forms and tables with advanced validation."
+      },
+      "visualFlowEditor": {
+        "title": "A visual flow editor.",
+        "result": "A workflow system for chatbots and voice menus (IVR), plus the frontend of a real-time live chat."
+      },
+      "integrationsAndBackendApis": {
+        "title": "Integrations and backend APIs.",
+        "result": "Messaging and CRM integrations through REST APIs and third-party SDKs, REST APIs in Node.js (Express), C# and PHP, Python automation, and backend refactors for speed and clarity."
+      }
+    }
   },
   "stack": {
     "intro": "Stack"

@@ -15,7 +15,7 @@ Fuera de alcance por ahora: sección de proyectos y ruta `/projects/[slug]` (fut
 - [x] 05 Movimiento de scroll (`Reveal`)
 - [x] 06 Shell y Hero
 - [x] 07 About
-- [ ] 08 Work
+- [x] 08 Work
 - [ ] 09 Stack
 - [ ] 10 Contact y enlaces del footer
 - [ ] 11 SEO y metadatos

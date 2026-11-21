@@ -1,0 +1,39 @@
+[data-work-row] {
+  --work-surface: var(--color-surface);
+  --work-ink: var(--color-ink);
+  --work-number: var(--color-ink-muted);
+  --work-line: var(--color-line);
+
+  background-color: var(--work-surface);
+  color: var(--work-ink);
+  border-color: var(--work-line);
+}
+
+[data-work-row] [data-work-number] {
+  color: var(--work-number);
+}
+
+[data-work-row] [data-work-technologies] > span {
+  background-color: var(--work-surface);
+  color: var(--work-ink);
+  border-color: var(--work-line);
+}
+
+[data-work-row],
+[data-work-row] span {
+  transition:
+    background-color var(--duration-state),
+    color var(--duration-state),
+    border-color var(--duration-state);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  [data-work-row]:hover {
+    /* Swap the active theme's ink/surface pair without changing the theme.
+       Local aliases also keep the informational tags in the same palette. */
+    --work-surface: var(--color-ink);
+    --work-ink: var(--color-surface);
+    --work-number: var(--color-surface);
+    --work-line: var(--color-surface);
+  }
+}

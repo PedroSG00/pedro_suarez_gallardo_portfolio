@@ -45,17 +45,17 @@ async function mountFallbackFixture(
       [data-reveal-root] { height: ${BLOCK_HEIGHT}px; }
     </style>
     <main>
-      <section class="reveal" data-reveal-root role="group" aria-label="Bloque A">
+      <section class="reveal" data-reveal-root data-reveal-ready role="group" aria-label="Bloque A">
         <span data-reveal-entry-marker aria-hidden="true"></span>
         <span data-reveal-exit-marker aria-hidden="true"></span>
         <h2>Bloque A</h2>
       </section>
-      <section class="reveal" data-reveal-root role="group" aria-label="Bloque B">
+      <section class="reveal" data-reveal-root data-reveal-ready role="group" aria-label="Bloque B">
         <span data-reveal-entry-marker aria-hidden="true"></span>
         <span data-reveal-exit-marker aria-hidden="true"></span>
         <h2>Bloque B</h2>
       </section>
-      <section class="reveal" data-reveal-root role="group" aria-label="Bloque C">
+      <section class="reveal" data-reveal-root data-reveal-ready role="group" aria-label="Bloque C">
         <span data-reveal-entry-marker aria-hidden="true"></span>
         <span data-reveal-exit-marker aria-hidden="true"></span>
         <h2>Bloque C</h2>
