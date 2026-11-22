@@ -1,3 +1,12 @@
+[data-work-content] > h3 {
+  padding-block: calc(var(--spacing) * 4) calc(var(--spacing) * 8);
+  font-size: var(--text-title);
+  font-weight: var(--font-weight-emphasis);
+  line-height: var(--text-title--line-height);
+  letter-spacing: var(--text-title--letter-spacing);
+  text-wrap: balance;
+}
+
 [data-work-row] {
   --work-surface: var(--color-surface);
   --work-ink: var(--color-ink);
@@ -7,10 +16,69 @@
   background-color: var(--work-surface);
   color: var(--work-ink);
   border-color: var(--work-line);
+  padding: calc(var(--spacing) * 6) calc(var(--spacing) * 4);
+}
+
+[data-work-row]:last-child {
+  border-bottom: var(--line-width) solid var(--work-line);
+}
+
+[data-work-composition] {
+  display: grid;
+  min-width: 0;
+  gap: calc(var(--spacing) * 6);
+  align-items: start;
+}
+
+[data-work-composition] > h4 {
+  min-width: 0;
+  font-size: max(calc(var(--text-body) * 1.5), calc(var(--text-title) * 0.75));
+  font-weight: var(--font-weight-emphasis);
+  line-height: var(--text-title--line-height);
+  letter-spacing: var(--text-title--letter-spacing);
+  text-wrap: balance;
 }
 
 [data-work-row] [data-work-number] {
   color: var(--work-number);
+  font-size: var(--text-meta);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--text-meta--line-height);
+  letter-spacing: var(--text-meta--letter-spacing);
+}
+
+[data-work-details] {
+  align-self: end;
+}
+
+[data-work-details] > p {
+  text-wrap: pretty;
+}
+
+@media (min-width: 768px) {
+  [data-work-row] {
+    padding: calc(var(--spacing) * 8);
+  }
+
+  [data-work-composition] {
+    grid-template-columns: max-content minmax(0, 1fr);
+    column-gap: calc(var(--spacing) * 10);
+  }
+
+  [data-work-details] {
+    grid-column: 2;
+  }
+}
+
+@media (min-width: 1024px) {
+  [data-work-composition] {
+    grid-template-columns: max-content minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  [data-work-details] {
+    grid-column: 3;
+    padding-top: calc(var(--spacing) * 2);
+  }
 }
 
 [data-work-row] [data-work-technologies] > span {

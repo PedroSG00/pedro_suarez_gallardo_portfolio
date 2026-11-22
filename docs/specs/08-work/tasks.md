@@ -352,3 +352,11 @@
 - La evidencia de navegador es Chromium; la ausencia de soporte de scroll se simula sobre el CSS servido. No acredita una ejecución nativa en Safari/Firefox ni hardware híbrido físico. Estas limitaciones no bloquean los criterios de esta spec; permanecen para la fase de pulido multiplataforma.
 - Verificación independiente final: `pnpm test` (490/490, 44 archivos) y `pnpm test:e2e --workers=2` (306/306, Chromium) pasan sin reintentos. La auditoría requisito por requisito confirma cobertura observable y resultados verdes para RF-1–RF-6; los criterios de finalización y el brief aprobado quedan satisfechos.
 - `git diff --check` pasa. **Cierre:** Work queda completada; todos los requisitos funcionales y no funcionales definidos para esta spec cuentan con evidencia en verde.
+
+## Reajuste visual — 2026-11-22
+
+- A petición de Pedro, se refuerza la presentación local de Work: apertura de gran escala, índices protagonistas y titulares destacados junto a la explicación en escritorio; composición apilada en móvil. Se conservan contenido bilingüe, semántica, navegación, inversión y movimiento.
+- Tests primero: los cuatro escenarios nuevos de jerarquía editorial fallan con la presentación anterior. Se comprueban tamaños relativos y disposición visible, no clases. La revisión al 200 % detecta índices partidos; la comprobación de una sola línea falla antes de reservarles una columna de ancho intrínseco.
+- Solo se modifican `Work.tsx`, `Work.module.css`, su prueba e2e y la documentación de la spec. Sin cambios en componentes compartidos, tokens globales, traducciones ni dependencias.
+- Validación final en orden: `pnpm lint`, `pnpm typecheck`, `pnpm test` (490/490), `pnpm build` y `pnpm test:e2e --workers=2` (310/310, Chromium, sin reintentos), todos verdes. Cobertura global: 96,77 % sentencias, 92,66 % ramas, 97,69 % funciones y 96,98 % líneas.
+- Revisión visual del render en castellano/claro e inglés/oscuro a 1440 px y castellano a 390 px; también se revisan las composiciones intermedias a 768/1024 px y el hover completo. Se comprueban los cinco índices al 200 %. Las pruebas conservan la matriz EN/ES, temas, adaptación 320/1920 px, contraste, movimiento y fallbacks.

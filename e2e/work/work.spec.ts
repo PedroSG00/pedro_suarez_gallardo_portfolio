@@ -67,6 +67,49 @@ for (const item of LOCALES) {
     test.describe(`${item.locale}, ${theme}: Work accessibility and reflow`, () => {
       test.use({ reducedMotion: 'reduce', colorScheme: theme });
 
+      test('editorial hierarchy separates result headlines from supporting copy across viewports', async ({ page }) => {
+        await page.setViewportSize({ width: 1440, height: 1000 });
+        await page.goto(`/${item.locale}#work`);
+        await page.evaluate(() => document.fonts.ready);
+        const work = page.getByRole('region', { name: item.label, exact: true });
+        const intro = work.getByRole('heading', { level: 3 });
+        const sectionHeading = work.getByRole('heading', { level: 2 });
+        const rows = work.getByRole('listitem');
+        for (const width of [1440, 390]) {
+          await page.setViewportSize({ width, height: 1000 });
+          const opening = await intro.evaluate((element) => {
+            const style = getComputedStyle(element);
+            return {
+              size: Number.parseFloat(style.fontSize),
+              contentHeight: element.getBoundingClientRect().height -
+                Number.parseFloat(style.paddingTop) - Number.parseFloat(style.paddingBottom),
+              lineHeight: Number.parseFloat(style.lineHeight),
+            };
+          });
+          const headingSize = await sectionHeading.evaluate((element) =>
+            Number.parseFloat(getComputedStyle(element).fontSize));
+          expect(opening.size).toBeLessThanOrEqual(headingSize);
+          if (width === 1440) {
+            expect(opening.contentHeight).toBeLessThanOrEqual(opening.lineHeight + 1);
+          }
+          for (const row of await rows.all()) {
+            const title = row.getByRole('heading', { level: 4 });
+            const description = row.getByRole('paragraph');
+            const size = (text: Locator) => text.evaluate((element) =>
+              Number.parseFloat(getComputedStyle(element).fontSize));
+            expect(await size(title)).toBeGreaterThanOrEqual(await size(description) * 1.5);
+            expect(await size(intro)).toBeGreaterThan(await size(title));
+            const headline = (await title.boundingBox())!;
+            const copy = (await description.boundingBox())!;
+            if (width === 1440) {
+              expect(copy.x).toBeGreaterThanOrEqual(headline.x + headline.width);
+            } else {
+              expect(copy.y).toBeGreaterThanOrEqual(headline.y + headline.height);
+            }
+          }
+        }
+      });
+
       for (const width of [320, 1920]) {
         for (const scale of [1, 2]) {
           test(`${width}px, ${scale * 100}% text: all results reflow without clipping or overlap`, async ({ page }) => {
@@ -111,6 +154,11 @@ for (const item of LOCALES) {
               await expect(row.getByRole('paragraph')).toHaveText(copy.result);
               const number = row.getByText(String(index + 1).padStart(2, '0'), { exact: true });
               await expect(number).toHaveAttribute('aria-hidden', 'true');
+              const numberLayout = await number.evaluate((element) => ({
+                height: element.getBoundingClientRect().height,
+                lineHeight: Number.parseFloat(getComputedStyle(element).lineHeight),
+              }));
+              expect(numberLayout.height).toBeLessThanOrEqual(numberLayout.lineHeight + 1);
               for (const text of [number, row.getByRole('paragraph'),
                 ...entry.technologies.map((name) => row.getByText(name, { exact: true }))]) {
                 allLines.push(...(await expectReadableText(text)).map((line) => ({ ...line, group })));

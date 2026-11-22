@@ -67,7 +67,7 @@ describe.each(LOCALES)('Work in $locale', ({ locale, label, title, entries }) =>
     });
   });
 
-  test('keeps the visual row numbers decorative for assistive technology', () => {
+  test('keeps row numbers and illustrative icons decorative for assistive technology', () => {
     renderWithIntl(<Work />, { locale });
 
     const rows = within(screen.getByRole('list')).getAllByRole('listitem');
@@ -75,7 +75,13 @@ describe.each(LOCALES)('Work in $locale', ({ locale, label, title, entries }) =>
       const number = within(row).getByText(String(index + 1).padStart(2, '0'));
       expect(number).toBeVisible();
       expect(number).toHaveAttribute('aria-hidden', 'true');
+      const icon = within(row).getByRole('img', { hidden: true });
+      expect(icon).toBeVisible();
+      expect(icon).toHaveAttribute('aria-hidden', 'true');
+      expect(icon).toHaveAttribute('focusable', 'false');
+      expect(icon).not.toHaveAccessibleName();
     });
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
   });
 
   test('keeps results and technology labels informational without focus stops', () => {
