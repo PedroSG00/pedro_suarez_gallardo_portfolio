@@ -115,6 +115,14 @@ Momento firma: cada fila entra con su número tabular; en hover se invierte (cru
 
 - **Titular EN:** The tools I trust. / **ES:** Las herramientas en las que confío.
 
+### Dirección de experiencia propuesta
+
+Presentar el stack como un canvas espectacular e interactivo, no como una lista convencional: las tecnologías aparecen como cartas flotantes con icono y nombre. Un switch permite pasar de 2D a 3D y viceversa; el cambio debe sentirse natural y mantener la continuidad visual de la composición, no reemplazarla por otra escena. En el centro hay un casillero; al llevar una carta hasta él —o seleccionarla mediante una alternativa accesible sin arrastre— se muestra información sobre esa tecnología.
+
+La interacción debe ayudar a entender cómo Pedro usa cada tecnología, no sugerir niveles, puntuaciones ni dominio comparativo. El contenido concreto de esa información se definirá y validará en la spec 09, usando únicamente datos respaldados por el CV y este brief. La experiencia debe conservar una alternativa estática y legible con movimiento reducido o cuando no haya soporte 3D.
+
+### Tecnologías y agrupación aprobadas
+
 Agrupado como en el CV. Sin niveles ni barras de progreso.
 
 | Grupo (EN / ES) | Tecnologías |
@@ -125,7 +133,7 @@ Agrupado como en el CV. Sin niveles ni barras de progreso.
 | Tools / Herramientas | Git, GitHub Copilot, OpenCode |
 
 Prioridad al frontend (React y TypeScript). Sin jQuery ni Bootstrap en la lista general.
-Momento firma: los grupos entran escalonados; las tecnologías aparecen como etiquetas mono.
+Momento firma propuesto: cartas de tecnología flotantes en un canvas que transiciona naturalmente entre los modos 2D y 3D mediante un switch; el casillero central transforma la selección en información útil.
 
 ---
 

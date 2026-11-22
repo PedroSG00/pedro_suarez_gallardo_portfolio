@@ -12,6 +12,7 @@ Minimal in elements, spectacular in execution: an editorial, high-impact piece, 
 - Monospaced typography at extreme scale: massive fluid headlines against small, readable body text.
 - Visible grid, numbered sections, inverted blocks, asymmetry and generous negative space.
 - CSS-only motion: every block animates **in as it enters the viewport and out as it leaves** while scrolling, plus staggered entrances and themed transitions. Anchor scrolling uses native smooth behavior only when `prefers-reduced-motion` is not set; reload and locale switching keep the viewport position.
+- Stack's planned signature moment: a striking canvas of floating technology cards with a switch that naturally transitions between 2D and 3D. Selecting or dragging a card to a central slot reveals information about that technology; the interaction must remain usable without drag, 3D, or motion.
 - Voice: short, affirmative, benefit first.
 
 Details live in `AGENTS.md`; each section defines its own "signature moment".
