@@ -97,10 +97,16 @@
       "engine": "Three.js / CAD",
       "view": "Vista 3D",
       "viewOptions": "2D / 3D",
+      "zoom": {
+        "label": "Zoom 3D",
+        "in": "Acercar",
+        "out": "Alejar",
+        "level": "{level} %"
+      },
       "list": "Lista de tecnologías",
       "plane": "2D // Ortográfica",
       "space": "3D // Perspectiva",
-      "hint": "Selecciona una carta",
+      "hint": "Elige o arrastra al casillero",
       "modules": "{count} módulos",
       "slot": "Ranura: {name}",
       "empty": "vacía"
@@ -108,6 +114,7 @@
     "detail": {
       "label": "Detalle de tecnología",
       "empty": "Selecciona una carta para ver qué es.",
+      "emptyWithDrag": "Selecciona una carta o arrástrala aquí para ver qué es.",
       "select": "Seleccionar {name}",
       "eject": "Expulsar",
       "feedback": {

@@ -10,7 +10,7 @@ vi.mock('./StackCanvas', () => ({
     onSceneStatusChange,
     onSelect,
   }: {
-    onSceneStatusChange: (status: 'ready' | 'fallback') => void;
+    onSceneStatusChange: (status: 'ready' | 'flat' | 'fallback') => void;
     onSelect: (id: string) => void;
   }) => (
     <div>
@@ -22,6 +22,9 @@ vi.mock('./StackCanvas', () => ({
         }}
       >
         Select React from canvas
+      </button>
+      <button type="button" onClick={() => onSceneStatusChange('flat')}>
+        Open a flat-only scene
       </button>
     </div>
   ),
@@ -71,5 +74,15 @@ describe('StackFlatList scene integration', () => {
     expect(list).toHaveAttribute('aria-expanded', 'false');
     fireEvent.click(view);
     expect(view).not.toBeChecked();
+  });
+
+  test('keeps 2D and its list available without offering an unsupported projection', () => {
+    const cad = enMessages.stack.cad;
+    renderWithIntl(<StackFlatList />, { locale: 'en' });
+    fireEvent.click(screen.getByRole('button', { name: 'Open a flat-only scene' }));
+    expect(screen.queryByRole('switch', { name: cad.view })).not.toBeInTheDocument();
+    expect(screen.getByText(cad.plane)).toBeVisible();
+    expect(screen.getByRole('button', { name: cad.list })).toBeVisible();
+    expect(screen.getAllByRole('listitem')).toHaveLength(STACK_TECHNOLOGIES.length);
   });
 });

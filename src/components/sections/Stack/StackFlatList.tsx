@@ -28,6 +28,7 @@ import StackDetail, {
   type StackDetailTechnology,
 } from '@/components/sections/Stack/StackDetail';
 import StackWorkbench from '@/components/sections/Stack/StackWorkbench';
+import type { StackSceneStatus } from '@/lib/stack/stack-scene-types';
 
 const STACK_LIST_ID = 'stack-technology-list';
 
@@ -57,10 +58,8 @@ export default function StackFlatList() {
   const [feedback, setFeedback] = useState<StackDetailFeedback | null>(null);
   const [mounted, setMounted] = useState(false);
   const [listOpen, setListOpen] = useState(false);
-  const [sceneStatus, setSceneStatus] = useState<
-    'checking' | 'fallback' | 'ready'
-  >('checking');
-  const sceneActive = sceneStatus === 'ready';
+  const [sceneStatus, setSceneStatus] = useState<'checking' | StackSceneStatus>('checking');
+  const sceneActive = sceneStatus === 'ready' || sceneStatus === 'flat';
 
   useEffect(() => {
     // Keep JavaScript-only controls out of the server HTML.
@@ -148,6 +147,7 @@ export default function StackFlatList() {
     >
       <StackWorkbench
         active={sceneActive}
+        supportsPerspective={sceneStatus === 'ready'}
         technologies={sceneTechnologies}
         filter={stackState.filter}
         selectedId={stackState.selectedId}
@@ -155,6 +155,7 @@ export default function StackFlatList() {
         listId={STACK_LIST_ID}
         listOpen={listOpen}
         onSelect={handleSceneSelect}
+        onReceive={handleReceive}
         onSceneStatusChange={setSceneStatus}
         onToggleList={() => setListOpen((open) => !open)}
         filters={
@@ -170,6 +171,7 @@ export default function StackFlatList() {
         detail={mounted && (
           <StackDetail
             technology={selectedDetail}
+            canDragCard={sceneActive && !listOpen}
             feedback={feedback}
             canReceiveTechnology={(id) => isTechnologyEnabled(id)}
             onReceive={handleReceive}

@@ -53,6 +53,11 @@ const three = vi.hoisted(() => {
 
     copy(value: FakeVector) {
       this.set(value.x, value.y, value.z);
+      return this;
+    }
+
+    project() {
+      return this;
     }
   }
 
@@ -157,6 +162,7 @@ const three = vi.hoisted(() => {
     aspect = 1;
     lookAt = vi.fn();
     updateProjectionMatrix = vi.fn();
+    updateMatrixWorld = vi.fn();
 
     constructor(
       public readonly fov: number,
@@ -194,6 +200,7 @@ const three = vi.hoisted(() => {
     dispose = vi.fn();
     setPixelRatio = vi.fn();
     setSize = vi.fn();
+    getContext = () => ({ getContextAttributes: () => ({ depth: true }) });
 
     constructor(public readonly options: Record<string, unknown>) {
       state.renderer = this;
@@ -202,6 +209,7 @@ const three = vi.hoisted(() => {
 
   class FakeRaycaster {
     setFromCamera = vi.fn();
+    ray = { intersectPlane: vi.fn(() => new FakeVector()) };
 
     constructor() {
       state.raycaster = this;
@@ -219,6 +227,7 @@ const three = vi.hoisted(() => {
     set(x: number, y: number) {
       this.x = x;
       this.y = y;
+      return this;
     }
   }
 
@@ -307,6 +316,9 @@ vi.mock('three', () => ({
   LineBasicMaterial: three.FakeMaterial,
   BoxGeometry: three.FakeGeometry,
   PlaneGeometry: three.FakeGeometry,
+  Plane: class {
+    constant = 0;
+  },
   MeshStandardMaterial: three.FakeMaterial,
   MeshBasicMaterial: three.FakeMaterial,
   ShadowMaterial: three.FakeMaterial,
@@ -432,6 +444,8 @@ function setMotionPreference(reducedMotion: boolean) {
   };
 }
 
+const zoomInput = { zoom: 100, onZoom: vi.fn() };
+
 function mountScene(
   canvas: HTMLCanvasElement,
   options: Partial<Parameters<typeof mountStackScene>[1]> = {},
@@ -442,6 +456,8 @@ function mountScene(
     filter: 'all',
     selectedId: null,
     onSelect: vi.fn(),
+    onReceive: vi.fn(),
+    ...zoomInput,
     ...options,
   });
 }
@@ -603,7 +619,10 @@ describe('mountStackScene', () => {
 
   test('switches projections on the same stage without rebuilding cards or moving the occupied slot', () => {
     setMotionPreference(true);
-    const selection = { technologies, filter: 'all', selectedId: 'react', onSelect: vi.fn() } as const;
+    const selection = {
+      technologies, filter: 'all', selectedId: 'react', onSelect: vi.fn(), onReceive: vi.fn(),
+      ...zoomInput,
+    } as const;
     const handle = mountScene(makeCanvas(), selection);
     const { render: draw } = three.state.renderer ?? {};
     const scene = three.state.scene;
@@ -627,6 +646,32 @@ describe('mountStackScene', () => {
     handle.update({ ...selection, mode: '2d' });
     expect(draw).toHaveBeenLastCalledWith(scene, flatCamera);
     handle.dispose();
+  });
+
+  test('consumes vertical wheel for 3D only and leaves browser gestures alone', () => {
+    setMotionPreference(true);
+    const canvas = makeCanvas();
+    const onZoom = vi.fn();
+    const options = {
+      technologies, filter: 'all', selectedId: null, zoom: 100,
+      onSelect: vi.fn(), onReceive: vi.fn(), onZoom,
+    } as const;
+    const handle = mountScene(canvas, options);
+    const wheel = (input: WheelEventInit) =>
+      canvas.dispatchEvent(new WheelEvent('wheel', { cancelable: true, ...input }));
+
+    expect(wheel({ deltaY: 20 })).toBe(true);
+    handle.update({ ...options, mode: '3d' });
+    expect(wheel({ deltaY: -20, ctrlKey: true })).toBe(true);
+    expect(wheel({ deltaX: 30, deltaY: 5 })).toBe(true);
+    expect(wheel({ deltaY: -20 })).toBe(false);
+    expect(wheel({ deltaY: 20 })).toBe(false);
+    handle.update({ ...options, mode: '2d' });
+    expect(wheel({ deltaY: 20 })).toBe(true);
+    handle.update({ ...options, mode: '3d' });
+    handle.dispose();
+    expect(wheel({ deltaY: 20 })).toBe(true);
+    expect(onZoom.mock.calls).toEqual([['in'], ['out']]);
   });
 
   test('selects enabled cards by raycasting and ignores cards outside the active filter', () => {
@@ -656,6 +701,8 @@ describe('mountStackScene', () => {
       filter: 'frontend',
       selectedId: null,
       onSelect,
+      onReceive: vi.fn(),
+      ...zoomInput,
     });
     three.state.intersections = [{ object: node }];
     canvasClick();
@@ -683,6 +730,8 @@ describe('mountStackScene', () => {
       filter: 'all',
       selectedId: 'react',
       onSelect: vi.fn(),
+      onReceive: vi.fn(),
+      ...zoomInput,
     });
     expect(react.userData.inSlot).toBe(true);
     expect(react.position).toMatchObject({ x: 0, y: 0 });
@@ -693,6 +742,8 @@ describe('mountStackScene', () => {
       filter: 'all',
       selectedId: null,
       onSelect: vi.fn(),
+      onReceive: vi.fn(),
+      ...zoomInput,
     });
     expect(react.userData.inSlot).toBe(false);
     expect(react.position.y).toBe(originalPosition.y);
@@ -706,6 +757,8 @@ describe('mountStackScene', () => {
     expect(three.state.frameCallbacks).toHaveLength(0);
 
     preference.setReducedMotion(false);
+    expect(three.state.frameCallbacks).toHaveLength(0);
+    three.state.observer?.trigger(true);
     expect(three.state.frameCallbacks).toHaveLength(1);
     three.state.observer?.trigger(false);
     expect(three.state.cancelledFrames).toContain(1);
@@ -728,6 +781,39 @@ describe('mountStackScene', () => {
     handle.dispose();
     expect(preference.listenerCount()).toBe(0);
     expect(three.state.observer?.disconnect).toHaveBeenCalledOnce();
+  });
+
+  test('drifts slowly, freezes offscreen, and restores rest without moving the occupied slot', () => {
+    const preference = setMotionPreference(false);
+    const handle = mountScene(makeCanvas(), { selectedId: 'react' });
+    const meshes = three.state.scene?.children
+      // eslint-disable-next-line testing-library/no-node-access -- Three.js scene graph.
+      .flatMap((child) => child instanceof three.FakeGroup ? child.children : [])
+      .filter((mesh) => typeof mesh.userData.technologyId === 'string') ?? [];
+    const occupant = meshes.find((mesh) => mesh.userData.inSlot);
+    const read = () => meshes.map(({ position: { x, y, z } }) => ({ x, y, z }));
+    const rest = read();
+    expect(rest).toHaveLength(25);
+    expect(three.state.frameCallbacks).toHaveLength(0);
+    const frame = (time: number) => three.state.frameCallbacks.at(-1)?.(time);
+    three.state.observer?.trigger(true);
+    frame(100);
+    frame(140);
+    frame(180);
+    const drifting = read();
+    expect(drifting).not.toEqual(rest);
+    for (const [index, point] of drifting.entries()) {
+      expect(Math.hypot(point.x - rest[index].x, point.y - rest[index].y)).toBeLessThan(0.1);
+    }
+    expect(occupant?.position).toMatchObject({ x: 0, y: 0 });
+
+    three.state.observer?.trigger(false);
+    three.state.observer?.trigger(true);
+    frame(60_000);
+    expect(read()).toEqual(drifting);
+    preference.setReducedMotion(true);
+    expect(read()).toEqual(rest);
+    handle.dispose();
   });
 
   test('refreshes card and stage colors when the active theme changes', async () => {
@@ -787,11 +873,13 @@ describe('mountStackScene', () => {
 
 function canvasClick() {
   const canvas = three.state.renderer?.options.canvas as HTMLCanvasElement;
-  canvas.dispatchEvent(
-    new MouseEvent('click', {
+  for (const type of ['pointerdown', 'pointerup']) {
+    canvas.dispatchEvent(new PointerEvent(type, {
       bubbles: true,
       clientX: 600,
       clientY: 350,
-    }),
-  );
+      pointerId: 1,
+      isPrimary: true,
+    }));
+  }
 }

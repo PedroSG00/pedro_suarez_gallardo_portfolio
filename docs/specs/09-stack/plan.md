@@ -156,8 +156,8 @@ Seleccionar por control accesible ejecuta la misma función de estado, sin geome
 - 2D: cámara ortográfica frontal, retícula plana y distribución editorial.
 - 3D: cámara en perspectiva y retícula de suelo; las mismas cartas conservan su identidad/posición y enseñan el grosor real de sus cantos. Cada marca se integra en la cara, no como sprite flotante.
 - El slot tiene cavidad/profundidad y hover en ambas proyecciones. Escenario y cartas comparten escala, materiales y sistema de luz/sombra.
-- La mesa CAD ya permite alternar proyecciones en un fotograma; la interpolación de proyección y posición queda pendiente para T8 y se omitirá con `prefers-reduced-motion`.
-- El switch solo se muestra si `stack-capabilities` detecta 3D.
+- El cambio interpola la cámara y la proyección sin recalcular la colocación; ambas vistas encuadran toda el área donde pueden moverse las cartas. Las retículas se funden durante la transición, que usa un token de duración existente y se omite con `prefers-reduced-motion`.
+- El switch solo se muestra si `stack-capabilities` detecta un búfer de profundidad capaz de renderizar la perspectiva. Sin él, la escena ortográfica y su lista siguen disponibles; sin WebGL queda la lista plana.
 
 ### Cámara — RF-6, RF-7
 
@@ -169,6 +169,7 @@ girar(dx, dy): yaw = limitar(yaw + dx, -MAX_YAW, MAX_YAW)
 
 - Arrastrar el fondo rota; arrastrar una carta mueve la carta.
 - Los límites garantizan que todas las cartas sigan dentro del frustum explorable.
+- El zoom de la vista 3D va del 85 % al 110 %, parte del 100 % y cambia en pasos de 5 puntos. El máximo se ajusta al área útil para mantener visibles las cartas de los bordes; solo la rueda vertical sobre el canvas 3D controla el zoom.
 - Sin animación autónoma: la cámara solo se mueve por entrada de la persona.
 
 ### Render bajo demanda — rendimiento

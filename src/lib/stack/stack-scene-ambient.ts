@@ -6,7 +6,7 @@ const AMBIENT_FRAME_INTERVAL = 1000 / 30;
 
 export function observeStackSceneMotion(
   host: HTMLElement,
-  render: () => void,
+  restoreRest: () => void,
   animate: (time: number) => void,
 ): AmbientMotionHandle {
   const motionQuery =
@@ -14,15 +14,17 @@ export function observeStackSceneMotion(
       ? window.matchMedia('(prefers-reduced-motion: reduce)')
       : null;
   let isReducedMotion = motionQuery?.matches ?? false;
-  let isInViewport = true;
+  let isInViewport = typeof IntersectionObserver === 'undefined';
   let isPageVisible = document.visibilityState === 'visible';
   let isDisposed = false;
   let frameId: number | null = null;
-  let lastFrameAt = 0;
+  let lastFrameAt: number | null = null;
+  let elapsed = 0;
 
   const canAnimate = () =>
     !isDisposed && !isReducedMotion && isInViewport && isPageVisible;
   const stopAmbientLoop = () => {
+    lastFrameAt = null;
     if (frameId === null) return;
     window.cancelAnimationFrame(frameId);
     frameId = null;
@@ -32,8 +34,11 @@ export function observeStackSceneMotion(
     frameId = window.requestAnimationFrame((time) => {
       frameId = null;
       if (!canAnimate()) return;
-      if (time - lastFrameAt >= AMBIENT_FRAME_INTERVAL) {
-        animate(time);
+      if (lastFrameAt === null) {
+        lastFrameAt = time;
+      } else if (time - lastFrameAt >= AMBIENT_FRAME_INTERVAL) {
+        elapsed += Math.min(time - lastFrameAt, 2 * AMBIENT_FRAME_INTERVAL);
+        animate(elapsed);
         lastFrameAt = time;
       }
       requestAmbientFrame();
@@ -47,14 +52,16 @@ export function observeStackSceneMotion(
   const handleVisibilityChange = () => {
     isPageVisible = document.visibilityState === 'visible';
     syncAmbientLoop();
-    render();
   };
   document.addEventListener('visibilitychange', handleVisibilityChange);
 
   const handleMotionChange = (event: MediaQueryListEvent) => {
     isReducedMotion = event.matches;
     syncAmbientLoop();
-    render();
+    if (isReducedMotion) {
+      elapsed = 0;
+      restoreRest();
+    }
   };
   if (motionQuery?.addEventListener) {
     motionQuery.addEventListener('change', handleMotionChange);

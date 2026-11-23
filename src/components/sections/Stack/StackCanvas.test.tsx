@@ -35,8 +35,11 @@ const technologies = STACK_TECHNOLOGIES.map((technology) => ({
 }));
 
 const onSelect = vi.fn();
+const onReceive = vi.fn();
+const onZoom = vi.fn();
 const onSceneStatusChange = vi.fn();
 const sceneHandle = {
+  supportsPerspective: true,
   update: vi.fn(),
   dispose: vi.fn(),
 };
@@ -46,9 +49,12 @@ function renderCanvas(props: Partial<ComponentProps<typeof StackCanvas>> = {}) {
     <StackCanvas
       technologies={technologies}
       mode="2d"
+      zoom={100}
       filter="all"
       selectedId={null}
       onSelect={onSelect}
+      onReceive={onReceive}
+      onZoom={onZoom}
       onSceneStatusChange={onSceneStatusChange}
       {...props}
     />,
@@ -62,6 +68,7 @@ describe('StackCanvas', () => {
     sceneHandle.update.mockReset();
     sceneHandle.dispose.mockReset();
     onSelect.mockReset();
+    onReceive.mockReset();
     onSceneStatusChange.mockReset();
     mocks.mountStackScene.mockReturnValue(sceneHandle);
   });
@@ -104,7 +111,7 @@ describe('StackCanvas', () => {
     expect(onSceneStatusChange).toHaveBeenLastCalledWith('ready');
   });
 
-  test('forwards raycast selection and updates filter and selected state', async () => {
+  test('forwards canvas selection and drops and updates filter and selected state', async () => {
     mocks.detectWebGL.mockReturnValue(true);
     const { rerender } = renderCanvas();
     await waitFor(async () =>
@@ -116,14 +123,19 @@ describe('StackCanvas', () => {
     const options = mocks.mountStackScene.mock.calls[0]?.[1];
     act(() => options.onSelect('react'));
     expect(onSelect).toHaveBeenCalledWith('react');
+    act(() => options.onReceive('typescript'));
+    expect(onReceive).toHaveBeenCalledWith('typescript');
 
     rerender(
       <StackCanvas
         technologies={technologies}
         mode="3d"
+        zoom={105}
         filter="frontend"
         selectedId="react"
         onSelect={onSelect}
+        onReceive={onReceive}
+        onZoom={onZoom}
         onSceneStatusChange={onSceneStatusChange}
       />,
     );
@@ -131,11 +143,22 @@ describe('StackCanvas', () => {
       expect(sceneHandle.update).toHaveBeenCalledWith({
         technologies,
         mode: '3d',
+        zoom: 105,
         filter: 'frontend',
         selectedId: 'react',
         onSelect,
+        onReceive,
+        onZoom,
       }),
     );
+  });
+
+  test('reports a usable 2D scene when perspective is unsupported', async () => {
+    mocks.detectWebGL.mockReturnValue(true);
+    mocks.mountStackScene.mockReturnValue({ ...sceneHandle, supportsPerspective: false });
+    renderCanvas();
+    await waitFor(() => expect(onSceneStatusChange).toHaveBeenLastCalledWith('flat'));
+    expect(screen.getByTestId('stack-canvas')).toBeVisible();
   });
 
   test('disposes the scene and reports it inactive on unmount', async () => {

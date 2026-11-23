@@ -97,10 +97,16 @@
       "engine": "Three.js / CAD",
       "view": "3D view",
       "viewOptions": "2D / 3D",
+      "zoom": {
+        "label": "3D zoom",
+        "in": "Zoom in",
+        "out": "Zoom out",
+        "level": "{level}%"
+      },
       "list": "Technology list",
       "plane": "2D // Orthographic",
       "space": "3D // Perspective",
-      "hint": "Select a card",
+      "hint": "Select or drag to the slot",
       "modules": "{count} modules",
       "slot": "Slot: {name}",
       "empty": "empty"
@@ -108,6 +114,7 @@
     "detail": {
       "label": "Technology detail",
       "empty": "Select a card to see what it is.",
+      "emptyWithDrag": "Select a card or drag it here to see what it is.",
       "select": "Select {name}",
       "eject": "Eject",
       "feedback": {

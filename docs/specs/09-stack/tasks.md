@@ -201,6 +201,10 @@ No se implementa una tarea mientras sus decisiones previas sigan abiertas. No se
 
 **Criterio de hecho:** tests de interacción y e2e de drop dentro/fuera pasan; lint, typecheck y build pasan.
 
+**Estado:** completada en su alcance (RF-4: arrastre; RF-4a: conexión con el casillero). Las cartas habilitadas se arrastran con ratón o tacto en 2D y 3D; al soltar fuera conservan la posición sin cambiar la selección. El casillero se resalta al acercar una carta, confirma la recepción y rechaza un segundo drop. Al expulsar, la carta vuelve al escenario en una posición visible fuera del casillero. Se mantienen la selección sin arrastre y el scroll desde el fondo. Los límites generales y las colisiones quedan para T7.
+
+**Verificación:** 604 tests de Vitest y 29 e2e de Stack en verde; pasan typecheck, build y lint de Stack. El lint global falla por el aviso previo de `.tmp/R2-visual.mjs:51`. La suite e2e global terminó con 324/339 aprobados y 15 fallos en las suites de About, Hero, Navbar y Work.
+
 ## T7 — Límites del área y colisiones
 
 **Objetivo:** mantener las cartas dentro del canvas y evitar que se oculten por completo entre sí.
@@ -232,6 +236,10 @@ No se implementa una tarea mientras sus decisiones previas sigan abiertas. No se
 
 **Criterio de hecho:** unitarios de límites y repulsión, y e2e en móvil y escritorio, pasan; lint, typecheck y build pasan.
 
+**Estado:** completada en su alcance (RF-4: límites, repulsión y movimiento ambiental; RF-4a: colocación al expulsar o rechazar). Las cartas quedan dentro del canvas en 2D y 3D, incluso al soltar fuera o redimensionar. La repulsión admite solapamiento parcial sin ocultar cartas por completo y mantiene libre el casillero. El movimiento ambiental se pausa fuera de vista o con la pestaña oculta y se desactiva con movimiento reducido sin afectar al arrastre. Verificado el reflujo de Stack a 320 px con texto al 200 %.
+
+**Verificación:** 617 tests de Vitest y 32 e2e de Stack en verde; pasan typecheck y build. La suite e2e global terminó con 338/342 aprobados y cuatro fallos de foco por teclado en Work ya observados antes de T7. El lint global falla por el aviso previo de `.tmp/R2-visual.mjs:51`; al excluir solo ese archivo, pasa.
+
 ## T8 — Switch 2D/3D con continuidad espacial
 
 **Objetivo:** alternar la misma escena entre composición plana y perspectiva conservando posiciones.
@@ -255,6 +263,10 @@ No se implementa una tarea mientras sus decisiones previas sigan abiertas. No se
 
 **Criterio de hecho:** tests de sección y e2e de modos, continuidad y fallback pasan; lint, typecheck y build pasan.
 
+**Estado:** completada (RF-5). El selector alterna de 2D a 3D y de vuelta en la misma escena. La cámara y las retículas cambian de forma continua sin recolocar las cartas ni perder el filtro, la selección o la descripción. Con movimiento reducido el cambio se aplica en el primer fotograma; sin soporte de perspectiva el selector se oculta y la escena ortográfica queda disponible.
+
+**Verificación:** 626 tests de Vitest y 35 e2e de Stack en verde; pasan typecheck y build. La suite e2e global terminó con 341/345 aprobados y los cuatro fallos de foco por teclado en Work ya observados antes de T8. El lint global falla por el aviso previo de `.tmp/R2-visual.mjs:51`; al excluir solo ese archivo, pasa.
+
 ## T9 — Zoom 3D con límites
 
 **Objetivo:** acercar y alejar la vista 3D con rueda y controles accesibles.
@@ -276,6 +288,10 @@ No se implementa una tarea mientras sus decisiones previas sigan abiertas. No se
 - Rango de zoom acotado y calibrado, con nombres accesibles y foco visible.
 
 **Criterio de hecho:** unitarios de límites y e2e de rueda y controles pasan; lint, typecheck y build pasan.
+
+**Estado:** completada (RF-6). El zoom 3D va del 85 % al 110 %, parte del 100 % en pasos de 5 puntos, y el máximo ajusta el área útil para que las cartas de los bordes sigan alcanzables. La rueda vertical solo controla el zoom sobre el canvas 3D; fuera de él y en 2D se conserva el desplazamiento nativo de la página, y se ignoran gestos horizontales y con Ctrl. Los controles bilingües funcionan con ratón, teclado y tacto; en un límite su dirección se desactiva sin perder el foco de teclado, y el cambio es inmediato también con movimiento reducido.
+
+**Verificación:** 637 tests de Vitest (61 archivos) en verde; cobertura 92.20 % sentencias, 86.16 % ramas, 94.37 % funciones, 94.20 % líneas. Pasan typecheck, build y lint (excluyendo el aviso preexistente en `.tmp/R2-visual.mjs:51`). E2e de Stack: 35/35 en verde, incluidas las 3 nuevas pruebas de zoom (rueda con scroll preservado, límites y acceso a carta de borde, controles táctiles localizados) y las 6 de arrastre con coordenadas proyectadas. La suite e2e global terminó 344/348; las 4 fallas son pre-existing en `e2e/work/work.spec.ts:195` (foco por teclado en Work, ambos idiomas y temas), ajenas a T9 y observadas antes de esta tarea.
 
 ## T10 — Rotación 3D y controles accesibles
 

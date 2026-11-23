@@ -12,7 +12,7 @@ const LOCALES = [
     filterLabel: 'Filter by category',
     allLabel: 'All',
     eject: 'Eject',
-    empty: 'Select a card to see what it is.',
+    empty: 'Select a card or drag it here to see what it is.',
   },
   {
     locale: 'es',
@@ -22,7 +22,7 @@ const LOCALES = [
     filterLabel: 'Filtrar por categoría',
     allLabel: 'Todas',
     eject: 'Expulsar',
-    empty: 'Selecciona una carta para ver qué es.',
+    empty: 'Selecciona una carta o arrástrala aquí para ver qué es.',
   },
 ] as const;
 
@@ -111,7 +111,7 @@ for (const {
 
         const ejectButton = detail.getByRole('button', { name: eject });
         await ejectButton.tap();
-        await expect(detail).toContainText(empty);
+        await expect(detail).toContainText(messages.detail.empty);
         await expect(react).toHaveAttribute('aria-pressed', 'false');
       } finally {
         await context.close();

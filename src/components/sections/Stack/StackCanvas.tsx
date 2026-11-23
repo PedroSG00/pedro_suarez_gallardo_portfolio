@@ -1,23 +1,16 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import type { StackTechnologyId } from '@/content/stack';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { hasWebGLSupport } from '@/lib/stack/stack-capabilities';
-import type { StackFilter } from '@/lib/stack/stack-state';
 import type {
   StackSceneHandle,
-  StackSceneMode,
+  StackSceneStatus,
   StackSceneTechnology,
   StackSceneUpdate,
 } from '@/lib/stack/stack-scene-types';
 
-type Props = {
-  technologies: readonly StackSceneTechnology[];
-  mode: StackSceneMode;
-  filter: StackFilter;
-  selectedId: StackTechnologyId | null;
-  onSelect: (id: StackTechnologyId) => void;
-  onSceneStatusChange: (status: 'fallback' | 'ready') => void;
+type Props = StackSceneUpdate & {
+  onSceneStatusChange: (status: StackSceneStatus) => void;
 };
 
 export type { StackSceneTechnology };
@@ -25,9 +18,12 @@ export type { StackSceneTechnology };
 export default function StackCanvas({
   technologies,
   mode,
+  zoom,
   filter,
   selectedId,
   onSelect,
+  onReceive,
+  onZoom,
   onSceneStatusChange,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -35,9 +31,12 @@ export default function StackCanvas({
   const latestUpdateRef = useRef<StackSceneUpdate>({
     technologies,
     mode,
+    zoom,
     filter,
     selectedId,
     onSelect,
+    onReceive,
+    onZoom,
   });
   const [webglAvailable, setWebglAvailable] = useState(false);
   const [sceneReady, setSceneReady] = useState(false);
@@ -76,7 +75,7 @@ export default function StackCanvas({
 
           sceneRef.current = scene;
           setSceneReady(true);
-          onSceneStatusChange('ready');
+          onSceneStatusChange(scene.supportsPerspective ? 'ready' : 'flat');
         } catch {
           failToFlatList();
         }
@@ -90,17 +89,20 @@ export default function StackCanvas({
     };
   }, [webglAvailable, onSceneStatusChange]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const update: StackSceneUpdate = {
       technologies,
       mode,
+      zoom,
       filter,
       selectedId,
       onSelect,
+      onReceive,
+      onZoom,
     };
     latestUpdateRef.current = update;
     if (sceneReady) sceneRef.current?.update(update);
-  }, [technologies, mode, filter, selectedId, onSelect, sceneReady]);
+  }, [technologies, mode, zoom, filter, selectedId, onSelect, onReceive, onZoom, sceneReady]);
 
   if (!webglAvailable) return null;
 

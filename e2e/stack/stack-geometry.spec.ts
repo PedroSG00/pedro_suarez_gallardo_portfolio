@@ -1,0 +1,108 @@
+import { expect, test, type Page } from '@playwright/test';
+import en from '../../messages/en.json';
+import es from '../../messages/es.json';
+import { readStackCardBounds as geometry, type StackFootprint } from './stack-geometry.helpers';
+
+type Point = { x: number; y: number };
+type Geometry = Record<string, StackFootprint>;
+
+async function open(page: Page, locale: 'en' | 'es') {
+  await page.goto(`/${locale}#stack`);
+  const copy = locale === 'en' ? en : es;
+  const stack = page.getByRole('region', { name: copy.shared.nav.stack, exact: true });
+  const canvas = stack.locator('[data-stack-canvas]');
+  await expect(canvas).toHaveAttribute('data-stack-scene-ready', 'true');
+  const detail = stack.getByRole('region', { name: copy.stack.detail.label });
+  const coordinates = async () => {
+    await canvas.scrollIntoViewIfNeeded();
+    const rect = await canvas.boundingBox();
+    if (!rect) throw new Error('The canvas must be visible');
+    return ({ x, y }: Point) => ({ x: rect.x + x * rect.width, y: rect.y + y * rect.height });
+  };
+  const drag = async (start: Point, end: Point) => {
+    const at = await coordinates();
+    const from = at(start);
+    const to = at(end);
+    await page.mouse.move(from.x, from.y);
+    await page.mouse.down();
+    await page.mouse.move(to.x, to.y, { steps: 7 });
+    await page.mouse.up();
+  };
+  return { canvas, coordinates, copy, detail, drag, stack };
+}
+
+function expectInCanvas(cards: Geometry) {
+  for (const [id, { left, right, top, bottom }] of Object.entries(cards)) {
+    expect(left, `${id}: left`).toBeGreaterThanOrEqual(0);
+    expect(right, `${id}: right`).toBeLessThanOrEqual(1);
+    expect(top, `${id}: top`).toBeGreaterThanOrEqual(0);
+    expect(bottom, `${id}: bottom`).toBeLessThanOrEqual(1);
+  }
+}
+
+test.describe('Stack card geometry', () => {
+  test.use({ reducedMotion: 'reduce' });
+
+  test('keeps all four edges reachable on a narrow canvas at 200% text', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 2170 });
+    await page.addInitScript(() => document.documentElement.style.setProperty('font-size', '200%'));
+    const { canvas, coordinates, copy, detail, drag } = await open(page, 'es');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
+    const edges = [
+      { point: { x: -0.04, y: 0.17 }, edge: 'left', limit: 0 },
+      { point: { x: 1.04, y: 0.17 }, edge: 'right', limit: 1 },
+      { point: { x: 0.56, y: -0.025 }, edge: 'top', limit: 0 },
+      { point: { x: 0.56, y: 1.025 }, edge: 'bottom', limit: 1 },
+    ] as const;
+    for (const { point, edge, limit } of edges) {
+      await drag((await geometry(canvas)).react, point);
+      const cards = await geometry(canvas);
+      expectInCanvas(cards);
+      expect(Math.abs(cards.react[edge] - limit)).toBeLessThan(0.06);
+    }
+
+    const target = (await coordinates())((await geometry(canvas)).react);
+    await page.mouse.click(target.x, target.y);
+    await expect(detail).toContainText(copy.stack.technologies.react.description);
+  });
+
+  test('separates a collision immediately, keeps the slot clear, and returns a card to an unoccupied space', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 1050 });
+    const { canvas, copy, detail, drag } = await open(page, 'en');
+    const initial = await geometry(canvas);
+    expect(Object.keys(initial)).toHaveLength(25);
+    await drag(initial.react, initial.typescript);
+    const blocked = await geometry(canvas);
+    expect(Math.hypot(blocked.typescript.x - initial.typescript.x, blocked.typescript.y - initial.typescript.y)).toBeGreaterThan(0.02);
+    expect(Math.hypot(blocked.react.x - blocked.typescript.x, blocked.react.y - blocked.typescript.y)).toBeGreaterThan(0.04);
+    expectInCanvas(blocked);
+
+    await drag(blocked.react, { x: 0.5, y: 0.5 });
+    await expect(detail).toContainText(copy.stack.technologies.react.description);
+    const occupied = await geometry(canvas);
+    expect(occupied.react).toBeUndefined();
+    // Fill the old position to exercise the search for a genuinely free return.
+    await drag(occupied.typescript, blocked.react);
+    await detail.getByRole('button', { name: copy.stack.detail.eject, exact: true }).click();
+    const returned = await geometry(canvas);
+    expectInCanvas(returned);
+    const a = returned.react;
+    for (const [id, b] of Object.entries(returned)) {
+      if (id === 'react') continue;
+      expect(a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top, id).toBe(true);
+    }
+  });
+
+  test('keeps cards and a resized edge drop inside perspective', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 1050 });
+    const { canvas, copy, drag, stack } = await open(page, 'en');
+    await stack.getByRole('switch', { name: copy.stack.cad.view }).click();
+    await drag((await geometry(canvas)).react, { x: 1.025, y: 0.23 });
+    const beforeResize = await geometry(canvas);
+    expectInCanvas(beforeResize);
+    expect(beforeResize.react.x).toBeGreaterThan(0.7);
+    await page.setViewportSize({ width: 390, height: 1050 });
+    await expect.poll(() => geometry(canvas)).not.toEqual(beforeResize);
+    expectInCanvas(await geometry(canvas));
+  });
+});

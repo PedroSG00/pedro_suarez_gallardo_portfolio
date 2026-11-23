@@ -22,6 +22,7 @@ export type StackDetailFeedback = {
 type Props = {
   technology: StackDetailTechnology | null;
   feedback: StackDetailFeedback | null;
+  canDragCard?: boolean;
   canReceiveTechnology: (id: string) => boolean;
   onReceive: (id: string) => void;
   onEject: () => void;
@@ -38,6 +39,7 @@ function getDraggedTechnologyId(event: DragEvent<HTMLElement>): string | null {
 export default function StackDetail({
   technology,
   feedback,
+  canDragCard = false,
   canReceiveTechnology,
   onReceive,
   onEject,
@@ -116,7 +118,7 @@ export default function StackDetail({
           </button>
         </div>
       ) : (
-        <p data-stack-detail-empty>{t('detail.empty')}</p>
+        <p data-stack-detail-empty>{t(canDragCard ? 'detail.emptyWithDrag' : 'detail.empty')}</p>
       )}
       {feedbackMessage && <p role="status">{feedbackMessage}</p>}
     </div>

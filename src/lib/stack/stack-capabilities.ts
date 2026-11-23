@@ -22,3 +22,9 @@ export function hasWebGLSupport(
     return false;
   }
 }
+
+export function hasStackPerspectiveSupport(
+  context: Pick<WebGL2RenderingContext, 'getContextAttributes'>,
+): boolean {
+  return context.getContextAttributes()?.depth === true;
+}
