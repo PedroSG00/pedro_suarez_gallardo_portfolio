@@ -80,6 +80,9 @@ test.describe('home structure', () => {
               exact: true,
             })).toHaveCount(1);
             await expect(section.getByRole('heading', { level: 4 })).toHaveCount(5);
+          } else if (id === 'stack') {
+            await expect(section.getByRole('heading', { level: 3 })).toHaveCount(6);
+            await expect(section.locator('h1, h4, h5, h6')).toHaveCount(0);
           } else {
             await expect(section.locator('h1, h3, h4, h5, h6')).toHaveCount(0);
           }

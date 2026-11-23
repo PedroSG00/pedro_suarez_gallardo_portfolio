@@ -84,6 +84,7 @@ Everything runs from the repository root in PowerShell and in bash: `pnpm instal
 │   ├── reveal/                   # Reveal primitive specs
 │   ├── scroll-motion/            # Scroll-motion reveal specs
 │   ├── shell/                    # Shell layout specs
+│   ├── stack/                    # Stack section specs
 │   ├── no-js/                    # No-JavaScript fallback specs
 │   ├── anchors/                  # Anchor jump specs
 │   └── evidence/                 # RF evidence specs
@@ -145,7 +146,7 @@ Every route is wrapped by the global shell: `SkipLink`, `Navbar`, `<main>` and `
 1. **Hero**: name, role, pitch, support, metadata and calls to action. Home of the site's signature moment (staggered entry, cursor, outline and parallax).
 2. **About** (`01`): reserved destination; implemented in spec 07 — portrait, biografía, cualidades, afirmación firma con progresión palabra a palabra, fallbacks de movimiento y sin JavaScript.
 3. **Work** (`02`): reserved destination, heading only.
-4. **Stack** (`03`): reserved destination, heading only.
+4. **Stack** (`03`): implemented in spec 09 — accessible flat list with the 25 technologies and their descriptions in both languages, React/TypeScript priority and no controls until the Three.js scene lands.
 5. **Contact** (`04`): reserved destination, heading only.
 
 **Parked:** the Projects section and the `/projects/[slug]` pages are out of scope for now. They return when there is a new project, with their own spec. See `content-brief.md`, section 10.

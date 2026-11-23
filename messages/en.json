@@ -80,6 +80,14 @@
   },
   "stack": {
     "intro": "Stack",
+    "categories": {
+      "frontend": "Frontend",
+      "dataVisualization": "Data visualization",
+      "backendApis": "Backend & APIs",
+      "databases": "Databases",
+      "testingCi": "Testing & CI/CD",
+      "aiTools": "AI & Tools"
+    },
     "technologies": {
       "javascript": {
         "name": "JavaScript",

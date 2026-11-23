@@ -81,6 +81,8 @@ No se implementa una tarea mientras sus decisiones previas sigan abiertas. No se
 
 **Criterio de hecho:** unitarios y e2e sin JavaScript pasan en ambos idiomas; lint, typecheck y build pasan.
 
+**Estado:** completada. `src/components/sections/Stack/Stack.tsx` sustituye el placeholder en la home, después de Work y antes de Contact, con un único encabezado `03 / Stack` y sin duplicar navegación. `StackFlatList.tsx` sirve desde el servidor las seis categorías y las 25 tecnologías con nombre, icono decorativo y descripción completa, en orden editorial y con React/TypeScript marcados como destacados. Las etiquetas de categoría están en `messages/en.json` y `messages/es.json`. `Stack.test.tsx`, `StackFlatList.test.tsx`, `e2e/stack/stack-flat-list.spec.ts` y `e2e/stack/stack-no-js.spec.ts` cubren contenido, orden, encabezado único, ausencia de controles, prioridad visual y la lista completa sin JavaScript en EN y ES.
+
 ## T3 — Filtrar por categoría
 
 **Objetivo:** permitir una categoría activa o «Todas», atenuando y deshabilitando las tecnologías de otras categorías.
