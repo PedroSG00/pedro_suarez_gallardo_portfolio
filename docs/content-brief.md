@@ -117,23 +117,30 @@ Momento firma: cada fila entra con su número tabular; en hover se invierte (cru
 
 ### Dirección de experiencia propuesta
 
-Presentar el stack como un canvas espectacular e interactivo, no como una lista convencional: las tecnologías aparecen como cartas flotantes con icono y nombre. Un switch permite pasar de 2D a 3D y viceversa; el cambio debe sentirse natural y mantener la continuidad visual de la composición, no reemplazarla por otra escena. En el centro hay un casillero; al llevar una carta hasta él —o seleccionarla mediante una alternativa accesible sin arrastre— se muestra información sobre esa tecnología.
+Presentar el stack como una escena tridimensional real, no como una lista convencional: las tecnologías aparecen como cartas flotantes con icono y nombre, renderizadas con Three.js sobre WebGL. Las cartas se pueden arrastrar y se repelen entre sí; ninguna oculta por completo a otra. Un switch alterna entre la composición plana y la perspectiva de la misma escena, conservando las posiciones. En el centro hay un casillero; al llevar una carta hasta él —o seleccionarla mediante una alternativa accesible sin arrastre— se muestra la descripción de esa tecnología.
 
-La interacción debe ayudar a entender cómo Pedro usa cada tecnología, no sugerir niveles, puntuaciones ni dominio comparativo. El contenido concreto de esa información se definirá y validará en la spec 09, usando únicamente datos respaldados por el CV y este brief. La experiencia debe conservar una alternativa estática y legible con movimiento reducido o cuando no haya soporte 3D.
+Lo que aparece al seleccionar una tecnología es una **descripción de la propia tecnología**: qué es y para qué sirve. No es un relato de uso personal, no atribuye proyectos ni resultados y no sugiere niveles, puntuaciones ni dominio comparativo. Las descripciones viven en `docs/specs/09-stack/content-review.md` y deben aprobarse antes de implementar.
+
+Sin JavaScript o sin soporte de WebGL, la sección se presenta como una **lista plana** con las categorías, las tecnologías y todas sus descripciones, sin controles interactivos. Con movimiento reducido, la escena no tiene movimiento autónomo: solo responde a la acción directa de la persona.
+
+Decisiones confirmadas para Stack: el casillero empieza sin tecnología seleccionada, con una instrucción breve para elegir o arrastrar una carta; al alternar 2D↔3D se conservan filtro, selección y descripción, además de las posiciones. El filtro funciona igual en ambos modos.
 
 ### Tecnologías y agrupación aprobadas
 
-Agrupado como en el CV. Sin niveles ni barras de progreso.
+El usuario ha elegido adoptar las siguientes 25 tecnologías en seis categorías, sustituyendo la lista anterior de 20. El orden de esta tabla es el orden editorial aprobado; las etiquetas ES están aprobadas mediante «APRUEBO EL CONTENT-REVIEW». Sin niveles ni barras de progreso.
 
-| Grupo (EN / ES) | Tecnologías |
-|---|---|
-| Frontend / Frontend | React, TypeScript, JavaScript, HTML, CSS |
-| Backend / Backend | Node.js, Express.js, REST APIs, WebSockets, WebRTC, MySQL, MongoDB, C#, Python, PHP |
-| Testing / Testing | Vitest, Playwright |
-| Tools / Herramientas | Git, GitHub Copilot, OpenCode |
+| Categoría aprobada (EN) | Etiqueta ES aprobada | Tecnologías |
+|---|---|---|
+| Frontend | Frontend | JavaScript, TypeScript, React, Next.js, HTML, CSS |
+| Data visualization | Visualización de datos | Chart.js, Recharts |
+| Backend & APIs | Backend y APIs | Node.js, Express.js, REST APIs, WebSockets, C#, Python |
+| Databases | Bases de datos | MySQL, MongoDB |
+| Testing & CI/CD | Testing y CI/CD | Jest, Vitest, Playwright, GitHub Actions |
+| AI & Tools | IA y herramientas | GitHub Copilot, Claude Code, OpenCode, Git, GitHub |
 
-Prioridad al frontend (React y TypeScript). Sin jQuery ni Bootstrap en la lista general.
-Momento firma propuesto: cartas de tecnología flotantes en un canvas que transiciona naturalmente entre los modos 2D y 3D mediante un switch; el casillero central transforma la selección en información útil.
+Se conserva la prioridad visual de React y TypeScript dentro de Frontend, sin alterar el orden editorial de la lista. Sin jQuery ni Bootstrap en la lista general; WebRTC y PHP dejan de formar parte de Stack, sin borrar su respaldo histórico en otras secciones.
+Textos, fuentes y pendientes editoriales: `docs/specs/09-stack/content-review.md`. Las descripciones de tecnología están redactadas y pendientes de aprobación; no se implementan antes de aprobarse.
+Momento firma: cartas de tecnología flotando en una escena Three.js que alterna entre 2D y 3D conservando la composición; el casillero central convierte la selección en la descripción de la tecnología.
 
 ---
 
