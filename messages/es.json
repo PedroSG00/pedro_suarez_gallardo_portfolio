@@ -79,7 +79,109 @@
     }
   },
   "stack": {
-    "intro": "Stack"
+    "intro": "Stack",
+    "technologies": {
+      "javascript": {
+        "name": "JavaScript",
+        "description": "El lenguaje que da vida a la parte interactiva de la web."
+      },
+      "typescript": {
+        "name": "TypeScript",
+        "description": "JavaScript con tipos estáticos, para un código que crece sin sorpresas."
+      },
+      "react": {
+        "name": "React",
+        "description": "Una biblioteca de componentes para construir interfaces con piezas pequeñas y reutilizables."
+      },
+      "nextJs": {
+        "name": "Next.js",
+        "description": "Un framework de React con rutas, renderizado en servidor y generación estática incluidos."
+      },
+      "html": {
+        "name": "HTML",
+        "description": "El marcado que da estructura y significado a cada página."
+      },
+      "css": {
+        "name": "CSS",
+        "description": "El lenguaje que controla maquetación, tipografía y detalle visual."
+      },
+      "chartJs": {
+        "name": "Chart.js",
+        "description": "Una biblioteca ligera de gráficos para visualizaciones claras y adaptables."
+      },
+      "recharts": {
+        "name": "Recharts",
+        "description": "Componentes de gráficos construidos sobre React, que se componen como cualquier otro componente."
+      },
+      "nodeJs": {
+        "name": "Node.js",
+        "description": "Un entorno de ejecución de JavaScript que permite servicios de backend fuera del navegador."
+      },
+      "expressJs": {
+        "name": "Express.js",
+        "description": "Un framework minimalista de Node.js para construir servidores HTTP y APIs."
+      },
+      "restApis": {
+        "name": "REST APIs",
+        "description": "Un estilo de interfaz HTTP para exponer datos y operaciones entre sistemas."
+      },
+      "webSockets": {
+        "name": "WebSockets",
+        "description": "Una conexión persistente que permite a cliente y servidor intercambiar datos en tiempo real."
+      },
+      "cSharp": {
+        "name": "C#",
+        "description": "Un lenguaje tipado del ecosistema .NET, usado para servicios de backend."
+      },
+      "python": {
+        "name": "Python",
+        "description": "Un lenguaje legible con un ecosistema amplio para scripting y automatización."
+      },
+      "mysql": {
+        "name": "MySQL",
+        "description": "Una base de datos relacional que guarda datos estructurados en tablas y relaciones."
+      },
+      "mongodb": {
+        "name": "MongoDB",
+        "description": "Una base de datos de documentos que guarda registros como documentos flexibles tipo JSON."
+      },
+      "jest": {
+        "name": "Jest",
+        "description": "Un ejecutor de tests de JavaScript para pruebas unitarias y aserciones."
+      },
+      "vitest": {
+        "name": "Vitest",
+        "description": "Un ejecutor de tests rápido pensado para proyectos Vite, con una API compatible con Jest."
+      },
+      "playwright": {
+        "name": "Playwright",
+        "description": "Una herramienta de automatización de navegadores para tests end-to-end de flujos reales de usuario."
+      },
+      "githubActions": {
+        "name": "GitHub Actions",
+        "description": "El servicio de automatización de GitHub para ejecutar flujos ante eventos del repositorio."
+      },
+      "githubCopilot": {
+        "name": "GitHub Copilot",
+        "description": "Un asistente de IA dentro del editor que sugiere código mientras escribes."
+      },
+      "claudeCode": {
+        "name": "Claude Code",
+        "description": "Un agente de IA para programar que trabaja desde la terminal sobre repositorios reales."
+      },
+      "opencode": {
+        "name": "OpenCode",
+        "description": "Un agente de IA de código abierto para trabajar en la terminal."
+      },
+      "git": {
+        "name": "Git",
+        "description": "Un sistema de control de versiones distribuido que registra el historial de cambios."
+      },
+      "github": {
+        "name": "GitHub",
+        "description": "Una plataforma para alojar repositorios Git y colaborar en código."
+      }
+    }
   },
   "contact": {
     "intro": "Contacto",

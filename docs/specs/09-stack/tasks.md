@@ -8,8 +8,8 @@
 
 Antes de implementar T1:
 
-- [ ] Aprobar las 25 descripciones EN/ES de `docs/specs/09-stack/content-review.md` y la instrucción del casillero.
-- [ ] Registrar en `docs/constitution.md` la incorporación de Three.js al stack cerrado. Es una capa transversal: requiere autorización explícita.
+- [x] Aprobar las 25 descripciones EN/ES de `docs/specs/09-stack/content-review.md` y la instrucción del casillero. Aprobado por el usuario.
+- [x] Registrar en `docs/constitution.md` la incorporación de Three.js al stack cerrado. Es una capa transversal: requiere autorización explícita. Autorizado y registrado.
 - [x] Adoptar las 25 tecnologías y seis categorías de la sección 4 del brief, con prioridad visual de React y TypeScript.
 - [x] Casillero inicial sin selección, con instrucción breve.
 - [x] Conservar posiciones, filtro, selección y descripción al alternar 2D↔3D.
@@ -56,6 +56,8 @@ No se implementa una tarea mientras sus decisiones previas sigan abiertas. No se
 - Si falta una descripción o su traducción, la tarea queda bloqueada.
 
 **Criterio de hecho:** pasan los tests de integridad y paridad; las 25 descripciones están aprobadas y presentes en ambos idiomas.
+
+**Estado:** completada. `src/content/stack.ts` contiene el registro canónico (25 tecnologías, seis categorías, orden editorial, ids únicos e iconos) y `FEATURED_STACK_TECHNOLOGY_IDS` para la prioridad visual de React y TypeScript sin alterar el orden de lectura. `messages/en.json` y `messages/es.json` incluyen nombre y descripción aprobados para las 25 claves. `src/content/stack.test.ts` cubre integridad, orden, categorías, prioridad, paridad y ausencia de niveles, métricas, proyectos personales, clientes y resultados.
 
 ## T2 — Lista plana accesible e integración de la sección
 

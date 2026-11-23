@@ -1,6 +1,6 @@
 # Stack — Contenido EN/ES
 
-**Estado: BORRADORES DE DESCRIPCIÓN, PENDIENTES DE APROBACIÓN.**
+**Estado: APROBADO POR EL USUARIO. Fuente editorial de T1 y T2.**
 
 Cada tecnología muestra una **descripción de la propia tecnología**: qué es y para qué sirve. No es un relato de uso personal, de proyectos ni de resultados, y no afirma niveles de dominio.
 
@@ -90,10 +90,10 @@ Cada tecnología muestra una **descripción de la propia tecnología**: qué es 
 | Sin filtro | All | Todas |
 | Casillero inicial | Select a card or drag it here to see what it is. | Selecciona una carta o arrástrala aquí para ver qué es. |
 
-## 5. Pendiente para desbloquear la implementación
+## 5. Estado de los bloqueos
 
-- Aprobar las 25 descripciones EN/ES de la sección 3.
-- Aprobar la nueva instrucción del casillero y, si procede, las etiquetas de categoría.
-- Registrar en la constitución la incorporación de Three.js al stack cerrado.
+- [x] Aprobadas las 25 descripciones EN/ES de la sección 3.
+- [x] Aprobadas la instrucción del casillero y las etiquetas de categoría.
+- [x] Registrada en la constitución la incorporación de Three.js al stack cerrado.
 
 Las descripciones no requieren datos del CV ni nombres de proyectos: si alguna se considera imprecisa, se corrige la redacción, no se añade contexto personal.

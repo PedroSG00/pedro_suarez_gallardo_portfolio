@@ -79,7 +79,109 @@
     }
   },
   "stack": {
-    "intro": "Stack"
+    "intro": "Stack",
+    "technologies": {
+      "javascript": {
+        "name": "JavaScript",
+        "description": "The language that runs the interactive side of the web."
+      },
+      "typescript": {
+        "name": "TypeScript",
+        "description": "JavaScript with static types, for code that grows without surprises."
+      },
+      "react": {
+        "name": "React",
+        "description": "A component library for building interfaces from small, reusable pieces."
+      },
+      "nextJs": {
+        "name": "Next.js",
+        "description": "A React framework with routing, server rendering and static generation built in."
+      },
+      "html": {
+        "name": "HTML",
+        "description": "The markup that gives structure and meaning to every page."
+      },
+      "css": {
+        "name": "CSS",
+        "description": "The language that controls layout, typography and visual detail."
+      },
+      "chartJs": {
+        "name": "Chart.js",
+        "description": "A lightweight charting library for clear, responsive data visuals."
+      },
+      "recharts": {
+        "name": "Recharts",
+        "description": "Chart components built on React, composed like any other component."
+      },
+      "nodeJs": {
+        "name": "Node.js",
+        "description": "A JavaScript runtime that runs backend services outside the browser."
+      },
+      "expressJs": {
+        "name": "Express.js",
+        "description": "A minimal Node.js framework for building HTTP servers and APIs."
+      },
+      "restApis": {
+        "name": "REST APIs",
+        "description": "An HTTP interface style for exposing data and operations between systems."
+      },
+      "webSockets": {
+        "name": "WebSockets",
+        "description": "A persistent connection that lets client and server exchange data in real time."
+      },
+      "cSharp": {
+        "name": "C#",
+        "description": "A typed language from the .NET ecosystem, used for backend services."
+      },
+      "python": {
+        "name": "Python",
+        "description": "A readable language with a broad ecosystem for scripting and automation."
+      },
+      "mysql": {
+        "name": "MySQL",
+        "description": "A relational database that stores structured data in tables and relations."
+      },
+      "mongodb": {
+        "name": "MongoDB",
+        "description": "A document database that stores records as flexible JSON-like documents."
+      },
+      "jest": {
+        "name": "Jest",
+        "description": "A JavaScript test runner for unit tests and assertions."
+      },
+      "vitest": {
+        "name": "Vitest",
+        "description": "A fast test runner built for Vite projects, with a Jest-compatible API."
+      },
+      "playwright": {
+        "name": "Playwright",
+        "description": "A browser automation tool for end-to-end tests across real user flows."
+      },
+      "githubActions": {
+        "name": "GitHub Actions",
+        "description": "GitHub's automation service for running workflows on repository events."
+      },
+      "githubCopilot": {
+        "name": "GitHub Copilot",
+        "description": "An AI assistant inside the editor that suggests code as you write."
+      },
+      "claudeCode": {
+        "name": "Claude Code",
+        "description": "An AI coding agent that works from the terminal on real repositories."
+      },
+      "opencode": {
+        "name": "OpenCode",
+        "description": "An open-source AI coding agent for working in the terminal."
+      },
+      "git": {
+        "name": "Git",
+        "description": "A distributed version control system that records the history of changes."
+      },
+      "github": {
+        "name": "GitHub",
+        "description": "A platform for hosting Git repositories and collaborating on code."
+      }
+    }
   },
   "contact": {
     "intro": "Contact",
