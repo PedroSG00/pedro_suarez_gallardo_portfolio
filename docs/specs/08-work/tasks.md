@@ -360,3 +360,12 @@
 - Solo se modifican `Work.tsx`, `Work.module.css`, su prueba e2e y la documentación de la spec. Sin cambios en componentes compartidos, tokens globales, traducciones ni dependencias.
 - Validación final en orden: `pnpm lint`, `pnpm typecheck`, `pnpm test` (490/490), `pnpm build` y `pnpm test:e2e --workers=2` (310/310, Chromium, sin reintentos), todos verdes. Cobertura global: 96,77 % sentencias, 92,66 % ramas, 97,69 % funciones y 96,98 % líneas.
 - Revisión visual del render en castellano/claro e inglés/oscuro a 1440 px y castellano a 390 px; también se revisan las composiciones intermedias a 768/1024 px y el hover completo. Se comprueban los cinco índices al 200 %. Las pruebas conservan la matriz EN/ES, temas, adaptación 320/1920 px, contraste, movimiento y fallbacks.
+
+### Segunda pasada: escala contenida e iconos
+
+- Pedro pide reducir el tamaño e incorporar iconos a las entradas. La apertura pasa del token `title-lg` a `title` (aproximadamente 96 → 48 px en escritorio), con menos espacio vertical. Los titulares de fila se reducen conservando una jerarquía clara respecto al cuerpo; los números pasan a escala de metadatos.
+- Cada registro de `src/content/work.ts` incorpora un icono de Iconoir: `Computer`, `GraphUp`, `ViewGrid`, `Network` y `Server`. Se muestran junto al índice, dentro del mismo Reveal; heredan el color de la fila y son decorativos y no enfocables.
+- Tests primero: dos unitarios fallan por la ausencia de iconos y los cuatro e2e de jerarquía fallan por el tamaño anterior de la apertura. Tras implementar, las seis pruebas unitarias de Work y los cuatro escenarios de jerarquía pasan.
+- Lint, tipos, 490 unitarias con la cobertura anterior intacta y build pasan en orden. Se revisan capturas reales en móvil y escritorio, ambos temas, las cinco entradas y la inversión completa.
+- El puerto 3000 estaba ocupado y se conserva el servidor existente. Se usa una configuración temporal que hereda la de Playwright y solo cambia el puerto al 3002: 309 e2e pasan, incluidos los 73 de Work; falla un caso de idioma cuya intercepción usa literalmente `http://127.0.0.1:3000/`. La misma comprobación de `Accept-Language` con la URL del servidor aislado pasa (1/1), sin modificar producción ni tests de idioma. Esto no se presenta como una ejecución estándar de 310/310 en el puerto 3000.
+- Sin dependencias nuevas, cambios globales, commit ni push.
