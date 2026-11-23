@@ -1,0 +1,42 @@
+# Stack brand artwork and attribution
+
+All marks are bundled locally; the site makes no runtime request for them.
+Simple Icons artwork is taken from commit
+[`c01109118e134e061c9bdf2e1a7f814117f1f032`](https://github.com/simple-icons/simple-icons/tree/c01109118e134e061c9bdf2e1a7f814117f1f032).
+Its CC0 project license does **not** automatically license the individual
+brand marks. Where no per-mark license is listed below, no copyright license
+is asserted here; use is limited to identifying the corresponding technology
+and remains subject to its owner's trademark and brand rules.
+
+| Technology ID | Local asset | Artwork source | License / status |
+| --- | --- | --- | --- |
+| javascript | `/stack/javascript.svg` | [Simple Icons](https://github.com/simple-icons/simple-icons/blob/c01109118e134e061c9bdf2e1a7f814117f1f032/icons/javascript.svg); [source](https://github.com/voodootikigod/logo.js/blob/1544bdeed6d618a6cfe4f0650d04ab8d9cfa76d9/js.svg) | MIT in Simple Icons metadata; JavaScript logo remains a mark of its owner. |
+| typescript | `/stack/typescript.svg` | [Simple Icons](https://github.com/simple-icons/simple-icons/blob/c01109118e134e061c9bdf2e1a7f814117f1f032/icons/typescript.svg); [brand guidelines](https://www.typescriptlang.org/branding) | No per-mark license listed in the metadata; follow TypeScript brand guidelines. |
+| react | `/stack/react.svg` | [Simple Icons](https://github.com/simple-icons/simple-icons/blob/c01109118e134e061c9bdf2e1a7f814117f1f032/icons/react.svg); [source](https://github.com/facebook/create-react-app/blob/282c03f9525fdf8061ffa1ec50dce89296d916bd/test/fixtures/relative-paths/src/logo.svg) | No per-mark license listed in the metadata; React is a Meta mark. |
+| nextJs | `/stack/nextJs.svg` | [Simple Icons](https://github.com/simple-icons/simple-icons/blob/c01109118e134e061c9bdf2e1a7f814117f1f032/icons/nextdotjs.svg); [brand guidelines](https://vercel.com/design/brands#next-js) | No per-mark license listed in the metadata; follow Vercel brand guidelines. |
+| html | `/stack/html.svg` | [Simple Icons](https://github.com/simple-icons/simple-icons/blob/c01109118e134e061c9bdf2e1a7f814117f1f032/icons/html5.svg); [W3C logo guidance](https://www.w3.org/html/logo/) | No per-mark license listed in the metadata; follow W3C logo guidance. |
+| css | `/stack/css.svg` | [Simple Icons](https://github.com/simple-icons/simple-icons/blob/c01109118e134e061c9bdf2e1a7f814117f1f032/icons/css.svg); [source and guidelines](https://github.com/CSS-Next/logo.css) | No per-mark license listed in the metadata; CSS-Next logo source. |
+| chartJs | `/stack/chartJs.svg` | [Simple Icons](https://github.com/simple-icons/simple-icons/blob/c01109118e134e061c9bdf2e1a7f814117f1f032/icons/chartdotjs.svg); [Chart.js](https://www.chartjs.org/) | No per-mark license listed in the metadata; Chart.js mark remains with its owner. |
+| recharts | `/stack/recharts.svg` | [Recharts logo](https://github.com/recharts/recharts/blob/b65a04e6fd609241f4d66c31f2df66ec3914f6ee/www/public/logo.svg) | Recharts repository: MIT; logo/trademark remains with Recharts. |
+| nodeJs | `/stack/nodeJs.svg` | [Simple Icons](https://github.com/simple-icons/simple-icons/blob/c01109118e134e061c9bdf2e1a7f814117f1f032/icons/nodedotjs.svg); [brand guidelines](https://nodejs.org/en/about/branding) | No per-mark license listed in the metadata; follow Node.js brand guidelines. |
+| expressJs | `/stack/expressJs.svg` | [Simple Icons](https://github.com/simple-icons/simple-icons/blob/c01109118e134e061c9bdf2e1a7f814117f1f032/icons/express.svg); [OpenJS artwork](https://github.com/openjs-foundation/artwork/blob/3816245ebbf4707bdafde748350ac8476b6b5b62/projects/express/express-icon-black.svg) | No per-mark license listed in the metadata; Express mark remains with its owner. |
+| restApis | `/stack/restApis.svg` | Original artwork, authored for this portfolio to represent REST request/response documents; not an official REST logo. | Original artwork; no third-party mark or asset used. |
+| webSockets | `/stack/webSockets.svg` | Original artwork, authored for this portfolio to represent a persistent bidirectional connection; not an official WebSocket logo. | Original artwork; no third-party mark or asset used. |
+| cSharp | `/stack/cSharp.svg` | [Official .NET language icon](https://github.com/dotnet/brand/blob/91845f6ddf2123b3bb1bfd1b6a386d9ce02b43aa/logo/language-icons/csharp-72.svg) | dotnet/brand repository: CC0-1.0; C# and .NET marks remain with Microsoft. |
+| python | `/stack/python.svg` | [Simple Icons](https://github.com/simple-icons/simple-icons/blob/c01109118e134e061c9bdf2e1a7f814117f1f032/icons/python.svg); [Python logo guidelines](https://www.python.org/community/logos/) | No per-mark license listed in the metadata; follow Python logo guidelines. |
+| mysql | `/stack/mysql.svg` | [Simple Icons](https://github.com/simple-icons/simple-icons/blob/c01109118e134e061c9bdf2e1a7f814117f1f032/icons/mysql.svg); [logo usage terms](https://www.mysql.com/about/legal/logos.html) | No per-mark license listed in the metadata; follow MySQL logo usage terms. |
+| mongodb | `/stack/mongodb.svg` | [Simple Icons](https://github.com/simple-icons/simple-icons/blob/c01109118e134e061c9bdf2e1a7f814117f1f032/icons/mongodb.svg); [MongoDB press room](https://www.mongodb.com/pressroom) | No per-mark license listed in the metadata; MongoDB mark remains with its owner. |
+| jest | `/stack/jest.svg` | [Simple Icons](https://github.com/simple-icons/simple-icons/blob/c01109118e134e061c9bdf2e1a7f814117f1f032/icons/jest.svg); [Jest](https://jestjs.io/) | No per-mark license listed in the metadata; Jest mark remains with its owner. |
+| vitest | `/stack/vitest.svg` | [Simple Icons](https://github.com/simple-icons/simple-icons/blob/c01109118e134e061c9bdf2e1a7f814117f1f032/icons/vitest.svg); [source](https://github.com/voidzero-dev/community-design-resources/blob/55902097229cf01cf2a4ceb376f992f5cf306756/brand-assets/vitest/vitest-icon-color-bracketless.svg) | No per-mark license listed in the metadata; Vitest mark remains with its owner. |
+| playwright | `/stack/playwright.svg` | [Official Playwright logo](https://github.com/microsoft/playwright/blob/61775c1ae65409859ebc4e60dec3a4a3a9cc3f92/packages/web/src/assets/playwright-logo.svg) | Playwright repository: Apache-2.0; logo/trademark remains with Microsoft. |
+| githubActions | `/stack/githubActions.svg` | [Simple Icons](https://github.com/simple-icons/simple-icons/blob/c01109118e134e061c9bdf2e1a7f814117f1f032/icons/githubactions.svg); [GitHub Actions](https://github.com/features/actions) | No per-mark license listed in the metadata; GitHub marks remain with GitHub. |
+| githubCopilot | `/stack/githubCopilot.svg` | [Simple Icons](https://github.com/simple-icons/simple-icons/blob/c01109118e134e061c9bdf2e1a7f814117f1f032/icons/githubcopilot.svg); [Primer icon](https://primer.style/foundations/icons/copilot-24) | MIT in Simple Icons metadata; GitHub Copilot remains a GitHub mark. |
+| claudeCode | `/stack/claudeCode.svg` | [Simple Icons](https://github.com/simple-icons/simple-icons/blob/c01109118e134e061c9bdf2e1a7f814117f1f032/icons/claudecode.svg); [Claude Code](https://code.claude.com/) | No per-mark license listed in the metadata; Claude is an Anthropic mark. |
+| opencode | `/stack/opencode.svg` | [Simple Icons](https://github.com/simple-icons/simple-icons/blob/c01109118e134e061c9bdf2e1a7f814117f1f032/icons/opencode.svg); [source](https://github.com/anomalyco/opencode/blob/1251a870cb384543c150c4a72fb101b55eec971b/packages/identity/mark.svg) | No per-mark license listed in the metadata; OpenCode mark remains with its owner. |
+| git | `/stack/git.svg` | [Simple Icons](https://github.com/simple-icons/simple-icons/blob/c01109118e134e061c9bdf2e1a7f814117f1f032/icons/git.svg); [Git logo](https://git-scm.com/community/logos) | CC-BY-3.0; attribution to the Git project is provided here. |
+| github | `/stack/github.svg` | [Simple Icons](https://github.com/simple-icons/simple-icons/blob/c01109118e134e061c9bdf2e1a7f814117f1f032/icons/github.svg); [GitHub logo and guidelines](https://github.com/logos) | No per-mark license listed in the metadata; follow GitHub logo guidelines. |
+
+These marks identify technologies only. Their appearance does not imply
+endorsement, sponsorship, or affiliation. Trademarks and brand rights remain
+with their respective owners. Check the linked source and current guidelines
+before redistributing or using any mark outside this portfolio.

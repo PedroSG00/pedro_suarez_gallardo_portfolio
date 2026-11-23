@@ -41,6 +41,8 @@ for (const { locale, messages, nav } of LOCALES) {
       await expect(stack.getByRole('heading', { level: 2 })).toHaveText(
         `03 / ${nav.stack}`,
       );
+      await stack.getByRole('button', { name: messages.cad.list }).click();
+      await expect(stack.locator('canvas')).toBeHidden();
 
       const destinations = await page
         .locator('main > section[id]')
@@ -67,13 +69,31 @@ for (const { locale, messages, nav } of LOCALES) {
         ).toBeVisible();
       }
 
-      await expect(stack.getByRole('img', { includeHidden: true })).toHaveCount(
+      const marks = stack.getByRole('img', { includeHidden: true });
+      await expect(marks).toHaveCount(STACK_TECHNOLOGIES.length);
+      for (const [index, technology] of STACK_TECHNOLOGIES.entries()) {
+        await expect(marks.nth(index)).toHaveAttribute(
+          'src',
+          technology.brandMark,
+        );
+      }
+      const filters = stack.getByRole('group', {
+        name: locale === 'en' ? 'Filter by category' : 'Filtrar por categoría',
+      });
+      await expect(filters.getByRole('radio')).toHaveCount(
+        STACK_CATEGORIES.length + 1,
+      );
+      await expect(
+        filters.getByRole('radio', {
+          name: locale === 'en' ? 'All' : 'Todas',
+        }),
+      ).toBeChecked();
+
+      await expect(lists.getByRole('button')).toHaveCount(
         STACK_TECHNOLOGIES.length,
       );
       for (const role of [
-        'button',
         'checkbox',
-        'radio',
         'textbox',
         'combobox',
         'slider',
@@ -81,7 +101,6 @@ for (const { locale, messages, nav } of LOCALES) {
       ] as const) {
         await expect(stack.getByRole(role)).toHaveCount(0);
       }
-      await expect(stack.locator('canvas')).toHaveCount(0);
     });
 
     test('gives React and TypeScript visual priority inside Frontend', async ({ page }) => {

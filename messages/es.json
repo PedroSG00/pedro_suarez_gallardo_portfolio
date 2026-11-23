@@ -88,6 +88,34 @@
       "testingCi": "Testing y CI/CD",
       "aiTools": "IA y herramientas"
     },
+    "filters": {
+      "label": "Filtrar por categoría",
+      "all": "Todas"
+    },
+    "cad": {
+      "title": "Mesa de tecnologías",
+      "engine": "Three.js / CAD",
+      "view": "Vista 3D",
+      "viewOptions": "2D / 3D",
+      "list": "Lista de tecnologías",
+      "plane": "2D // Ortográfica",
+      "space": "3D // Perspectiva",
+      "hint": "Selecciona una carta",
+      "modules": "{count} módulos",
+      "slot": "Ranura: {name}",
+      "empty": "vacía"
+    },
+    "detail": {
+      "label": "Detalle de tecnología",
+      "empty": "Selecciona una carta para ver qué es.",
+      "select": "Seleccionar {name}",
+      "eject": "Expulsar",
+      "feedback": {
+        "received": "{name} está ahora en el casillero.",
+        "rejected": "El casillero está ocupado. {name} sigue en el stack.",
+        "ejected": "{name} ha vuelto al stack."
+      }
+    },
     "technologies": {
       "javascript": {
         "name": "JavaScript",

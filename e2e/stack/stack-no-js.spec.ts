@@ -31,6 +31,15 @@ for (const { locale, messages, nav } of LOCALES) {
         ).toBeVisible();
       }
 
+      const marks = stack.getByRole('img', { includeHidden: true });
+      await expect(marks).toHaveCount(STACK_TECHNOLOGIES.length);
+      for (const [index, technology] of STACK_TECHNOLOGIES.entries()) {
+        await expect(marks.nth(index)).toHaveAttribute(
+          'src',
+          technology.brandMark,
+        );
+      }
+
       const reveals = stack.locator('[data-reveal-root]');
       await expect(reveals).toHaveCount(STACK_CATEGORIES.length);
       for (const reveal of await reveals.all()) {

@@ -88,6 +88,34 @@
       "testingCi": "Testing & CI/CD",
       "aiTools": "AI & Tools"
     },
+    "filters": {
+      "label": "Filter by category",
+      "all": "All"
+    },
+    "cad": {
+      "title": "Technology workbench",
+      "engine": "Three.js / CAD",
+      "view": "3D view",
+      "viewOptions": "2D / 3D",
+      "list": "Technology list",
+      "plane": "2D // Orthographic",
+      "space": "3D // Perspective",
+      "hint": "Select a card",
+      "modules": "{count} modules",
+      "slot": "Slot: {name}",
+      "empty": "empty"
+    },
+    "detail": {
+      "label": "Technology detail",
+      "empty": "Select a card to see what it is.",
+      "select": "Select {name}",
+      "eject": "Eject",
+      "feedback": {
+        "received": "{name} is now in the detail slot.",
+        "rejected": "The detail slot is occupied. {name} stays in the stack.",
+        "ejected": "{name} returned to the stack."
+      }
+    },
     "technologies": {
       "javascript": {
         "name": "JavaScript",

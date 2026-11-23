@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 import enMessages from '../../messages/en.json';
 import esMessages from '../../messages/es.json';
@@ -142,10 +144,51 @@ describe('STACK_TECHNOLOGIES', () => {
     }
   });
 
-  test('assigns a decorative icon to every technology', () => {
+  test('assigns a unique local brand mark to every technology', () => {
+    const brandMarks = STACK_TECHNOLOGIES.map(
+      (technology) => technology.brandMark
+    );
+
+    expect(new Set(brandMarks).size).toBe(STACK_TECHNOLOGIES.length);
+
     for (const technology of STACK_TECHNOLOGIES) {
-      expect(technology.icon).toBeTruthy();
+      expect(technology.brandMark).toMatch(/^\/stack\/[a-zA-Z0-9-]+\.svg$/);
     }
+  });
+
+  test('ships valid local SVG artwork for every brand mark', () => {
+    for (const technology of STACK_TECHNOLOGIES) {
+      const filePath = resolve(
+        process.cwd(),
+        'public',
+        technology.brandMark.slice(1)
+      );
+      const svg = readFileSync(filePath, 'utf8');
+
+      expect(svg).toMatch(/^<svg[\s\S]*<\/svg>\s*$/);
+      expect(svg).toMatch(/viewBox="[^"]+"/);
+      expect(svg).toMatch(/<path\b[^>]*d="[^"]+"/);
+      expect(svg).not.toMatch(/<(script|image)\b|\bhref=/i);
+    }
+  });
+
+  test('documents every mark source, license or original-artwork status', () => {
+    const attribution = readFileSync(
+      resolve(process.cwd(), 'public/stack/ATTRIBUTION.md'),
+      'utf8'
+    );
+
+    for (const technology of STACK_TECHNOLOGIES) {
+      const entry = attribution
+        .split('\n')
+        .find((line) => line.startsWith(`| ${technology.id} |`));
+
+      expect(entry).toContain(`\`${technology.brandMark}\``);
+      expect(entry).toMatch(/https?:\/\/|Original artwork/);
+    }
+
+    expect(attribution).toMatch(/trademark/i);
+    expect(attribution).toMatch(/not\s+imply\s+endorsement/i);
   });
 });
 

@@ -2,13 +2,29 @@ import { describe, expect, test } from 'vitest';
 import { screen, within } from '@testing-library/react';
 import enMessages from '../../../../messages/en.json';
 import esMessages from '../../../../messages/es.json';
-import { STACK_TECHNOLOGIES } from '@/content/stack';
+import { STACK_CATEGORIES, STACK_TECHNOLOGIES } from '@/content/stack';
 import { renderWithIntl } from '@/test/render-with-intl';
 import Stack from './Stack';
 
 const LOCALES = [
-  { locale: 'en', messages: enMessages.stack, nav: enMessages.shared.nav },
-  { locale: 'es', messages: esMessages.stack, nav: esMessages.shared.nav },
+  {
+    locale: 'en',
+    messages: enMessages.stack,
+    nav: enMessages.shared.nav,
+    filterLabel: 'Filter by category',
+    allLabel: 'All',
+    detailLabel: 'Technology detail',
+    emptyDetail: 'Select a card to see what it is.',
+  },
+  {
+    locale: 'es',
+    messages: esMessages.stack,
+    nav: esMessages.shared.nav,
+    filterLabel: 'Filtrar por categoría',
+    allLabel: 'Todas',
+    detailLabel: 'Detalle de tecnología',
+    emptyDetail: 'Selecciona una carta para ver qué es.',
+  },
 ] as const;
 
 const CATEGORY_LABEL_KEYS = [
@@ -20,7 +36,9 @@ const CATEGORY_LABEL_KEYS = [
   'aiTools',
 ] as const;
 
-describe.each(LOCALES)('Stack in $locale', ({ locale, messages, nav }) => {
+describe.each(LOCALES)(
+  'Stack in $locale',
+  ({ locale, messages, nav, filterLabel, allLabel, detailLabel, emptyDetail }) => {
   test('renders one section heading and the complete stack', () => {
     renderWithIntl(<Stack />, { locale });
 
@@ -48,15 +66,25 @@ describe.each(LOCALES)('Stack in $locale', ({ locale, messages, nav }) => {
     expect(stack.queryByRole('navigation')).not.toBeInTheDocument();
   });
 
-  test('ships no filters, modes, zoom or rotation controls yet', () => {
+  test('exposes category filters and the accessible detail slot before the scene', () => {
     renderWithIntl(<Stack />, { locale });
 
     const region = screen.getByRole('region', { name: nav.stack });
+    const filters = within(region).getByRole('group', { name: filterLabel });
+    expect(within(filters).getAllByRole('radio')).toHaveLength(
+      STACK_CATEGORIES.length + 1,
+    );
+    expect(within(filters).getByRole('radio', { name: allLabel })).toBeChecked();
+
+    const detail = within(region).getByRole('region', { name: detailLabel });
+    expect(detail).toHaveTextContent(emptyDetail);
+    expect(within(detail).queryByRole('button')).not.toBeInTheDocument();
+    expect(within(region).getAllByRole('button')).toHaveLength(
+      STACK_TECHNOLOGIES.length,
+    );
 
     for (const role of [
-      'button',
       'checkbox',
-      'radio',
       'textbox',
       'combobox',
       'slider',
@@ -68,4 +96,5 @@ describe.each(LOCALES)('Stack in $locale', ({ locale, messages, nav }) => {
     // eslint-disable-next-line testing-library/no-node-access
     expect(region.querySelector('canvas')).toBeNull();
   });
-});
+  },
+);

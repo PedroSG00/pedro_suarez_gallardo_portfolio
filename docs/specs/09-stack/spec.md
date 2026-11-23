@@ -4,7 +4,9 @@
 
 Stack presenta las 25 tecnologías que Pedro utiliza como cartas flotantes dentro de un canvas 3D renderizado con Three.js. La persona puede explorar las tecnologías por categoría, mover las cartas, cambiarlas entre una composición plana y otra en perspectiva y consultar qué es cada tecnología.
 
-El momento firma combina la transición espacial entre 2D y 3D con la interacción del canvas: las cartas flotan, se arrastran y se repelen entre sí; al llevar una al casillero central se muestra su descripción. En 3D el fondo permite rotar la escena y la persona puede acercarse o alejarse.
+El momento firma es un pequeño escenario editorial, minimalista en elementos y espectacular en ejecución: cada tecnología aparece como una carta tridimensional con su marca reconocible, volumen, material, luz y sombra coherentes con el mismo lenguaje visual. Las cartas se desplazan suavemente por el escenario y colisionan entre ellas con una respuesta legible, sin física realista ni movimiento frenético. Se pueden agarrar, mover y soltar; al recibir una carta, el casillero responde con hover y feedback visible, muestra su descripción y ofrece expulsarla de vuelta al escenario. La expulsión es explícita y nunca deja cartas ocultas bajo el casillero. El modo 2D conserva la identidad de las cartas en una composición plana.
+
+**Dirección de arte — mesa CAD.** La referencia visual se traduce en una consola monocroma: barra compacta de filtros y vistas, cartas extruidas con ficha numerada y marca propia, conexiones finas entre cartas de una misma categoría y ranura en el centro. La vista 2D usa papel cuadriculado y proyección frontal; la vista 3D muestra la misma composición sobre una cuadrícula de suelo en perspectiva. Una banda inferior informa de la vista y la ocupación. La consola mantiene las 25 tecnologías y seis categorías aprobadas (las referencias no cambian el contenido), hereda el tema del sitio y ofrece acceso visible a la lista. Se exponen solo acciones ya operativas.
 
 La sección comunica criterio técnico. No presenta niveles, puntuaciones ni comparaciones de dominio, y no atribuye a Pedro usos, proyectos o resultados no respaldados.
 
@@ -19,6 +21,8 @@ La sección comunica criterio técnico. No presenta niveles, puntuaciones ni com
 - Como reclutador, quiero consultar una tecnología y leer qué es y para qué sirve.
 - Como cliente potencial, quiero filtrar las tecnologías por categoría para explorar con más claridad las capacidades relevantes.
 - Como visitante, quiero mover las cartas por el canvas y ver cómo reaccionan entre ellas.
+- Como visitante, quiero reconocer cada tecnología por su marca propia y ver cartas con volumen real integradas en una escena 3D coherente.
+- Como visitante, quiero recibir feedback visual claro al acercar o soltar una carta sobre el casillero y poder expulsarla de nuevo al escenario.
 - Como visitante, quiero alternar entre 2D y 3D sin perder la continuidad espacial del canvas.
 - Como visitante, quiero rotar y acercar la escena 3D con ratón y controles accesibles.
 - Como visitante que no puede o no quiere arrastrar, quiero seleccionar tecnologías por otra vía.
@@ -34,9 +38,12 @@ El sistema deberá mostrar las 25 tecnologías aprobadas en la sección 4 del br
 
 - Cuando se consulte Stack en cualquiera de los idiomas, se mostrarán todas las tecnologías aprobadas, sin añadir tecnologías no aprobadas.
 - Cuando se muestre una tecnología, aparecerá identificable por su nombre y un icono.
+- Cada tecnología se identificará con su propio logotipo/marca reconocible, no con un icono genérico de Iconoir ni con una marca compartida; el nombre escrito seguirá visible.
+- Las marcas tendrán un tratamiento compatible con la dirección editorial minimalista y contraste AA, sin convertir los colores de marca en colores de acento de la interfaz.
 - Cuando se muestren las cartas, React y TypeScript tendrán prioridad visual dentro de Frontend, sin indicar niveles de dominio.
 - Cuando se presente el contenido en orden de lectura, se respetarán el orden de categorías y el orden editorial de tecnologías del brief; la prioridad visual no cambia ese orden.
 - Cuando una persona consulte la estructura con tecnología de asistencia, podrá identificar las categorías y las tecnologías que pertenecen a cada una.
+- Las marcas serán decorativas para lectores de pantalla: el nombre de la tecnología proporcionará el nombre accesible sin anuncios duplicados.
 - El sistema no mostrará niveles, puntuaciones, rankings ni barras de progreso.
 
 ### RF-2 — Filtro por categoría
@@ -60,7 +67,7 @@ El sistema deberá permitir seleccionar una tecnología y mostrar en el casiller
 
 **Criterios de aceptación (EARS):**
 
-- Cuando se entre sin una selección, el casillero estará vacío de detalle y mostrará una instrucción breve para elegir o arrastrar una carta; no se preseleccionará ninguna tecnología. La instrucción incluirá la alternativa sin arrastre.
+- Cuando se entre sin una selección, el casillero estará vacío de detalle y mostrará una instrucción breve para elegir una carta; no se preseleccionará ninguna tecnología. La instrucción mencionará el arrastre cuando esté disponible.
 - Cuando se seleccione una carta habilitada, el casillero mostrará la descripción de esa tecnología.
 - Cuando se seleccione otra carta habilitada, el casillero reemplazará la descripción anterior por la nueva.
 - Cuando se muestre una descripción, el nombre y el texto corresponderán a la misma tecnología y al idioma activo.
@@ -71,7 +78,7 @@ El sistema deberá permitir seleccionar una tecnología y mostrar en el casiller
 
 ### RF-4 — Arrastre, límites y colisiones
 
-El sistema deberá permitir arrastrar una carta habilitada al casillero para seleccionarla. Las cartas podrán reubicarse dentro del canvas, no saldrán de sus límites y se repelerán entre sí.
+El sistema deberá permitir arrastrar una carta habilitada al casillero para seleccionarla. Las cartas se desplazarán por el escenario, responderán a colisiones entre sí y al arrastre, y no saldrán de sus límites.
 
 **Criterios de aceptación (EARS):**
 
@@ -79,9 +86,27 @@ El sistema deberá permitir arrastrar una carta habilitada al casillero para sel
 - Cuando una carta se suelte fuera del casillero, conservará la posición de soltado dentro del canvas y no cambiará la selección activa.
 - Cuando una carta se arrastre fuera de los límites del canvas, permanecerá dentro de estos; ninguna carta podrá perderse fuera del área visible.
 - Cuando una carta se acerque a otra, se producirá repulsión: se admite solapamiento parcial, pero ninguna carta ocultará por completo a otra.
+- En reposo, las cartas se desplazarán lentamente y de forma acotada; las colisiones producirán separación perceptible, sin vibración, aceleraciones bruscas ni ocultación completa.
+- Con movimiento reducido, las cartas quedarán quietas hasta una interacción directa; la respuesta a un arrastre seguirá disponible y será inmediata.
 - Mientras una carta esté atenuada por el filtro, no se podrá arrastrar ni seleccionar.
 - Cuando se use teclado o pantalla táctil, se podrá seleccionar una carta sin arrastrarla.
 - Cuando se arrastre una carta, no se rotará la escena.
+
+### RF-4a — Casillero: recepción, estado ocupado y expulsión
+
+El casillero central deberá comunicar cuándo acepta una carta, mostrar la tecnología seleccionada y permitir devolverla al escenario mediante una acción explícita.
+
+**Criterios de aceptación (EARS):**
+
+- Cuando una carta habilitada entre en la zona de recepción, el casillero mostrará un hover claramente perceptible; al salir de la zona volverá al estado normal.
+- Cuando se suelte una carta habilitada en el casillero, este confirmará la recepción con feedback visual breve, mostrará su marca, nombre y descripción, y expondrá un botón accesible para expulsarla.
+- Mientras una carta esté alojada, no quedará una copia interactiva de esa carta en la escena: el casillero será su ubicación visible y única.
+- Cuando se active «Expulsar» con ratón, teclado o tacto, la carta volverá al escenario en una posición libre, visible, dentro de límites y que no se solape por completo con otra carta ni con el casillero.
+- Cuando se seleccione otra tecnología mediante la lista accesible, la nueva pasará a ocupar el casillero y la anterior volverá a una posición libre visible; el cambio nunca crea duplicados ni cartas ocultas.
+- Al expulsar, el casillero volverá a su estado vacío y la descripción dejará de presentarse como selección activa.
+- Mientras haya una carta alojada, no se podrá soltar otra bajo el casillero ni ocultarla: se rechazará con feedback y la nueva carta volverá a una posición visible, o se deberá expulsar primero la ocupante.
+- Si cambia el viewport, la carta alojada seguirá representada en el casillero y la acción de expulsión seguirá disponible.
+- El botón tendrá nombre accesible localizado, foco visible y uso por teclado; el estado ocupado/vacío se comunicará semánticamente.
 
 ### RF-5 — Cambio entre 2D y 3D
 
@@ -95,7 +120,7 @@ El sistema deberá ofrecer un switch para alternar entre los modos 2D y 3D de la
 - Cuando se alterne 2D↔3D, se conservarán el filtro activo, la selección y la descripción.
 - Cuando se active `prefers-reduced-motion`, el switch seguirá permitiendo cambiar de modo, pero el cambio será instantáneo y no animado.
 - Cuando el navegador no admita 3D, el switch no se mostrará y el modo 2D seguirá disponible.
-- La escena no tendrá movimiento autónomo: las cartas solo se mueven por acción de la persona o como respuesta a una colisión provocada por ella.
+- La escena puede tener movimiento ambiental pausado y acotado; no habrá movimiento frenético ni física continua de cuerpos. Con movimiento reducido se desactiva por completo. Las colisiones por interacción directa siempre se resuelven.
 
 ### RF-6 — Zoom en 3D
 
@@ -151,10 +176,13 @@ El sistema deberá ofrecer una presentación plana y completa cuando no haya Jav
 - La presentación conservará contraste AA en los temas claro y oscuro, incluso para las cartas atenuadas.
 - Toda la información deberá poder consultarse con teclado y tecnología de asistencia; la selección no dependerá exclusivamente del arrastre.
 - La presentación se adaptará a móvil y escritorio, sin recortar cartas, nombres, controles ni descripciones.
+- La escena 3D tendrá profundidad legible en todas sus piezas: cartas extruidas con cantos, marcas legibles, casillero, y un escenario con planos/materiales, iluminación y sombras consistentes. No se mezclarán objetos planos flotando sobre elementos volumétricos como si fueran escenas distintas.
+- La dirección 3D será una feature única y coherente: paleta editorial, escala, perspectiva, iluminación, materiales, profundidad y respuesta física compartirán reglas visuales. El impacto vendrá del volumen, la composición y el movimiento, no de adornos, colores aleatorios, partículas o efectos ajenos al sistema.
+- El movimiento ambiental será pausado y de baja amplitud, se detendrá cuando la escena no esté visible o la pestaña no esté activa y no consumirá un bucle continuo si no es necesario; `prefers-reduced-motion` desactivará el movimiento ambiental.
 - Con movimiento reducido, sin JavaScript o sin WebGL, el contenido permanecerá visible y legible.
 - La interacción no impedirá el desplazamiento de la página ni bloqueará la lectura.
 - La voz será breve, afirmativa y centrada en qué es cada tecnología. No se inventarán cifras, usos ni afirmaciones profesionales.
-- La escena no consumirá recursos de forma continua cuando no haya interacción.
+- La escena no consumirá recursos de forma continua cuando no haya cambios visuales; el movimiento ambiental, si está activo, usará un ciclo acotado y se pausará fuera de vista o con la pestaña inactiva.
 - Los bloques de Stack respetarán el comportamiento general de entrada y salida con el scroll. Con movimiento reducido o sin soporte de la animación por scroll, todos permanecerán visibles.
 
 ## Casos límite
@@ -181,7 +209,7 @@ El sistema deberá ofrecer una presentación plana y completa cuando no haya Jav
 - Descripciones basadas en la experiencia personal, proyectos o resultados de Pedro.
 - Enlaces externos desde las cartas.
 - Guardar posiciones, modo o filtro entre entradas.
-- Física realista, gravedad o simulación de cuerpos rígidos.
+- Física realista, gravedad o simulación de cuerpos rígidos; el movimiento ambiental es coreografiado y las colisiones son una respuesta simple y estable.
 - La sección de proyectos y sus páginas de detalle.
 
 ## Restricciones técnicas
@@ -198,6 +226,10 @@ El sistema deberá ofrecer una presentación plana y completa cuando no haya Jav
 - La selección única muestra la descripción correcta, y cambiar de filtro conserva la descripción activa.
 - Las cartas se pueden arrastrar al casillero o seleccionar sin arrastrar; las atenuadas no son seleccionables por ningún método.
 - Las cartas no se pierden fuera del canvas y la repulsión impide que una oculte por completo a otra.
+- Cada carta usa la marca propia de su tecnología; los 25 logotipos son identificables, legibles en 2D/3D y tienen representación alternativa con nombre en la lista plana.
+- En 3D, cartas, casillero y escenario comparten un lenguaje volumétrico coherente; iluminación, materiales, sombras, escala y perspectiva se verifican en tamaños móvil y escritorio.
+- Las cartas se desplazan de forma pausada, colisionan con separación visible y paran con movimiento reducido; la escena se pausa fuera de vista.
+- El casillero da hover al recibir una carta, confirma la recepción, presenta el botón «Expulsar» y devuelve la carta a una posición libre visible; no hay cartas apiladas u ocultas debajo.
 - El switch ofrece transición con continuidad espacial, conserva posiciones, filtro, selección y descripción, y no se muestra si falta soporte 3D.
 - En 3D funcionan el zoom acotado y la rotación horizontal/vertical mediante ratón y controles accesibles.
 - Movimiento reducido, ausencia de JavaScript y ausencia de WebGL dejan el contenido completo visible como lista plana o modo 2D.

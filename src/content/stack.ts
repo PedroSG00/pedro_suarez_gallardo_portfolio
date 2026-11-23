@@ -1,32 +1,3 @@
-import {
-  Atom,
-  Brain,
-  Code,
-  CodeBrackets,
-  Cpu,
-  Css3,
-  Database,
-  DatabaseScript,
-  DataTransferBoth,
-  Flask,
-  Git,
-  GitBranch,
-  Github,
-  Globe,
-  GraphUp,
-  Html5,
-  Network,
-  Play,
-  Server,
-  ServerConnection,
-  Spark,
-  StatsReport,
-  Terminal,
-  TerminalTag,
-  TestTube,
-} from 'iconoir-react';
-import type { ComponentType, SVGProps } from 'react';
-
 export const STACK_CATEGORIES = [
   'frontend',
   'data-visualization',
@@ -38,51 +9,164 @@ export const STACK_CATEGORIES = [
 
 export type StackCategoryId = (typeof STACK_CATEGORIES)[number];
 
-export type StackIcon = ComponentType<SVGProps<SVGSVGElement>>;
-
 export interface StackTechnology {
   id: string;
   category: StackCategoryId;
   order: number;
-  icon: StackIcon;
+  brandMark: string;
 }
 
 export const STACK_TECHNOLOGIES = [
-  { id: 'javascript', category: 'frontend', order: 1, icon: Code },
-  { id: 'typescript', category: 'frontend', order: 2, icon: CodeBrackets },
-  { id: 'react', category: 'frontend', order: 3, icon: Atom },
-  { id: 'nextJs', category: 'frontend', order: 4, icon: Globe },
-  { id: 'html', category: 'frontend', order: 5, icon: Html5 },
-  { id: 'css', category: 'frontend', order: 6, icon: Css3 },
-  { id: 'chartJs', category: 'data-visualization', order: 7, icon: GraphUp },
-  { id: 'recharts', category: 'data-visualization', order: 8, icon: StatsReport },
-  { id: 'nodeJs', category: 'backend-apis', order: 9, icon: Server },
+  {
+    id: 'javascript',
+    category: 'frontend',
+    order: 1,
+    brandMark: '/stack/javascript.svg',
+  },
+  {
+    id: 'typescript',
+    category: 'frontend',
+    order: 2,
+    brandMark: '/stack/typescript.svg',
+  },
+  {
+    id: 'react',
+    category: 'frontend',
+    order: 3,
+    brandMark: '/stack/react.svg',
+  },
+  {
+    id: 'nextJs',
+    category: 'frontend',
+    order: 4,
+    brandMark: '/stack/nextJs.svg',
+  },
+  {
+    id: 'html',
+    category: 'frontend',
+    order: 5,
+    brandMark: '/stack/html.svg',
+  },
+  {
+    id: 'css',
+    category: 'frontend',
+    order: 6,
+    brandMark: '/stack/css.svg',
+  },
+  {
+    id: 'chartJs',
+    category: 'data-visualization',
+    order: 7,
+    brandMark: '/stack/chartJs.svg',
+  },
+  {
+    id: 'recharts',
+    category: 'data-visualization',
+    order: 8,
+    brandMark: '/stack/recharts.svg',
+  },
+  {
+    id: 'nodeJs',
+    category: 'backend-apis',
+    order: 9,
+    brandMark: '/stack/nodeJs.svg',
+  },
   {
     id: 'expressJs',
     category: 'backend-apis',
     order: 10,
-    icon: ServerConnection,
+    brandMark: '/stack/expressJs.svg',
   },
-  { id: 'restApis', category: 'backend-apis', order: 11, icon: Network },
+  {
+    id: 'restApis',
+    category: 'backend-apis',
+    order: 11,
+    brandMark: '/stack/restApis.svg',
+  },
   {
     id: 'webSockets',
     category: 'backend-apis',
     order: 12,
-    icon: DataTransferBoth,
+    brandMark: '/stack/webSockets.svg',
   },
-  { id: 'cSharp', category: 'backend-apis', order: 13, icon: Cpu },
-  { id: 'python', category: 'backend-apis', order: 14, icon: Terminal },
-  { id: 'mysql', category: 'databases', order: 15, icon: Database },
-  { id: 'mongodb', category: 'databases', order: 16, icon: DatabaseScript },
-  { id: 'jest', category: 'testing-ci', order: 17, icon: TestTube },
-  { id: 'vitest', category: 'testing-ci', order: 18, icon: Flask },
-  { id: 'playwright', category: 'testing-ci', order: 19, icon: Play },
-  { id: 'githubActions', category: 'testing-ci', order: 20, icon: GitBranch },
-  { id: 'githubCopilot', category: 'ai-tools', order: 21, icon: Spark },
-  { id: 'claudeCode', category: 'ai-tools', order: 22, icon: Brain },
-  { id: 'opencode', category: 'ai-tools', order: 23, icon: TerminalTag },
-  { id: 'git', category: 'ai-tools', order: 24, icon: Git },
-  { id: 'github', category: 'ai-tools', order: 25, icon: Github },
+  {
+    id: 'cSharp',
+    category: 'backend-apis',
+    order: 13,
+    brandMark: '/stack/cSharp.svg',
+  },
+  {
+    id: 'python',
+    category: 'backend-apis',
+    order: 14,
+    brandMark: '/stack/python.svg',
+  },
+  {
+    id: 'mysql',
+    category: 'databases',
+    order: 15,
+    brandMark: '/stack/mysql.svg',
+  },
+  {
+    id: 'mongodb',
+    category: 'databases',
+    order: 16,
+    brandMark: '/stack/mongodb.svg',
+  },
+  {
+    id: 'jest',
+    category: 'testing-ci',
+    order: 17,
+    brandMark: '/stack/jest.svg',
+  },
+  {
+    id: 'vitest',
+    category: 'testing-ci',
+    order: 18,
+    brandMark: '/stack/vitest.svg',
+  },
+  {
+    id: 'playwright',
+    category: 'testing-ci',
+    order: 19,
+    brandMark: '/stack/playwright.svg',
+  },
+  {
+    id: 'githubActions',
+    category: 'testing-ci',
+    order: 20,
+    brandMark: '/stack/githubActions.svg',
+  },
+  {
+    id: 'githubCopilot',
+    category: 'ai-tools',
+    order: 21,
+    brandMark: '/stack/githubCopilot.svg',
+  },
+  {
+    id: 'claudeCode',
+    category: 'ai-tools',
+    order: 22,
+    brandMark: '/stack/claudeCode.svg',
+  },
+  {
+    id: 'opencode',
+    category: 'ai-tools',
+    order: 23,
+    brandMark: '/stack/opencode.svg',
+  },
+  {
+    id: 'git',
+    category: 'ai-tools',
+    order: 24,
+    brandMark: '/stack/git.svg',
+  },
+  {
+    id: 'github',
+    category: 'ai-tools',
+    order: 25,
+    brandMark: '/stack/github.svg',
+  },
 ] as const satisfies readonly StackTechnology[];
 
 export type StackTechnologyId = (typeof STACK_TECHNOLOGIES)[number]['id'];
