@@ -84,6 +84,7 @@ export default function StackWorkbench({
                 }}
               >
                 <Cube aria-hidden="true" focusable="false" width={20} height={20} />
+                <span data-stack-view-label>{t('view')}</span>
               </button>}
               <button
                 type="button"
@@ -94,6 +95,7 @@ export default function StackWorkbench({
                 onClick={onToggleList}
               >
                 <List aria-hidden="true" focusable="false" width={20} height={20} />
+                <span data-stack-view-label>{t('list')}</span>
               </button>
               {isSpatial && !listOpen && (
                 <>

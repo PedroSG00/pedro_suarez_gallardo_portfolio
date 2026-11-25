@@ -19,6 +19,70 @@ const RESPONSIVE_VIEWPORTS = [
 ] as const;
 
 for (const { locale, copy, nav } of LOCALES) {
+  test.describe(`/${locale}: Stack on a touch screen`, () => {
+    test.use({ hasTouch: true, reducedMotion: 'reduce', viewport: { width: 320, height: 568 } });
+
+    test('keeps the inspector beneath a visible navbar and pins it at the top when the navbar hides', async ({ page }) => {
+      await page.goto(`/${locale}#stack`);
+      const stack = page.getByRole('region', { name: nav.stack, exact: true });
+      const canvas = stack.locator('[data-stack-canvas]');
+      await expect(canvas).toHaveAttribute('data-stack-scene-ready', 'true');
+      expect(await readStackCardBounds(canvas)).toHaveProperty('react');
+      expect((await canvas.boundingBox())!.height).toBeLessThan(650);
+
+      const view = stack.getByRole('switch', { name: copy.cad.view });
+      const list = stack.getByRole('button', { name: copy.cad.list });
+      await expect(view.getByText(copy.cad.view, { exact: true })).toBeVisible();
+      await expect(list.getByText(copy.cad.list, { exact: true })).toBeVisible();
+      await view.tap();
+      const zoom = stack.getByRole('button', { name: copy.cad.zoom.in });
+      const rotate = stack.getByRole('button', { name: copy.cad.rotation.left });
+      for (const control of [view, list, zoom, rotate]) {
+        const bounds = (await control.boundingBox())!;
+        expect(bounds.width).toBeGreaterThanOrEqual(44);
+        expect(bounds.height).toBeGreaterThanOrEqual(44);
+        expect(bounds.x + bounds.width).toBeLessThanOrEqual(320);
+      }
+      await zoom.tap();
+      await expect(stack.getByRole('group', { name: copy.cad.zoom.label })).toContainText('105');
+      await list.tap();
+      await stack.getByRole('button', { name: copy.detail.select.replace('{name}', 'React') }).tap();
+      await list.tap();
+
+      const detail = stack.getByRole('region', { name: copy.detail.label });
+      const detailDock = stack.locator('[data-stack-detail-dock]');
+      const heading = detail.getByRole('heading', { name: 'React' });
+      const eject = detail.getByRole('button', { name: copy.detail.eject });
+      await expect(detail).toContainText(copy.technologies.react.description);
+      const nameBox = (await heading.boundingBox())!;
+      const ejectBox = (await eject.boundingBox())!;
+      expect(Math.abs(nameBox.y + nameBox.height / 2 - ejectBox.y - ejectBox.height / 2)).toBeLessThan(2);
+
+      await page.setViewportSize({ width: 667, height: 375 });
+      const navbar = page.getByRole('banner');
+      await page.emulateMedia({ reducedMotion: 'no-preference' });
+      await expect(navbar).not.toHaveAttribute('data-hidden');
+      await page.mouse.move(8, 300);
+      await page.mouse.wheel(0, 120);
+      await expect(navbar).toHaveAttribute('data-hidden');
+      await expect.poll(() => detailDock.boundingBox().then((bounds) => bounds!.y))
+        .toBeLessThan(1);
+
+      await page.mouse.wheel(0, -120);
+      await expect(navbar).not.toHaveAttribute('data-hidden');
+      const navbarHeight = await navbar.evaluate((element) => element.getBoundingClientRect().height);
+      await expect.poll(() => detailDock.boundingBox().then((bounds) => bounds!.y))
+        .toBeGreaterThanOrEqual(navbarHeight - 1);
+      await expect.poll(() => detailDock.boundingBox().then((bounds) => bounds!.y))
+        .toBeLessThanOrEqual(navbarHeight + 1);
+      await eject.tap();
+      await expect(heading).toHaveCount(0);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(667);
+    });
+  });
+}
+
+for (const { locale, copy, nav } of LOCALES) {
   test.describe(`/${locale}: Stack workbench`, () => {
     test.use({ reducedMotion: 'reduce', deviceScaleFactor: 2 });
 

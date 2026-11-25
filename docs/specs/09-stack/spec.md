@@ -101,6 +101,7 @@ El sistema deberá permitir arrastrar una carta habilitada al casillero para sel
 - Con `prefers-reduced-motion`, el empuje y la separación por colisión serán inmediatos, sin deslizamiento posterior ni movimiento ambiental.
 - La consola separará filtros y acciones en grupos legibles. En escritorio, el detalle ocupará un inspector lateral integrado en el marco; en tamaños estrechos será un panel compacto persistente al recorrer el canvas, sin quedar al final del dibujo ni exigir scroll para consultar una selección.
 - En escritorio, las acciones se alinearán con la fila de filtros; en viewports estrechos los grupos se reorganizarán sin desbordamiento ni cambios en el orden de lectura.
+- En teléfonos, la lista y el cambio de vista tendrán etiquetas visibles junto a sus iconos. El canvas ajustará su altura al espacio vertical disponible sin quitar cartas, y el inspector colocará la expulsión junto al nombre. El inspector permanecerá pegado al borde superior del viewport; dejará espacio para la navbar cuando esté visible y subirá al borde cuando esta se oculte.
 
 ### RF-4a — Casillero: recepción, estado ocupado y expulsión
 

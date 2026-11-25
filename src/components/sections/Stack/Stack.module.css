@@ -45,7 +45,7 @@
   grid-column: 1;
   grid-template-columns: minmax(0, 1fr);
   position: sticky;
-  top: calc(var(--nav-height) + var(--spacing) * 2);
+  inset-block-start: 0;
   z-index: calc(var(--nav-z) - 1);
   border-bottom: var(--line-width) solid var(--color-ink);
   padding: calc(var(--spacing) * 3) calc(var(--spacing) * 4);
@@ -83,6 +83,10 @@
 
 [data-stack-view-controls] {
   align-self: flex-start;
+}
+
+[data-stack-view-label] {
+  display: none;
 }
 
 [data-stack-filter-group] {
@@ -373,11 +377,54 @@
 
 @media (max-width: 750px) {
   [data-stack-drawing] {
-    --stack-scene-height: 46rem;
+    --stack-scene-height: clamp(36rem, 82svh, 46rem);
+  }
+
+  [data-stack-drawing-note] {
+    display: none;
+  }
+
+  [data-stack-view-label] {
+    display: inline;
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+  }
+
+  [data-stack-view-controls] button svg {
+    flex-shrink: 0;
   }
 }
 
 @media (max-width: 515px) {
+  [data-stack-engine] {
+    display: none;
+  }
+
+  [data-stack-workbench][data-active='true'] [data-stack-toolbar],
+  [data-stack-toolbar-controls] {
+    gap: calc(var(--spacing) * 3);
+  }
+
+  [data-stack-view-controls] {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    inline-size: 100%;
+  }
+
+  [data-stack-zoom-controls],
+  [data-stack-rotation-controls] {
+    grid-column: 1 / -1;
+  }
+
+  [data-stack-rotation-controls] {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  [data-stack-zoom-controls] output {
+    margin-inline-start: auto;
+  }
+
   [data-stack-filter-options] {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -411,12 +458,6 @@
     overflow: hidden;
     clip-path: inset(50%);
     white-space: nowrap;
-  }
-}
-
-@media (max-width: 515px) {
-  [data-stack-drawing] {
-    --stack-scene-height: 57rem;
   }
 }
 
@@ -624,6 +665,15 @@
   overflow-wrap: anywhere;
 }
 
+@media (max-width: 515px) {
+  [data-stack-detail-empty-state] {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: calc(var(--spacing) * 3);
+    min-block-size: 0;
+  }
+}
+
 [data-stack-select],
 [data-stack-eject] {
   min-height: max(var(--touch-target), calc(var(--spacing) * 11));
@@ -702,12 +752,30 @@
 [data-stack-list-mode='true'] [data-stack-detail-dock] {
   grid-row: 1;
   position: sticky;
-  inset-block-start: calc(var(--nav-height) + var(--spacing) * 2);
+  inset-block-start: 0;
   z-index: calc(var(--nav-z) - 1);
   align-self: start;
   max-block-size: 55svh;
   overflow: auto;
   background: var(--color-surface);
+}
+
+[data-stack-workbench][data-active='true'] [data-stack-detail-dock],
+[data-stack-list-mode='true'] [data-stack-detail-dock] {
+  transition: inset-block-start var(--duration-state) ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-stack-workbench][data-active='true'] [data-stack-detail-dock],
+  [data-stack-list-mode='true'] [data-stack-detail-dock] {
+    transition: none;
+  }
+}
+
+/* Keep the inspector at the viewport edge; make room only while the navbar is shown. */
+:root:has(header:not([data-hidden])) [data-stack-workbench][data-active='true'] [data-stack-detail-dock],
+:root:has(header:not([data-hidden])) [data-stack-list-mode='true'] [data-stack-detail-dock] {
+  inset-block-start: var(--nav-height);
 }
 
 [data-stack-workbench][data-active='false'] [data-stack-detail-dock]:not(:empty) {
@@ -809,22 +877,22 @@
 }
 
 @media (max-width: 1023px) {
-  [data-stack-list-mode='true'] [data-stack-detail-technology] {
+  [data-stack-detail-technology] {
     grid-template-columns: minmax(0, 1fr) auto;
     gap: calc(var(--spacing) * 2);
     align-items: center;
   }
 
-  [data-stack-list-mode='true'] [data-stack-detail-heading] [data-stack-brand-mark] {
+  [data-stack-detail-heading] [data-stack-brand-mark] {
     inline-size: calc(var(--spacing) * 9);
   }
 
-  [data-stack-list-mode='true'] [data-stack-detail-technology] [data-stack-detail-description] {
+  [data-stack-detail-technology] [data-stack-detail-description] {
     grid-column: 1 / -1;
     grid-row: 2;
   }
 
-  [data-stack-list-mode='true'] [data-stack-eject] {
+  [data-stack-eject] {
     grid-column: 2;
     grid-row: 1;
   }

@@ -166,7 +166,7 @@ test.describe('Stack touch gestures', () => {
     const session = await context.newCDPSession(page);
     const touch = (type: 'touchStart' | 'touchMove' | 'touchEnd' | 'touchCancel', point?: Point) =>
       session.send('Input.dispatchTouchEvent', { type, touchPoints: point ? [point] : [] });
-    const react = { x: 0.66, y: 0.065 };
+    const { react } = await readStackCardBounds(canvas);
     const at = await coordinates();
     const beforeDrag = await page.evaluate(() => window.scrollY);
     await touch('touchStart', at(react));
