@@ -397,7 +397,9 @@ No se implementa una tarea mientras sus decisiones previas sigan abiertas. No se
 - Añadir una entrada breve al detalle y verificar que nombre, marca, descripción y feedback no se recortan al recibir una carta.
 - Tests primero: integridad de las 50 descripciones, SVG estático, interpolación/retarget/reduced-motion, alineación e2e y recepción visible.
 
-**Estado:** implementación completada; lint, typecheck, test y build pasan; la suite e2e global sigue en curso. T11 no se inicia.
+**Verificación de la ampliación (2026-11-25):** `pnpm lint`, `pnpm typecheck`, `pnpm test` (678/678; 95,41 % líneas, 86,95 % ramas, 96,10 % funciones y 93,57 % sentencias), `pnpm build` y `pnpm test:e2e --workers=2` (361/361 en 11,2 minutos) pasan.
+
+**Estado:** completada y verificada globalmente. T11 sigue sin iniciar.
 
 ## T11 — Entrada, idioma y degradación sin WebGL
 
