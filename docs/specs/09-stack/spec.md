@@ -89,6 +89,7 @@ El sistema deberá permitir arrastrar una carta habilitada al casillero para sel
 - Cuando una carta se suelte fuera del casillero, conservará la posición de soltado dentro del canvas y no cambiará la selección activa.
 - Cuando una carta se arrastre fuera de los límites del canvas, permanecerá dentro de estos; ninguna carta podrá perderse fuera del área visible.
 - Cuando una carta se acerque a otra, se producirá repulsión: se admite solapamiento parcial, pero ninguna carta ocultará por completo a otra.
+- En perspectiva, el cuerpo completo de cada carta permanecerá por encima del plano del suelo, también al moverla al borde inferior del canvas en un viewport móvil.
 - En reposo, las cartas se desplazarán lentamente y de forma acotada; las colisiones producirán separación perceptible, sin vibración, aceleraciones bruscas ni ocultación completa.
 - Con movimiento reducido, las cartas quedarán quietas hasta una interacción directa; la respuesta a un arrastre seguirá disponible y será inmediata.
 - Mientras una carta esté atenuada por el filtro, no se podrá arrastrar ni seleccionar.

@@ -79,6 +79,7 @@ const PERSPECTIVE_SLOT_INSET = 0.18;
 const CAMERA_MARGIN = 0.02;
 const FLOOR_GRID_OPACITY = 0.32;
 const FLOOR_SHADOW_OPACITY = 0.1;
+const FLOOR_CLEARANCE = 0.08;
 const PROJECTION_DURATION_TOKEN = '--duration-theme';
 const CAMERA_TRANSITION_DURATION_TOKEN = '--duration-state';
 const FEATURED: ReadonlySet<StackTechnologyId> = new Set(FEATURED_STACK_TECHNOLOGY_IDS);
@@ -512,15 +513,15 @@ export function mountStackScene(
     if (supportsPerspective) fitPerspective();
     projectStage(progress);
 
-    let bottom = 0;
     for (const [id, position] of positions) {
       const card = cards.get(id);
       if (!card) continue;
       if (!card.placed) card.position.set(position.x, position.y, position.z);
       card.scale = position.scale;
-      bottom = Math.min(bottom, position.y);
     }
-    floor.position.y = bottom - 0.92;
+    // The floor must sit below the full drag area, not just below the initial
+    // card layout, which can leave a large gap on narrow mobile viewports.
+    floor.position.y = limits.bottom - FLOOR_CLEARANCE;
     updateCards();
     settle();
   };

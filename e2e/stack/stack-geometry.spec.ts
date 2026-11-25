@@ -103,7 +103,13 @@ test.describe('Stack card geometry', () => {
     expect(beforeResize.react.x).toBeGreaterThan(0.7);
     await page.setViewportSize({ width: 390, height: 1050 });
     await expect.poll(() => geometry(canvas)).not.toEqual(beforeResize);
-    expectInCanvas(await geometry(canvas));
+    const mobile = await geometry(canvas);
+    expectInCanvas(mobile);
+
+    await drag(mobile.react, { x: 0.5, y: 1.025 });
+    const lowerEdge = await geometry(canvas);
+    expectInCanvas(lowerEdge);
+    expect(Math.abs(lowerEdge.react.bottom - 1)).toBeLessThan(0.08);
   });
 
   test('keeps collision displacement continuous and rolls back a cancelled gesture', async ({ page }) => {

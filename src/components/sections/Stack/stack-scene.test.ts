@@ -11,6 +11,7 @@ import { STACK_TECHNOLOGIES } from '@/content/stack';
 import {
   STACK_CARD_HEIGHT,
   STACK_CARD_WIDTH,
+  layoutStackCards,
 } from '@/lib/stack/stack-scene-layout';
 import { mountStackScene } from './stack-scene';
 
@@ -640,6 +641,64 @@ describe('mountStackScene', () => {
     expect(three.state.camera?.aspect).toBeCloseTo(350 / 720);
     expect(three.state.camera?.position.z).toBeGreaterThan(15);
     expect(three.state.camera?.updateProjectionMatrix).toHaveBeenCalled();
+    handle.dispose();
+  });
+
+  test('keeps mobile cards above the 3D floor when dragged to the lower edge', () => {
+    setMotionPreference(true);
+    three.state.width = 350;
+    three.state.height = 720;
+    const canvas = makeCanvas();
+    const handle = mountScene(canvas, { mode: '3d' });
+    const { viewHeight } = layoutStackCards(technologies, 350 / 720);
+    const scene = three.state.scene;
+    const floor = scene?.children.find((child) =>
+      child instanceof three.FakeGroup &&
+      child.children.some((mesh) => mesh instanceof three.FakeGrid),
+    );
+    const cardGroup = scene?.children.find((child) =>
+      child instanceof three.FakeGroup &&
+      child.children.some((mesh) => typeof mesh.userData.technologyId === 'string'),
+    );
+    if (!(floor instanceof three.FakeGroup) || !(cardGroup instanceof three.FakeGroup)) {
+      throw new Error('Expected the 3D floor and technology cards');
+    }
+    const cards = cardGroup.children.filter((mesh) => typeof mesh.userData.technologyId === 'string');
+    const bottomCard = cards.reduce((lowest, card) =>
+      card.position.y < lowest.position.y ? card : lowest,
+    );
+    const expectAboveFloor = () => {
+      const lowestCardEdge = Math.min(...cards.map(
+        (card) => card.position.y - STACK_CARD_HEIGHT * card.scale.y / 2,
+      ));
+      expect(lowestCardEdge).toBeGreaterThan(floor.position.y);
+    };
+    three.state.intersections = [{ object: bottomCard }];
+    const intersectPlane = three.state.raycaster?.ray.intersectPlane;
+    intersectPlane?.mockReturnValueOnce(
+      new three.FakeVector(bottomCard.position.x, bottomCard.position.y, 0),
+    );
+    intersectPlane?.mockReturnValue(
+      new three.FakeVector(bottomCard.position.x, -100, 0),
+    );
+    for (const [type, clientY] of [['pointerdown', 100], ['pointermove', 180]] as const) {
+      canvas.dispatchEvent(new PointerEvent(type, {
+        bubbles: true,
+        button: 0,
+        pointerId: 7,
+        pointerType: 'touch',
+        isPrimary: true,
+        clientX: 100,
+        clientY,
+      }));
+    }
+
+    expectAboveFloor();
+    expect(bottomCard.position.y).toBeLessThan(-viewHeight / 2 + STACK_CARD_HEIGHT);
+    three.state.width = 320;
+    three.state.height = 912;
+    three.state.resizeObserver?.trigger();
+    expectAboveFloor();
     handle.dispose();
   });
 
