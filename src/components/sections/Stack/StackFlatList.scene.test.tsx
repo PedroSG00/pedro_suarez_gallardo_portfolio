@@ -26,6 +26,9 @@ vi.mock('./StackCanvas', () => ({
       <button type="button" onClick={() => onSceneStatusChange('flat')}>
         Open a flat-only scene
       </button>
+      <button type="button" onClick={() => onSceneStatusChange('fallback')}>
+        Report unavailable WebGL
+      </button>
     </div>
   ),
 }));
@@ -75,6 +78,60 @@ describe('StackFlatList scene integration', () => {
     expect(list).toHaveAttribute('aria-expanded', 'false');
     fireEvent.click(view);
     expect(view).not.toBeChecked();
+  });
+
+  test('keeps filters on the canvas and restores them after an unfiltered list visit', () => {
+    const cad = enMessages.stack.cad;
+    const filterLabel = enMessages.stack.filters.label;
+    renderWithIntl(<StackFlatList />, { locale: 'en' });
+    fireEvent.click(screen.getByRole('button', { name: 'Select React from canvas' }));
+
+    const filters = screen.getByRole('group', { name: filterLabel });
+    const frontendFilter = within(filters).getByRole('radio', {
+      name: enMessages.stack.categories.frontend,
+    });
+    fireEvent.click(frontendFilter);
+
+    const chartJsButton = screen.getByRole('button', {
+      name: enMessages.stack.detail.select.replace(
+        '{name}',
+        enMessages.stack.technologies.chartJs.name,
+      ),
+    });
+    expect(chartJsButton).toBeDisabled();
+
+    const listToggle = screen.getByRole('button', { name: cad.list });
+    fireEvent.click(listToggle);
+    expect(screen.queryByRole('group', { name: filterLabel })).not.toBeInTheDocument();
+    expect(chartJsButton).toBeEnabled();
+    fireEvent.click(chartJsButton);
+    expect(chartJsButton).toHaveAttribute('aria-pressed', 'true');
+
+    fireEvent.click(listToggle);
+    const restoredFilters = screen.getByRole('group', { name: filterLabel });
+    expect(restoredFilters).toBeVisible();
+    expect(within(restoredFilters).getByRole('radio', {
+      name: enMessages.stack.categories.frontend,
+    })).toBeChecked();
+    expect(chartJsButton).toBeDisabled();
+  });
+
+  test('hides filters and leaves every list technology selectable without WebGL', () => {
+    const filterLabel = enMessages.stack.filters.label;
+    renderWithIntl(<StackFlatList />, { locale: 'en' });
+    fireEvent.click(screen.getByRole('button', { name: 'Report unavailable WebGL' }));
+
+    expect(screen.queryByRole('group', { name: filterLabel })).not.toBeInTheDocument();
+    for (const technology of STACK_TECHNOLOGIES) {
+      expect(
+        screen.getByRole('button', {
+          name: enMessages.stack.detail.select.replace(
+            '{name}',
+            enMessages.stack.technologies[technology.id].name,
+          ),
+        }),
+      ).toBeEnabled();
+    }
   });
 
   test('keeps the icon console and technology detail inside the active scene frame', () => {

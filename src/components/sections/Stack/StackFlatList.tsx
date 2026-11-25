@@ -103,7 +103,7 @@ export default function StackFlatList() {
   const isTechnologyEnabled = (id: string, state: StackState = stackState) => {
     const technology = STACK_TECHNOLOGIES.find((item) => item.id === id);
     return technology
-      ? isStackTechnologyEnabled(technology.category, state)
+      ? flatView || isStackTechnologyEnabled(technology.category, state)
       : false;
   };
 
@@ -111,8 +111,15 @@ export default function StackFlatList() {
     const technology = STACK_TECHNOLOGIES.find((item) => item.id === id);
     if (!technology) return;
 
-    const result = receiveStackTechnology(stackState, technology);
-    setStackState(result.state);
+    const receivingState = flatView
+      ? selectStackFilter(stackState, 'all')
+      : stackState;
+    const result = receiveStackTechnology(receivingState, technology);
+    setStackState(
+      flatView
+        ? selectStackFilter(result.state, stackState.filter)
+        : result.state,
+    );
 
     if (result.outcome === 'disabled') return;
     const name = t(`technologies.${technology.id}.name`);
@@ -150,7 +157,15 @@ export default function StackFlatList() {
     const technology = STACK_TECHNOLOGIES.find((item) => item.id === id);
     if (!technology) return;
 
-    setStackState((state) => selectStackTechnology(state, technology));
+    setStackState((state) => {
+      const selectableState = flatView
+        ? selectStackFilter(state, 'all')
+        : state;
+      const nextState = selectStackTechnology(selectableState, technology);
+      return flatView
+        ? selectStackFilter(nextState, state.filter)
+        : nextState;
+    });
     setFeedback(null);
   };
 
@@ -208,7 +223,8 @@ export default function StackFlatList() {
       >
         {CATEGORY_GROUPS.map(({ id, technologies }) => {
           const headingId = `stack-category-${id}`;
-          const isCategoryActive = isStackTechnologyEnabled(id, stackState);
+          const isCategoryActive =
+            flatView || isStackTechnologyEnabled(id, stackState);
 
           return (
             <Reveal key={id} variant="fade">
@@ -227,10 +243,7 @@ export default function StackFlatList() {
                   {technologies.map((technology) => {
                     const { id: technologyId, brandMark } = technology;
                     const name = t(`technologies.${technologyId}.name`);
-                    const isEnabled = isStackTechnologyEnabled(
-                      technology.category,
-                      stackState,
-                    );
+                    const isEnabled = isTechnologyEnabled(technologyId);
 
                     return (
                       <li

@@ -69,7 +69,7 @@ export default function StackWorkbench({
           </div>
         )}
         <div data-stack-toolbar-controls>
-          {filters}
+          {active && !listOpen && filters}
           {active && (
             <div data-stack-view-controls>
               {supportsPerspective && <button

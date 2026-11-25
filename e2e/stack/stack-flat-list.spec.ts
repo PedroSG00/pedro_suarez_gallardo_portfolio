@@ -17,8 +17,18 @@ const CATEGORY_LABEL_KEYS = [
 ] as const;
 
 const LOCALES = [
-  { locale: 'en', messages: en.stack, nav: en.shared.nav },
-  { locale: 'es', messages: es.stack, nav: es.shared.nav },
+  {
+    locale: 'en',
+    messages: en.stack,
+    nav: en.shared.nav,
+    filterLabel: 'Filter by category',
+  },
+  {
+    locale: 'es',
+    messages: es.stack,
+    nav: es.shared.nav,
+    filterLabel: 'Filtrar por categoría',
+  },
 ] as const;
 
 const FEATURED_IDS: ReadonlySet<string> = new Set(
@@ -28,7 +38,7 @@ const FEATURED_IDS: ReadonlySet<string> = new Set(
 const technologiesIn = (category: string) =>
   STACK_TECHNOLOGIES.filter((technology) => technology.category === category);
 
-for (const { locale, messages, nav } of LOCALES) {
+for (const { locale, messages, nav, filterLabel } of LOCALES) {
   test.describe(`/${locale}: Stack flat list`, () => {
     test.use({ reducedMotion: 'reduce' });
 
@@ -41,9 +51,11 @@ for (const { locale, messages, nav } of LOCALES) {
       await expect(stack.getByRole('heading', { level: 2 })).toHaveText(
         `03 / ${nav.stack}`,
       );
+      await expect(stack.getByRole('group', { name: filterLabel })).toBeVisible();
       await stack.getByRole('button', { name: messages.cad.list }).click();
       await expect(stack.locator('canvas')).toBeHidden();
       const frame = stack.getByRole('region', { name: messages.cad.title });
+      await expect(frame.getByRole('group', { name: filterLabel })).toHaveCount(0);
 
       const destinations = await page
         .locator('main > section[id]')
@@ -79,21 +91,12 @@ for (const { locale, messages, nav } of LOCALES) {
             : technology.brandMark,
         );
       }
-      const filters = stack.getByRole('group', {
-        name: locale === 'en' ? 'Filter by category' : 'Filtrar por categoría',
-      });
-      await expect(filters.getByRole('radio')).toHaveCount(
-        STACK_CATEGORIES.length + 1,
-      );
-      await expect(
-        filters.getByRole('radio', {
-          name: locale === 'en' ? 'All' : 'Todas',
-        }),
-      ).toBeChecked();
-
       await expect(lists.getByRole('button')).toHaveCount(
         STACK_TECHNOLOGIES.length,
       );
+      for (const button of await lists.getByRole('button').all()) {
+        await expect(button).toBeEnabled();
+      }
       for (const role of [
         'checkbox',
         'textbox',
@@ -102,6 +105,48 @@ for (const { locale, messages, nav } of LOCALES) {
         'progressbar',
       ] as const) {
         await expect(stack.getByRole(role)).toHaveCount(0);
+      }
+    });
+
+    test('right-aligns view controls while the list is open on desktop', async ({ page }) => {
+      await page.setViewportSize({ width: 1280, height: 900 });
+      await page.goto(`/${locale}#stack`);
+
+      const stack = page.getByRole('region', { name: nav.stack, exact: true });
+      const frame = stack.getByRole('region', { name: messages.cad.title });
+      const canvas = frame.locator('[data-stack-canvas]');
+      await expect(canvas).toHaveAttribute('data-stack-scene-ready', 'true');
+
+      const listToggle = frame.getByRole('button', { name: messages.cad.list });
+      await listToggle.click();
+      await expect(listToggle).toHaveAttribute('aria-expanded', 'true');
+      await expect(frame.getByRole('group', { name: filterLabel })).toHaveCount(0);
+
+      const toolbar = frame.locator('[data-stack-toolbar]');
+      const viewControls = frame.locator('[data-stack-view-controls]');
+      for (const width of [830, 1280]) {
+        await page.setViewportSize({ width, height: 900 });
+        const [toolbarBounds, controlsBounds, toolbarEdges] = await Promise.all([
+          toolbar.boundingBox(),
+          viewControls.boundingBox(),
+          toolbar.evaluate((element) => {
+            const style = getComputedStyle(element);
+            return {
+              paddingRight: Number.parseFloat(style.paddingRight),
+              borderRight: Number.parseFloat(style.borderRightWidth),
+            };
+          }),
+        ]);
+        if (!toolbarBounds || !controlsBounds) {
+          throw new Error('The list toolbar controls must have visible bounds');
+        }
+        const toolbarContentRight =
+          toolbarBounds.x + toolbarBounds.width -
+          toolbarEdges.paddingRight - toolbarEdges.borderRight;
+
+        expect(
+          Math.abs(toolbarContentRight - controlsBounds.x - controlsBounds.width),
+        ).toBeLessThanOrEqual(1);
       }
     });
 

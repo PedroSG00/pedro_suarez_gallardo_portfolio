@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import { screen, within } from '@testing-library/react';
 import enMessages from '../../../../messages/en.json';
 import esMessages from '../../../../messages/es.json';
-import { STACK_CATEGORIES, STACK_TECHNOLOGIES } from '@/content/stack';
+import { STACK_TECHNOLOGIES } from '@/content/stack';
 import { renderWithIntl } from '@/test/render-with-intl';
 import Stack from './Stack';
 
@@ -11,8 +11,6 @@ const LOCALES = [
     locale: 'en',
     messages: enMessages.stack,
     nav: enMessages.shared.nav,
-    filterLabel: 'Filter by category',
-    allLabel: 'All',
     detailLabel: 'Technology detail',
     emptyDetail: 'Select a card to see what it is.',
   },
@@ -20,8 +18,6 @@ const LOCALES = [
     locale: 'es',
     messages: esMessages.stack,
     nav: esMessages.shared.nav,
-    filterLabel: 'Filtrar por categoría',
-    allLabel: 'Todas',
     detailLabel: 'Detalle de tecnología',
     emptyDetail: 'Selecciona una carta para ver qué es.',
   },
@@ -38,7 +34,7 @@ const CATEGORY_LABEL_KEYS = [
 
 describe.each(LOCALES)(
   'Stack in $locale',
-  ({ locale, messages, nav, filterLabel, allLabel, detailLabel, emptyDetail }) => {
+  ({ locale, messages, nav, detailLabel, emptyDetail }) => {
   test('renders one section heading and the complete stack', () => {
     renderWithIntl(<Stack />, { locale });
 
@@ -65,15 +61,12 @@ describe.each(LOCALES)(
     expect(stack.queryByRole('navigation')).not.toBeInTheDocument();
   });
 
-  test('exposes category filters and the accessible detail slot before the scene', () => {
+  test('keeps category filters out of the flat fallback and exposes the accessible detail slot', () => {
     renderWithIntl(<Stack />, { locale });
 
     const region = screen.getByRole('region', { name: nav.stack });
-    const filters = within(region).getByRole('group', { name: filterLabel });
-    expect(within(filters).getAllByRole('radio')).toHaveLength(
-      STACK_CATEGORIES.length + 1,
-    );
-    expect(within(filters).getByRole('radio', { name: allLabel })).toBeChecked();
+    expect(within(region).queryByRole('group')).not.toBeInTheDocument();
+    expect(within(region).queryByRole('radio')).not.toBeInTheDocument();
 
     const detail = within(region).getByRole('region', { name: detailLabel });
     expect(detail).toHaveTextContent(emptyDetail);
@@ -81,6 +74,9 @@ describe.each(LOCALES)(
     expect(within(region).getAllByRole('button')).toHaveLength(
       STACK_TECHNOLOGIES.length,
     );
+    for (const button of within(region).getAllByRole('button')) {
+      expect(button).toBeEnabled();
+    }
 
     for (const role of [
       'checkbox',

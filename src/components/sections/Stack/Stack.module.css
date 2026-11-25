@@ -461,6 +461,13 @@
   }
 }
 
+@media (min-width: 516px) {
+  [data-stack-workbench][data-active='true'][data-stack-list-mode='true']
+    [data-stack-toolbar-controls] {
+    justify-content: flex-end;
+  }
+}
+
 @media (pointer: coarse) {
   [data-stack-filter-option],
   [data-stack-view-controls] button,

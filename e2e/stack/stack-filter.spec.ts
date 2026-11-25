@@ -97,6 +97,10 @@ for (const {
         name: messages.categories.frontend,
         exact: true,
       });
+      const dataVisualization = group.getByRole('radio', {
+        name: messages.categories.dataVisualization,
+        exact: true,
+      });
       await frontend.check();
 
       await expect(frontend).toBeChecked();
@@ -129,32 +133,40 @@ for (const {
 
       await frontend.focus();
       await page.keyboard.press('ArrowRight');
-      await expect(
-        group.getByRole('radio', {
-          name: messages.categories.dataVisualization,
-          exact: true,
-        }),
-      ).toBeChecked();
+      await expect(dataVisualization).toBeChecked();
       await page.keyboard.press('Tab');
       await expect(stack.getByRole('switch', { name: messages.cad.view })).toBeFocused();
       await page.keyboard.press('Tab');
       const listToggle = stack.getByRole('button', { name: messages.cad.list });
       await expect(listToggle).toBeFocused();
       await page.keyboard.press('Space');
+      await expect(group).toHaveCount(0);
       await page.keyboard.press('Tab');
 
-      await expect(
-        stack.getByRole('button', {
-          name: selectionName(messages.technologies.chartJs.name),
-        }),
-      ).toBeFocused();
+      const chartJsButton = stack.getByRole('button', {
+        name: selectionName(messages.technologies.chartJs.name),
+      });
+      await expect(stack.getByRole('button', {
+        name: selectionName(messages.technologies.javascript.name),
+      })).toBeFocused();
+      await expect(chartJsButton).toBeEnabled();
+      await expect(stack.getByRole('button', {
+        name: selectionName(messages.technologies.nodeJs.name),
+      })).toBeEnabled();
+
+      await listToggle.click();
+      await expect(group).toBeVisible();
+      await expect(dataVisualization).toBeChecked();
+      await expect(stack.getByRole('button', {
+        name: selectionName(messages.technologies.nodeJs.name),
+      })).toBeDisabled();
 
       await all.check();
       await expect(all).toBeChecked();
       await expect(group.getByRole('radio', { checked: true })).toHaveCount(1);
     });
 
-    test('keeps inactive technology entries non-actionable by touch', async ({
+    test('selects any technology from the list by touch and restores the canvas filter', async ({
       browser,
     }) => {
       const context = await browser.newContext({
@@ -178,27 +190,28 @@ for (const {
         await frontend.tap();
         await expect(frontend).toBeChecked();
 
-        await stack.getByRole('button', { name: messages.cad.list }).tap();
-        const inactiveTechnology = stack.getByText(
-          messages.technologies.chartJs.name,
-          { exact: true },
-        );
-        await inactiveTechnology.scrollIntoViewIfNeeded();
-        const technologyBounds = await inactiveTechnology.boundingBox();
-        if (!technologyBounds) throw new Error('The inactive technology must be visible');
-        // A locator tap correctly refuses disabled controls. Send a native touch
-        // at the now-stable visible target to prove the browser ignores it.
+        const listToggle = stack.getByRole('button', { name: messages.cad.list });
+        await listToggle.tap();
+        await expect(group).toHaveCount(0);
+        const chartJsButton = stack.getByRole('button', {
+          name: selectionName(messages.technologies.chartJs.name),
+        });
+        await expect(chartJsButton).toBeEnabled();
+        await chartJsButton.scrollIntoViewIfNeeded();
+        const technologyBounds = await chartJsButton.boundingBox();
+        if (!technologyBounds) throw new Error('Chart.js must be visible in the list');
         await page.touchscreen.tap(
           technologyBounds.x + technologyBounds.width / 2,
           technologyBounds.y + technologyBounds.height / 2,
         );
-        await expect(frontend).toBeChecked();
-        await expect(inactiveTechnology).toBeVisible();
-        await expect(stack.getByRole('button', {
-          name: selectionName(messages.technologies.chartJs.name),
-        })).toBeDisabled();
+        await expect(chartJsButton).toHaveAttribute('aria-pressed', 'true');
         await expect(stack.getByRole('region', { name: messages.detail.label }))
-          .toContainText(messages.detail.empty);
+          .toContainText(messages.technologies.chartJs.description);
+
+        await listToggle.tap();
+        await expect(group).toBeVisible();
+        await expect(frontend).toBeChecked();
+        await expect(chartJsButton).toBeDisabled();
       } finally {
         await context.close();
       }

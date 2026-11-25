@@ -15,7 +15,6 @@ const LOCALES = [
     locale: 'en',
     messages: enMessages.stack,
     filterLabel: 'Filter by category',
-    allLabel: 'All',
     detailLabel: 'Technology detail',
     emptyDetail: 'Select a card to see what it is.',
     ejectLabel: 'Eject',
@@ -25,7 +24,6 @@ const LOCALES = [
     locale: 'es',
     messages: esMessages.stack,
     filterLabel: 'Filtrar por categoría',
-    allLabel: 'Todas',
     detailLabel: 'Detalle de tecnología',
     emptyDetail: 'Selecciona una carta para ver qué es.',
     ejectLabel: 'Expulsar',
@@ -60,7 +58,6 @@ describe.each(LOCALES)(
     locale,
     messages,
     filterLabel,
-    allLabel,
     detailLabel,
     emptyDetail,
     ejectLabel,
@@ -142,22 +139,6 @@ describe.each(LOCALES)(
           selector: '[data-featured] [data-stack-select]',
         }),
       ).not.toBeInTheDocument();
-    }
-  });
-
-  test('starts with All selected and exposes one localized active filter', () => {
-    renderWithIntl(<StackFlatList />, { locale });
-
-    const group = screen.getByRole('group', { name: filterLabel });
-    const radios = within(group).getAllByRole('radio');
-
-    expect(radios).toHaveLength(STACK_CATEGORIES.length + 1);
-    expect(within(group).getByRole('radio', { name: allLabel })).toBeChecked();
-    expect(within(group).getAllByRole('radio', { checked: true })).toHaveLength(1);
-    for (const key of CATEGORY_LABEL_KEYS) {
-      expect(
-        within(group).getByRole('radio', { name: messages.categories[key] }),
-      ).not.toBeChecked();
     }
   });
 
@@ -250,72 +231,21 @@ describe.each(LOCALES)(
     expect(within(detail).getByRole('button', { name: ejectLabel })).toBeVisible();
   });
 
-  test('keeps selected detail while its category is filtered out and disables that card', () => {
-    renderWithIntl(<StackFlatList />, { locale });
-
-    const detail = screen.getByRole('region', { name: detailLabel });
-    const reactCopy = messages.technologies.react;
-    const reactButton = screen.getByRole('button', {
-      name: selectName(reactCopy.name),
-    });
-    fireEvent.click(reactButton);
-
-    const filters = screen.getByRole('group', { name: filterLabel });
-    fireEvent.click(
-      within(filters).getByRole('radio', {
-        name: messages.categories.testingCi,
-      }),
-    );
-
-    expect(reactButton).toBeDisabled();
-    expect(reactButton).toHaveAttribute('aria-pressed', 'true');
-    expect(detail).toHaveTextContent(reactCopy.description);
-  });
-
-  test('filters prominence without hiding or reordering technologies and restores All', () => {
-    renderWithIntl(<StackFlatList />, { locale });
-
-    const group = screen.getByRole('group', { name: filterLabel });
-    const all = within(group).getByRole('radio', { name: allLabel });
-    const filteredItems = screen.getAllByRole('listitem');
-    const readingOrder = filteredItems.map((item) => item.textContent);
-    expect(filteredItems).toHaveLength(STACK_TECHNOLOGIES.length);
-
-    const testingFilter = within(group).getByRole('radio', {
-      name: messages.categories.testingCi,
-    });
-    fireEvent.click(testingFilter);
-
-    expect(testingFilter).toBeChecked();
-    expect(within(group).getAllByRole('radio', { checked: true })).toHaveLength(1);
-    expect(screen.getAllByRole('listitem')).toHaveLength(STACK_TECHNOLOGIES.length);
-    expect(screen.getAllByRole('listitem').map((item) => item.textContent)).toEqual(
-      readingOrder,
-    );
-    for (const item of screen.getAllByRole('listitem')) {
-      expect(item).toBeVisible();
-    }
-
-    fireEvent.click(screen.getByText(messages.technologies.react.name, { exact: true }));
-    expect(testingFilter).toBeChecked();
-
-    fireEvent.click(all);
-    expect(all).toBeChecked();
-    expect(within(group).getAllByRole('radio', { checked: true })).toHaveLength(1);
-  });
-
   test('exposes one localized selection button per technology without canvas controls', () => {
     renderWithIntl(<StackFlatList />, { locale });
 
     expect(screen.getAllByRole('button')).toHaveLength(STACK_TECHNOLOGIES.length);
-    expect(screen.getAllByRole('radio')).toHaveLength(STACK_CATEGORIES.length + 1);
+    expect(
+      screen.queryByRole('group', { name: filterLabel }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole('radio')).not.toBeInTheDocument();
 
     for (const technology of STACK_TECHNOLOGIES) {
-      expect(
-        screen.getByRole('button', {
-          name: selectName(messages.technologies[technology.id].name),
-        }),
-      ).toBeVisible();
+      const button = screen.getByRole('button', {
+        name: selectName(messages.technologies[technology.id].name),
+      });
+      expect(button).toBeVisible();
+      expect(button).toBeEnabled();
     }
 
     for (const role of [

@@ -48,7 +48,7 @@ El sistema deberá mostrar las 25 tecnologías aprobadas en la sección 4 del br
 
 ### RF-2 — Filtro por categoría
 
-El sistema deberá permitir filtrar las cartas mediante una sola categoría activa o la opción «Todas». Las cartas de otras categorías permanecerán visibles, atenuadas y no seleccionables.
+El sistema deberá permitir filtrar las cartas del canvas mediante una sola categoría activa o la opción «Todas». Las cartas de otras categorías permanecerán visibles, atenuadas y no seleccionables.
 
 **Criterios de aceptación (EARS):**
 
@@ -61,6 +61,7 @@ El sistema deberá permitir filtrar las cartas mediante una sola categoría acti
 - Cuando se use teclado o tecnología de asistencia, los filtros tendrán nombres accesibles y el filtro activo se podrá identificar.
 - Las cartas atenuadas seguirán siendo legibles y distinguibles en ambos temas.
 - El filtro tendrá el mismo comportamiento en 2D y en 3D y se conservará al alternar entre modos.
+- Los controles de filtro solo se mostrarán mientras el canvas esté visible. En cualquier vista de lista, todas las tecnologías estarán habilitadas; al volver al canvas, se restaurará el filtro que estaba activo.
 
 ### RF-3 — Selección de tecnología y descripción
 
@@ -101,7 +102,7 @@ El sistema deberá permitir arrastrar una carta habilitada al casillero para sel
 - Cuando una carta empuje a otra, la carta desplazada continuará deslizándose un tramo corto en la misma dirección y frenará suavemente; el impulso y la distancia quedan acotados, sin rebotes ni deriva larga. La carta agarrada seguirá fija bajo el puntero.
 - Con `prefers-reduced-motion`, el empuje y la separación por colisión serán inmediatos, sin deslizamiento posterior ni movimiento ambiental.
 - La consola separará filtros y acciones en grupos legibles. En escritorio, el detalle ocupará un inspector lateral integrado en el marco; en tamaños estrechos será un panel compacto persistente al recorrer el canvas, sin quedar al final del dibujo ni exigir scroll para consultar una selección.
-- En escritorio, las acciones se alinearán con la fila de filtros; en viewports estrechos los grupos se reorganizarán sin desbordamiento ni cambios en el orden de lectura.
+- En escritorio, con el canvas visible las acciones se alinearán con la fila de filtros; en la vista de lista los controles de vista quedarán alineados al borde derecho de la barra. En viewports estrechos los grupos se reorganizarán sin desbordamiento ni cambios en el orden de lectura.
 - En teléfonos, la lista y el cambio de vista tendrán etiquetas visibles junto a sus iconos. El canvas ajustará su altura al espacio vertical disponible sin quitar cartas, y el inspector colocará la expulsión junto al nombre. El inspector permanecerá pegado al borde superior del viewport; dejará espacio para la navbar cuando esté visible y subirá al borde cuando esta se oculte.
 
 ### RF-4a — Casillero: recepción, estado ocupado y expulsión
@@ -188,7 +189,8 @@ El sistema deberá ofrecer una presentación plana y completa cuando no haya Jav
 - Cuando se consulte Stack sin JavaScript, se mostrará una lista plana con todas las categorías, tecnologías y sus descripciones completas, sin canvas ni controles interactivos.
 - Cuando el navegador no disponga de WebGL, se mostrará la misma lista plana en lugar del canvas.
 - Cuando se muestre la lista plana, el contenido será el mismo que el de las cartas y estará completo en ambos idiomas.
-- Cuando se muestre la lista plana, no aparecerán controles de filtro, modo, zoom o rotación que no puedan funcionar.
+- En cualquier vista de lista —al abrirla o al recurrir al fallback sin WebGL— no se mostrarán los controles de filtro. Todas las tecnologías estarán habilitadas y seleccionables, y el filtro anterior se restaurará al volver al canvas.
+- Cuando se muestre la lista plana de fallback, no aparecerán controles de modo, zoom o rotación que no puedan funcionar.
 - La lista plana mantendrá el orden editorial de categorías y tecnologías y la prioridad visual de React y TypeScript.
 - Al abrir la lista o faltar WebGL, las tecnologías se mostrarán como cartas compactas y seleccionables, agrupadas por categoría dentro del marco de Stack. La selección mostrará la descripción en el inspector, que permanecerá a mano al recorrer las cartas. Sin JavaScript, las descripciones se mostrarán en las propias cartas.
 - La lista se reorganizará según el ancho disponible y tendrá entrada escalonada y transiciones de interacción solo cuando se permita el movimiento. En esta vista, las marcas de C# y Playwright tendrán acabados planos monocromos sin alterar las del canvas.
