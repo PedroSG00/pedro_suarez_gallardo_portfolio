@@ -14,6 +14,7 @@ const LOCALES = [
     empty: 'Select a card to see what it is.',
     eject: 'Eject',
     received: 'React is now in the detail slot.',
+    replaced: 'React replaced TypeScript in the detail slot.',
   },
   {
     locale: 'es',
@@ -22,6 +23,7 @@ const LOCALES = [
     empty: 'Selecciona una carta para ver qué es.',
     eject: 'Expulsar',
     received: 'React está ahora en el casillero.',
+    replaced: 'React sustituye a TypeScript en el casillero.',
   },
 ] as const;
 
@@ -85,6 +87,21 @@ describe.each(LOCALES)('StackDetail in $locale', (localeData) => {
       'title',
       localeData.eject,
     );
+  });
+
+  test('announces which technology replaced the previous slot occupant', () => {
+    renderWithIntl(
+      <StackDetail
+        technology={reactCopy}
+        feedback={{ kind: 'replaced', name: 'React', replacedName: 'TypeScript' }}
+        canReceiveTechnology={() => true}
+        onReceive={vi.fn()}
+        onEject={vi.fn()}
+      />,
+      { locale: localeData.locale },
+    );
+
+    expect(screen.getByRole('status')).toHaveTextContent(localeData.replaced);
   });
 
   test('highlights the slot only for an enabled dragged technology and clears on leave', () => {

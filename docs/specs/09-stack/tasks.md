@@ -15,7 +15,7 @@ Antes de implementar T1:
 - [x] Registrar y validar 25 marcas propias en recursos SVG locales; documentar fuentes, licencias conocidas, límites de marca y arte original en `public/stack/ATTRIBUTION.md`. Los permisos de marca no se presumen: el uso identifica las tecnologías y no implica respaldo.
 - [ ] Definir dirección de arte de la escena como un único sistema volumétrico: cartas, caras con marcas, slot, escenario, escala, materiales, luces, sombras y perspectiva.
 - [ ] Aprobar el comportamiento de movimiento ambiental pausado, colisiones estables, pausa fuera de vista y reduced-motion.
-- [ ] Aprobar exclusividad del slot, feedback de recepción, rechazo de segundo drop y expulsión a posición visible libre.
+- [x] Definir exclusividad del slot, feedback de recepción, reemplazo al soltar sobre una ocupación y expulsión a posición visible libre. El usuario confirma que el drop nuevo reemplaza a la tecnología alojada.
 - [x] Conservar posiciones, filtro, selección y descripción al alternar 2D↔3D.
 - [x] Sustituir la propuesta CSS por Three.js.
 - [x] Presentar una lista plana cuando no haya JavaScript o WebGL.
@@ -400,6 +400,15 @@ No se implementa una tarea mientras sus decisiones previas sigan abiertas. No se
 **Verificación de la ampliación (2026-11-25):** `pnpm lint`, `pnpm typecheck`, `pnpm test` (678/678; 95,41 % líneas, 86,95 % ramas, 96,10 % funciones y 93,57 % sentencias), `pnpm build` y `pnpm test:e2e --workers=2` (361/361 en 11,2 minutos) pasan.
 
 **Estado:** completada y verificada globalmente. T11 sigue sin iniciar.
+
+### Refinamiento solicitado — inspector visible y reemplazo al recibir
+
+- Sustituir la franja bajo el canvas por un inspector lateral en escritorio; en tamaños estrechos el panel permanece visible al recorrer el canvas, sin obligar a bajar hasta el final del dibujo.
+- Recibir una segunda carta en el casillero ocupado devuelve la anterior a una posición libre y deja la nueva como única ocupante.
+- Reforzar jerarquía, legibilidad y estados vacío/ocupado del detalle sin añadir color de acento ni cubrir las cartas.
+- Regresiones bilingües para reemplazo/expulsión y e2e de composición responsive, persistencia del inspector y visibilidad del contenido.
+
+**Estado:** implementación en curso; T11 no se inicia.
 
 ## T11 — Entrada, idioma y degradación sin WebGL
 

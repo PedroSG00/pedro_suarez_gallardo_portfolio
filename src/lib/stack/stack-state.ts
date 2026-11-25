@@ -22,7 +22,8 @@ type SelectableTechnology = {
 };
 
 export type StackReceiveResult = {
-  outcome: 'received' | 'rejected' | 'disabled';
+  outcome: 'received' | 'replaced' | 'disabled';
+  replacedId: StackTechnologyId | null;
   state: StackState;
 };
 
@@ -70,15 +71,13 @@ export function receiveStackTechnology(
   technology: SelectableTechnology,
 ): StackReceiveResult {
   if (!isStackTechnologyEnabled(technology.category, state)) {
-    return { outcome: 'disabled', state };
+    return { outcome: 'disabled', replacedId: null, state };
   }
 
-  if (state.slotId !== null) {
-    return { outcome: 'rejected', state };
-  }
-
+  const replacedId = state.slotId === technology.id ? null : state.slotId;
   return {
-    outcome: 'received',
+    outcome: replacedId ? 'replaced' : 'received',
+    replacedId,
     state: {
       ...state,
       selectedId: technology.id,

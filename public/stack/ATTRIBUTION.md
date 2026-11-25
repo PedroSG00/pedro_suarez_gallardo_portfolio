@@ -36,6 +36,8 @@ and remains subject to its owner's trademark and brand rules.
 | git | `/stack/git.svg` | [Simple Icons](https://github.com/simple-icons/simple-icons/blob/c01109118e134e061c9bdf2e1a7f814117f1f032/icons/git.svg); [Git logo](https://git-scm.com/community/logos) | CC-BY-3.0; attribution to the Git project is provided here. |
 | github | `/stack/github.svg` | [Simple Icons](https://github.com/simple-icons/simple-icons/blob/c01109118e134e061c9bdf2e1a7f814117f1f032/icons/github.svg); [GitHub logo and guidelines](https://github.com/logos) | No per-mark license listed in the metadata; follow GitHub logo guidelines. |
 
+`cSharp-flat.svg` and `playwright-flat.svg` are simplified monochrome adaptations of the corresponding marks above, used only in the flat list and its inspector.
+
 These marks identify technologies only. Their appearance does not imply
 endorsement, sponsorship, or affiliation. Trademarks and brand rights remain
 with their respective owners. Check the linked source and current guidelines

@@ -59,3 +59,64 @@ export function layoutStackCards(
 
   return { positions, viewHeight };
 }
+
+export function connectStackCards(
+  technologies: readonly StackSceneTechnology[],
+  positions: ReadonlyMap<StackTechnologyId, Pick<CardPosition, 'x' | 'y'>>,
+): [StackTechnologyId, StackTechnologyId][] {
+  const groups = new Map<StackSceneTechnology['category'], StackSceneTechnology[]>();
+  for (const technology of technologies) {
+    if (!positions.has(technology.id)) continue;
+    const group = groups.get(technology.category) ?? [];
+    group.push(technology);
+    groups.set(technology.category, group);
+  }
+
+  const connections: [StackTechnologyId, StackTechnologyId][] = [];
+  for (const group of groups.values()) {
+    const parent = new Map(group.map(({ id }) => [id, id]));
+    let connected = 0;
+    const rootOf = (id: StackTechnologyId) => {
+      let root = id;
+      while (parent.get(root) !== root) root = parent.get(root)!;
+      return root;
+    };
+    const candidates: {
+      left: StackTechnologyId;
+      right: StackTechnologyId;
+      distance: number;
+    }[] = [];
+
+    for (let leftIndex = 0; leftIndex < group.length; leftIndex++) {
+      const left = group[leftIndex];
+      const a = positions.get(left.id);
+      if (!a) continue;
+      for (let rightIndex = leftIndex + 1; rightIndex < group.length; rightIndex++) {
+        const right = group[rightIndex];
+        const b = positions.get(right.id);
+        if (!b) continue;
+        candidates.push({
+          left: left.id,
+          right: right.id,
+          distance: (a.x - b.x) ** 2 + (a.y - b.y) ** 2,
+        });
+      }
+    }
+
+    candidates.sort((left, right) =>
+      left.distance - right.distance ||
+      left.left.localeCompare(right.left) ||
+      left.right.localeCompare(right.right),
+    );
+    for (const { left, right } of candidates) {
+      const leftRoot = rootOf(left);
+      const rightRoot = rootOf(right);
+      if (leftRoot === rightRoot) continue;
+      parent.set(leftRoot, rightRoot);
+      connections.push([left, right]);
+      connected++;
+      if (connected === group.length - 1) break;
+    }
+  }
+  return connections;
+}

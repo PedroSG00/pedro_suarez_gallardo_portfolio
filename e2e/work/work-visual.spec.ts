@@ -16,7 +16,7 @@ async function openWork(page: Page, locale: string, label: string, theme: Theme)
   await page.goto(`/${locale}`);
   await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
   await page.evaluate(() => document.fonts.ready);
-  return page.getByRole('region', { name: label }).getByRole('listitem');
+  return page.getByRole('region', { name: label, exact: true }).getByRole('listitem');
 }
 
 function rowText(row: Locator, index: number) {

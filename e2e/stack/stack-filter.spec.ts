@@ -76,7 +76,11 @@ for (const {
       const group = stack.getByRole('group', { name: filterLabel });
       const radios = group.getByRole('radio');
       const all = group.getByRole('radio', { name: allLabel, exact: true });
-      const namesBefore = await stack.getByRole('listitem').allTextContents();
+      await expect(stack.locator('[data-stack-canvas]')).toHaveAttribute(
+        'data-stack-scene-ready', 'true',
+      );
+      const technologyButtons = stack.getByRole('listitem').getByRole('button');
+      const namesBefore = await technologyButtons.allTextContents();
 
       await expect(radios).toHaveCount(STACK_CATEGORIES.length + 1);
       await expect(all).toBeChecked();
@@ -107,7 +111,7 @@ for (const {
           }),
         ).toBeVisible();
       }
-      expect(await stack.getByRole('listitem').allTextContents()).toEqual(
+      expect(await technologyButtons.allTextContents()).toEqual(
         namesBefore,
       );
 

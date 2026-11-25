@@ -88,7 +88,7 @@ describe.each(LOCALES)(
         const item = within(items[position]);
         const copy = messages.technologies[technology.id];
         expect(item.getByText(copy.name, { exact: true })).toBeVisible();
-        expect(item.getByText(copy.description, { exact: true })).toBeVisible();
+        expect(item.queryByText(copy.description, { exact: true })).not.toBeInTheDocument();
       });
     });
 
@@ -108,7 +108,12 @@ describe.each(LOCALES)(
       const mark = marks[index];
 
       expect(mark).toBeVisible();
-      expect(mark).toHaveAttribute('src', technology.brandMark);
+      expect(mark).toHaveAttribute(
+        'src',
+        technology.id === 'cSharp' || technology.id === 'playwright'
+          ? `/stack/${technology.id}-flat.svg`
+          : technology.brandMark,
+      );
       expect(mark).toHaveAttribute('alt', '');
       expect(mark).toHaveAttribute('aria-hidden', 'true');
       expect(mark).not.toHaveAccessibleName();
@@ -200,7 +205,7 @@ describe.each(LOCALES)(
     expect(nodeButton).toHaveAttribute('aria-pressed', 'false');
   });
 
-  test('rejects a second drop while keeping the current technology in the slot', () => {
+  test('replaces the current technology when another card is dropped into the occupied slot', () => {
     renderWithIntl(<StackFlatList />, { locale });
 
     const detail = screen.getByRole('region', { name: detailLabel });
@@ -213,10 +218,12 @@ describe.each(LOCALES)(
       dataTransfer: makeDataTransfer('nodeJs'),
     });
 
-    expect(detail).toHaveAttribute('data-slot-technology', 'react');
-    expect(detail).toHaveTextContent(messages.technologies.react.description);
+    expect(detail).toHaveAttribute('data-slot-technology', 'nodeJs');
+    expect(detail).toHaveTextContent(messages.technologies.nodeJs.description);
     expect(detail).toHaveTextContent(
-      messages.detail.feedback.rejected.replace('{name}', messages.technologies.nodeJs.name),
+      messages.detail.feedback.replaced
+        .replace('{name}', messages.technologies.nodeJs.name)
+        .replace('{replacedName}', messages.technologies.react.name),
     );
     expect(
       screen.getByRole('button', {

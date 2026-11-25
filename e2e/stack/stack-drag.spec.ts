@@ -3,8 +3,6 @@ import en from '../../messages/en.json';
 import es from '../../messages/es.json';
 import { readStackCardBounds } from './stack-geometry.helpers';
 
-const REACT = { x: 0.43, y: 0.15 };
-const TYPESCRIPT = { x: 0.19, y: 0.14 };
 const SLOT = { x: 0.5, y: 0.5 };
 type Point = { x: number; y: number };
 
@@ -32,7 +30,7 @@ for (const { locale, copy } of [{ locale: 'en', copy: en }, { locale: 'es', copy
   test.describe(`/${locale}: Stack card drag`, () => {
     test.use({ reducedMotion: 'reduce', viewport: { width: 1280, height: 1050 } });
 
-    test('signals slot entry and exit, receives one card, rejects a second and ejects by keyboard', async ({
+    test('signals slot entry and exit, replaces the occupant and ejects by keyboard', async ({
       page,
     }) => {
       const { stack, detail, canvas, coordinates } = await openScene(page, locale, copy);
@@ -40,8 +38,9 @@ for (const { locale, copy } of [{ locale: 'en', copy: en }, { locale: 'es', copy
       expect(await detail.textContent()).toContain(locale === 'en' ? 'drag it here' : 'arrástrala aquí');
       await expect(stack.getByText(cad.slot.replace('{name}', cad.empty), { exact: true })).toBeVisible();
       const move = async (point: Point) => page.mouse.move(at(point).x, at(point).y, { steps: 4 });
+      const initialReact = (await readStackCardBounds(canvas)).react;
 
-      await move(REACT);
+      await move(initialReact);
       await page.mouse.down();
       await move(SLOT);
       await expect(canvas).toHaveAttribute('data-stack-drop-active', 'true');
@@ -57,14 +56,24 @@ for (const { locale, copy } of [{ locale: 'en', copy: en }, { locale: 'es', copy
       await expect(stack.getByText(cad.slot.replace('{name}', 'React'), { exact: true })).toBeVisible();
 
       // The original position is empty while the card occupies the slot.
-      await page.mouse.click(at(REACT).x, at(REACT).y);
+      await page.mouse.click(at(initialReact).x, at(initialReact).y);
       await expect(detail.getByRole('status')).toHaveText(text.feedback.received.replace('{name}', 'React'));
 
       await move((await readStackCardBounds(canvas)).typescript);
       await page.mouse.down();
       await move(SLOT);
       await page.mouse.up();
-      await expect(detail.getByRole('status')).toHaveText(text.feedback.rejected.replace('{name}', 'TypeScript'));
+      await expect(detail).toHaveAttribute('data-slot-technology', 'typescript');
+      await expect(detail.getByRole('heading', { name: technologies.typescript.name })).toBeVisible();
+      await expect(detail).toContainText(technologies.typescript.description);
+      await expect(detail.getByRole('status')).toHaveText(
+        text.feedback.replaced
+          .replace('{name}', technologies.typescript.name)
+          .replace('{replacedName}', technologies.react.name),
+      );
+      const returnedReact = (await coordinates())((await readStackCardBounds(canvas)).react);
+      await page.mouse.click(returnedReact.x, returnedReact.y);
+      await expect(detail).toHaveAttribute('data-slot-technology', 'react');
       await expect(detail).toContainText(technologies.react.description);
 
       await detail.getByRole('button', { name: text.eject, exact: true }).press('Enter');
@@ -89,7 +98,8 @@ for (const { locale, copy } of [{ locale: 'en', copy: en }, { locale: 'es', copy
       await stack.getByRole('radio', { name: copy.stack.categories.databases }).check();
       const at = await coordinates();
       const move = async (point: Point) => page.mouse.move(at(point).x, at(point).y, { steps: 4 });
-      await move(REACT);
+      const filteredReact = (await readStackCardBounds(canvas)).react;
+      await move(filteredReact);
       await page.mouse.down();
       await move(SLOT);
       await expect(canvas).not.toHaveAttribute('data-stack-drop-active', 'true');
@@ -98,34 +108,51 @@ for (const { locale, copy } of [{ locale: 'en', copy: en }, { locale: 'es', copy
 
       await stack.getByRole('radio', { name: copy.stack.filters.all, exact: true }).check();
       const current = await coordinates();
-      await page.mouse.click(current(TYPESCRIPT).x, current(TYPESCRIPT).y);
+      const initialPositions = await readStackCardBounds(canvas);
+      await page.mouse.click(current(initialPositions.typescript).x, current(initialPositions.typescript).y);
       await expect(detail).toContainText(technologies.typescript.description);
       const destination = { x: 0.43, y: 0.35 };
-      await page.mouse.move(current(REACT).x, current(REACT).y);
+      const reactStart = (await readStackCardBounds(canvas)).react;
+      await page.mouse.move(current(reactStart).x, current(reactStart).y);
       await page.mouse.down();
       await page.mouse.move(current(destination).x, current(destination).y, { steps: 4 });
       await page.mouse.up();
       await expect(detail).toContainText(technologies.typescript.description);
-      await page.mouse.click(current(REACT).x, current(REACT).y);
+      await page.mouse.click(current(reactStart).x, current(reactStart).y);
       await expect(detail).toContainText(technologies.typescript.description);
       await page.mouse.click(current(destination).x, current(destination).y);
       await expect(detail).toContainText(technologies.react.description);
-    });
+  });
 
-    test('receives a dragged card in perspective without switching the view', async ({ page }) => {
-      await page.emulateMedia({ colorScheme: 'dark' });
+  test('receives a dragged card in perspective without switching the view', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark' });
       const { stack, detail, canvas, coordinates } = await openScene(page, locale, copy);
       const view = stack.getByRole('switch', { name: cad.view });
       await view.click();
       await expect(canvas).toHaveAttribute('data-stack-projection', '1');
-      const at = await coordinates();
-      const react = at((await readStackCardBounds(canvas)).react);
-      await page.mouse.move(react.x, react.y);
-      await page.mouse.down();
-      await page.mouse.move(at(SLOT).x, at(SLOT).y, { steps: 6 });
-      await expect(canvas).toHaveAttribute('data-stack-drop-active', 'true');
-      await page.mouse.up();
+      const receive = async (id: 'react' | 'typescript') => {
+        const at = await coordinates();
+        const source = at((await readStackCardBounds(canvas))[id]);
+        await page.mouse.move(source.x, source.y);
+        await page.mouse.down();
+        await page.mouse.move(at(SLOT).x, at(SLOT).y, { steps: 6 });
+        await expect(canvas).toHaveAttribute('data-stack-drop-active', 'true');
+        await page.mouse.up();
+      };
+
+      await receive('react');
       await expect(detail).toContainText(technologies.react.description);
+      await receive('typescript');
+      await expect(detail).toHaveAttribute('data-slot-technology', 'typescript');
+      await expect(detail).toContainText(technologies.typescript.description);
+      await expect(detail.getByRole('status')).toHaveText(
+        copy.stack.detail.feedback.replaced
+          .replace('{name}', technologies.typescript.name)
+          .replace('{replacedName}', technologies.react.name),
+      );
+      const reactReturned = (await coordinates())((await readStackCardBounds(canvas)).react);
+      await page.mouse.click(reactReturned.x, reactReturned.y);
+      await expect(detail).toHaveAttribute('data-slot-technology', 'react');
       await expect(view).toBeChecked();
     });
   });
@@ -178,16 +205,27 @@ test.describe('Stack touch gestures', () => {
 test.describe('Stack detail reveal', () => {
   test.use({ reducedMotion: 'no-preference', viewport: { width: 1280, height: 1050 } });
 
-  test('keeps the received description fully visible after a card is dragged into the slot', async ({
+  test('keeps the held card steady over the slot and the received description fully visible', async ({
     page,
   }) => {
     const { detail, canvas, coordinates } = await openScene(page, 'en', en);
+    await canvas.evaluate((element) => element.scrollIntoView({ block: 'center', behavior: 'instant' }));
     const initial = await readStackCardBounds(canvas);
     const at = await coordinates();
 
     await page.mouse.move(at(initial.react).x, at(initial.react).y);
     await page.mouse.down();
     await page.mouse.move(at(SLOT).x, at(SLOT).y, { steps: 6 });
+    await expect(canvas).toHaveAttribute('data-stack-drop-active', 'true');
+
+    const whileHeld = await readStackCardBounds(canvas);
+    await expect.poll(async () => (await readStackCardBounds(canvas)).typescript).not.toEqual(
+      whileHeld.typescript,
+    );
+    const { x, y } = (await readStackCardBounds(canvas)).react;
+    expect(x).toBeCloseTo(SLOT.x, 2);
+    expect(y).toBeCloseTo(SLOT.y, 2);
+    await expect(detail.getByRole('heading')).toHaveCount(0);
     await page.mouse.up();
 
     const heading = detail.getByRole('heading', { name: en.stack.technologies.react.name });
@@ -207,10 +245,17 @@ test.describe('Stack detail reveal', () => {
     for (const content of [heading, mark, description, feedback]) {
       const bounds = await content.boundingBox();
       expect(bounds).not.toBeNull();
-      expect(bounds!.x).toBeGreaterThanOrEqual(panel!.x);
-      expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(panel!.x + panel!.width);
-      expect(bounds!.y).toBeGreaterThanOrEqual(panel!.y);
-      expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(panel!.y + panel!.height);
+      const contentName = await content.textContent();
+      expect(bounds!.x, `${contentName} left edge`).toBeGreaterThanOrEqual(panel!.x);
+      expect(
+        bounds!.x + bounds!.width,
+        `${contentName} right edge`,
+      ).toBeLessThanOrEqual(panel!.x + panel!.width);
+      expect(bounds!.y, `${contentName} top edge`).toBeGreaterThanOrEqual(panel!.y);
+      expect(
+        bounds!.y + bounds!.height,
+        `${contentName} bottom edge`,
+      ).toBeLessThanOrEqual(panel!.y + panel!.height);
     }
     expect(await detail.evaluate((element) =>
       element.scrollWidth <= element.clientWidth &&

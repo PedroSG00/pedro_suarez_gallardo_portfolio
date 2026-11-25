@@ -128,7 +128,7 @@ async function withoutScrollSupport(page: Page) {
 }
 
 async function verifyContent(page: Page, item: (typeof LOCALES)[number]) {
-  const work = page.getByRole('region', { name: item.label });
+  const work = page.getByRole('region', { name: item.label, exact: true });
   await expect(work.getByRole('heading', { name: item.messages.title })).toBeVisible();
   const rows = work.getByRole('listitem');
   await expect(rows).toHaveCount(5);
@@ -217,7 +217,7 @@ for (const item of LOCALES) {
         await page.emulateMedia({ reducedMotion: 'no-preference' });
         await page.goto(`/${item.locale}#work`);
         await page.evaluate(() => document.fonts.ready);
-        const work = page.getByRole('region', { name: item.label });
+        const work = page.getByRole('region', { name: item.label, exact: true });
         await expect(work.getByRole('heading', { name: item.label, exact: true })).toBeInViewport();
         const rows = await verifyContent(page, item);
         await settle(page);

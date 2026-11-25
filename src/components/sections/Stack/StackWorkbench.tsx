@@ -31,6 +31,7 @@ type Props = {
   listOpen: boolean;
   filters: ReactNode;
   detail: ReactNode;
+  list: ReactNode;
   onSelect: (id: StackTechnologyId) => void;
   onReceive: StackSceneUpdate['onReceive'];
   onToggleList: () => void;
@@ -39,7 +40,7 @@ type Props = {
 
 export default function StackWorkbench({
   active, supportsPerspective, technologies, filter, selectedId, selectedName, listId, listOpen,
-  filters, detail, onSelect, onReceive, onToggleList, onSceneStatusChange,
+  filters, detail, list, onSelect, onReceive, onToggleList, onSceneStatusChange,
 }: Props) {
   const t = useTranslations('stack.cad');
   const [requestedMode, setMode] = useState<StackSceneMode>('2d');
@@ -56,8 +57,9 @@ export default function StackWorkbench({
     <div
       data-stack-workbench
       data-active={active}
-      role={active ? 'region' : undefined}
-      aria-label={active ? t('title') : undefined}
+      data-stack-list-mode={!active || listOpen}
+      role="region"
+      aria-label={t('title')}
     >
       <div data-stack-toolbar>
         {active && (
@@ -103,24 +105,27 @@ export default function StackWorkbench({
           )}
         </div>
       </div>
-      <div data-stack-drawing data-mode={mode} hidden={listOpen}>
-        <StackCanvas
-          mode={mode}
-          zoom={zoom}
-          yaw={orientation.yaw}
-          pitch={orientation.pitch}
-          onZoom={changeZoom}
-          onRotate={setOrientation}
-          technologies={technologies}
-          filter={filter}
-          selectedId={selectedId}
-          onSelect={onSelect}
-          onReceive={onReceive}
-          onSceneStatusChange={onSceneStatusChange}
-        />
-        {active && <p data-stack-drawing-note aria-hidden="true">{t('hint')}</p>}
+      <div data-stack-stage>
+        <div data-stack-drawing data-mode={mode} hidden={listOpen}>
+          <StackCanvas
+            mode={mode}
+            zoom={zoom}
+            yaw={orientation.yaw}
+            pitch={orientation.pitch}
+            onZoom={changeZoom}
+            onRotate={setOrientation}
+            technologies={technologies}
+            filter={filter}
+            selectedId={selectedId}
+            onSelect={onSelect}
+            onReceive={onReceive}
+            onSceneStatusChange={onSceneStatusChange}
+          />
+          {active && !selectedId && <p data-stack-drawing-note aria-hidden="true">{t('hint')}</p>}
+        </div>
+        <div data-stack-detail-dock>{detail}</div>
+        {list}
       </div>
-      <div data-stack-detail-dock>{detail}</div>
       {active && (
         <div data-stack-readout>
           <span>{projection}</span>

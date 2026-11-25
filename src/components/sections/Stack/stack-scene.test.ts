@@ -376,6 +376,7 @@ const originalVisibilityState = Object.getOwnPropertyDescriptor(
   document,
   'visibilityState',
 );
+const originalDevicePixelRatio = Object.getOwnPropertyDescriptor(window, 'devicePixelRatio');
 const originalTheme = document.documentElement.getAttribute('data-theme');
 
 function makeCanvas() {
@@ -527,6 +528,11 @@ describe('mountStackScene', () => {
         'visibilityState',
         originalVisibilityState,
       );
+    }
+    if (originalDevicePixelRatio) {
+      Object.defineProperty(window, 'devicePixelRatio', originalDevicePixelRatio);
+    } else {
+      Reflect.deleteProperty(window, 'devicePixelRatio');
     }
     if (originalTheme === null) {
       document.documentElement.removeAttribute('data-theme');
@@ -892,7 +898,7 @@ describe('mountStackScene', () => {
     handle.dispose();
   });
 
-  test('keeps surrounding cards moving while one card is held', () => {
+  test.each(['on the workbench', 'over the slot'])('keeps a held card steady %s while its neighbors move', (position) => {
     setMotionPreference(false);
     const canvas = makeCanvas();
     const handle = mountScene(canvas);
@@ -904,6 +910,15 @@ describe('mountStackScene', () => {
     const neighbor = cards.find((mesh) => mesh.userData.technologyId === 'typescript');
     if (!held || !neighbor) throw new Error('Expected React and TypeScript cards');
     three.state.intersections = [{ object: held }];
+    const intersect = three.state.raycaster?.ray.intersectPlane;
+    if (position === 'over the slot') {
+      const start = new three.FakeVector(held.position.x, held.position.y, held.position.z);
+      intersect?.mockReturnValueOnce(start);
+    } else {
+      intersect?.mockReturnValueOnce(new three.FakeVector())
+        .mockReturnValueOnce(new three.FakeVector())
+        .mockReturnValueOnce(new three.FakeVector(10, 0, 0));
+    }
     canvas.dispatchEvent(new PointerEvent('pointerdown', {
       button: 0, pointerId: 1, pointerType: 'mouse', isPrimary: true,
       clientX: 600, clientY: 350,
@@ -913,6 +928,7 @@ describe('mountStackScene', () => {
       clientX: 620, clientY: 350,
     }));
     expect(canvas.dataset.stackDragging).toBe('true');
+    expect(canvas.dataset.stackDropActive).toBe(String(position === 'over the slot'));
     const heldPosition = { x: held.position.x, y: held.position.y };
     const neighborPosition = { x: neighbor.position.x, y: neighbor.position.y };
     three.state.observer?.trigger(true);
@@ -993,18 +1009,24 @@ describe('mountStackScene', () => {
 
   test('uses device pixel ratio up to the drawing-buffer pixel budget', () => {
     const originalPixelRatio = Object.getOwnPropertyDescriptor(window, 'devicePixelRatio');
-    Object.defineProperty(window, 'devicePixelRatio', { configurable: true, value: 3 });
-    const handle = mountScene(makeCanvas());
+    Object.defineProperty(window, 'devicePixelRatio', { configurable: true, value: 1 });
+    const standardDensityHandle = mountScene(makeCanvas());
     expect(three.state.renderer?.setPixelRatio).toHaveBeenLastCalledWith(2);
-    handle.dispose();
+    standardDensityHandle.dispose();
+
+    resetThree();
+    Object.defineProperty(window, 'devicePixelRatio', { configurable: true, value: 3 });
+    const highDensityHandle = mountScene(makeCanvas());
+    expect(three.state.renderer?.setPixelRatio).toHaveBeenLastCalledWith(3);
+    highDensityHandle.dispose();
 
     resetThree();
     three.state.width = 3840;
     three.state.height = 2160;
     const highDensityCanvas = makeCanvas();
-    const highDensityHandle = mountScene(highDensityCanvas);
+    const cappedHandle = mountScene(highDensityCanvas);
     expect(three.state.renderer?.setPixelRatio).toHaveBeenLastCalledWith(1);
-    highDensityHandle.dispose();
+    cappedHandle.dispose();
     if (originalPixelRatio) {
       Object.defineProperty(window, 'devicePixelRatio', originalPixelRatio);
     } else {

@@ -36,7 +36,9 @@ for (const { locale, messages, nav } of LOCALES) {
       for (const [index, technology] of STACK_TECHNOLOGIES.entries()) {
         await expect(marks.nth(index)).toHaveAttribute(
           'src',
-          technology.brandMark,
+          technology.id === 'cSharp' || technology.id === 'playwright'
+            ? `/stack/${technology.id}-flat.svg`
+            : technology.brandMark,
         );
       }
 

@@ -126,7 +126,7 @@
       "eject": "Eject",
       "feedback": {
         "received": "{name} is now in the detail slot.",
-        "rejected": "The detail slot is occupied. {name} stays in the stack.",
+        "replaced": "{name} replaced {replacedName} in the detail slot.",
         "ejected": "{name} returned to the stack."
       }
     },

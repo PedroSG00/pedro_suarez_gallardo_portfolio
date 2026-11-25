@@ -126,7 +126,7 @@
       "eject": "Expulsar",
       "feedback": {
         "received": "{name} está ahora en el casillero.",
-        "rejected": "El casillero está ocupado. {name} sigue en el stack.",
+        "replaced": "{name} sustituye a {replacedName} en el casillero.",
         "ejected": "{name} ha vuelto al stack."
       }
     },

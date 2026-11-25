@@ -60,7 +60,6 @@ describe.each(LOCALES)(
     for (const technology of STACK_TECHNOLOGIES) {
       const copy = messages.technologies[technology.id];
       expect(stack.getByText(copy.name, { exact: true })).toBeVisible();
-      expect(stack.getByText(copy.description, { exact: true })).toBeVisible();
     }
 
     expect(stack.queryByRole('navigation')).not.toBeInTheDocument();

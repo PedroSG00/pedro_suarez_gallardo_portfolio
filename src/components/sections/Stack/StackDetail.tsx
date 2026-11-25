@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { useState, type DragEvent } from 'react';
 import { useTranslations } from 'next-intl';
-import { Eject } from 'iconoir-react';
+import { Cube, Eject } from 'iconoir-react';
 import type { StackTechnologyId } from '@/content/stack';
 
 export const STACK_DRAG_DATA_TYPE = 'application/x-stack-technology';
@@ -15,10 +15,9 @@ export type StackDetailTechnology = {
   brandMark: string;
 };
 
-export type StackDetailFeedback = {
-  kind: 'received' | 'rejected' | 'ejected';
-  name: string;
-};
+export type StackDetailFeedback =
+  | { kind: 'received' | 'ejected'; name: string }
+  | { kind: 'replaced'; name: string; replacedName: string };
 
 type Props = {
   technology: StackDetailTechnology | null;
@@ -72,8 +71,11 @@ export default function StackDetail({
   let feedbackMessage: string | null = null;
   if (feedback?.kind === 'received') {
     feedbackMessage = t('detail.feedback.received', { name: feedback.name });
-  } else if (feedback?.kind === 'rejected') {
-    feedbackMessage = t('detail.feedback.rejected', { name: feedback.name });
+  } else if (feedback?.kind === 'replaced') {
+    feedbackMessage = t('detail.feedback.replaced', {
+      name: feedback.name,
+      replacedName: feedback.replacedName,
+    });
   } else if (feedback?.kind === 'ejected') {
     feedbackMessage = t('detail.feedback.ejected', { name: feedback.name });
   }
@@ -100,22 +102,13 @@ export default function StackDetail({
               alt=""
               aria-hidden="true"
               role="img"
-              width={48}
-              height={32}
+              width={80}
+              height={56}
               unoptimized
               data-stack-brand-mark
-              className="h-8 w-12 shrink-0 object-contain"
+              className="h-14 w-20 shrink-0 object-contain"
             />
             <h3>{technology.name}</h3>
-            <button
-              type="button"
-              title={t('detail.eject')}
-              data-stack-eject
-              onClick={onEject}
-            >
-              <Eject aria-hidden="true" focusable="false" width={20} height={20} />
-              <span data-stack-eject-label>{t('detail.eject')}</span>
-            </button>
           </div>
           <p
             data-stack-detail-description
@@ -123,9 +116,21 @@ export default function StackDetail({
           >
             {technology.description}
           </p>
+          <button
+            type="button"
+            title={t('detail.eject')}
+            data-stack-eject
+            onClick={onEject}
+          >
+            <Eject aria-hidden="true" focusable="false" width={20} height={20} />
+            <span data-stack-eject-label>{t('detail.eject')}</span>
+          </button>
         </div>
       ) : (
-        <p data-stack-detail-empty>{t(canDragCard ? 'detail.emptyWithDrag' : 'detail.empty')}</p>
+        <div data-stack-detail-empty-state>
+          <Cube aria-hidden="true" focusable="false" width={32} height={32} />
+          <p data-stack-detail-empty>{t(canDragCard ? 'detail.emptyWithDrag' : 'detail.empty')}</p>
+        </div>
       )}
       {feedbackMessage && <p role="status">{feedbackMessage}</p>}
     </div>

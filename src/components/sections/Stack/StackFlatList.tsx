@@ -31,6 +31,10 @@ import StackWorkbench from '@/components/sections/Stack/StackWorkbench';
 import type { StackSceneStatus } from '@/lib/stack/stack-scene-types';
 
 const STACK_LIST_ID = 'stack-technology-list';
+const FLAT_MARKS: Partial<Record<StackTechnologyId, string>> = {
+  cSharp: '/stack/cSharp-flat.svg',
+  playwright: '/stack/playwright-flat.svg',
+};
 
 const CATEGORY_MESSAGE_KEYS = {
   frontend: 'frontend',
@@ -60,6 +64,7 @@ export default function StackFlatList() {
   const [listOpen, setListOpen] = useState(false);
   const [sceneStatus, setSceneStatus] = useState<'checking' | StackSceneStatus>('checking');
   const sceneActive = sceneStatus === 'ready' || sceneStatus === 'flat';
+  const flatView = !sceneActive || listOpen;
 
   useEffect(() => {
     // Keep JavaScript-only controls out of the server HTML.
@@ -81,7 +86,10 @@ export default function StackFlatList() {
     : null;
   const selectedDetail: StackDetailTechnology | null = selectedTechnology
     ? {
-        ...selectedTechnology,
+         ...selectedTechnology,
+         brandMark: flatView
+           ? FLAT_MARKS[selectedTechnology.id] ?? selectedTechnology.brandMark
+           : selectedTechnology.brandMark,
         name: t(`technologies.${selectedTechnology.id}.name`),
         description: t(`technologies.${selectedTechnology.id}.description`),
       }
@@ -106,12 +114,20 @@ export default function StackFlatList() {
     const result = receiveStackTechnology(stackState, technology);
     setStackState(result.state);
 
-    if (result.outcome === 'received' || result.outcome === 'rejected') {
-      setFeedback({
-        kind: result.outcome,
-        name: t(`technologies.${technology.id}.name`),
-      });
-    }
+    if (result.outcome === 'disabled') return;
+    const name = t(`technologies.${technology.id}.name`);
+    const replacedTechnology = result.replacedId
+      ? STACK_TECHNOLOGIES.find((item) => item.id === result.replacedId)
+      : undefined;
+    setFeedback(
+      result.outcome === 'replaced' && replacedTechnology
+        ? {
+            kind: 'replaced',
+            name,
+            replacedName: t(`technologies.${replacedTechnology.id}.name`),
+          }
+        : { kind: 'received', name },
+    );
   };
 
   const handleEject = () => {
@@ -178,8 +194,18 @@ export default function StackFlatList() {
             onEject={handleEject}
           />
         )}
+        list={renderList()}
       />
-      <div id={STACK_LIST_ID} data-stack-accessible-list={sceneActive && !listOpen}>
+    </div>
+  );
+
+  function renderList() {
+    return (
+      <div
+        id={STACK_LIST_ID}
+        data-stack-accessible-list={!flatView}
+        data-stack-list-interactive={mounted}
+      >
         {CATEGORY_GROUPS.map(({ id, technologies }) => {
           const headingId = `stack-category-${id}`;
           const isCategoryActive = isStackTechnologyEnabled(id, stackState);
@@ -215,7 +241,7 @@ export default function StackFlatList() {
                       >
                         <div className="flex items-center gap-3">
                           <Image
-                            src={brandMark}
+                            src={flatView ? FLAT_MARKS[technologyId] ?? brandMark : brandMark}
                             alt=""
                             aria-hidden="true"
                             role="img"
@@ -233,12 +259,7 @@ export default function StackFlatList() {
                                 aria-pressed={stackState.selectedId === technologyId}
                                 disabled={!isEnabled}
                                 data-stack-select
-                                onClick={() => {
-                                  setStackState((state) =>
-                                    selectStackTechnology(state, technology),
-                                  );
-                                  setFeedback(null);
-                                }}
+                                onClick={() => handleSceneSelect(technologyId)}
                               >
                                 {name}
                               </button>
@@ -247,12 +268,11 @@ export default function StackFlatList() {
                             )}
                           </span>
                         </div>
-                        <p
-                          data-stack-technology-description
-                          className="max-w-prose text-body"
-                        >
-                          {t(`technologies.${technologyId}.description`)}
-                        </p>
+                        {(!mounted || !flatView) && (
+                          <p data-stack-technology-description className="max-w-prose text-body">
+                            {t(`technologies.${technologyId}.description`)}
+                          </p>
+                        )}
                       </li>
                     );
                   })}
@@ -262,6 +282,6 @@ export default function StackFlatList() {
           );
         })}
       </div>
-    </div>
-  );
+    );
+  }
 }

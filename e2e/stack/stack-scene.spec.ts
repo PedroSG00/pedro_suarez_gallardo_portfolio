@@ -90,7 +90,13 @@ for (const { locale, messages, nav } of LOCALES) {
       const stack = page.getByRole('region', { name: nav.stack, exact: true });
       await expect(stack.locator('[data-stack-flat-list]')).toHaveAttribute('data-scene-status', 'fallback');
       await expect(stack.getByRole('switch')).toHaveCount(0);
-      await expect(stack.getByRole('listitem')).toHaveCount(STACK_TECHNOLOGIES.length);
+      const frame = stack.getByRole('region', { name: messages.cad.title });
+      await expect(frame.getByRole('listitem')).toHaveCount(STACK_TECHNOLOGIES.length);
+      await frame.getByRole('button', {
+        name: messages.detail.select.replace('{name}', messages.technologies.react.name),
+      }).click();
+      await expect(frame.getByRole('region', { name: messages.detail.label }))
+        .toContainText(messages.technologies.react.description);
     });
   });
 }

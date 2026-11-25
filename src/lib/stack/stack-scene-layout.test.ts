@@ -1,6 +1,7 @@
 import { expect, test } from 'vitest';
 import { STACK_TECHNOLOGIES } from '@/content/stack';
 import {
+  connectStackCards,
   layoutStackCards,
   STACK_CARD_HEIGHT,
   STACK_CARD_WIDTH,
@@ -32,3 +33,25 @@ test.each([0.31, 0.59, 0.93, 1.05, 1.92])(
     }
   },
 );
+
+test('connects cards by visual proximity within their own category', () => {
+  const { positions } = layoutStackCards(technologies, 1.72);
+  const connections = connectStackCards(technologies, positions);
+  const categories = new Map(technologies.map(({ id, category }) => [id, category]));
+  const frontend = connections.filter(([left]) => categories.get(left) === 'frontend');
+  const maximumFrontendSpan = Math.max(...frontend.map(([left, right]) => {
+    const a = positions.get(left);
+    const b = positions.get(right);
+    if (!a || !b) throw new Error('Expected every technology to have a position');
+    return Math.hypot(a.x - b.x, a.y - b.y);
+  }));
+
+  expect(connections).toHaveLength(technologies.length - new Set(categories.values()).size);
+  expect(connections.every(([left, right]) =>
+    categories.get(left) === categories.get(right),
+  )).toBe(true);
+  expect(frontend.some(([left, right]) =>
+    [left, right].includes('react') && [left, right].includes('nextJs'),
+  )).toBe(false);
+  expect(maximumFrontendSpan).toBeLessThan(3);
+});

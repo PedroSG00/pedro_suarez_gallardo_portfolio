@@ -43,13 +43,14 @@ for (const { locale, messages, nav } of LOCALES) {
       );
       await stack.getByRole('button', { name: messages.cad.list }).click();
       await expect(stack.locator('canvas')).toBeHidden();
+      const frame = stack.getByRole('region', { name: messages.cad.title });
 
       const destinations = await page
         .locator('main > section[id]')
         .evaluateAll((sections) => sections.map((section) => section.id));
       expect(destinations).toEqual(['about', 'work', 'stack', 'contact']);
 
-      const lists = stack.getByRole('list');
+      const lists = frame.getByRole('list');
       await expect(lists).toHaveCount(STACK_CATEGORIES.length);
       for (const [index, category] of STACK_CATEGORIES.entries()) {
         const list = lists.nth(index);
@@ -64,9 +65,7 @@ for (const { locale, messages, nav } of LOCALES) {
       for (const technology of STACK_TECHNOLOGIES) {
         const copy = messages.technologies[technology.id];
         await expect(stack.getByText(copy.name, { exact: true })).toBeVisible();
-        await expect(
-          stack.getByText(copy.description, { exact: true }),
-        ).toBeVisible();
+        await expect(frame.getByText(copy.description, { exact: true })).toHaveCount(0);
       }
 
       const marks = stack.locator('[data-stack-accessible-list]')
@@ -75,7 +74,9 @@ for (const { locale, messages, nav } of LOCALES) {
       for (const [index, technology] of STACK_TECHNOLOGIES.entries()) {
         await expect(marks.nth(index)).toHaveAttribute(
           'src',
-          technology.brandMark,
+          technology.id === 'cSharp' || technology.id === 'playwright'
+            ? `/stack/${technology.id}-flat.svg`
+            : technology.brandMark,
         );
       }
       const filters = stack.getByRole('group', {
@@ -108,6 +109,7 @@ for (const { locale, messages, nav } of LOCALES) {
       await page.goto(`/${locale}#stack`);
 
       const stack = page.getByRole('region', { name: nav.stack, exact: true });
+      await stack.getByRole('button', { name: messages.cad.list }).click();
       const featured = STACK_TECHNOLOGIES.filter((technology) =>
         FEATURED_IDS.has(technology.id),
       ).map((technology) => messages.technologies[technology.id].name);
@@ -130,6 +132,40 @@ for (const { locale, messages, nav } of LOCALES) {
           baseline,
         );
       }
+    });
+
+    test('reflows the card grid and keeps the inspector available while browsing', async ({ page }) => {
+      await page.setViewportSize({ width: 1280, height: 900 });
+      await page.goto(`/${locale}#stack`);
+      const frame = page.getByRole('region', { name: messages.cad.title });
+      await frame.getByRole('button', { name: messages.cad.list }).click();
+      const frontend = frame.getByRole('list', { name: messages.categories.frontend });
+      const cards = frontend.getByRole('listitem');
+      const desktopColumns = await cards.evaluateAll((items) =>
+        new Set(items.map((item) => item.getBoundingClientRect().left)).size,
+      );
+      const select = (name: string) => frame.getByRole('button', {
+        name: messages.detail.select.replace('{name}', name),
+      });
+      await select(messages.technologies.react.name).click();
+      const inspector = frame.getByRole('region', { name: messages.detail.label });
+      await expect(inspector).toContainText(messages.technologies.react.description);
+      await page.setViewportSize({ width: 320, height: 760 });
+      const mobileColumns = await cards.evaluateAll((items) =>
+        new Set(items.map((item) => item.getBoundingClientRect().left)).size,
+      );
+      expect(mobileColumns).toBeLessThan(desktopColumns);
+      await select(messages.technologies.playwright.name).click();
+      await expect(inspector).toBeInViewport();
+      await expect(inspector).toContainText(messages.technologies.playwright.description);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
+
+      await page.evaluate(() => {
+        document.documentElement.style.fontSize = '200%';
+      });
+      const toolbar = frame.locator('[data-stack-toolbar]');
+      expect(await toolbar.evaluate((element) => element.scrollWidth))
+        .toBeLessThanOrEqual(await toolbar.evaluate((element) => element.clientWidth));
     });
   });
 }

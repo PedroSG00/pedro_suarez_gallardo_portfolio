@@ -31,6 +31,7 @@ import {
   STACK_CARD_FACE_WIDTH,
 } from '@/lib/stack/stack-scene-artwork';
 import {
+  connectStackCards,
   layoutStackCards,
   STACK_CARD_HEIGHT,
   STACK_CARD_WIDTH,
@@ -64,9 +65,11 @@ type Card = {
 
 const CARD_DEPTH = 0.16;
 const SLOT_DEPTH = 0.46;
-const TRACE_SURFACE_OFFSET = 0.035;
+const TRACE_SURFACE_OFFSET = -0.025;
+const TRACE_EDGE_EXTENSION = 0.025;
 const MAX_DRAWING_BUFFER_PIXELS = 3840 * 2160;
-const MAX_DEVICE_PIXEL_RATIO = 2;
+const MIN_DEVICE_PIXEL_RATIO = 2;
+const MAX_DEVICE_PIXEL_RATIO = 3;
 const FIELD_OF_VIEW = 34;
 const CAMERA_ROTATION_SENSITIVITY = 0.18;
 const AMBIENT_AMPLITUDE = 0.18;
@@ -304,43 +307,49 @@ export function mountStackScene(
   }
   scene.add(cardGroup);
 
-  // Keep only a chain per category so the lines read as a schematic, not a web.
+  // Connect each category through its nearest neighbors to avoid long crossings.
   const connections = new THREE.LineSegments(new THREE.BufferGeometry(), rules);
   connections.renderOrder = 1;
   connections.frustumCulled = false;
   scene.add(connections);
   let connectionPointCount = 0;
+  let connectionPairs: ReturnType<typeof connectStackCards> = [];
+  const freeCards = () => [...cards.values()].filter((card) => card.technology.id !== current.selectedId);
+  const refreshConnections = () => {
+    const available = freeCards();
+    const positions = new Map(available.map(({ technology, position }) => [
+      technology.id, { x: position.x, y: position.y },
+    ]));
+    connectionPairs = connectStackCards(
+      available.map(({ technology }) => technology),
+      positions,
+    );
+  };
   const updateConnections = () => {
-    const previous = new Map<StackSceneTechnology['category'], Card>();
     const points: THREE.Vector3[] = [];
-    for (const card of cards.values()) {
-      if (card.inSlot) continue;
-      const neighbor = previous.get(card.technology.category);
-      if (neighbor) {
-        const from = neighbor.mesh.position;
-        const to = card.mesh.position;
-        const length = Math.hypot(to.x - from.x, to.y - from.y);
-        const directionX = length ? (to.x - from.x) / length : 1;
-        const directionY = length ? (to.y - from.y) / length : 0;
-        const edgePoint = (item: Card, sign: number) => {
-          const halfWidth = STACK_CARD_WIDTH * item.scale / 2;
-          const halfHeight = STACK_CARD_HEIGHT * item.scale / 2;
-          const distance = Math.min(
-            directionX === 0 ? Infinity : halfWidth / Math.abs(directionX),
-            directionY === 0 ? Infinity : halfHeight / Math.abs(directionY),
-          );
-          return new THREE.Vector3(
-            item.mesh.position.x + directionX * distance * sign,
-            item.mesh.position.y + directionY * distance * sign,
-            item.mesh.position.z + CARD_DEPTH / 2 + TRACE_SURFACE_OFFSET,
-          );
-        };
-        points.push(
-          edgePoint(neighbor, 1),
-          edgePoint(card, -1),
+    for (const [fromId, toId] of connectionPairs) {
+      const fromCard = cards.get(fromId);
+      const toCard = cards.get(toId);
+      if (!fromCard || !toCard || fromCard.inSlot || toCard.inSlot) continue;
+      const from = fromCard.mesh.position;
+      const to = toCard.mesh.position;
+      const length = Math.hypot(to.x - from.x, to.y - from.y);
+      const directionX = length ? (to.x - from.x) / length : 1;
+      const directionY = length ? (to.y - from.y) / length : 0;
+      const edgePoint = (item: Card, sign: number) => {
+        const halfWidth = STACK_CARD_WIDTH * item.scale / 2;
+        const halfHeight = STACK_CARD_HEIGHT * item.scale / 2;
+        const distance = Math.min(
+          directionX === 0 ? Infinity : halfWidth / Math.abs(directionX),
+          directionY === 0 ? Infinity : halfHeight / Math.abs(directionY),
+        ) + TRACE_EDGE_EXTENSION;
+        return new THREE.Vector3(
+          item.mesh.position.x + directionX * distance * sign,
+          item.mesh.position.y + directionY * distance * sign,
+          item.mesh.position.z + CARD_DEPTH / 2 + TRACE_SURFACE_OFFSET,
         );
-      }
-      previous.set(card.technology.category, card);
+      };
+      points.push(edgePoint(fromCard, 1), edgePoint(toCard, -1));
     }
     if (points.length !== connectionPointCount) {
       const previousGeometry = connections.geometry;
@@ -474,7 +483,7 @@ export function mountStackScene(
     const { positions, viewHeight } = layoutStackCards(initial.technologies, aspect);
     homePositions = positions;
     renderer.setPixelRatio(Math.min(
-      window.devicePixelRatio || 1,
+      Math.max(window.devicePixelRatio || 1, MIN_DEVICE_PIXEL_RATIO),
       MAX_DEVICE_PIXEL_RATIO,
       Math.sqrt(MAX_DRAWING_BUFFER_PIXELS / (width * height)),
     ));
@@ -606,7 +615,9 @@ export function mountStackScene(
     return Boolean(point && Math.abs(point.x) <= halfWidth && Math.abs(point.y) <= halfHeight);
   }
 
+  let slotPreviewActive = false;
   function indicateSlot(active: boolean) {
+    slotPreviewActive = active;
     backing.material = active ? slotHighlight : slotFill;
     canvas.dataset.stackDropActive = String(active);
   }
@@ -631,7 +642,6 @@ export function mountStackScene(
     const inset = supportsPerspective ? PERSPECTIVE_SLOT_INSET : CAMERA_MARGIN;
     return { x: 0, y: 0, halfWidth: halfWidth + inset, halfHeight: halfHeight + inset };
   };
-  const freeCards = () => [...cards.values()].filter((card) => card.technology.id !== current.selectedId);
 
   function renderPositions(positions: readonly (StackBody & { card: Card })[]) {
     for (const { card, x, y } of positions) card.mesh.position.set(x, y, card.position.z);
@@ -687,6 +697,7 @@ export function mountStackScene(
       rebaseAmbient(card);
     }
     renderPositions(resolved);
+    refreshConnections();
     updateConnections();
     settledGeometry();
     render();
@@ -782,8 +793,6 @@ export function mountStackScene(
       indicateSlot(false);
       highlight(null);
       if (received) {
-        if (current.selectedId) returnToStack(card, current.selectedId);
-        settle();
         current.onReceive(card.technology.id);
       } else {
         settle(card);
@@ -932,7 +941,10 @@ export function mountStackScene(
         }
       }
     }
-    const bodies = freeCards().map((card) => {
+    // During slot preview the pointer owns the held position. Only its
+    // neighbors should be pushed out of the slot by the ambient solver.
+    const previewCard = slotPreviewActive ? heldCard : undefined;
+    const bodies = freeCards().filter((card) => card !== previewCard).map((card) => {
       const angle = card.ambientPhase + time * AMBIENT_RATE;
       const target = card === heldCard
         ? card.mesh.position

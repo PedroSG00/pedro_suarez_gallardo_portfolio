@@ -102,28 +102,33 @@ describe('stack filter state', () => {
     expect(next).toMatchObject({ selectedId: null, slotId: null });
   });
 
-  test('receives an enabled technology only when the slot is empty', () => {
+  test('receives an enabled technology into an empty slot', () => {
     const received = receiveStackTechnology(
       createInitialStackState(),
       technology('react'),
     );
-    const rejected = receiveStackTechnology(
+    const replaced = receiveStackTechnology(
       received.state,
       technology('nodeJs'),
     );
 
     expect(received).toEqual({
       outcome: 'received',
+      replacedId: null,
       state: expect.objectContaining({ selectedId: 'react', slotId: 'react' }),
     });
-    expect(rejected).toEqual({ outcome: 'rejected', state: received.state });
+    expect(replaced).toEqual({
+      outcome: 'replaced',
+      replacedId: 'react',
+      state: expect.objectContaining({ selectedId: 'nodeJs', slotId: 'nodeJs' }),
+    });
   });
 
   test('ignores a drop from a filtered-out category', () => {
     const filtered = selectStackFilter(createInitialStackState(), 'frontend');
     const result = receiveStackTechnology(filtered, technology('chartJs'));
 
-    expect(result).toEqual({ outcome: 'disabled', state: filtered });
+    expect(result).toEqual({ outcome: 'disabled', replacedId: null, state: filtered });
   });
 
   test('ejects the single occupant and leaves an already-empty slot unchanged', () => {

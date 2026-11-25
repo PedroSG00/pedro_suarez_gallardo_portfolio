@@ -12,6 +12,8 @@ const RESPONSIVE_VIEWPORTS = [
   { width: 320, height: 950 },
   { width: 390, height: 950 },
   { width: 768, height: 1080 },
+  { width: 1023, height: 1050 },
+  { width: 1024, height: 1050 },
   { width: 1920, height: 1200 },
   { width: 3840, height: 2160 },
 ] as const;
@@ -64,6 +66,7 @@ for (const { locale, copy, nav } of LOCALES) {
       const view = frame.getByRole('switch', { name: copy.cad.view });
       const list = frame.getByRole('button', { name: copy.cad.list });
       const detail = frame.getByRole('region', { name: copy.detail.label });
+      const detailDock = frame.locator('[data-stack-detail-dock]');
 
       await expect(canvas).toHaveAttribute('data-stack-scene-ready', 'true');
       await expect(frame.getByRole('group', { name: copy.filters.label })).toBeVisible();
@@ -73,6 +76,7 @@ for (const { locale, copy, nav } of LOCALES) {
       await expect(list).toBeVisible();
       await expect(list.locator('svg')).toBeVisible();
       await expect(detail).toBeVisible();
+      await expect(frame.locator('[data-stack-drawing-note]')).toHaveText(copy.cad.hint);
 
       const filters = frame.getByRole('group', { name: copy.filters.label });
       const all = filters.getByRole('radio', { name: copy.filters.all, exact: true });
@@ -112,6 +116,7 @@ for (const { locale, copy, nav } of LOCALES) {
       );
       await stack.getByRole('button', { name: selectReact }).click();
       await expect(detail).toContainText(copy.technologies.react.description);
+      await expect(frame.locator('[data-stack-drawing-note]')).toHaveCount(0);
       const eject = detail.getByRole('button', { name: copy.detail.eject });
       await expect(eject.locator('svg')).toBeVisible();
       await list.click();
@@ -126,6 +131,7 @@ for (const { locale, copy, nav } of LOCALES) {
         const frameBox = await frame.boundingBox();
         const canvasBox = await canvas.boundingBox();
         const detailBox = await detail.boundingBox();
+        const dockBox = await detailDock.boundingBox();
         const controlBoxes = await frame.locator(
           '[data-stack-filter-option], [data-stack-view-controls] button, ' +
           '[data-stack-zoom-controls] button, [data-stack-rotation-controls] button, ' +
@@ -138,8 +144,20 @@ for (const { locale, copy, nav } of LOCALES) {
         expect(frameBox).not.toBeNull();
         expect(canvasBox).not.toBeNull();
         expect(detailBox).not.toBeNull();
-        if (canvasBox && detailBox) {
-          expect(detailBox.y).toBeGreaterThanOrEqual(canvasBox.y + canvasBox.height);
+        expect(dockBox).not.toBeNull();
+        if (canvasBox && dockBox && viewport.width >= 1024) {
+          expect(dockBox.x).toBeGreaterThanOrEqual(canvasBox.x + canvasBox.width);
+          expect(Math.abs(dockBox.y - canvasBox.y)).toBeLessThanOrEqual(1);
+        } else if (viewport.width < 1024) {
+          expect(await detailDock.evaluate((element) => getComputedStyle(element).position)).toBe('sticky');
+          await canvas.scrollIntoViewIfNeeded();
+          await expect(detail).toBeInViewport();
+          const dockRect = await detailDock.evaluate((element) => {
+            const { top, bottom } = element.getBoundingClientRect();
+            return { top, bottom };
+          });
+          expect(dockRect.top).toBeGreaterThanOrEqual(0);
+          expect(dockRect.bottom).toBeLessThanOrEqual(viewport.height);
         }
         for (const { left, right } of controlBoxes) {
           expect(left).toBeGreaterThanOrEqual(0);
@@ -159,8 +177,41 @@ for (const { locale, copy, nav } of LOCALES) {
         expect(bufferPixels).toBeLessThanOrEqual(3840 * 2160);
       }
 
+      await page.setViewportSize({ width: 320, height: 950 });
+      await page.evaluate(() => {
+        document.documentElement.style.fontSize = '200%';
+      });
+      await expect.poll(() =>
+        page.evaluate(() => document.documentElement.scrollWidth),
+      ).toBeLessThanOrEqual(320);
+      const zoomedDetailBox = await detail.boundingBox();
+      expect(zoomedDetailBox).not.toBeNull();
+      for (const content of [
+        detail.getByRole('heading'),
+        detail.locator('[data-stack-brand-mark]'),
+        detail.locator('[data-stack-detail-description]'),
+        eject,
+      ]) {
+        const bounds = await content.boundingBox();
+        expect(bounds).not.toBeNull();
+        expect(bounds!.x).toBeGreaterThanOrEqual(zoomedDetailBox!.x);
+        expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(
+          zoomedDetailBox!.x + zoomedDetailBox!.width,
+        );
+      }
+      expect(await detail.evaluate((element) =>
+        element.scrollWidth <= element.clientWidth,
+      )).toBe(true);
+
       await eject.click();
       await expect(detail).toContainText(copy.detail.emptyWithDrag);
+      await expect.poll(() =>
+        page.evaluate(() => document.documentElement.scrollWidth),
+      ).toBeLessThanOrEqual(320);
+      expect(await detail.evaluate((element) =>
+        element.scrollWidth <= element.clientWidth,
+      )).toBe(true);
+      await expect(frame.locator('[data-stack-drawing-note]')).toHaveText(copy.cad.hint);
       await expect(detail.getByRole('status')).toHaveText(
         copy.detail.feedback.ejected.replace(
           '{name}',

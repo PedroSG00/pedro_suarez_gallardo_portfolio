@@ -99,7 +99,7 @@ El sistema deberá permitir arrastrar una carta habilitada al casillero para sel
 - Durante un arrastre, las cartas vecinas conservarán el desplazamiento recibido, sin volver a su posición anterior en cada evento ni saltar al soltar. Los movimientos rápidos se resolverán por pasos acotados para no atravesar cartas intermedias. La carta agarrada seguirá el puntero mientras los límites y el casillero lo permitan.
 - Cuando una carta empuje a otra, la carta desplazada continuará deslizándose un tramo corto en la misma dirección y frenará suavemente; el impulso y la distancia quedan acotados, sin rebotes ni deriva larga. La carta agarrada seguirá fija bajo el puntero.
 - Con `prefers-reduced-motion`, el empuje y la separación por colisión serán inmediatos, sin deslizamiento posterior ni movimiento ambiental.
-- La consola separará filtros y acciones en grupos legibles. El detalle ocupará una franja editorial bajo el dibujo, sin una tarjeta anidada estrecha ni superposición sobre las cartas; la composición se adaptará a móvil y escritorio.
+- La consola separará filtros y acciones en grupos legibles. En escritorio, el detalle ocupará un inspector lateral integrado en el marco; en tamaños estrechos será un panel compacto persistente al recorrer el canvas, sin quedar al final del dibujo ni exigir scroll para consultar una selección.
 - En escritorio, las acciones se alinearán con la fila de filtros; en viewports estrechos los grupos se reorganizarán sin desbordamiento ni cambios en el orden de lectura.
 
 ### RF-4a — Casillero: recepción, estado ocupado y expulsión
@@ -109,12 +109,13 @@ El casillero central deberá comunicar cuándo acepta una carta, mostrar la tecn
 **Criterios de aceptación (EARS):**
 
 - Cuando una carta habilitada entre en la zona de recepción, el casillero mostrará un hover claramente perceptible; al salir de la zona volverá al estado normal.
+- Mientras se mantenga agarrada una carta sobre la zona de recepción, seguirá al puntero sin que el movimiento ambiental la empuje fuera del casillero entre fotogramas.
 - Cuando se suelte una carta habilitada en el casillero, este confirmará la recepción con feedback visual breve, mostrará su marca, nombre y descripción, y expondrá un botón accesible para expulsarla.
 - Mientras una carta esté alojada, no quedará una copia interactiva de esa carta en la escena: el casillero será su ubicación visible y única.
 - Cuando se active «Expulsar» con ratón, teclado o tacto, la carta volverá al escenario en una posición libre, visible, dentro de límites y que no se solape por completo con otra carta ni con el casillero.
 - Cuando se seleccione otra tecnología mediante la lista accesible, la nueva pasará a ocupar el casillero y la anterior volverá a una posición libre visible; el cambio nunca crea duplicados ni cartas ocultas.
 - Al expulsar, el casillero volverá a su estado vacío y la descripción dejará de presentarse como selección activa.
-- Mientras haya una carta alojada, no se podrá soltar otra bajo el casillero ni ocultarla: se rechazará con feedback y la nueva carta volverá a una posición visible, o se deberá expulsar primero la ocupante.
+- Cuando se suelte una segunda carta habilitada sobre el casillero ocupado, la anterior volverá a una posición libre y visible, la nueva pasará al casillero y el feedback confirmará el reemplazo.
 - Si cambia el viewport, la carta alojada seguirá representada en el casillero y la acción de expulsión seguirá disponible.
 - El botón tendrá nombre accesible localizado, foco visible y uso por teclado; el estado ocupado/vacío se comunicará semánticamente.
 
@@ -187,6 +188,8 @@ El sistema deberá ofrecer una presentación plana y completa cuando no haya Jav
 - Cuando se muestre la lista plana, el contenido será el mismo que el de las cartas y estará completo en ambos idiomas.
 - Cuando se muestre la lista plana, no aparecerán controles de filtro, modo, zoom o rotación que no puedan funcionar.
 - La lista plana mantendrá el orden editorial de categorías y tecnologías y la prioridad visual de React y TypeScript.
+- Al abrir la lista o faltar WebGL, las tecnologías se mostrarán como cartas compactas y seleccionables, agrupadas por categoría dentro del marco de Stack. La selección mostrará la descripción en el inspector, que permanecerá a mano al recorrer las cartas. Sin JavaScript, las descripciones se mostrarán en las propias cartas.
+- La lista se reorganizará según el ancho disponible y tendrá entrada escalonada y transiciones de interacción solo cuando se permita el movimiento. En esta vista, las marcas de C# y Playwright tendrán acabados planos monocromos sin alterar las del canvas.
 
 ## Requisitos no funcionales
 
@@ -216,6 +219,7 @@ El sistema deberá ofrecer una presentación plana y completa cuando no haya Jav
 - Si una carta se suelta más allá de los límites del canvas, no podrá quedar fuera del área visible.
 - Si una carta entra en el casillero, el detalle podrá aparecer con una transición breve, pero todo su contenido seguirá visible y sin recortes durante y después de la entrada.
 - Si varias cartas se acercan o solapan, podrán tocarse parcialmente, pero se repelerán y ninguna ocultará totalmente a otra.
+- Si se recibe una carta con el casillero ocupado, la anterior vuelve al escenario en una posición libre y la nueva queda como única ocupante.
 - Si el arrastre empuja una carta vecina, esta avanzará brevemente por inercia y se detendrá dentro de un recorrido limitado; empujes repetidos no acumularán una deriva excesiva.
 - Si se usa arrastre sobre una carta en modo 3D, se moverá la carta; si se arrastra el fondo, rotará la escena.
 - Si se mueve una carta conectada, su trazado se actualizará con ella y terminará en el borde de la carta; ninguna línea de categoría se dibujará como una capa de fondo detrás de la escena.

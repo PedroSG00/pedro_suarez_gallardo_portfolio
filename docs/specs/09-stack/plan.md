@@ -30,7 +30,7 @@ Consecuencias de diseño:
 - El canvas es decorativo desde el punto de vista semántico (`aria-hidden` en el nodo WebGL); la información vive en la capa 1.
 - Las cartas del canvas se seleccionan por *raycasting*, pero la misma selección se puede hacer desde la lista accesible.
 - El estado (filtro, selección, modo, cámara, posiciones) vive en React y se refleja en atributos `data-*` del contenedor para poder verificarlo sin leer píxeles.
-- El marco visual ordena consola, canvas, lectura y dock de detalle en filas adaptables; el dock mantiene una anchura legible y no tapa las cartas en ningún viewport.
+- El marco visual ordena consola, canvas, lectura e inspector de detalle; el inspector va al lateral del escenario en escritorio y permanece accesible al recorrer el canvas en tamaños estrechos, sin exigir scroll hasta el final de la escena.
 - Sin WebGL o sin JavaScript no se muestran controles inoperantes: solo la lista plana.
 
 ## Estructura de módulos
@@ -144,8 +144,10 @@ resolverColisiones(cartas, limites, iteraciones = N):
 ```text
 alSoltar(carta):
   si !habilitada(carta): ignorar
-  si dentroDelCasillero(carta) y slotId == null: alojar(carta.id); seleccionar(carta.id)
-  si dentroDelCasillero(carta) y slotId != null: rechazarConFeedback(); devolverAPosicionLibre(carta)
+  si dentroDelCasillero(carta):
+    si slotId != null y slotId != carta.id: devolverAPosicionLibre(slotId); confirmarReemplazo(carta.id, slotId)
+    si no: confirmarRecepcion(carta.id)
+    alojar(carta.id); seleccionar(carta.id)
   si no: conservarPosicion(carta); no cambiar selección
 
 expulsar():
@@ -246,7 +248,7 @@ Los tests de aceptación se escriben antes de implementar. Se comprueba comporta
 - Paridad EN/ES: toda tecnología tiene nombre y descripción en ambos catálogos, sin claves sobrantes.
 - `stack-state`: «Todas» inicial, filtro único, habilitación, selección conservada al filtrar, reinicio en entrada e idioma.
 - `stack-geometry`: límites en los cuatro bordes, solape parcial permitido, ninguna carta completamente tapada, colocación determinista.
-- Movimiento/slot: desplazamiento acotado, colisión estable, pausa con reduced-motion, exclusión de la zona del casillero, segundo drop rechazado y expulsión a posición libre visible.
+- Movimiento/slot: desplazamiento acotado, colisión estable, pausa con reduced-motion, exclusión de la zona del casillero, reemplazo del ocupante por una carta recibida y expulsión a posición libre visible.
 - `stack-camera`: mínimos y máximos de zoom y pitch; el yaw completa vueltas de 360° sin límite.
 - `stack-camera`: interpolación por el trayecto horizontal más corto, valores acotados y continuidad al recalcular el objetivo durante una transición.
 - Geometría de escena: trazados entre cartas con extremos en sus bordes y actualización durante el movimiento.
@@ -261,7 +263,7 @@ Con mensajes reales y ambos idiomas:
 - Casillero: instrucción inicial, descripción al seleccionar, reemplazo y conservación al filtrar.
 - Casillero: hover, confirmación de recepción, expulsión accesible, ocupación exclusiva y ausencia verificable de cartas ocultas debajo.
 - Controles: switch oculto sin 3D, zoom y rotación con nombres accesibles y límites.
-- Consola y detalle: botones de icono con nombres localizados dentro del marco visual; el detalle ocupa una zona integrada y no cubre las cartas.
+- Consola y detalle: botones de icono con nombres localizados dentro del marco visual; el inspector ocupa el lateral en escritorio y queda visible durante la exploración en móvil sin cubrir la escena.
 - Responsive/nitidez: controles, canvas y detalle sin desbordamiento en 320, 390, 768, 1920 y 3840 px; el dibujo respeta DPR y un presupuesto de píxeles.
 - Movimiento/trazados: respuesta directa, ciclo ambiental a 60 fps mientras visible, pausa con movimiento reducido; enlaces adheridos a los bordes y sincronizados al mover cartas.
 - Sin controles inoperantes en la lista plana.
@@ -281,7 +283,7 @@ Con mensajes reales y ambos idiomas:
 - Cámara: rueda y botones recorren el zoom 50–150 %; al 50 % se encuadra toda la composición y al 150 % se permite acercar más. El yaw completa vueltas de 360° con teclado, tacto y ratón, el pitch queda acotado y arrastrar una carta no rota la escena.
 - Cámara: zoom y giro por controles muestran estados intermedios, retargetean desde la pose visible y se aplican al instante con movimiento reducido; el arrastre del fondo permanece directo.
 - Consola: filtros, vista, lista, zoom y rotación se encuentran dentro del marco visual como iconos accesibles; el detalle permanece dentro del mismo marco.
-- Consola: en escritorio las acciones se alinean con los filtros; el detalle se revela sin recortar texto, marca, nombre ni feedback al recibir una carta.
+- Consola: en escritorio las acciones se alinean con los filtros; el inspector se mantiene junto al escenario y revela el detalle sin recortar texto, marca, nombre ni feedback al recibir o reemplazar una carta.
 - Responsive/render: verificación visual y de desbordamiento en móvil, tablet, escritorio y 4K; canvas alineado al DPR con presupuesto de píxeles y cartas legibles durante el zoom.
 - Trazados: enlaces de categoría unidos a los bordes de las cartas, con profundidad correcta y actualización al moverlas; no se leen como líneas de fondo.
 - Accesibilidad: selección por teclado desde la lista, foco visible, contraste AA en ambos temas, 320 px, 1920 px y texto al 200 %.
