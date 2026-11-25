@@ -69,6 +69,10 @@
   gap: calc(var(--spacing) * 4);
 }
 
+[data-stack-view-controls] {
+  align-self: flex-start;
+}
+
 [data-stack-filter-group] {
   flex: 1 1 100%;
 }
@@ -528,16 +532,18 @@
 
 @keyframes stack-detail-enter {
   from {
+    opacity: 0.4;
     transform: translateY(calc(var(--spacing) * 3));
   }
   to {
+    opacity: 1;
     transform: translateY(0);
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
   [data-stack-detail-technology] {
-    animation: stack-detail-enter var(--duration-state) ease-out;
+    animation: stack-detail-enter var(--duration-state) cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 }
 

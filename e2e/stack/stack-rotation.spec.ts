@@ -141,4 +141,29 @@ test.describe('Stack 3D rotation', () => {
       await session.detach();
     });
   });
+
+  test.describe('camera controls with motion enabled', () => {
+    test.use({ reducedMotion: 'no-preference' });
+
+    test('eases zoom and rotation buttons to their targets', async ({ page }) => {
+      const { stack, canvas, copy } = await openScene(page, 'en');
+      const rotation = stack.getByRole('group', { name: copy.stack.cad.rotation.label });
+      const zoom = stack.getByRole('group', { name: copy.stack.cad.zoom.label });
+      const readZoom = async () => Number(await canvas.getAttribute('data-stack-camera-zoom'));
+
+      await rotation.getByRole('button', { name: copy.stack.cad.rotation.right }).click();
+      await expect.poll(async () => {
+        const { yaw } = await readOrientation(canvas);
+        return yaw > 0 && yaw < 5;
+      }, { intervals: [5], timeout: 1_000 }).toBe(true);
+      await expect.poll(async () => (await readOrientation(canvas)).yaw).toBe(5);
+
+      await zoom.getByRole('button', { name: copy.stack.cad.zoom.in }).click();
+      await expect.poll(async () => {
+        const level = await readZoom();
+        return level > 100 && level < 105;
+      }, { intervals: [5], timeout: 1_000 }).toBe(true);
+      await expect.poll(readZoom).toBe(105);
+    });
+  });
 });

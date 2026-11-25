@@ -1,14 +1,68 @@
 export type StackBounds = { left: number; right: number; bottom: number; top: number };
 type Point = { x: number; y: number };
 export type StackBody = Point & { halfWidth: number; halfHeight: number; anchor?: Point };
+export type StackGlide = { velocityX: number; velocityY: number; remaining: number };
 
 const CONTACT_RATIO = 0.94;
 const MAX_PASSES = 12;
 const TOLERANCE = 0.0001;
 const DEEP_OVERLAP_RATIO = 0.55;
 const DRAG_RESPONSE_RATIO = 1.5;
+const GLIDE_DISTANCE_RATIO = 0.35;
+const MAX_GLIDE_DISTANCE = 0.24;
+const GLIDE_IMPULSE_GAIN = 2;
+const MAX_GLIDE_SPEED = 0.55;
+const GLIDE_FRICTION = 4.5;
+const MIN_GLIDE_SPEED = 0.02;
+const MAX_GLIDE_FRAME_SECONDS = 1 / 30;
 
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
+
+export function createStackGlide(): StackGlide {
+  return { velocityX: 0, velocityY: 0, remaining: 0 };
+}
+
+export function addStackGlideImpulse(glide: StackGlide, displacement: Point): StackGlide {
+  const distance = Math.hypot(displacement.x, displacement.y);
+  if (distance <= TOLERANCE) return glide;
+
+  const velocityX = glide.velocityX + displacement.x * GLIDE_IMPULSE_GAIN;
+  const velocityY = glide.velocityY + displacement.y * GLIDE_IMPULSE_GAIN;
+  const speed = Math.hypot(velocityX, velocityY);
+  const ratio = speed > MAX_GLIDE_SPEED ? MAX_GLIDE_SPEED / speed : 1;
+  return {
+    velocityX: velocityX * ratio,
+    velocityY: velocityY * ratio,
+    remaining: Math.min(MAX_GLIDE_DISTANCE, glide.remaining + distance * GLIDE_DISTANCE_RATIO),
+  };
+}
+
+export function advanceStackGlide(glide: StackGlide, deltaSeconds: number) {
+  if (deltaSeconds <= 0) return { dx: 0, dy: 0, glide };
+  if (glide.remaining <= TOLERANCE) {
+    return { dx: 0, dy: 0, glide: glide.remaining > 0 ? createStackGlide() : glide };
+  }
+
+  const elapsed = Math.min(deltaSeconds, MAX_GLIDE_FRAME_SECONDS);
+  const decay = Math.exp(-GLIDE_FRICTION * elapsed);
+  const travelScale = (1 - decay) / GLIDE_FRICTION;
+  let dx = glide.velocityX * travelScale;
+  let dy = glide.velocityY * travelScale;
+  const distance = Math.hypot(dx, dy);
+  const scale = distance > glide.remaining ? glide.remaining / distance : 1;
+  dx *= scale;
+  dy *= scale;
+
+  const remaining = Math.max(0, glide.remaining - distance * scale);
+  const velocityX = glide.velocityX * decay;
+  const velocityY = glide.velocityY * decay;
+  const nextGlide = remaining <= TOLERANCE ||
+    Math.hypot(velocityX, velocityY) <= MIN_GLIDE_SPEED
+    ? createStackGlide()
+    : { velocityX, velocityY, remaining };
+
+  return { dx, dy, glide: nextGlide };
+}
 
 export function constrainStackCard<T extends StackBody>(body: T, bounds: StackBounds, slot?: StackBody): T {
   const left = bounds.left + body.halfWidth;

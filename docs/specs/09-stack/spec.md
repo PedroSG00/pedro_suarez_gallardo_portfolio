@@ -73,6 +73,7 @@ El sistema deberá permitir seleccionar una tecnología y mostrar en el casiller
 - Cuando se seleccione otra carta habilitada, el casillero reemplazará la descripción anterior por la nueva.
 - Cuando la escena esté disponible, el detalle aparecerá dentro del marco visual de la escena; en la lista plana seguirá disponible fuera de la escena.
 - Cuando se muestre una descripción, el nombre y el texto corresponderán a la misma tecnología y al idioma activo.
+- Cada descripción tendrá dos frases breves: la primera explicará qué es la tecnología y la segunda concretará capacidades o propósitos distintivos, sin atribuir usos a Pedro.
 - Cuando se cambie de idioma, nombres, categorías, controles y descripciones estarán disponibles en el idioma seleccionado.
 - Cuando se active un filtro que atenúe la carta seleccionada, la descripción y el estado de selección se conservarán; la carta no se podrá volver a seleccionar mientras permanezca atenuada.
 - La descripción hablará de la tecnología, no de la experiencia personal de Pedro ni de resultados profesionales.
@@ -96,7 +97,10 @@ El sistema deberá permitir arrastrar una carta habilitada al casillero para sel
 - Los trazados de categoría conectarán los bordes de las cartas, respetarán su profundidad y seguirán el movimiento de las cartas sin quedar flotando por detrás.
 - Al pasar un puntero compatible sobre una carta habilitada, su superficie se invertirá y el cursor indicará que puede agarrarse; las cartas inactivas no darán una señal de acción. El foco de los controles HTML tendrá una respuesta equivalente.
 - Durante un arrastre, las cartas vecinas conservarán el desplazamiento recibido, sin volver a su posición anterior en cada evento ni saltar al soltar. Los movimientos rápidos se resolverán por pasos acotados para no atravesar cartas intermedias. La carta agarrada seguirá el puntero mientras los límites y el casillero lo permitan.
+- Cuando una carta empuje a otra, la carta desplazada continuará deslizándose un tramo corto en la misma dirección y frenará suavemente; el impulso y la distancia quedan acotados, sin rebotes ni deriva larga. La carta agarrada seguirá fija bajo el puntero.
+- Con `prefers-reduced-motion`, el empuje y la separación por colisión serán inmediatos, sin deslizamiento posterior ni movimiento ambiental.
 - La consola separará filtros y acciones en grupos legibles. El detalle ocupará una franja editorial bajo el dibujo, sin una tarjeta anidada estrecha ni superposición sobre las cartas; la composición se adaptará a móvil y escritorio.
+- En escritorio, las acciones se alinearán con la fila de filtros; en viewports estrechos los grupos se reorganizarán sin desbordamiento ni cambios en el orden de lectura.
 
 ### RF-4a — Casillero: recepción, estado ocupado y expulsión
 
@@ -142,6 +146,7 @@ El sistema deberá permitir acercar y alejar la vista 3D mediante la rueda del r
 - Cuando se use movimiento reducido, el zoom explícito seguirá funcionando sin animación añadida.
 - Los controles de zoom tendrán nombres accesibles y se podrán utilizar con teclado.
 - Los controles de zoom serán botones de icono dentro del marco visual de la escena, con nombres accesibles localizados.
+- Al accionar el zoom, la cámara llegará al nuevo nivel con una transición suave e interrumpible; con movimiento reducido aplicará el nivel sin transición.
 
 ### RF-7 — Rotación en 3D
 
@@ -158,6 +163,7 @@ El sistema deberá permitir rotar la escena horizontal y verticalmente arrastran
 - Cuando se solicite movimiento reducido, la rotación causada directamente por la persona seguirá disponible y no se añadirá movimiento autónomo.
 - Los controles de rotación tendrán nombres accesibles y se podrán utilizar con teclado y pantalla táctil.
 - Los controles de rotación serán botones de icono dentro del marco visual de la escena, con nombres accesibles localizados.
+- La rotación iniciada desde los botones tendrá una transición suave e interrumpible; el arrastre del fondo seguirá la entrada directamente y movimiento reducido aplica los botones sin transición.
 
 ### RF-8 — Estado al entrar y volver a Stack
 
@@ -197,7 +203,9 @@ El sistema deberá ofrecer una presentación plana y completa cuando no haya Jav
 - La interacción no impedirá el desplazamiento de la página ni bloqueará la lectura.
 - La voz será breve, afirmativa y centrada en qué es cada tecnología. No se inventarán cifras, usos ni afirmaciones profesionales.
 - La escena no consumirá recursos de forma continua cuando no haya cambios visuales; el movimiento ambiental, si está activo, usará un ciclo acotado y se pausará fuera de vista o con la pestaña inactiva.
+- Las transiciones de cámara reutilizarán el ciclo de render existente, se detendrán al alcanzar el objetivo y no saltarán al encadenar controles. La entrada del detalle no recortará nombre, marca, descripción ni feedback al recibir una carta.
 - El movimiento ambiental visible apuntará a 60 fps cuando la pestaña y la escena estén activas; los arrastres responderán directamente y actualizarán los trazados en el mismo movimiento.
+- La inercia breve de una carta empujada se integra en el ciclo existente, se desacelera y se pausa fuera de vista; movimiento reducido elimina la continuación y conserva la respuesta directa.
 - Los bloques de Stack respetarán el comportamiento general de entrada y salida con el scroll. Con movimiento reducido o sin soporte de la animación por scroll, todos permanecerán visibles.
 
 ## Casos límite
@@ -206,13 +214,16 @@ El sistema deberá ofrecer una presentación plana y completa cuando no haya Jav
 - Si se intenta llevar una carta atenuada al casillero, no se seleccionará ni moverá.
 - Si se cambia de filtro mientras hay una descripción activa, la descripción se conserva aunque su carta quede atenuada.
 - Si una carta se suelta más allá de los límites del canvas, no podrá quedar fuera del área visible.
+- Si una carta entra en el casillero, el detalle podrá aparecer con una transición breve, pero todo su contenido seguirá visible y sin recortes durante y después de la entrada.
 - Si varias cartas se acercan o solapan, podrán tocarse parcialmente, pero se repelerán y ninguna ocultará totalmente a otra.
+- Si el arrastre empuja una carta vecina, esta avanzará brevemente por inercia y se detendrá dentro de un recorrido limitado; empujes repetidos no acumularán una deriva excesiva.
 - Si se usa arrastre sobre una carta en modo 3D, se moverá la carta; si se arrastra el fondo, rotará la escena.
 - Si se mueve una carta conectada, su trazado se actualizará con ella y terminará en el borde de la carta; ninguna línea de categoría se dibujará como una capa de fondo detrás de la escena.
 - Si se intenta superar los límites de zoom o de inclinación vertical, la escena permanecerá dentro de límites explorables; la rotación horizontal continuará y envolverá cada 360°.
 - Si el navegador no admite 3D, no se mostrará el switch; el modo 2D seguirá disponible.
 - Si el navegador no admite WebGL, se mostrará la lista plana.
 - Si se solicita movimiento reducido, el cambio de modo será instantáneo y no habrá movimiento autónomo; los controles directos de zoom y rotación seguirán funcionando.
+- Si se solicitan zooms o giros consecutivos desde los controles, la cámara continuará desde su posición visual actual hacia el último objetivo; con movimiento reducido cada acción será instantánea.
 - Si JavaScript está desactivado, Stack se mostrará como una lista plana con todas las tecnologías y sus descripciones.
 - Si falta una descripción aprobada o una traducción, el cierre de la spec queda bloqueado; no se recurre a una traducción incompleta ni a contenido inventado.
 

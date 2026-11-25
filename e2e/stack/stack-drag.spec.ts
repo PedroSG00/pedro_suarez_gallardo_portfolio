@@ -174,3 +174,47 @@ test.describe('Stack touch gestures', () => {
     await session.detach();
   });
 });
+
+test.describe('Stack detail reveal', () => {
+  test.use({ reducedMotion: 'no-preference', viewport: { width: 1280, height: 1050 } });
+
+  test('keeps the received description fully visible after a card is dragged into the slot', async ({
+    page,
+  }) => {
+    const { detail, canvas, coordinates } = await openScene(page, 'en', en);
+    const initial = await readStackCardBounds(canvas);
+    const at = await coordinates();
+
+    await page.mouse.move(at(initial.react).x, at(initial.react).y);
+    await page.mouse.down();
+    await page.mouse.move(at(SLOT).x, at(SLOT).y, { steps: 6 });
+    await page.mouse.up();
+
+    const heading = detail.getByRole('heading', { name: en.stack.technologies.react.name });
+    const description = detail.getByText(en.stack.technologies.react.description, { exact: true });
+    const mark = detail.locator('[data-stack-brand-mark]');
+    const feedback = detail.getByRole('status');
+    await expect(heading).toBeVisible();
+    await expect(description).toBeVisible();
+    await expect(mark).toBeVisible();
+    await expect(feedback).toHaveText(
+      en.stack.detail.feedback.received.replace('{name}', 'React'),
+    );
+    await page.waitForTimeout(300);
+
+    const panel = await detail.boundingBox();
+    expect(panel).not.toBeNull();
+    for (const content of [heading, mark, description, feedback]) {
+      const bounds = await content.boundingBox();
+      expect(bounds).not.toBeNull();
+      expect(bounds!.x).toBeGreaterThanOrEqual(panel!.x);
+      expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(panel!.x + panel!.width);
+      expect(bounds!.y).toBeGreaterThanOrEqual(panel!.y);
+      expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(panel!.y + panel!.height);
+    }
+    expect(await detail.evaluate((element) =>
+      element.scrollWidth <= element.clientWidth &&
+      element.scrollHeight <= element.clientHeight,
+    )).toBe(true);
+  });
+});

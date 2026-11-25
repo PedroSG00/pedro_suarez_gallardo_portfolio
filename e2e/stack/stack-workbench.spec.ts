@@ -55,6 +55,7 @@ for (const { locale, copy, nav } of LOCALES) {
     test('keeps icon controls and technology detail inside a responsive frame', async ({
       page,
     }) => {
+      await page.setViewportSize({ width: 1280, height: 1050 });
       await page.goto(`/${locale}#stack`);
 
       const stack = page.getByRole('region', { name: nav.stack, exact: true });
@@ -75,6 +76,11 @@ for (const { locale, copy, nav } of LOCALES) {
 
       const filters = frame.getByRole('group', { name: copy.filters.label });
       const all = filters.getByRole('radio', { name: copy.filters.all, exact: true });
+      const filterBox = await all.locator('xpath=..').boundingBox();
+      const viewBox = await view.boundingBox();
+      expect(filterBox).not.toBeNull();
+      expect(viewBox).not.toBeNull();
+      expect(Math.abs(filterBox!.y - viewBox!.y)).toBeLessThanOrEqual(1);
       await expect(all.locator('xpath=..').locator('svg')).toBeVisible();
       await expect(all.locator('xpath=..')).toHaveAttribute('title', copy.filters.all);
       await all.check();

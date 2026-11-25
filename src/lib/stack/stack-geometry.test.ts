@@ -1,6 +1,9 @@
 import { expect, test } from 'vitest';
 import {
+  addStackGlideImpulse,
+  advanceStackGlide,
   constrainStackCard,
+  createStackGlide,
   moveStackCard,
   resolveStackCollisions,
   type StackBody,
@@ -52,6 +55,34 @@ test('a held card repels its neighbor without drifting away from the pointer', (
   const [held, neighbor] = resolveStackCollisions([card(3, 0), card(3, 0.3)], bounds, slot, 0);
   expect(held).toEqual(card(3, 0));
   expect(neighbor.y).toBeGreaterThan(0.65);
+});
+
+test('a pushed card glides a short distance in the push direction and eases to rest', () => {
+  let glide = addStackGlideImpulse(createStackGlide(), { x: 0.4, y: -0.2 });
+  let x = 0;
+  let y = 0;
+  for (let frame = 0; frame < 60; frame++) {
+    const step = advanceStackGlide(glide, 1 / 60);
+    glide = step.glide;
+    x += step.dx;
+    y += step.dy;
+  }
+
+  expect(x).toBeGreaterThan(0.08);
+  expect(y).toBeLessThan(-0.03);
+  expect(Math.hypot(x, y)).toBeLessThan(0.18);
+  expect(glide).toEqual(createStackGlide());
+});
+
+test('repeated pushes cannot build an unbounded glide', () => {
+  let glide = createStackGlide();
+  for (let push = 0; push < 30; push++) {
+    glide = addStackGlideImpulse(glide, { x: 0.5, y: 0 });
+  }
+
+  expect(glide.velocityX).toBeLessThanOrEqual(0.55);
+  expect(Math.hypot(glide.velocityX, glide.velocityY)).toBeLessThanOrEqual(0.55);
+  expect(glide.remaining).toBeLessThanOrEqual(0.24);
 });
 
 test('a fast drag pushes intermediate neighbors instead of tunneling through them', () => {

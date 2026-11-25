@@ -1,6 +1,7 @@
 import { expect, test } from 'vitest';
 import {
   getStackPerspectiveZoom,
+  interpolateStackCamera,
   isStackRotationAtLimit,
   rotateStackCamera,
   rotateStackCameraBy,
@@ -74,4 +75,28 @@ test('normalizes input angles before applying the next direct adjustment', () =>
     yaw: -80,
     pitch: STACK_PITCH_MIN,
   });
+});
+
+test('interpolates the shortest horizontal turn and keeps camera values in range', () => {
+  expect(
+    interpolateStackCamera(
+      { zoom: 100, yaw: 170, pitch: 0 },
+      { zoom: 150, yaw: -170, pitch: 20 },
+      0.5,
+    ),
+  ).toEqual({ zoom: 125, yaw: -180, pitch: 10 });
+  expect(
+    interpolateStackCamera(
+      { zoom: 100, yaw: 10, pitch: 0 },
+      { zoom: 150, yaw: 20, pitch: 10 },
+      0,
+    ),
+  ).toEqual({ zoom: 100, yaw: 10, pitch: 0 });
+  expect(
+    interpolateStackCamera(
+      { zoom: 100, yaw: 10, pitch: 0 },
+      { zoom: 150, yaw: 20, pitch: 10 },
+      1.5,
+    ),
+  ).toEqual({ zoom: 150, yaw: 20, pitch: 10 });
 });

@@ -13,6 +13,7 @@ const STACK_YAW_RANGE = STACK_YAW_MAX - STACK_YAW_MIN;
 export type StackZoomDirection = 'in' | 'out';
 export type StackRotationDirection = 'left' | 'right' | 'up' | 'down';
 export type StackCameraOrientation = { yaw: number; pitch: number };
+export type StackCameraPose = StackCameraOrientation & { zoom: number };
 
 const ROTATION_DELTAS: Record<StackRotationDirection, StackCameraOrientation> = {
   left: { yaw: -STACK_ROTATION_STEP, pitch: 0 },
@@ -42,6 +43,25 @@ function clampStackOrientation(orientation: StackCameraOrientation): StackCamera
   return {
     yaw: wrapStackYaw(orientation.yaw),
     pitch: Math.max(STACK_PITCH_MIN, Math.min(STACK_PITCH_MAX, orientation.pitch)),
+  };
+}
+
+export function interpolateStackCamera(
+  from: StackCameraPose,
+  to: StackCameraPose,
+  progress: number,
+): StackCameraPose {
+  const amount = Math.max(0, Math.min(1, progress));
+  const start = clampStackOrientation(from);
+  const target = clampStackOrientation(to);
+  const yawDelta = wrapStackYaw(target.yaw - start.yaw);
+  const startZoom = clampStackZoom(from.zoom);
+  const targetZoom = clampStackZoom(to.zoom);
+
+  return {
+    zoom: startZoom + (targetZoom - startZoom) * amount,
+    yaw: wrapStackYaw(start.yaw + yawDelta * amount),
+    pitch: start.pitch + (target.pitch - start.pitch) * amount,
   };
 }
 

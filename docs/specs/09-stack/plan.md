@@ -14,7 +14,7 @@ Este plan concreta `docs/specs/09-stack/spec.md`: una sección bilingüe con 25 
 - Las cartas tienen movimiento ambiental coreografiado, pausado y acotado, con colisiones visibles y estables; no es una simulación física. `prefers-reduced-motion` desactiva el movimiento ambiental, no la respuesta directa.
 - El casillero tiene ocupación exclusiva: la carta alojada sale de la nube; expulsarla la devuelve a una posición visible y libre. Nunca hay cartas ocultas bajo el casillero.
 - La incorporación de Three.js al stack cerrado debe quedar registrada en `docs/constitution.md` antes de implementar. Esa edición es una capa transversal y requiere autorización explícita.
-- Las 25 descripciones EN/ES de `content-review.md` están pendientes de aprobación editorial. No se implementa contenido no aprobado.
+- Las 25 descripciones EN/ES de `content-review.md` están registradas en los catálogos; cualquier ampliación solicitada se mantiene neutral y coherente entre idiomas.
 - Se autorizan las carpetas necesarias para Stack bajo `src/`. No se autorizan cambios en layout raíz, tema, i18n, `Reveal`, configuración ni estilos globales.
 
 ## Arquitectura de la experiencia
@@ -79,7 +79,7 @@ Notas de estructura:
 | Campo | Regla |
 |---|---|
 | `name` | Nombre oficial de la tecnología; no se traduce. |
-| `description` | Texto EN/ES que explica qué es la tecnología; sin uso personal ni métricas. |
+| `description` | Dos frases breves EN/ES: definición y capacidades o propósitos; sin uso personal ni métricas. |
 
 ### Estado de interacción
 
@@ -100,8 +100,8 @@ Sin persistencia entre entradas. El cambio de idioma restablece `mode` y `filter
 ```text
 { id: 'react', category: 'frontend', order: 3, brandMark: '/stack/react.svg' }
 name: 'React'
-description.en: 'A component library for building interfaces from small, reusable pieces.'
-description.es: 'Una biblioteca de componentes para construir interfaces con piezas pequeñas y reutilizables.'
+description.en: 'React is a JavaScript library for building user interfaces from components. It updates the rendered interface as data and user input change.'
+description.es: 'React es una biblioteca de JavaScript para crear interfaces a partir de componentes. Actualiza la interfaz mostrada cuando cambian los datos o la interacción.'
 ```
 
 ## Algoritmos clave
@@ -136,6 +136,7 @@ resolverColisiones(cartas, limites, iteraciones = N):
 - `limitar` recorta al rectángulo interior descontando el radio; una carta nunca sale del área.
 - El movimiento tiene velocidad/amplitud limitadas, se pausa con reduced-motion, canvas fuera de vista o pestaña inactiva.
 - El arrastre usa pasos espaciales acotados y conserva las posiciones resueltas de las vecinas en cada paso. Cancelar restaura la composición anterior al gesto; soltar fija la nueva composición sin rebote a posiciones antiguas.
+- Un empuje directo puede transferir un impulso pequeño a las cartas desplazadas: la continuación se limita por velocidad y distancia, decae exponencialmente y reutiliza el ciclo de escena existente. Con movimiento reducido, las colisiones siguen siendo inmediatas pero no hay inercia posterior.
 - El hover por raycasting invierte solo la carta habilitada bajo el puntero, sin ampliar su geometría ni mover su objetivo. Se limpia al salir, filtrar, seleccionar o comenzar una rotación; no necesita un bucle autónomo.
 
 ### Selección — RF-3, RF-4
@@ -175,6 +176,13 @@ girar(dx, dy): yaw = envolver(yaw + dx, -180°, 180°)
 - El zoom de la vista 3D va del 50 % al 150 %, parte del 100 % y cambia en pasos de 5 puntos. El 150 % permite acercarse más allá del encuadre completo y puede recortar cartas periféricas; al alejarse al 50 % se recupera la composición completa. Solo la rueda vertical sobre el canvas 3D controla el zoom.
 - La orientación horizontal envuelve cada 360° y permite vueltas completas; la inclinación vertical permanece entre −20° y 20° para mantener la escena explorable.
 - Sin animación autónoma: la cámara solo se mueve por entrada de la persona.
+
+#### Refinamiento de movimiento y consola
+
+- Las acciones de zoom y rotación por controles DOM actualizan un objetivo; la cámara interpola hacia él con easing de salida y puede interrumpir la transición desde la pose visible actual. El arrastre del fondo continúa siendo directo.
+- La interpolación usa el ciclo de escena existente, activo solo cuando la escena está visible y la pestaña activa. La preferencia de movimiento reducido aplica inmediatamente el objetivo; no se añaden dependencias ni un segundo bucle permanente.
+- Los filtros y estados de control comunican sus cambios con transiciones breves de color/opacity. La entrada del detalle usa opacity y desplazamiento corto, sin `clip-path` ni contenedores que recorten su contenido.
+- La fila de acciones se alinea ópticamente con la fila de filtros en escritorio; en tamaños estrechos mantiene grupos legibles y refluye dentro del marco.
 
 ### Render bajo demanda — rendimiento
 
@@ -240,6 +248,7 @@ Los tests de aceptación se escriben antes de implementar. Se comprueba comporta
 - `stack-geometry`: límites en los cuatro bordes, solape parcial permitido, ninguna carta completamente tapada, colocación determinista.
 - Movimiento/slot: desplazamiento acotado, colisión estable, pausa con reduced-motion, exclusión de la zona del casillero, segundo drop rechazado y expulsión a posición libre visible.
 - `stack-camera`: mínimos y máximos de zoom y pitch; el yaw completa vueltas de 360° sin límite.
+- `stack-camera`: interpolación por el trayecto horizontal más corto, valores acotados y continuidad al recalcular el objetivo durante una transición.
 - Geometría de escena: trazados entre cartas con extremos en sus bordes y actualización durante el movimiento.
 - `stack-capabilities`: detección con contexto inyectado (soportado, no soportado, lanza al crear contexto).
 
@@ -270,7 +279,9 @@ Con mensajes reales y ambos idiomas:
 - Límites: arrastrar fuera del área deja la carta dentro.
 - Modos: inicio 2D, switch conserva posiciones, filtro, selección y descripción; instantáneo con `prefers-reduced-motion`.
 - Cámara: rueda y botones recorren el zoom 50–150 %; al 50 % se encuadra toda la composición y al 150 % se permite acercar más. El yaw completa vueltas de 360° con teclado, tacto y ratón, el pitch queda acotado y arrastrar una carta no rota la escena.
+- Cámara: zoom y giro por controles muestran estados intermedios, retargetean desde la pose visible y se aplican al instante con movimiento reducido; el arrastre del fondo permanece directo.
 - Consola: filtros, vista, lista, zoom y rotación se encuentran dentro del marco visual como iconos accesibles; el detalle permanece dentro del mismo marco.
+- Consola: en escritorio las acciones se alinean con los filtros; el detalle se revela sin recortar texto, marca, nombre ni feedback al recibir una carta.
 - Responsive/render: verificación visual y de desbordamiento en móvil, tablet, escritorio y 4K; canvas alineado al DPR con presupuesto de píxeles y cartas legibles durante el zoom.
 - Trazados: enlaces de categoría unidos a los bordes de las cartas, con profundidad correcta y actualización al moverlas; no se leen como líneas de fondo.
 - Accesibilidad: selección por teclado desde la lista, foco visible, contraste AA en ambos temas, 320 px, 1920 px y texto al 200 %.

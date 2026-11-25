@@ -379,6 +379,26 @@ No se implementa una tarea mientras sus decisiones previas sigan abiertas. No se
 
 **Verificación:** lint, typecheck, 669/669 tests (94,23 % sentencias, 88,77 % ramas, 95,98 % funciones y 96,06 % líneas), build y `pnpm test:e2e --workers=2` pasan. La suite global terminó con 357/357 aprobados en 13,4 minutos; los e2e focales de geometría y proyección pasaron 8/8 antes de la repetición. T11 sigue sin iniciar.
 
+### Refinamiento solicitado — deslizamiento sutil al empujar
+
+- Las cartas libres que reciben un empuje del arrastre conservan un impulso pequeño en esa dirección y frenan exponencialmente. La velocidad se limita a 0,55 unidades/s y cada impulso añade un recorrido acotado; la carta agarrada sigue directamente al puntero.
+- La continuación reutiliza el ciclo de escena y respeta límites, slot y colisiones. Con `prefers-reduced-motion`, solo queda la separación directa e inmediata.
+- El observer de visibilidad ahora considera cualquier entrada visible del lote, evitando que una entrada anterior fuera de viewport mantenga detenido el ciclo.
+- Regresiones unitarias para dirección, frenado y límite de impulsos; e2e para el deslizamiento al soltar y su ausencia con movimiento reducido.
+
+**Verificación:** `pnpm lint`, `pnpm typecheck`, `pnpm test` (672/672), `pnpm build` y `pnpm test:e2e --workers=2` (359/359 en la ejecución global) pasan. También pasan los 42 tests focales de geometría/escena y sus 7 e2e. T11 sigue sin iniciar.
+
+### Ampliación solicitada — contenido, marca y movimiento de cámara
+
+- Ampliar las descripciones de las 25 tecnologías en inglés y español con una segunda frase factual, sin niveles, métricas ni atribuciones personales.
+- Sustituir el SVG de Recharts —una superficie SVG interactiva y recortada— por una marca compacta y estática, con atribución actualizada.
+- Animar zoom y rotación iniciados por controles desde la pose visible, permitir que un nuevo objetivo interrumpa el anterior y respetar `prefers-reduced-motion`; el arrastre del fondo sigue siendo directo.
+- Alinear las acciones con la primera fila de filtros en escritorio y reflujo sin desbordamiento en tamaños estrechos.
+- Añadir una entrada breve al detalle y verificar que nombre, marca, descripción y feedback no se recortan al recibir una carta.
+- Tests primero: integridad de las 50 descripciones, SVG estático, interpolación/retarget/reduced-motion, alineación e2e y recepción visible.
+
+**Estado:** implementación completada; lint, typecheck, test y build pasan; la suite e2e global sigue en curso. T11 no se inicia.
+
 ## T11 — Entrada, idioma y degradación sin WebGL
 
 **Objetivo:** fijar los estados iniciales y garantizar el contenido en todos los modos degradados.

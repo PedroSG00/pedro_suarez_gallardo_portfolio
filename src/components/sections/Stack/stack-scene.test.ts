@@ -173,6 +173,7 @@ const three = vi.hoisted(() => {
   class FakeCamera {
     position = new FakeVector();
     aspect = 1;
+    zoom = 1;
     lookAt = vi.fn();
     updateProjectionMatrix = vi.fn();
     updateMatrixWorld = vi.fn();
@@ -265,8 +266,8 @@ const three = vi.hoisted(() => {
     observe = vi.fn();
     disconnect = vi.fn();
 
-    trigger(isIntersecting: boolean) {
-      this.callback([{ isIntersecting }]);
+    trigger(...intersections: boolean[]) {
+      this.callback(intersections.map((isIntersecting) => ({ isIntersecting })));
     }
   }
 
@@ -729,6 +730,32 @@ describe('mountStackScene', () => {
     handle.dispose();
   });
 
+  test('starts background dragging from the visible camera pose during a control turn', () => {
+    setMotionPreference(false);
+    const canvas = makeCanvas();
+    canvas.style.setProperty('--duration-state', '400ms');
+    const initial = {
+      technologies,
+      mode: '3d' as const,
+      filter: 'all' as const,
+      selectedId: null,
+      onSelect: vi.fn(),
+      onReceive: vi.fn(),
+      ...zoomInput,
+    };
+    const handle = mountScene(canvas, initial);
+    handle.update({ ...initial, yaw: 10 });
+    three.state.observer?.trigger(true);
+    three.state.frameCallbacks.at(-1)?.(100);
+    three.state.frameCallbacks.at(-1)?.(117);
+    const visibleYaw = Number(canvas.dataset.stackCameraYaw);
+
+    pointerDrag(canvas, 'mouse', 10, { x: 600, y: 350 }, { x: 660, y: 350 });
+
+    expect(Number(canvas.dataset.stackCameraYaw)).toBeCloseTo(visibleYaw + 10.8, 2);
+    handle.dispose();
+  });
+
   test('does not rotate while dragging a card or when a touch gesture starts on the background', () => {
     setMotionPreference(true);
     const canvas = makeCanvas();
@@ -773,6 +800,70 @@ describe('mountStackScene', () => {
     handle.dispose();
   });
 
+  test('smooths zoom and rotation updates from controls and resumes from the visible pose', () => {
+    setMotionPreference(false);
+    const canvas = makeCanvas();
+    canvas.style.setProperty('--duration-state', '400ms');
+    const initial = {
+      technologies,
+      mode: '3d' as const,
+      filter: 'all' as const,
+      selectedId: null,
+      onSelect: vi.fn(),
+      onReceive: vi.fn(),
+      ...zoomInput,
+    };
+    const handle = mountScene(canvas, initial);
+    const readPose = () => ({
+      zoom: Number(canvas.dataset.stackCameraZoom),
+      yaw: Number(canvas.dataset.stackCameraYaw),
+      pitch: Number(canvas.dataset.stackCameraPitch),
+    });
+
+    handle.update({ ...initial, zoom: 110, yaw: 10, pitch: 10 });
+    expect(readPose()).toEqual({ zoom: 100, yaw: 0, pitch: 0 });
+    three.state.observer?.trigger(true);
+    const frame = (time: number) => three.state.frameCallbacks.at(-1)?.(time);
+    frame(100);
+    frame(117);
+    const inFlight = readPose();
+    expect(inFlight.zoom).toBeGreaterThan(100);
+    expect(inFlight.zoom).toBeLessThan(110);
+    expect(inFlight.yaw).toBeGreaterThan(0);
+    expect(inFlight.yaw).toBeLessThan(10);
+
+    handle.update({ ...initial, zoom: 120, yaw: 20, pitch: 15 });
+    expect(readPose()).toEqual(inFlight);
+    for (let time = 134; time <= 600; time += 17) frame(time);
+
+    expect(readPose()).toEqual({ zoom: 120, yaw: 20, pitch: 15 });
+    handle.dispose();
+  });
+
+  test('applies camera control updates immediately with reduced motion', () => {
+    setMotionPreference(true);
+    const canvas = makeCanvas();
+    canvas.style.setProperty('--duration-state', '400ms');
+    const initial = {
+      technologies,
+      mode: '3d' as const,
+      filter: 'all' as const,
+      selectedId: null,
+      onSelect: vi.fn(),
+      onReceive: vi.fn(),
+      ...zoomInput,
+    };
+    const handle = mountScene(canvas, initial);
+
+    handle.update({ ...initial, zoom: 105, yaw: 5, pitch: 5 });
+
+    expect(canvas.dataset.stackCameraZoom).toBe('105');
+    expect(canvas.dataset.stackCameraYaw).toBe('5');
+    expect(canvas.dataset.stackCameraPitch).toBe('5');
+    expect(three.state.frameCallbacks).toHaveLength(0);
+    handle.dispose();
+  });
+
   test('updates visible ambient movement at a 60 fps cadence', () => {
     setMotionPreference(false);
     const handle = mountScene(makeCanvas());
@@ -789,6 +880,15 @@ describe('mountStackScene', () => {
     three.state.frameCallbacks.at(-1)?.(117);
 
     expect(cards.map(({ position }) => ({ x: position.x, y: position.y }))).not.toEqual(rest);
+    handle.dispose();
+  });
+
+  test('starts the ambient loop when a visible entry follows an offscreen entry', () => {
+    setMotionPreference(false);
+    const handle = mountScene(makeCanvas());
+    three.state.observer?.trigger(false, true);
+
+    expect(three.state.frameCallbacks).toHaveLength(1);
     handle.dispose();
   });
 

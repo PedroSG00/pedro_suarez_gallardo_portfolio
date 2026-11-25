@@ -228,6 +228,17 @@ describe('stack descriptions', () => {
     }
   });
 
+  test('gives every technology two concise description sentences in both locales', () => {
+    for (const technology of STACK_TECHNOLOGIES) {
+      for (const locale of ['en', 'es'] as const) {
+        const { description } = TECHNOLOGIES_BY_LOCALE[locale][technology.id];
+        const sentenceEndings = description.match(/[.!?](?=\s|$)/g) ?? [];
+
+        expect(sentenceEndings, `${technology.id} (${locale})`).toHaveLength(2);
+      }
+    }
+  });
+
   test('keeps the same technology keys in both message catalogs', () => {
     const expectedKeys = STACK_TECHNOLOGIES.map(
       (technology) => technology.id
@@ -235,6 +246,16 @@ describe('stack descriptions', () => {
 
     expect(Object.keys(TECHNOLOGIES_BY_LOCALE.en).sort()).toEqual(expectedKeys);
     expect(Object.keys(TECHNOLOGIES_BY_LOCALE.es).sort()).toEqual(expectedKeys);
+  });
+
+  test('uses a compact, static Recharts mark suitable for the card face', () => {
+    const svg = readFileSync(
+      resolve(process.cwd(), 'public/stack/recharts.svg'),
+      'utf8',
+    );
+
+    expect(svg).toContain('viewBox="0 0 64 64"');
+    expect(svg).not.toMatch(/\b(class|role|tabindex)=|:r\d+/i);
   });
 
   test.each(['en', 'es'] as const)(

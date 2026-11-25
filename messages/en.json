@@ -133,103 +133,103 @@
     "technologies": {
       "javascript": {
         "name": "JavaScript",
-        "description": "The language that runs the interactive side of the web."
+        "description": "JavaScript is a programming language used across the web. It powers interactive behavior in browsers and can also run outside them through runtimes such as Node.js."
       },
       "typescript": {
         "name": "TypeScript",
-        "description": "JavaScript with static types, for code that grows without surprises."
+        "description": "TypeScript extends JavaScript with a static type system. It catches many mistakes during development and compiles to JavaScript."
       },
       "react": {
         "name": "React",
-        "description": "A component library for building interfaces from small, reusable pieces."
+        "description": "React is a JavaScript library for building user interfaces from components. It updates the rendered interface as data and user input change."
       },
       "nextJs": {
         "name": "Next.js",
-        "description": "A React framework with routing, server rendering and static generation built in."
+        "description": "Next.js is a React framework for building web applications. It includes routing and supports server rendering, static generation and other rendering strategies."
       },
       "html": {
         "name": "HTML",
-        "description": "The markup that gives structure and meaning to every page."
+        "description": "HTML is the markup language that structures web content. Its elements describe headings, links, forms, media and other parts of a page."
       },
       "css": {
         "name": "CSS",
-        "description": "The language that controls layout, typography and visual detail."
+        "description": "CSS is the style language used to present web documents. It controls layout, typography, color, responsive behavior and visual states."
       },
       "chartJs": {
         "name": "Chart.js",
-        "description": "A lightweight charting library for clear, responsive data visuals."
+        "description": "Chart.js is a JavaScript library for creating charts. It provides common chart types and options for responsive, interactive visualizations."
       },
       "recharts": {
         "name": "Recharts",
-        "description": "Chart components built on React, composed like any other component."
+        "description": "Recharts is a charting library built with React components. Its composable charts use familiar React patterns to map data into visualizations."
       },
       "nodeJs": {
         "name": "Node.js",
-        "description": "A JavaScript runtime that runs backend services outside the browser."
+        "description": "Node.js is a JavaScript runtime for applications and tools. It runs JavaScript outside the browser and provides APIs for server-side development."
       },
       "expressJs": {
         "name": "Express.js",
-        "description": "A minimal Node.js framework for building HTTP servers and APIs."
+        "description": "Express is a web framework for Node.js. Its routing and middleware APIs help structure HTTP servers and web APIs."
       },
       "restApis": {
         "name": "REST APIs",
-        "description": "An HTTP interface style for exposing data and operations between systems."
+        "description": "REST is an architectural style for networked applications that use HTTP. REST APIs expose resources through URLs and standard HTTP methods."
       },
       "webSockets": {
         "name": "WebSockets",
-        "description": "A persistent connection that lets client and server exchange data in real time."
+        "description": "WebSocket is a protocol for a persistent, bidirectional connection between a client and server. It lets both sides exchange messages over one connection without repeated HTTP requests."
       },
       "cSharp": {
         "name": "C#",
-        "description": "A typed language from the .NET ecosystem, used for backend services."
+        "description": "C# is a statically typed, general-purpose programming language. It belongs to the .NET ecosystem and supports application development across platforms."
       },
       "python": {
         "name": "Python",
-        "description": "A readable language with a broad ecosystem for scripting and automation."
+        "description": "Python is a general-purpose programming language with readable syntax. Its standard library and package ecosystem support scripting, automation, data work and web development."
       },
       "mysql": {
         "name": "MySQL",
-        "description": "A relational database that stores structured data in tables and relations."
+        "description": "MySQL is a relational database management system. It stores structured data in tables and supports queries, relationships and transactions through SQL."
       },
       "mongodb": {
         "name": "MongoDB",
-        "description": "A document database that stores records as flexible JSON-like documents."
+        "description": "MongoDB is a document-oriented database. It stores records as JSON-like documents and supports flexible schemas, indexes and aggregation."
       },
       "jest": {
         "name": "Jest",
-        "description": "A JavaScript test runner for unit tests and assertions."
+        "description": "Jest is a JavaScript testing framework. It provides a test runner, assertions, mocks and utilities for running tests."
       },
       "vitest": {
         "name": "Vitest",
-        "description": "A fast test runner built for Vite projects, with a Jest-compatible API."
+        "description": "Vitest is a testing framework designed to work with Vite. It offers a Jest-compatible API and uses Vite's transform and module-resolution pipeline."
       },
       "playwright": {
         "name": "Playwright",
-        "description": "A browser automation tool for end-to-end tests across real user flows."
+        "description": "Playwright is a browser automation framework. It drives Chromium, Firefox and WebKit to test pages and end-to-end user flows."
       },
       "githubActions": {
         "name": "GitHub Actions",
-        "description": "GitHub's automation service for running workflows on repository events."
+        "description": "GitHub Actions automates workflows for repositories. It can run jobs in response to events such as pushes, pull requests and scheduled triggers."
       },
       "githubCopilot": {
         "name": "GitHub Copilot",
-        "description": "An AI assistant inside the editor that suggests code as you write."
+        "description": "GitHub Copilot is an AI coding assistant integrated into development tools. It offers code completions and conversational help in supported editors and workflows."
       },
       "claudeCode": {
         "name": "Claude Code",
-        "description": "An AI coding agent that works from the terminal on real repositories."
+        "description": "Claude Code is an AI coding agent that works with software repositories. It can inspect files, make changes and run development commands through supported interfaces."
       },
       "opencode": {
         "name": "OpenCode",
-        "description": "An open-source AI coding agent for working in the terminal."
+        "description": "OpenCode is an open-source AI coding agent. It connects language models with tools for exploring, editing and running code in a development environment."
       },
       "git": {
         "name": "Git",
-        "description": "A distributed version control system that records the history of changes."
+        "description": "Git is a distributed version control system. It records changes as commits and supports branching and merging across local and shared repositories."
       },
       "github": {
         "name": "GitHub",
-        "description": "A platform for hosting Git repositories and collaborating on code."
+        "description": "GitHub is a platform for hosting Git repositories and collaborating on software. It adds tools for code review, issue tracking and project automation."
       }
     }
   },

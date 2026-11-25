@@ -133,103 +133,103 @@
     "technologies": {
       "javascript": {
         "name": "JavaScript",
-        "description": "El lenguaje que da vida a la parte interactiva de la web."
+        "description": "JavaScript es un lenguaje de programación usado en toda la web. Da comportamiento interactivo al navegador y también puede ejecutarse fuera de él mediante entornos como Node.js."
       },
       "typescript": {
         "name": "TypeScript",
-        "description": "JavaScript con tipos estáticos, para un código que crece sin sorpresas."
+        "description": "TypeScript amplía JavaScript con un sistema de tipos estáticos. Detecta muchos errores durante el desarrollo y se compila a JavaScript."
       },
       "react": {
         "name": "React",
-        "description": "Una biblioteca de componentes para construir interfaces con piezas pequeñas y reutilizables."
+        "description": "React es una biblioteca de JavaScript para crear interfaces a partir de componentes. Actualiza la interfaz mostrada cuando cambian los datos o la interacción."
       },
       "nextJs": {
         "name": "Next.js",
-        "description": "Un framework de React con rutas, renderizado en servidor y generación estática incluidos."
+        "description": "Next.js es un framework de React para crear aplicaciones web. Incluye enrutamiento y admite renderizado en servidor, generación estática y otras estrategias."
       },
       "html": {
         "name": "HTML",
-        "description": "El marcado que da estructura y significado a cada página."
+        "description": "HTML es el lenguaje de marcado que estructura el contenido web. Sus elementos describen encabezados, enlaces, formularios, medios y otras partes de una página."
       },
       "css": {
         "name": "CSS",
-        "description": "El lenguaje que controla maquetación, tipografía y detalle visual."
+        "description": "CSS es el lenguaje de estilos que presenta documentos web. Controla la maquetación, tipografía, color, diseño adaptable y estados visuales."
       },
       "chartJs": {
         "name": "Chart.js",
-        "description": "Una biblioteca ligera de gráficos para visualizaciones claras y adaptables."
+        "description": "Chart.js es una biblioteca de JavaScript para crear gráficos. Ofrece tipos de gráfico habituales y opciones para visualizaciones interactivas y adaptables."
       },
       "recharts": {
         "name": "Recharts",
-        "description": "Componentes de gráficos construidos sobre React, que se componen como cualquier otro componente."
+        "description": "Recharts es una biblioteca de gráficos construida con componentes de React. Sus gráficos componibles aplican patrones de React para convertir datos en visualizaciones."
       },
       "nodeJs": {
         "name": "Node.js",
-        "description": "Un entorno de ejecución de JavaScript que permite servicios de backend fuera del navegador."
+        "description": "Node.js es un entorno de ejecución de JavaScript para aplicaciones y herramientas. Ejecuta JavaScript fuera del navegador y ofrece API para el desarrollo de servidor."
       },
       "expressJs": {
         "name": "Express.js",
-        "description": "Un framework minimalista de Node.js para construir servidores HTTP y APIs."
+        "description": "Express es un framework web para Node.js. Sus API de rutas y middleware ayudan a estructurar servidores HTTP y API web."
       },
       "restApis": {
         "name": "REST APIs",
-        "description": "Un estilo de interfaz HTTP para exponer datos y operaciones entre sistemas."
+        "description": "REST es un estilo arquitectónico para aplicaciones en red que usan HTTP. Las API REST exponen recursos mediante URL y métodos HTTP estándar."
       },
       "webSockets": {
         "name": "WebSockets",
-        "description": "Una conexión persistente que permite a cliente y servidor intercambiar datos en tiempo real."
+        "description": "WebSocket es un protocolo para mantener una conexión bidireccional entre cliente y servidor. Permite intercambiar mensajes por una misma conexión sin repetir peticiones HTTP."
       },
       "cSharp": {
         "name": "C#",
-        "description": "Un lenguaje tipado del ecosistema .NET, usado para servicios de backend."
+        "description": "C# es un lenguaje de programación de propósito general y tipado estático. Forma parte del ecosistema .NET y permite desarrollar aplicaciones multiplataforma."
       },
       "python": {
         "name": "Python",
-        "description": "Un lenguaje legible con un ecosistema amplio para scripting y automatización."
+        "description": "Python es un lenguaje de programación de propósito general y sintaxis legible. Su biblioteca estándar y su ecosistema de paquetes permiten crear scripts, automatizaciones, herramientas de datos y aplicaciones web."
       },
       "mysql": {
         "name": "MySQL",
-        "description": "Una base de datos relacional que guarda datos estructurados en tablas y relaciones."
+        "description": "MySQL es un sistema gestor de bases de datos relacionales. Almacena datos estructurados en tablas y permite consultarlos, relacionarlos y gestionarlos mediante SQL."
       },
       "mongodb": {
         "name": "MongoDB",
-        "description": "Una base de datos de documentos que guarda registros como documentos flexibles tipo JSON."
+        "description": "MongoDB es una base de datos orientada a documentos. Almacena registros como documentos similares a JSON y admite esquemas flexibles, índices y agregaciones."
       },
       "jest": {
         "name": "Jest",
-        "description": "Un ejecutor de tests de JavaScript para pruebas unitarias y aserciones."
+        "description": "Jest es un framework de pruebas para JavaScript. Incluye un ejecutor, aserciones, dobles de prueba y utilidades para ejecutar tests."
       },
       "vitest": {
         "name": "Vitest",
-        "description": "Un ejecutor de tests rápido pensado para proyectos Vite, con una API compatible con Jest."
+        "description": "Vitest es un framework de pruebas diseñado para trabajar con Vite. Ofrece una API compatible con Jest y reutiliza el sistema de transformación y resolución de módulos de Vite."
       },
       "playwright": {
         "name": "Playwright",
-        "description": "Una herramienta de automatización de navegadores para tests end-to-end de flujos reales de usuario."
+        "description": "Playwright es un framework de automatización de navegadores. Controla Chromium, Firefox y WebKit para probar páginas y flujos de usuario de extremo a extremo."
       },
       "githubActions": {
         "name": "GitHub Actions",
-        "description": "El servicio de automatización de GitHub para ejecutar flujos ante eventos del repositorio."
+        "description": "GitHub Actions automatiza flujos de trabajo de los repositorios. Puede ejecutar tareas ante eventos como envíos de cambios, solicitudes de integración o ejecuciones programadas."
       },
       "githubCopilot": {
         "name": "GitHub Copilot",
-        "description": "Un asistente de IA dentro del editor que sugiere código mientras escribes."
+        "description": "GitHub Copilot es un asistente de programación con IA integrado en herramientas de desarrollo. Ofrece sugerencias de código y ayuda conversacional en editores y flujos compatibles."
       },
       "claudeCode": {
         "name": "Claude Code",
-        "description": "Un agente de IA para programar que trabaja desde la terminal sobre repositorios reales."
+        "description": "Claude Code es un agente de programación con IA que trabaja con repositorios de software. Puede inspeccionar archivos, hacer cambios y ejecutar comandos de desarrollo desde interfaces compatibles."
       },
       "opencode": {
         "name": "OpenCode",
-        "description": "Un agente de IA de código abierto para trabajar en la terminal."
+        "description": "OpenCode es un agente de programación con IA de código abierto. Conecta modelos de lenguaje con herramientas para explorar, editar y ejecutar código en el entorno de desarrollo."
       },
       "git": {
         "name": "Git",
-        "description": "Un sistema de control de versiones distribuido que registra el historial de cambios."
+        "description": "Git es un sistema de control de versiones distribuido. Registra cambios en commits y permite crear ramas y fusionarlas en repositorios locales y compartidos."
       },
       "github": {
         "name": "GitHub",
-        "description": "Una plataforma para alojar repositorios Git y colaborar en código."
+        "description": "GitHub es una plataforma para alojar repositorios Git y colaborar en software. Incluye herramientas para revisar código, gestionar incidencias y automatizar proyectos."
       }
     }
   },

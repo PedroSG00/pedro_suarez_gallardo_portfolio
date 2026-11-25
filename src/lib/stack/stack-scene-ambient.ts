@@ -72,7 +72,7 @@ export function observeStackSceneMotion(
   let intersectionObserver: IntersectionObserver | null = null;
   if (typeof IntersectionObserver !== 'undefined') {
     intersectionObserver = new IntersectionObserver((entries) => {
-      isInViewport = entries[0]?.isIntersecting ?? isInViewport;
+      if (entries.length) isInViewport = entries.some((entry) => entry.isIntersecting);
       syncAmbientLoop();
     });
     intersectionObserver.observe(host);

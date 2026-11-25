@@ -126,6 +126,24 @@ test.describe('Stack card geometry', () => {
     await expect.poll(() => geometry(canvas)).toEqual(initial);
     await page.mouse.up();
   });
+
+  test('keeps a pushed neighbor still after release with reduced motion', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 1050 });
+    const { canvas, coordinates } = await open(page, 'en');
+    const initial = await geometry(canvas);
+    const at = await coordinates();
+    const from = at(initial.react);
+    const to = at(initial.typescript);
+
+    await page.mouse.move(from.x, from.y);
+    await page.mouse.down();
+    await page.mouse.move(to.x, to.y, { steps: 8 });
+    await page.mouse.up();
+    const atRelease = await geometry(canvas);
+    await page.waitForTimeout(220);
+
+    expect(await geometry(canvas)).toEqual(atRelease);
+  });
 });
 
 test.describe('Stack ambient motion', () => {
@@ -133,6 +151,7 @@ test.describe('Stack ambient motion', () => {
 
   test('keeps unheld cards moving while a card is dragged', async ({ page }) => {
     const { canvas, coordinates } = await open(page, 'en');
+    await canvas.evaluate((element) => element.scrollIntoView({ block: 'center' }));
     const initial = await geometry(canvas);
     const at = await coordinates();
     const from = at(initial.react);
@@ -158,5 +177,29 @@ test.describe('Stack ambient motion', () => {
     expect(greatestNeighborMovement).toBeGreaterThan(0.0001);
 
     await page.mouse.up();
+  });
+
+  test('lets a pushed neighbor glide briefly after release', async ({ page }) => {
+    const { canvas, coordinates } = await open(page, 'en');
+    await canvas.evaluate((element) => element.scrollIntoView({ block: 'center' }));
+    const initial = await geometry(canvas);
+    const at = await coordinates();
+    const from = at(initial.react);
+    const to = at(initial.typescript);
+
+    await page.mouse.move(from.x, from.y);
+    await page.mouse.down();
+    await page.mouse.move(to.x, to.y, { steps: 8 });
+    await page.mouse.up();
+    const atRelease = await geometry(canvas);
+    await page.waitForTimeout(220);
+    const afterGlide = await geometry(canvas);
+    const distance = Math.hypot(
+      afterGlide.typescript.x - atRelease.typescript.x,
+      afterGlide.typescript.y - atRelease.typescript.y,
+    );
+
+    expect(distance).toBeGreaterThan(0.0005);
+    expect(distance).toBeLessThan(0.03);
   });
 });
