@@ -1,22 +1,77 @@
 import { expect, test } from 'vitest';
-import { getStackPerspectiveZoom, stepStackZoom } from '@/lib/stack/stack-camera';
+import {
+  getStackPerspectiveZoom,
+  isStackRotationAtLimit,
+  rotateStackCamera,
+  rotateStackCameraBy,
+  stepStackZoom,
+  STACK_PITCH_MAX,
+  STACK_PITCH_MIN,
+  STACK_YAW_MAX,
+  STACK_YAW_MIN,
+} from '@/lib/stack/stack-camera';
 
 test.each([
   [100, 'in', 105],
   [100, 'out', 95],
-  [108, 'in', 110],
-  [87, 'out', 85],
-  [110, 'in', 110],
-  [85, 'out', 85],
-  [110, 'out', 105],
-  [85, 'in', 90],
+  [148, 'in', 150],
+  [52, 'out', 50],
+  [150, 'in', 150],
+  [50, 'out', 50],
+  [150, 'out', 145],
+  [50, 'in', 55],
 ] as const)('moves from %s %s to %s without crossing the limits', (current, direction, expected) => {
   expect(stepStackZoom(current, direction)).toBe(expected);
 });
 
-test('maps the maximum to the camera fit and keeps all lower levels inside it', () => {
+test('maps the wider zoom range proportionally around the default level', () => {
   const fitted = 0.83;
-  expect(getStackPerspectiveZoom(110, fitted)).toBe(fitted);
-  expect(getStackPerspectiveZoom(100, fitted)).toBeCloseTo(fitted * 100 / 110);
-  expect(getStackPerspectiveZoom(85, fitted)).toBeLessThan(getStackPerspectiveZoom(100, fitted));
+  expect(getStackPerspectiveZoom(150, fitted)).toBeCloseTo(fitted * 1.4);
+  expect(getStackPerspectiveZoom(100, fitted)).toBeCloseTo(fitted * (100 / 150) * 1.4);
+  expect(getStackPerspectiveZoom(50, fitted)).toBeCloseTo(fitted * (50 / 150) * 1.4);
+  expect(getStackPerspectiveZoom(50, fitted)).toBeLessThan(getStackPerspectiveZoom(100, fitted));
+  expect(getStackPerspectiveZoom(150, fitted)).toBeGreaterThan(fitted);
+});
+
+test.each([
+  ['left', { yaw: -5, pitch: 0 }],
+  ['right', { yaw: 5, pitch: 0 }],
+  ['up', { yaw: 0, pitch: 5 }],
+  ['down', { yaw: 0, pitch: -5 }],
+] as const)('rotates %s without changing the other axis', (direction, expected) => {
+  expect(rotateStackCamera({ yaw: 0, pitch: 0 }, direction)).toEqual(expected);
+});
+
+test('wraps full horizontal turns and clamps vertical rotation', () => {
+  expect(rotateStackCameraBy({ yaw: 0, pitch: 0 }, 12, -8)).toEqual({
+    yaw: 12,
+    pitch: -8,
+  });
+  expect(rotateStackCameraBy({ yaw: 170, pitch: 18 }, 20, 10)).toEqual({
+    yaw: -170,
+    pitch: STACK_PITCH_MAX,
+  });
+  expect(rotateStackCameraBy({ yaw: -170, pitch: -18 }, -20, -10)).toEqual({
+    yaw: 170,
+    pitch: STACK_PITCH_MIN,
+  });
+  expect(rotateStackCameraBy({ yaw: 0, pitch: 0 }, 360, 0)).toEqual({ yaw: 0, pitch: 0 });
+  expect(rotateStackCameraBy({ yaw: 0, pitch: 0 }, -360, 0)).toEqual({ yaw: 0, pitch: 0 });
+});
+
+test.each([
+  [{ yaw: STACK_YAW_MIN, pitch: 0 }, 'left', false],
+  [{ yaw: STACK_YAW_MIN, pitch: 0 }, 'right', false],
+  [{ yaw: STACK_YAW_MAX, pitch: 0 }, 'right', false],
+  [{ yaw: 0, pitch: STACK_PITCH_MAX }, 'up', true],
+  [{ yaw: 0, pitch: STACK_PITCH_MIN }, 'down', true],
+] as const)('reports whether a rotation limit blocks %s', (orientation, direction, expected) => {
+  expect(isStackRotationAtLimit(orientation, direction)).toBe(expected);
+});
+
+test('normalizes input angles before applying the next direct adjustment', () => {
+  expect(rotateStackCameraBy({ yaw: 1000, pitch: -100 }, 0, 0)).toEqual({
+    yaw: -80,
+    pitch: STACK_PITCH_MIN,
+  });
 });

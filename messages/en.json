@@ -103,6 +103,13 @@
         "out": "Zoom out",
         "level": "{level}%"
       },
+      "rotation": {
+        "label": "3D rotation",
+        "left": "Rotate left",
+        "right": "Rotate right",
+        "up": "Tilt up",
+        "down": "Tilt down"
+      },
       "list": "Technology list",
       "plane": "2D // Orthographic",
       "space": "3D // Perspective",

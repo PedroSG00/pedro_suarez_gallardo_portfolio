@@ -68,11 +68,29 @@ describe.each(LOCALES)('StackFilters in $locale', (localeData) => {
 
     expect(radios).toHaveLength(STACK_CATEGORIES.length + 1);
     expect(within(group).getByRole('radio', { name: localeData.allLabel })).toBeChecked();
+    expect(screen.getByRole('status')).toHaveTextContent(localeData.allLabel);
+    expect(screen.getByTitle(localeData.allLabel)).toBeInTheDocument();
     for (const key of CATEGORY_LABEL_KEYS) {
       expect(
         within(group).getByRole('radio', { name: localeData.categories[key] }),
       ).toBeInTheDocument();
+      expect(screen.getByTitle(localeData.categories[key])).toBeInTheDocument();
     }
+  });
+
+  test('shows the active category beside the icon filters', () => {
+    const options = filterOptionsFor(localeData);
+    const activeLabel = options.find(({ id }) => id === 'frontend')?.label;
+    render(
+      <StackFilters
+        activeFilter="frontend"
+        groupLabel={localeData.filterLabel}
+        options={options}
+        onFilterChange={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole('status')).toHaveTextContent(activeLabel ?? '');
   });
 
   test('reports the selected category through the native radio control', () => {

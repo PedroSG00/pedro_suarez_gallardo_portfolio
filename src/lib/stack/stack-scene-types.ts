@@ -3,7 +3,10 @@ import type {
   StackTechnologyId,
 } from '@/content/stack';
 import type { StackFilter } from '@/lib/stack/stack-state';
-import type { StackZoomDirection } from '@/lib/stack/stack-camera';
+import type {
+  StackCameraOrientation,
+  StackZoomDirection,
+} from '@/lib/stack/stack-camera';
 
 export type StackSceneTechnology = {
   id: StackTechnologyId;
@@ -21,11 +24,14 @@ export type StackSceneUpdate = {
   technologies: readonly StackSceneTechnology[];
   mode: StackSceneMode;
   zoom: number;
+  yaw: number;
+  pitch: number;
   filter: StackFilter;
   selectedId: StackTechnologyId | null;
   onSelect: (id: StackTechnologyId) => void;
   onReceive: (id: StackTechnologyId) => void;
   onZoom: (direction: StackZoomDirection) => void;
+  onRotate: (orientation: StackCameraOrientation) => void;
 };
 
 export type StackSceneHandle = {

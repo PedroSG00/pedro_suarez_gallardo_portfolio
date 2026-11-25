@@ -37,6 +37,7 @@ const technologies = STACK_TECHNOLOGIES.map((technology) => ({
 const onSelect = vi.fn();
 const onReceive = vi.fn();
 const onZoom = vi.fn();
+const onRotate = vi.fn();
 const onSceneStatusChange = vi.fn();
 const sceneHandle = {
   supportsPerspective: true,
@@ -50,11 +51,14 @@ function renderCanvas(props: Partial<ComponentProps<typeof StackCanvas>> = {}) {
       technologies={technologies}
       mode="2d"
       zoom={100}
+      yaw={0}
+      pitch={0}
       filter="all"
       selectedId={null}
       onSelect={onSelect}
       onReceive={onReceive}
       onZoom={onZoom}
+      onRotate={onRotate}
       onSceneStatusChange={onSceneStatusChange}
       {...props}
     />,
@@ -69,6 +73,7 @@ describe('StackCanvas', () => {
     sceneHandle.dispose.mockReset();
     onSelect.mockReset();
     onReceive.mockReset();
+    onRotate.mockReset();
     onSceneStatusChange.mockReset();
     mocks.mountStackScene.mockReturnValue(sceneHandle);
   });
@@ -131,11 +136,14 @@ describe('StackCanvas', () => {
         technologies={technologies}
         mode="3d"
         zoom={105}
+        yaw={5}
+        pitch={-5}
         filter="frontend"
         selectedId="react"
         onSelect={onSelect}
         onReceive={onReceive}
         onZoom={onZoom}
+        onRotate={onRotate}
         onSceneStatusChange={onSceneStatusChange}
       />,
     );
@@ -149,6 +157,9 @@ describe('StackCanvas', () => {
         onSelect,
         onReceive,
         onZoom,
+        onRotate,
+        yaw: 5,
+        pitch: -5,
       }),
     );
   });

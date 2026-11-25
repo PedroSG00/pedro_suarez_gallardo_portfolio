@@ -19,11 +19,14 @@ export default function StackCanvas({
   technologies,
   mode,
   zoom,
+  yaw,
+  pitch,
   filter,
   selectedId,
   onSelect,
   onReceive,
   onZoom,
+  onRotate,
   onSceneStatusChange,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -32,11 +35,14 @@ export default function StackCanvas({
     technologies,
     mode,
     zoom,
+    yaw,
+    pitch,
     filter,
     selectedId,
     onSelect,
     onReceive,
     onZoom,
+    onRotate,
   });
   const [webglAvailable, setWebglAvailable] = useState(false);
   const [sceneReady, setSceneReady] = useState(false);
@@ -94,15 +100,31 @@ export default function StackCanvas({
       technologies,
       mode,
       zoom,
+      yaw,
+      pitch,
       filter,
       selectedId,
       onSelect,
       onReceive,
       onZoom,
+      onRotate,
     };
     latestUpdateRef.current = update;
     if (sceneReady) sceneRef.current?.update(update);
-  }, [technologies, mode, zoom, filter, selectedId, onSelect, onReceive, onZoom, sceneReady]);
+  }, [
+    technologies,
+    mode,
+    zoom,
+    yaw,
+    pitch,
+    filter,
+    selectedId,
+    onSelect,
+    onReceive,
+    onZoom,
+    onRotate,
+    sceneReady,
+  ]);
 
   if (!webglAvailable) return null;
 
@@ -120,6 +142,8 @@ export default function StackCanvas({
         data-stack-scene-mode={mode}
         data-stack-scene-ready={sceneReady}
         data-stack-scene-card-count={technologies.length}
+        data-stack-camera-yaw={yaw}
+        data-stack-camera-pitch={pitch}
       />
     </div>
   );

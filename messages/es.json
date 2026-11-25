@@ -103,6 +103,13 @@
         "out": "Alejar",
         "level": "{level} %"
       },
+      "rotation": {
+        "label": "Rotación 3D",
+        "left": "Girar a la izquierda",
+        "right": "Girar a la derecha",
+        "up": "Inclinar arriba",
+        "down": "Inclinar abajo"
+      },
       "list": "Lista de tecnologías",
       "plane": "2D // Ortográfica",
       "space": "3D // Perspectiva",

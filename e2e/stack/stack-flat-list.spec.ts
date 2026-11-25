@@ -69,7 +69,8 @@ for (const { locale, messages, nav } of LOCALES) {
         ).toBeVisible();
       }
 
-      const marks = stack.getByRole('img', { includeHidden: true });
+      const marks = stack.locator('[data-stack-accessible-list]')
+        .getByRole('img', { includeHidden: true });
       await expect(marks).toHaveCount(STACK_TECHNOLOGIES.length);
       for (const [index, technology] of STACK_TECHNOLOGIES.entries()) {
         await expect(marks.nth(index)).toHaveAttribute(

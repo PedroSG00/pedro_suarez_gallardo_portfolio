@@ -6,7 +6,7 @@ Stack presenta las 25 tecnologías que Pedro utiliza como cartas flotantes dentr
 
 El momento firma es un pequeño escenario editorial, minimalista en elementos y espectacular en ejecución: cada tecnología aparece como una carta tridimensional con su marca reconocible, volumen, material, luz y sombra coherentes con el mismo lenguaje visual. Las cartas se desplazan suavemente por el escenario y colisionan entre ellas con una respuesta legible, sin física realista ni movimiento frenético. Se pueden agarrar, mover y soltar; al recibir una carta, el casillero responde con hover y feedback visible, muestra su descripción y ofrece expulsarla de vuelta al escenario. La expulsión es explícita y nunca deja cartas ocultas bajo el casillero. El modo 2D conserva la identidad de las cartas en una composición plana.
 
-**Dirección de arte — mesa CAD.** La referencia visual se traduce en una consola monocroma: barra compacta de filtros y vistas, cartas extruidas con ficha numerada y marca propia, conexiones finas entre cartas de una misma categoría y ranura en el centro. La vista 2D usa papel cuadriculado y proyección frontal; la vista 3D muestra la misma composición sobre una cuadrícula de suelo en perspectiva. Una banda inferior informa de la vista y la ocupación. La consola mantiene las 25 tecnologías y seis categorías aprobadas (las referencias no cambian el contenido), hereda el tema del sitio y ofrece acceso visible a la lista. Se exponen solo acciones ya operativas.
+**Dirección de arte — mesa CAD.** La referencia visual se traduce en una consola monocroma: filtros y acciones mediante iconos en el marco del escenario, cartas extruidas con ficha numerada y marca propia, trazados finos conectados a los bordes de las cartas de una misma categoría y ranura central. La vista 2D usa papel cuadriculado y proyección frontal; la vista 3D muestra la misma composición sobre una cuadrícula de suelo en perspectiva. Los controles, el estado y el detalle viven dentro del marco del escenario como HTML nítido y accesible, nunca pintados en WebGL. La consola mantiene las 25 tecnologías y seis categorías aprobadas (las referencias no cambian el contenido), hereda el tema del sitio y ofrece acceso visible a la lista. Se exponen solo acciones ya operativas.
 
 La sección comunica criterio técnico. No presenta niveles, puntuaciones ni comparaciones de dominio, y no atribuye a Pedro usos, proyectos o resultados no respaldados.
 
@@ -56,6 +56,7 @@ El sistema deberá permitir filtrar las cartas mediante una sola categoría acti
 - Cuando se active una categoría, las cartas que pertenezcan a ella conservarán su prominencia y las demás quedarán visiblemente atenuadas.
 - Mientras una categoría esté activa, las cartas atenuadas no podrán seleccionarse ni moverse al casillero mediante ratón, teclado o interacción táctil.
 - Cuando se active «Todas», todas las cartas volverán a ser seleccionables.
+- Los filtros se mostrarán como botones de icono; cada uno conservará un nombre accesible localizado y el filtro activo tendrá una etiqueta visible.
 - Cuando se cambie la categoría activa, las cartas conservarán sus posiciones y la descripción seleccionada no cambiará.
 - Cuando se use teclado o tecnología de asistencia, los filtros tendrán nombres accesibles y el filtro activo se podrá identificar.
 - Las cartas atenuadas seguirán siendo legibles y distinguibles en ambos temas.
@@ -70,6 +71,7 @@ El sistema deberá permitir seleccionar una tecnología y mostrar en el casiller
 - Cuando se entre sin una selección, el casillero estará vacío de detalle y mostrará una instrucción breve para elegir una carta; no se preseleccionará ninguna tecnología. La instrucción mencionará el arrastre cuando esté disponible.
 - Cuando se seleccione una carta habilitada, el casillero mostrará la descripción de esa tecnología.
 - Cuando se seleccione otra carta habilitada, el casillero reemplazará la descripción anterior por la nueva.
+- Cuando la escena esté disponible, el detalle aparecerá dentro del marco visual de la escena; en la lista plana seguirá disponible fuera de la escena.
 - Cuando se muestre una descripción, el nombre y el texto corresponderán a la misma tecnología y al idioma activo.
 - Cuando se cambie de idioma, nombres, categorías, controles y descripciones estarán disponibles en el idioma seleccionado.
 - Cuando se active un filtro que atenúe la carta seleccionada, la descripción y el estado de selección se conservarán; la carta no se podrá volver a seleccionar mientras permanezca atenuada.
@@ -91,6 +93,10 @@ El sistema deberá permitir arrastrar una carta habilitada al casillero para sel
 - Mientras una carta esté atenuada por el filtro, no se podrá arrastrar ni seleccionar.
 - Cuando se use teclado o pantalla táctil, se podrá seleccionar una carta sin arrastrarla.
 - Cuando se arrastre una carta, no se rotará la escena.
+- Los trazados de categoría conectarán los bordes de las cartas, respetarán su profundidad y seguirán el movimiento de las cartas sin quedar flotando por detrás.
+- Al pasar un puntero compatible sobre una carta habilitada, su superficie se invertirá y el cursor indicará que puede agarrarse; las cartas inactivas no darán una señal de acción. El foco de los controles HTML tendrá una respuesta equivalente.
+- Durante un arrastre, las cartas vecinas conservarán el desplazamiento recibido, sin volver a su posición anterior en cada evento ni saltar al soltar. Los movimientos rápidos se resolverán por pasos acotados para no atravesar cartas intermedias. La carta agarrada seguirá el puntero mientras los límites y el casillero lo permitan.
+- La consola separará filtros y acciones en grupos legibles. El detalle ocupará una franja editorial bajo el dibujo, sin una tarjeta anidada estrecha ni superposición sobre las cartas; la composición se adaptará a móvil y escritorio.
 
 ### RF-4a — Casillero: recepción, estado ocupado y expulsión
 
@@ -131,8 +137,11 @@ El sistema deberá permitir acercar y alejar la vista 3D mediante la rueda del r
 - Cuando se use la rueda del ratón sobre la escena 3D, la vista se acercará o alejará según la dirección del movimiento.
 - Cuando se use el control de acercar o alejar, el nivel de zoom cambiará en la dirección indicada.
 - Cuando se alcance cualquiera de los límites de zoom, las acciones posteriores en esa dirección no alejarán ni acercarán más la vista.
+- El zoom permitirá niveles del 50 % al 150 %, en pasos de 5 y con un inicio del 100 %; al alejarse al mínimo se podrá ver de nuevo la composición completa.
+- Al acercarse por encima del encuadre completo, se podrán recortar cartas periféricas; el zoom hacia fuera y la lista accesible seguirán permitiendo explorarlas.
 - Cuando se use movimiento reducido, el zoom explícito seguirá funcionando sin animación añadida.
 - Los controles de zoom tendrán nombres accesibles y se podrán utilizar con teclado.
+- Los controles de zoom serán botones de icono dentro del marco visual de la escena, con nombres accesibles localizados.
 
 ### RF-7 — Rotación en 3D
 
@@ -141,11 +150,14 @@ El sistema deberá permitir rotar la escena horizontal y verticalmente arrastran
 **Criterios de aceptación (EARS):**
 
 - Cuando se arrastre el fondo de la escena 3D, la escena rotará en dirección horizontal o vertical según el movimiento del puntero.
+- La rotación horizontal permitirá completar vueltas de 360° sin detenerse; al completar una vuelta, la orientación volverá al mismo ángulo.
+- La inclinación vertical permanecerá dentro de límites explorables.
 - Cuando se arrastre una carta, se moverá la carta y no se rotará la escena.
 - Cuando se use un control de rotación, la escena rotará en la dirección indicada sin requerir arrastrar.
-- Cuando se alcance un límite de orientación, las acciones posteriores que lo sobrepasen no dejarán la escena en una orientación que impida explorar las cartas.
+- Cuando se alcance un límite de inclinación vertical, las acciones posteriores no dejarán la escena en una orientación que impida explorar las cartas.
 - Cuando se solicite movimiento reducido, la rotación causada directamente por la persona seguirá disponible y no se añadirá movimiento autónomo.
 - Los controles de rotación tendrán nombres accesibles y se podrán utilizar con teclado y pantalla táctil.
+- Los controles de rotación serán botones de icono dentro del marco visual de la escena, con nombres accesibles localizados.
 
 ### RF-8 — Estado al entrar y volver a Stack
 
@@ -176,6 +188,8 @@ El sistema deberá ofrecer una presentación plana y completa cuando no haya Jav
 - La presentación conservará contraste AA en los temas claro y oscuro, incluso para las cartas atenuadas.
 - Toda la información deberá poder consultarse con teclado y tecnología de asistencia; la selección no dependerá exclusivamente del arrastre.
 - La presentación se adaptará a móvil y escritorio, sin recortar cartas, nombres, controles ni descripciones.
+- La escena y sus controles se refluye sin desbordamiento horizontal entre 320 px y 3840 px; los objetivos táctiles tendrán al menos 44 px.
+- El canvas seguirá el tamaño CSS y la densidad de píxel del dispositivo, con un límite de memoria del búfer; el texto de los controles y el detalle no se rasterizará. Las texturas de las cartas mantendrán definición al acercar.
 - La escena 3D tendrá profundidad legible en todas sus piezas: cartas extruidas con cantos, marcas legibles, casillero, y un escenario con planos/materiales, iluminación y sombras consistentes. No se mezclarán objetos planos flotando sobre elementos volumétricos como si fueran escenas distintas.
 - La dirección 3D será una feature única y coherente: paleta editorial, escala, perspectiva, iluminación, materiales, profundidad y respuesta física compartirán reglas visuales. El impacto vendrá del volumen, la composición y el movimiento, no de adornos, colores aleatorios, partículas o efectos ajenos al sistema.
 - El movimiento ambiental será pausado y de baja amplitud, se detendrá cuando la escena no esté visible o la pestaña no esté activa y no consumirá un bucle continuo si no es necesario; `prefers-reduced-motion` desactivará el movimiento ambiental.
@@ -183,6 +197,7 @@ El sistema deberá ofrecer una presentación plana y completa cuando no haya Jav
 - La interacción no impedirá el desplazamiento de la página ni bloqueará la lectura.
 - La voz será breve, afirmativa y centrada en qué es cada tecnología. No se inventarán cifras, usos ni afirmaciones profesionales.
 - La escena no consumirá recursos de forma continua cuando no haya cambios visuales; el movimiento ambiental, si está activo, usará un ciclo acotado y se pausará fuera de vista o con la pestaña inactiva.
+- El movimiento ambiental visible apuntará a 60 fps cuando la pestaña y la escena estén activas; los arrastres responderán directamente y actualizarán los trazados en el mismo movimiento.
 - Los bloques de Stack respetarán el comportamiento general de entrada y salida con el scroll. Con movimiento reducido o sin soporte de la animación por scroll, todos permanecerán visibles.
 
 ## Casos límite
@@ -193,7 +208,8 @@ El sistema deberá ofrecer una presentación plana y completa cuando no haya Jav
 - Si una carta se suelta más allá de los límites del canvas, no podrá quedar fuera del área visible.
 - Si varias cartas se acercan o solapan, podrán tocarse parcialmente, pero se repelerán y ninguna ocultará totalmente a otra.
 - Si se usa arrastre sobre una carta en modo 3D, se moverá la carta; si se arrastra el fondo, rotará la escena.
-- Si se intenta superar los límites del zoom o la orientación, la escena permanecerá dentro de límites explorables.
+- Si se mueve una carta conectada, su trazado se actualizará con ella y terminará en el borde de la carta; ninguna línea de categoría se dibujará como una capa de fondo detrás de la escena.
+- Si se intenta superar los límites de zoom o de inclinación vertical, la escena permanecerá dentro de límites explorables; la rotación horizontal continuará y envolverá cada 360°.
 - Si el navegador no admite 3D, no se mostrará el switch; el modo 2D seguirá disponible.
 - Si el navegador no admite WebGL, se mostrará la lista plana.
 - Si se solicita movimiento reducido, el cambio de modo será instantáneo y no habrá movimiento autónomo; los controles directos de zoom y rotación seguirán funcionando.
@@ -231,7 +247,10 @@ El sistema deberá ofrecer una presentación plana y completa cuando no haya Jav
 - Las cartas se desplazan de forma pausada, colisionan con separación visible y paran con movimiento reducido; la escena se pausa fuera de vista.
 - El casillero da hover al recibir una carta, confirma la recepción, presenta el botón «Expulsar» y devuelve la carta a una posición libre visible; no hay cartas apiladas u ocultas debajo.
 - El switch ofrece transición con continuidad espacial, conserva posiciones, filtro, selección y descripción, y no se muestra si falta soporte 3D.
-- En 3D funcionan el zoom acotado y la rotación horizontal/vertical mediante ratón y controles accesibles.
+- En la escena activa, todos los controles —filtro, vista, lista, zoom y rotación— aparecen dentro de su marco como iconos con nombres accesibles; el detalle de la tecnología también queda dentro del marco.
+- En viewports de 320 px, 390 px, 768 px, 1920 px y 3840 px no hay desbordamiento horizontal ni se pierden controles, detalle o cartas; la resolución del canvas se adapta a CSS size y device pixel ratio.
+- Los trazados se adhieren a los bordes de las cartas, respetan profundidad y siguen las cartas durante el arrastre y el movimiento ambiental.
+- En 3D funcionan el zoom de 50–150 % y la rotación horizontal completa de 360° más la inclinación vertical acotada, mediante ratón y controles accesibles.
 - Movimiento reducido, ausencia de JavaScript y ausencia de WebGL dejan el contenido completo visible como lista plana o modo 2D.
 - Se verifican ambos idiomas, ambos temas, teclado, tecnología de asistencia, pantallas táctiles y adaptación a viewport antes del cierre.
 - Las descripciones por tecnología están revisadas y aprobadas; no hay campos ni traducciones pendientes.

@@ -23,13 +23,14 @@ Tres capas, en orden de degradación:
 
 1. **Lista plana (HTML del servidor).** Categorías, tecnologías y descripciones completas. Es el contenido real y funciona sin JavaScript. Base de RF-9 y de la semántica accesible.
 2. **Escena Three.js (mejora progresiva).** Se monta solo si hay JavaScript y WebGL. Sustituye visualmente a la lista, que permanece en el árbol de accesibilidad para lectores de pantalla.
-3. **Controles DOM.** Filtro, switch 2D/3D, zoom, rotación y selección por lista son botones reales fuera del canvas. El canvas nunca es la única vía de interacción.
+3. **Controles DOM.** Filtro, switch 2D/3D, zoom, rotación, acceso a la lista y detalle se componen como HTML nítido dentro del marco visual de la escena. El elemento WebGL es decorativo para tecnología de asistencia; los controles conservan nombres localizados, teclado y objetivos táctiles.
 
 Consecuencias de diseño:
 
 - El canvas es decorativo desde el punto de vista semántico (`aria-hidden` en el nodo WebGL); la información vive en la capa 1.
 - Las cartas del canvas se seleccionan por *raycasting*, pero la misma selección se puede hacer desde la lista accesible.
 - El estado (filtro, selección, modo, cámara, posiciones) vive en React y se refleja en atributos `data-*` del contenedor para poder verificarlo sin leer píxeles.
+- El marco visual ordena consola, canvas, lectura y dock de detalle en filas adaptables; el dock mantiene una anchura legible y no tapa las cartas en ningún viewport.
 - Sin WebGL o sin JavaScript no se muestran controles inoperantes: solo la lista plana.
 
 ## Estructura de módulos
@@ -49,7 +50,7 @@ Consecuencias de diseño:
 | `src/components/sections/Stack/StackDetail.tsx` | Casillero: estados vacío/hover/ocupado, descripción y botón de expulsión. | RF-3, RF-4a |
 | `src/components/sections/Stack/StackCanvas.tsx` | Monta y destruye la escena; traduce puntero a acciones. | RF-4–RF-7 |
 | `src/components/sections/Stack/StackControls.tsx` | Switch 2D/3D, zoom y rotación accesibles. | RF-5–RF-7 |
-| `src/components/sections/Stack/stack-scene.ts` | Adaptador Three.js: escena volumétrica, cartas/marcas, slot, materiales, luces, raycasting, colisiones y movimiento acotado. | RF-1, RF-4–RF-7 |
+| `src/components/sections/Stack/stack-scene.ts` | Adaptador Three.js: escena volumétrica, cartas/marcas, slot, materiales, luces, raycasting, colisiones, trazados integrados y movimiento acotado. | RF-1, RF-4–RF-7 |
 | `src/components/sections/Stack/Stack.module.css` | Presentación local; consume tokens existentes. | RF-1–RF-9 |
 | `src/components/sections/Stack/*.test.tsx` | Comportamiento observable de cada pieza. | RF-1–RF-3, RF-5, RF-8, RF-9 |
 | `messages/en.json`, `messages/es.json` | Titular, filtros, controles, instrucción y descripciones. | RF-1–RF-3, RF-5–RF-7, RF-9 |
@@ -134,6 +135,8 @@ resolverColisiones(cartas, limites, iteraciones = N):
 - El slot es una zona reservada: las cartas libres no pueden invadirla. La carta alojada sale del conjunto de colisiones.
 - `limitar` recorta al rectángulo interior descontando el radio; una carta nunca sale del área.
 - El movimiento tiene velocidad/amplitud limitadas, se pausa con reduced-motion, canvas fuera de vista o pestaña inactiva.
+- El arrastre usa pasos espaciales acotados y conserva las posiciones resueltas de las vecinas en cada paso. Cancelar restaura la composición anterior al gesto; soltar fija la nueva composición sin rebote a posiciones antiguas.
+- El hover por raycasting invierte solo la carta habilitada bajo el puntero, sin ampliar su geometría ni mover su objetivo. Se limpia al salir, filtrar, seleccionar o comenzar una rotación; no necesita un bucle autónomo.
 
 ### Selección — RF-3, RF-4
 
@@ -163,18 +166,20 @@ Seleccionar por control accesible ejecuta la misma función de estado, sin geome
 
 ```text
 zoom(delta): camera.zoom = limitar(camera.zoom + delta, MIN, MAX)
-girar(dx, dy): yaw = limitar(yaw + dx, -MAX_YAW, MAX_YAW)
+girar(dx, dy): yaw = envolver(yaw + dx, -180°, 180°)
                pitch = limitar(pitch + dy, MIN_PITCH, MAX_PITCH)
 ```
 
 - Arrastrar el fondo rota; arrastrar una carta mueve la carta.
-- Los límites garantizan que todas las cartas sigan dentro del frustum explorable.
-- El zoom de la vista 3D va del 85 % al 110 %, parte del 100 % y cambia en pasos de 5 puntos. El máximo se ajusta al área útil para mantener visibles las cartas de los bordes; solo la rueda vertical sobre el canvas 3D controla el zoom.
+- El zoom mínimo encuadra la composición completa; al acercarse, las cartas periféricas pueden salir del encuadre y vuelven a ser visibles al alejarse.
+- El zoom de la vista 3D va del 50 % al 150 %, parte del 100 % y cambia en pasos de 5 puntos. El 150 % permite acercarse más allá del encuadre completo y puede recortar cartas periféricas; al alejarse al 50 % se recupera la composición completa. Solo la rueda vertical sobre el canvas 3D controla el zoom.
+- La orientación horizontal envuelve cada 360° y permite vueltas completas; la inclinación vertical permanece entre −20° y 20° para mantener la escena explorable.
 - Sin animación autónoma: la cámara solo se mueve por entrada de la persona.
 
 ### Render bajo demanda — rendimiento
 
-- Render bajo demanda con reduced-motion. El movimiento ambiental usa un ciclo acotado solo mientras la escena está visible y la pestaña activa.
+- Render bajo demanda con reduced-motion. El movimiento ambiental apunta a 60 fps y solo se ejecuta mientras la escena está visible y la pestaña activa.
+- El `ResizeObserver` adapta tamaño, proyección y device pixel ratio; el búfer se limita por cantidad máxima de píxeles y las texturas de cartas usan una resolución que soporta el zoom.
 - Sin movimiento autónomo con reduced-motion; colisiones, recepción y expulsión responden a eventos directos.
 - `ResizeObserver` recalcula tamaño y proyección; `dispose()` libera geometrías, materiales, texturas y listeners al desmontar.
 
@@ -217,7 +222,7 @@ Funciones puras, sin DOM ni Three.js: reciben números y devuelven números o es
 | Colisiones propias por separación iterativa | Three.js no incluye física; un motor de física sería una dependencia nueva y desproporcionada. | `cannon-es`, `rapier` u otro motor: dependencia no aprobada y peso innecesario. |
 | Render bajo demanda | Evita consumo continuo y cumple movimiento reducido sin ramas especiales. | Bucle `requestAnimationFrame` permanente. |
 | Lista plana como contenido base | Cumple RF-9 sin JavaScript, da semántica accesible y evita duplicar textos. | Canvas con texto alternativo o una capa oculta generada por JS. |
-| Controles DOM fuera del canvas | Teclado, lectores de pantalla y táctil funcionan sin depender del canvas. | Controles dibujados en WebGL. |
+| Controles y detalle HTML dentro del marco visual | Teclado, lectores de pantalla y táctil funcionan sin depender del canvas; los controles se mantienen nítidos y la escena conserva sus texturas. | Controles dibujados en WebGL. |
 | Estado en React y atributos `data-*` para verificación | Permite e2e sin leer píxeles ni depender de la implementación gráfica. | Aserciones por captura de imagen. |
 | Marcas SVG locales en textura/material de cara | Conservan el reconocimiento de cada tecnología sin cargas externas ni dependencias nuevas. | Iconos genéricos compartidos o logos remotos, que dañan reconocimiento y fiabilidad. |
 | Descripciones neutrales de la tecnología | Evita atribuir usos no respaldados y simplifica el contenido. | Fichas de uso personal: requerían hechos del CV y aprobaciones por tecnología. |
@@ -234,7 +239,8 @@ Los tests de aceptación se escriben antes de implementar. Se comprueba comporta
 - `stack-state`: «Todas» inicial, filtro único, habilitación, selección conservada al filtrar, reinicio en entrada e idioma.
 - `stack-geometry`: límites en los cuatro bordes, solape parcial permitido, ninguna carta completamente tapada, colocación determinista.
 - Movimiento/slot: desplazamiento acotado, colisión estable, pausa con reduced-motion, exclusión de la zona del casillero, segundo drop rechazado y expulsión a posición libre visible.
-- `stack-camera`: mínimos y máximos de zoom, yaw y pitch; valores fuera de rango se recortan.
+- `stack-camera`: mínimos y máximos de zoom y pitch; el yaw completa vueltas de 360° sin límite.
+- Geometría de escena: trazados entre cartas con extremos en sus bordes y actualización durante el movimiento.
 - `stack-capabilities`: detección con contexto inyectado (soportado, no soportado, lanza al crear contexto).
 
 ### Componentes — RF-1–RF-3, RF-5, RF-8, RF-9
@@ -246,6 +252,9 @@ Con mensajes reales y ambos idiomas:
 - Casillero: instrucción inicial, descripción al seleccionar, reemplazo y conservación al filtrar.
 - Casillero: hover, confirmación de recepción, expulsión accesible, ocupación exclusiva y ausencia verificable de cartas ocultas debajo.
 - Controles: switch oculto sin 3D, zoom y rotación con nombres accesibles y límites.
+- Consola y detalle: botones de icono con nombres localizados dentro del marco visual; el detalle ocupa una zona integrada y no cubre las cartas.
+- Responsive/nitidez: controles, canvas y detalle sin desbordamiento en 320, 390, 768, 1920 y 3840 px; el dibujo respeta DPR y un presupuesto de píxeles.
+- Movimiento/trazados: respuesta directa, ciclo ambiental a 60 fps mientras visible, pausa con movimiento reducido; enlaces adheridos a los bordes y sincronizados al mover cartas.
 - Sin controles inoperantes en la lista plana.
 
 ### E2E (Chromium) — RF-1–RF-9
@@ -260,7 +269,10 @@ Con mensajes reales y ambos idiomas:
 - Casillero: hover al aproximarse, confirmación al soltar, expulsión por teclado/tacto/ratón y verificación de que no hay cartas ocultas debajo.
 - Límites: arrastrar fuera del área deja la carta dentro.
 - Modos: inicio 2D, switch conserva posiciones, filtro, selección y descripción; instantáneo con `prefers-reduced-motion`.
-- Cámara: rueda y botones cambian el zoom hasta el límite; arrastre del fondo rota; arrastre de carta no rota.
+- Cámara: rueda y botones recorren el zoom 50–150 %; al 50 % se encuadra toda la composición y al 150 % se permite acercar más. El yaw completa vueltas de 360° con teclado, tacto y ratón, el pitch queda acotado y arrastrar una carta no rota la escena.
+- Consola: filtros, vista, lista, zoom y rotación se encuentran dentro del marco visual como iconos accesibles; el detalle permanece dentro del mismo marco.
+- Responsive/render: verificación visual y de desbordamiento en móvil, tablet, escritorio y 4K; canvas alineado al DPR con presupuesto de píxeles y cartas legibles durante el zoom.
+- Trazados: enlaces de categoría unidos a los bordes de las cartas, con profundidad correcta y actualización al moverlas; no se leen como líneas de fondo.
 - Accesibilidad: selección por teclado desde la lista, foco visible, contraste AA en ambos temas, 320 px, 1920 px y texto al 200 %.
 - Entrada e idioma: modo 2D y «Todas» al volver y al cambiar de idioma.
 

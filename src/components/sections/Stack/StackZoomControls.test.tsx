@@ -5,10 +5,12 @@ import StackZoomControls from './StackZoomControls';
 
 test('announces the zoom level and ignores the unavailable direction', () => {
   const onZoom = vi.fn();
-  renderWithIntl(<StackZoomControls level={110} onZoom={onZoom} />, { locale: 'en' });
+  renderWithIntl(<StackZoomControls level={150} onZoom={onZoom} />, { locale: 'en' });
   const closer = screen.getByRole('button', { name: 'Zoom in' });
   const farther = screen.getByRole('button', { name: 'Zoom out' });
-  expect(screen.getByRole('status')).toHaveTextContent('110%');
+  expect(screen.getByRole('status')).toHaveTextContent('150%');
+  expect(closer).toHaveAttribute('title', 'Zoom in');
+  expect(farther).toHaveAttribute('title', 'Zoom out');
   expect(closer).toHaveAttribute('aria-disabled', 'true');
   fireEvent.click(closer);
   expect(onZoom).not.toHaveBeenCalled();

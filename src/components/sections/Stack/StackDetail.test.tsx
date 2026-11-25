@@ -81,6 +81,10 @@ describe.each(LOCALES)('StackDetail in $locale', (localeData) => {
       screen.getByRole('img', { hidden: true }),
     ).toHaveAttribute('src', reactCopy.brandMark);
     expect(screen.getByRole('button', { name: localeData.eject })).toBeVisible();
+    expect(screen.getByRole('button', { name: localeData.eject })).toHaveAttribute(
+      'title',
+      localeData.eject,
+    );
   });
 
   test('highlights the slot only for an enabled dragged technology and clears on leave', () => {

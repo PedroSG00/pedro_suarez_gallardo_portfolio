@@ -213,9 +213,9 @@ for (const item of LOCALES) {
         expect(Number.parseFloat(visibility.width)).toBeGreaterThan(0);
         await page.keyboard.press('Tab');
         expect(await work.evaluate((element) => element.contains(document.activeElement))).toBe(false);
-        await expect(page.getByRole('link').and(page.locator(':focus'))).toHaveCount(1);
-        // The next focus stop is a genuine page control, never a row or a tag.
-        expect(await page.evaluate(() => document.activeElement?.tagName)).toBe('A');
+        // Stack follows Work; its active category is the next genuine page control.
+        const stack = page.getByRole('region', { name: item.nav.stack, exact: true });
+        await expect(stack.getByRole('radio', { checked: true })).toBeFocused();
         await expect(page).toHaveURL(new RegExp(`/${item.locale}#work$`));
       });
     });

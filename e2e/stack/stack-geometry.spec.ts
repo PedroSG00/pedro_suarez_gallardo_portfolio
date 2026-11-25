@@ -105,4 +105,58 @@ test.describe('Stack card geometry', () => {
     await expect.poll(() => geometry(canvas)).not.toEqual(beforeResize);
     expectInCanvas(await geometry(canvas));
   });
+
+  test('keeps collision displacement continuous and rolls back a cancelled gesture', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 1050 });
+    const { canvas, coordinates } = await open(page, 'en');
+    const initial = await geometry(canvas);
+    const at = await coordinates();
+    const from = at(initial.react);
+    const to = at(initial.typescript);
+    await page.mouse.move(from.x, from.y);
+    await page.mouse.down();
+    await page.mouse.move(to.x, to.y, { steps: 8 });
+    const displaced = await geometry(canvas);
+    expect(displaced.typescript).not.toEqual(initial.typescript);
+    // Continue away: a neighbor must not rebound to its pre-drag position.
+    await page.mouse.move(to.x, to.y + 20, { steps: 3 });
+    const continuing = await geometry(canvas);
+    expect(continuing.typescript).not.toEqual(initial.typescript);
+    await canvas.dispatchEvent('pointercancel', { pointerId: 1 });
+    await expect.poll(() => geometry(canvas)).toEqual(initial);
+    await page.mouse.up();
+  });
+});
+
+test.describe('Stack ambient motion', () => {
+  test.use({ reducedMotion: 'no-preference', viewport: { width: 1280, height: 1050 } });
+
+  test('keeps unheld cards moving while a card is dragged', async ({ page }) => {
+    const { canvas, coordinates } = await open(page, 'en');
+    const initial = await geometry(canvas);
+    const at = await coordinates();
+    const from = at(initial.react);
+    const destination = at({ x: 0.42, y: 0.35 });
+
+    await page.mouse.move(from.x, from.y);
+    await page.mouse.down();
+    await page.mouse.move(destination.x, destination.y, { steps: 6 });
+    await expect(canvas).toHaveAttribute('data-stack-dragging', 'true');
+    const whileHeld = await geometry(canvas);
+    await page.waitForTimeout(250);
+    const afterAmbientFrames = await geometry(canvas);
+
+    expect(afterAmbientFrames.react.x).toBeCloseTo(whileHeld.react.x, 4);
+    expect(afterAmbientFrames.react.y).toBeCloseTo(whileHeld.react.y, 4);
+    const greatestNeighborMovement = Object.keys(afterAmbientFrames)
+      .filter((id) => id !== 'react')
+      .reduce((greatest, id) => {
+        const before = whileHeld[id];
+        const after = afterAmbientFrames[id];
+        return Math.max(greatest, Math.hypot(after.x - before.x, after.y - before.y));
+      }, 0);
+    expect(greatestNeighborMovement).toBeGreaterThan(0.0001);
+
+    await page.mouse.up();
+  });
 });

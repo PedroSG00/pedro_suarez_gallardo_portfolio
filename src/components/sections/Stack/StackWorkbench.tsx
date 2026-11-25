@@ -2,14 +2,23 @@
 
 import { useState, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
+import { Cube, List } from 'iconoir-react';
 import type { StackTechnologyId } from '@/content/stack';
 import type { StackFilter } from '@/lib/stack/stack-state';
 import type {
   StackSceneMode, StackSceneStatus, StackSceneTechnology, StackSceneUpdate,
 } from '@/lib/stack/stack-scene-types';
 import StackCanvas from '@/components/sections/Stack/StackCanvas';
+import StackRotationControls from '@/components/sections/Stack/StackRotationControls';
 import StackZoomControls from '@/components/sections/Stack/StackZoomControls';
-import { STACK_ZOOM_DEFAULT, stepStackZoom, type StackZoomDirection } from '@/lib/stack/stack-camera';
+import {
+  rotateStackCamera,
+  STACK_ZOOM_DEFAULT,
+  stepStackZoom,
+  type StackCameraOrientation,
+  type StackRotationDirection,
+  type StackZoomDirection,
+} from '@/lib/stack/stack-camera';
 
 type Props = {
   active: boolean;
@@ -35,13 +44,21 @@ export default function StackWorkbench({
   const t = useTranslations('stack.cad');
   const [requestedMode, setMode] = useState<StackSceneMode>('2d');
   const [zoom, setZoom] = useState(STACK_ZOOM_DEFAULT);
+  const [orientation, setOrientation] = useState<StackCameraOrientation>({ yaw: 0, pitch: 0 });
   const changeZoom = (direction: StackZoomDirection) => setZoom((level) => stepStackZoom(level, direction));
+  const changeRotation = (direction: StackRotationDirection) =>
+    setOrientation((current) => rotateStackCamera(current, direction));
   const mode = supportsPerspective ? requestedMode : '2d';
   const isSpatial = mode === '3d';
   const projection = t(listOpen ? 'list' : isSpatial ? 'space' : 'plane');
 
   return (
-    <div data-stack-workbench data-active={active}>
+    <div
+      data-stack-workbench
+      data-active={active}
+      role={active ? 'region' : undefined}
+      aria-label={active ? t('title') : undefined}
+    >
       <div data-stack-toolbar>
         {active && (
           <div data-stack-console-heading>
@@ -58,22 +75,30 @@ export default function StackWorkbench({
                 role="switch"
                 aria-label={t('view')}
                 aria-checked={isSpatial}
+                title={t('view')}
                 onClick={() => {
                   setMode((view) => view === '2d' ? '3d' : '2d');
                   if (listOpen) onToggleList();
                 }}
               >
-                {t('viewOptions')}
+                <Cube aria-hidden="true" focusable="false" width={20} height={20} />
               </button>}
               <button
                 type="button"
+                title={t('list')}
+                aria-label={t('list')}
                 aria-controls={listId}
                 aria-expanded={listOpen}
                 onClick={onToggleList}
               >
-                {t('list')}
+                <List aria-hidden="true" focusable="false" width={20} height={20} />
               </button>
-              {isSpatial && !listOpen && <StackZoomControls level={zoom} onZoom={changeZoom} />}
+              {isSpatial && !listOpen && (
+                <>
+                  <StackZoomControls level={zoom} onZoom={changeZoom} />
+                  <StackRotationControls orientation={orientation} onRotate={changeRotation} />
+                </>
+              )}
             </div>
           )}
         </div>
@@ -82,7 +107,10 @@ export default function StackWorkbench({
         <StackCanvas
           mode={mode}
           zoom={zoom}
+          yaw={orientation.yaw}
+          pitch={orientation.pitch}
           onZoom={changeZoom}
+          onRotate={setOrientation}
           technologies={technologies}
           filter={filter}
           selectedId={selectedId}
@@ -92,6 +120,7 @@ export default function StackWorkbench({
         />
         {active && <p data-stack-drawing-note aria-hidden="true">{t('hint')}</p>}
       </div>
+      <div data-stack-detail-dock>{detail}</div>
       {active && (
         <div data-stack-readout>
           <span>{projection}</span>
@@ -99,7 +128,6 @@ export default function StackWorkbench({
           <span>{t('slot', { name: selectedName ?? t('empty') })}</span>
         </div>
       )}
-      {detail}
     </div>
   );
 }

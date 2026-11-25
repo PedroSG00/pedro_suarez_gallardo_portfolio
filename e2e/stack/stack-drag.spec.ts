@@ -60,7 +60,7 @@ for (const { locale, copy } of [{ locale: 'en', copy: en }, { locale: 'es', copy
       await page.mouse.click(at(REACT).x, at(REACT).y);
       await expect(detail.getByRole('status')).toHaveText(text.feedback.received.replace('{name}', 'React'));
 
-      await move(TYPESCRIPT);
+      await move((await readStackCardBounds(canvas)).typescript);
       await page.mouse.down();
       await move(SLOT);
       await page.mouse.up();
@@ -73,10 +73,11 @@ for (const { locale, copy } of [{ locale: 'en', copy: en }, { locale: 'es', copy
       const restored = await coordinates();
       await page.mouse.click(restored(SLOT).x, restored(SLOT).y);
       await expect(detail.getByRole('heading')).toHaveCount(0);
-      await page.mouse.click(restored(REACT).x, restored(REACT).y);
+      const reactReturned = restored((await readStackCardBounds(canvas)).react);
+      await page.mouse.click(reactReturned.x, reactReturned.y);
       await expect(detail).toContainText(technologies.react.description);
       await detail.getByRole('button', { name: text.eject, exact: true }).click();
-      const returned = (await coordinates())(TYPESCRIPT);
+      const returned = (await coordinates())((await readStackCardBounds(canvas)).typescript);
       await page.mouse.click(returned.x, returned.y);
       await expect(detail).toContainText(technologies.typescript.description);
     });

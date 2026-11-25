@@ -1,4 +1,4 @@
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, within } from '@testing-library/react';
 import { describe, expect, test, vi } from 'vitest';
 import enMessages from '../../../../messages/en.json';
 import { STACK_TECHNOLOGIES } from '@/content/stack';
@@ -70,10 +70,29 @@ describe('StackFlatList scene integration', () => {
     expect(list).toHaveAttribute('aria-expanded', 'false');
     fireEvent.click(list);
     expect(list).toHaveAttribute('aria-expanded', 'true');
+    expect(list).toBeVisible();
     fireEvent.click(list);
     expect(list).toHaveAttribute('aria-expanded', 'false');
     fireEvent.click(view);
     expect(view).not.toBeChecked();
+  });
+
+  test('keeps the icon console and technology detail inside the active scene frame', () => {
+    const cad = enMessages.stack.cad;
+    renderWithIntl(<StackFlatList />, { locale: 'en' });
+    fireEvent.click(screen.getByRole('button', { name: 'Select React from canvas' }));
+
+    const frame = screen.getByRole('region', { name: cad.title });
+    fireEvent.click(within(frame).getByRole('switch', { name: cad.view }));
+    expect(within(frame).getByRole('group', { name: enMessages.stack.filters.label })).toBeVisible();
+    expect(within(frame).getByRole('switch', { name: cad.view })).toBeVisible();
+    expect(within(frame).getByRole('button', { name: cad.list })).toBeVisible();
+    expect(within(frame).getByRole('group', { name: cad.zoom.label })).toBeVisible();
+    expect(within(frame).getByRole('group', { name: cad.rotation.label })).toBeVisible();
+    expect(
+      within(frame).getByRole('region', { name: enMessages.stack.detail.label }),
+    ).toBeVisible();
+    expect(within(frame).getAllByRole('img', { hidden: true }).length).toBeGreaterThan(0);
   });
 
   test('keeps 2D and its list available without offering an unsupported projection', () => {

@@ -2,10 +2,11 @@ export type StackBounds = { left: number; right: number; bottom: number; top: nu
 type Point = { x: number; y: number };
 export type StackBody = Point & { halfWidth: number; halfHeight: number; anchor?: Point };
 
-const CONTACT_RATIO = 0.86;
+const CONTACT_RATIO = 0.94;
 const MAX_PASSES = 12;
 const TOLERANCE = 0.0001;
 const DEEP_OVERLAP_RATIO = 0.55;
+const DRAG_RESPONSE_RATIO = 1.5;
 
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
 
@@ -83,7 +84,10 @@ export function resolveStackCollisions<T extends StackBody>(
   bounds: StackBounds,
   slot: StackBody,
   heldIndex = -1,
+  recoverCrowded = true,
+  maxDisplacement = Infinity,
 ): T[] {
+  const origins = bodies.map(({ x, y }) => ({ x, y }));
   const constrain = (body: T) => constrainStackCard(body, bounds, slot);
   const result = bodies.map(constrain);
 
@@ -115,7 +119,9 @@ export function resolveStackCollisions<T extends StackBody>(
           let nextA = push(a, sign * distance * weight);
           const nextB = push(b, -sign * (gap - (nextA[axis] - b[axis]) * sign));
           const remainder = gap - (nextA[axis] - nextB[axis]) * sign;
-          if (remainder > TOLERANCE) nextA = push(nextA, sign * remainder);
+          if (remainder > TOLERANCE && i !== heldIndex) nextA = push(nextA, sign * remainder);
+          if ((i === heldIndex && (nextA.x !== a.x || nextA.y !== a.y)) ||
+              (j === heldIndex && (nextB.x !== b.x || nextB.y !== b.y))) continue;
           if ((nextA[axis] - nextB[axis]) * sign < gap - TOLERANCE) continue;
           const costA = Math.abs(nextA.x - a.x) + Math.abs(nextA.y - a.y);
           const costB = Math.abs(nextB.x - b.x) + Math.abs(nextB.y - b.y);
@@ -131,6 +137,56 @@ export function resolveStackCollisions<T extends StackBody>(
     }
     if (!moved) break;
   }
-  releaseCrowdedCards(result, bounds, slot, heldIndex);
+  if (recoverCrowded) releaseCrowdedCards(result, bounds, slot, heldIndex);
+  if (Number.isFinite(maxDisplacement)) {
+    for (let index = 0; index < result.length; index++) {
+      if (index === heldIndex) continue;
+      const origin = origins[index];
+      const body = result[index];
+      const dx = body.x - origin.x;
+      const dy = body.y - origin.y;
+      const distance = Math.hypot(dx, dy);
+      if (distance <= maxDisplacement || distance === 0) continue;
+      const ratio = maxDisplacement / distance;
+      const limited = constrain({
+        ...body,
+        x: origin.x + dx * ratio,
+        y: origin.y + dy * ratio,
+      });
+      result[index] = Math.hypot(limited.x - origin.x, limited.y - origin.y) <= maxDisplacement + TOLERANCE
+        ? limited
+        : { ...body, ...origin };
+    }
+  }
+  return result;
+}
+
+export function moveStackCard<T extends StackBody>(
+  bodies: readonly T[],
+  heldIndex: number,
+  target: Point,
+  bounds: StackBounds,
+  slot: StackBody,
+): T[] {
+  const held = bodies[heldIndex];
+  if (!held) return [...bodies];
+  const destination = constrainStackCard({ ...held, ...target }, bounds, slot);
+  // Sweep the path, not just its endpoint. A fast pointer must still push the
+  // cards it passes, and each substep starts from the last resolved positions.
+  const stride = Math.min(held.halfWidth, held.halfHeight) / 2;
+  const distance = Math.hypot(destination.x - held.x, destination.y - held.y);
+  const steps = Math.max(1, Math.min(128, Math.ceil(distance / Math.max(stride, TOLERANCE))));
+  const stepDistance = distance / steps;
+  let result = [...bodies];
+  for (let step = 1; step <= steps; step++) {
+    result[heldIndex] = {
+      ...held,
+      x: held.x + (destination.x - held.x) * step / steps,
+      y: held.y + (destination.y - held.y) * step / steps,
+    };
+    result = resolveStackCollisions(
+      result, bounds, slot, heldIndex, false, stepDistance * DRAG_RESPONSE_RATIO,
+    );
+  }
   return result;
 }

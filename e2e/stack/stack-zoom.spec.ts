@@ -66,7 +66,7 @@ test.describe('Stack zoom', () => {
     await expect(level).toHaveText('100%');
   });
 
-  test('keeps an edge placement reachable at both limits via mouse and keyboard', async ({ page }) => {
+  test('widens zoom in both directions and restores the full composition when zoomed out', async ({ page }) => {
     const { canvas, stack, switcher, detail, description, eject } = await openStack(page, 'en');
     const flat = await canvasRect(canvas);
     const { react } = await readStackCardBounds(canvas);
@@ -83,40 +83,42 @@ test.describe('Stack zoom', () => {
     const closer = zoom.getByRole('button', { name: 'Zoom in', exact: true });
     const farther = zoom.getByRole('button', { name: 'Zoom out', exact: true });
     const baseline = await cardWidth(canvas);
-    const inspectEdgeCard = async () => {
+    const inspectFullComposition = async () => {
       const cards = await readStackCardBounds(canvas);
       expect(Object.keys(cards)).toHaveLength(25);
       for (const [id, { left, right, top, bottom }] of Object.entries(cards)) {
         expect(Math.min(left, top), id).toBeGreaterThanOrEqual(0);
         expect(Math.max(right, bottom), id).toBeLessThanOrEqual(1);
       }
-      const { x, y } = cards.react;
-      const rect = await canvasRect(canvas);
-      await page.mouse.click(rect.x + rect.width * x, rect.y + rect.height * y);
-      await expect(detail).toContainText(description);
-      await detail.getByRole('button', { name: eject }).click();
-      await expect.poll(async () => (await readStackCardBounds(canvas)).react).toBeDefined();
     };
 
-    for (let i = 0; i < 3; i++) await farther.click();
+    for (let i = 0; i < 10; i++) await farther.click();
     await expect(farther).toHaveAttribute('aria-disabled', 'true');
     await expect(farther).toBeFocused();
     await farther.press('Enter');
-    await expect(level).toHaveText('85%');
+    await expect(level).toHaveText('50%');
     expect(await cardWidth(canvas)).toBeLessThan(baseline);
-    await inspectEdgeCard();
+    await inspectFullComposition();
     const minimumWidth = await cardWidth(canvas);
 
-    for (let i = 0; i < 5; i++) await closer.press('Space');
+    for (let i = 0; i < 20; i++) await closer.press('Space');
     await expect(closer).toHaveAttribute('aria-disabled', 'true');
     await expect(closer).toBeFocused();
     await closer.press('Space');
-    const spatial = await canvasRect(canvas);
-    await page.mouse.move(spatial.x + spatial.width / 2, spatial.y + spatial.height / 2);
-    await page.mouse.wheel(0, -120);
-    await expect(level).toHaveText('110%');
+    await expect(level).toHaveText('150%');
+    expect(await cardWidth(canvas)).toBeGreaterThan(baseline);
     expect(await cardWidth(canvas)).toBeGreaterThan(minimumWidth);
-    await inspectEdgeCard();
+    expect(Object.keys(await readStackCardBounds(canvas))).toHaveLength(25);
+
+    for (let i = 0; i < 20; i++) await farther.press('Enter');
+    await expect(level).toHaveText('50%');
+    await inspectFullComposition();
+    const rect = await canvasRect(canvas);
+    const { react: visibleReact } = await readStackCardBounds(canvas);
+    await page.mouse.click(rect.x + rect.width * visibleReact.x, rect.y + rect.height * visibleReact.y);
+    await expect(detail).toContainText(description);
+    await detail.getByRole('button', { name: eject }).click();
+    await expect.poll(async () => (await readStackCardBounds(canvas)).react).toBeDefined();
   });
 
   test.describe('touch controls', () => {

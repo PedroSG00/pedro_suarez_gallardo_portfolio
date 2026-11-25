@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useState, type DragEvent } from 'react';
 import { useTranslations } from 'next-intl';
+import { Eject } from 'iconoir-react';
 import type { StackTechnologyId } from '@/content/stack';
 
 export const STACK_DRAG_DATA_TYPE = 'application/x-stack-technology';
@@ -92,7 +93,7 @@ export default function StackDetail({
       onDrop={handleDrop}
     >
       {technology ? (
-        <div data-stack-detail-technology={technology.id}>
+        <div key={technology.id} data-stack-detail-technology={technology.id}>
           <div data-stack-detail-heading>
             <Image
               src={technology.brandMark}
@@ -106,6 +107,15 @@ export default function StackDetail({
               className="h-8 w-12 shrink-0 object-contain"
             />
             <h3>{technology.name}</h3>
+            <button
+              type="button"
+              title={t('detail.eject')}
+              data-stack-eject
+              onClick={onEject}
+            >
+              <Eject aria-hidden="true" focusable="false" width={20} height={20} />
+              <span data-stack-eject-label>{t('detail.eject')}</span>
+            </button>
           </div>
           <p
             data-stack-detail-description
@@ -113,9 +123,6 @@ export default function StackDetail({
           >
             {technology.description}
           </p>
-          <button type="button" data-stack-eject onClick={onEject}>
-            {t('detail.eject')}
-          </button>
         </div>
       ) : (
         <p data-stack-detail-empty>{t(canDragCard ? 'detail.emptyWithDrag' : 'detail.empty')}</p>

@@ -8,6 +8,10 @@ import {
 } from 'vitest';
 import { waitFor } from '@testing-library/react';
 import { STACK_TECHNOLOGIES } from '@/content/stack';
+import {
+  STACK_CARD_HEIGHT,
+  STACK_CARD_WIDTH,
+} from '@/lib/stack/stack-scene-layout';
 import { mountStackScene } from './stack-scene';
 
 const three = vi.hoisted(() => {
@@ -64,6 +68,7 @@ const three = vi.hoisted(() => {
   class FakeGeometry {
     disposed = false;
     readonly args: (number | FakeGeometry)[];
+    points: { x: number; y: number; z: number }[] = [];
 
     constructor(...args: (number | FakeGeometry)[]) {
       this.args = args;
@@ -74,7 +79,15 @@ const three = vi.hoisted(() => {
       this.disposed = true;
     }
 
-    setFromPoints() {
+    setFromPoints(points: FakeVector[]) {
+      if (this.points.length === 0) {
+        this.points = points.map(({ x, y, z }) => ({ x, y, z }));
+      } else {
+        for (const [index, { x, y, z }] of points.entries()) {
+          if (index >= this.points.length) break;
+          this.points[index] = { x, y, z };
+        }
+      }
       return this;
     }
   }
@@ -444,7 +457,13 @@ function setMotionPreference(reducedMotion: boolean) {
   };
 }
 
-const zoomInput = { zoom: 100, onZoom: vi.fn() };
+const zoomInput = {
+  zoom: 100,
+  yaw: 0,
+  pitch: 0,
+  onZoom: vi.fn(),
+  onRotate: vi.fn(),
+};
 
 function mountScene(
   canvas: HTMLCanvasElement,
@@ -653,8 +672,13 @@ describe('mountStackScene', () => {
     const canvas = makeCanvas();
     const onZoom = vi.fn();
     const options = {
-      technologies, filter: 'all', selectedId: null, zoom: 100,
-      onSelect: vi.fn(), onReceive: vi.fn(), onZoom,
+      technologies,
+      filter: 'all',
+      selectedId: null,
+      ...zoomInput,
+      onSelect: vi.fn(),
+      onReceive: vi.fn(),
+      onZoom,
     } as const;
     const handle = mountScene(canvas, options);
     const wheel = (input: WheelEventInit) =>
@@ -672,6 +696,220 @@ describe('mountStackScene', () => {
     handle.dispose();
     expect(wheel({ deltaY: 20 })).toBe(true);
     expect(onZoom.mock.calls).toEqual([['in'], ['out']]);
+  });
+
+  test('rotates the 3D camera by dragging the background in both axes', () => {
+    setMotionPreference(true);
+    const canvas = makeCanvas();
+    const onRotate = vi.fn();
+    const options = {
+      technologies,
+      filter: 'all',
+      selectedId: null,
+      ...zoomInput,
+      onSelect: vi.fn(),
+      onReceive: vi.fn(),
+      onRotate,
+    } as const;
+    const handle = mountScene(canvas, options);
+    handle.update({ ...options, mode: '3d' });
+    const camera = three.state.camera;
+    if (!camera) throw new Error('Expected a perspective camera');
+    const initialPosition = { ...camera.position };
+
+    pointerDrag(canvas, 'mouse', 7, { x: 600, y: 350 }, { x: 660, y: 290 });
+
+    expect(Number(canvas.dataset.stackCameraYaw)).toBeGreaterThan(0);
+    expect(Number(canvas.dataset.stackCameraPitch)).toBeGreaterThan(0);
+    expect(camera.position).not.toEqual(initialPosition);
+    expect(onRotate).toHaveBeenLastCalledWith({
+      yaw: Number(canvas.dataset.stackCameraYaw),
+      pitch: Number(canvas.dataset.stackCameraPitch),
+    });
+    handle.dispose();
+  });
+
+  test('does not rotate while dragging a card or when a touch gesture starts on the background', () => {
+    setMotionPreference(true);
+    const canvas = makeCanvas();
+    const onRotate = vi.fn();
+    const handle = mountScene(canvas, { ...zoomInput, mode: '3d', onRotate });
+    const card = three.state.scene?.children
+      .flatMap((child) =>
+        // eslint-disable-next-line testing-library/no-node-access -- Three.js scene graph.
+        child instanceof three.FakeGroup ? child.children : [],
+      )
+      .find((mesh) => mesh.userData.technologyId === 'react');
+    if (!card) throw new Error('Expected the React card in the scene');
+
+    three.state.intersections = [{ object: card }];
+    pointerDrag(canvas, 'mouse', 8, { x: 600, y: 350 }, { x: 660, y: 290 });
+    expect(onRotate).not.toHaveBeenCalled();
+
+    three.state.intersections = [];
+    const initialYaw = canvas.dataset.stackCameraYaw;
+    const initialPitch = canvas.dataset.stackCameraPitch;
+    pointerDrag(canvas, 'touch', 9, { x: 600, y: 350 }, { x: 660, y: 290 });
+    expect(canvas.dataset.stackCameraYaw).toBe(initialYaw);
+    expect(canvas.dataset.stackCameraPitch).toBe(initialPitch);
+    expect(onRotate).not.toHaveBeenCalled();
+    handle.dispose();
+  });
+
+  test('keeps camera orientation fixed during ambient card motion', () => {
+    setMotionPreference(false);
+    const canvas = makeCanvas();
+    const handle = mountScene(canvas, { ...zoomInput, mode: '3d' });
+    const initial = {
+      yaw: canvas.dataset.stackCameraYaw,
+      pitch: canvas.dataset.stackCameraPitch,
+    };
+    three.state.observer?.trigger(true);
+    three.state.frameCallbacks.at(-1)?.(100);
+    three.state.frameCallbacks.at(-1)?.(140);
+
+    expect(canvas.dataset.stackCameraYaw).toBe(initial.yaw);
+    expect(canvas.dataset.stackCameraPitch).toBe(initial.pitch);
+    handle.dispose();
+  });
+
+  test('updates visible ambient movement at a 60 fps cadence', () => {
+    setMotionPreference(false);
+    const handle = mountScene(makeCanvas());
+    const cards = three.state.scene?.children
+      .flatMap((child) =>
+        // eslint-disable-next-line testing-library/no-node-access -- Three.js scene graph, not DOM.
+        child instanceof three.FakeGroup ? child.children : [],
+      )
+      .filter((mesh) => typeof mesh.userData.technologyId === 'string') ?? [];
+    const rest = cards.map(({ position }) => ({ x: position.x, y: position.y }));
+    three.state.observer?.trigger(true);
+
+    three.state.frameCallbacks.at(-1)?.(100);
+    three.state.frameCallbacks.at(-1)?.(117);
+
+    expect(cards.map(({ position }) => ({ x: position.x, y: position.y }))).not.toEqual(rest);
+    handle.dispose();
+  });
+
+  test('keeps surrounding cards moving while one card is held', () => {
+    setMotionPreference(false);
+    const canvas = makeCanvas();
+    const handle = mountScene(canvas);
+    const cards = three.state.scene?.children
+      // eslint-disable-next-line testing-library/no-node-access -- Three.js scene graph.
+      .flatMap((child) => child instanceof three.FakeGroup ? child.children : [])
+      .filter((mesh) => typeof mesh.userData.technologyId === 'string') ?? [];
+    const held = cards.find((mesh) => mesh.userData.technologyId === 'react');
+    const neighbor = cards.find((mesh) => mesh.userData.technologyId === 'typescript');
+    if (!held || !neighbor) throw new Error('Expected React and TypeScript cards');
+    three.state.intersections = [{ object: held }];
+    canvas.dispatchEvent(new PointerEvent('pointerdown', {
+      button: 0, pointerId: 1, pointerType: 'mouse', isPrimary: true,
+      clientX: 600, clientY: 350,
+    }));
+    canvas.dispatchEvent(new PointerEvent('pointermove', {
+      pointerId: 1, pointerType: 'mouse', isPrimary: true,
+      clientX: 620, clientY: 350,
+    }));
+    expect(canvas.dataset.stackDragging).toBe('true');
+    const heldPosition = { x: held.position.x, y: held.position.y };
+    const neighborPosition = { x: neighbor.position.x, y: neighbor.position.y };
+    three.state.observer?.trigger(true);
+    three.state.frameCallbacks.at(-1)?.(100);
+    three.state.frameCallbacks.at(-1)?.(117);
+    expect(held.position).toMatchObject(heldPosition);
+    expect(neighbor.position).not.toEqual(neighborPosition);
+    handle.dispose();
+  });
+
+  test('keeps category traces in front of card centers and updates them with ambient movement', () => {
+    setMotionPreference(false);
+    const handle = mountScene(makeCanvas());
+    const scene = three.state.scene;
+    const connections = scene?.children.find(
+      (child) => child instanceof three.FakeMesh && child.geometry.points.length > 0,
+    );
+    if (!(connections instanceof three.FakeMesh)) {
+      throw new Error('Expected category connection geometry');
+    }
+    const cards = scene?.children
+      .flatMap((child) =>
+        // eslint-disable-next-line testing-library/no-node-access -- Three.js scene graph, not DOM.
+        child instanceof three.FakeGroup ? child.children : [],
+      )
+      .filter((mesh) => typeof mesh.userData.technologyId === 'string') ?? [];
+    const before = connections.geometry.points.map(({ x, y, z }) => ({ x, y, z }));
+    for (const point of before) {
+      const nearest = cards.reduce((closest, card) =>
+        Math.hypot(point.x - card.position.x, point.y - card.position.y)
+        < Math.hypot(point.x - closest.position.x, point.y - closest.position.y)
+          ? card
+          : closest,
+      );
+      expect(point.z).toBeGreaterThan(nearest.position.z);
+      const horizontalEdgeDistance = Math.abs(point.x - nearest.position.x) /
+        (STACK_CARD_WIDTH * nearest.scale.x / 2);
+      const verticalEdgeDistance = Math.abs(point.y - nearest.position.y) /
+        (STACK_CARD_HEIGHT * nearest.scale.y / 2);
+      expect(Math.max(horizontalEdgeDistance, verticalEdgeDistance)).toBeCloseTo(1, 1);
+    }
+    three.state.observer?.trigger(true);
+    three.state.frameCallbacks.at(-1)?.(100);
+    three.state.frameCallbacks.at(-1)?.(117);
+
+    expect(connections.geometry.points).not.toEqual(before);
+    handle.dispose();
+  });
+
+  test('rebuilds category traces when slot occupancy changes the number of segments', () => {
+    setMotionPreference(true);
+    const handle = mountScene(makeCanvas());
+    const scene = three.state.scene;
+    const connections = scene?.children.find(
+      (child) => child instanceof three.FakeMesh && child.geometry.points.length > 0,
+    );
+    if (!(connections instanceof three.FakeMesh)) {
+      throw new Error('Expected category connection geometry');
+    }
+    const previousGeometry = connections.geometry;
+    const previousPointCount = previousGeometry.points.length;
+
+    handle.update({
+      technologies,
+      mode: '2d',
+      filter: 'all',
+      selectedId: 'react',
+      onSelect: vi.fn(),
+      onReceive: vi.fn(),
+      ...zoomInput,
+    });
+
+    expect(previousGeometry.disposed).toBe(true);
+    expect(connections.geometry).not.toBe(previousGeometry);
+    expect(connections.geometry.points).toHaveLength(previousPointCount - 2);
+    handle.dispose();
+  });
+
+  test('uses device pixel ratio up to the drawing-buffer pixel budget', () => {
+    const originalPixelRatio = Object.getOwnPropertyDescriptor(window, 'devicePixelRatio');
+    Object.defineProperty(window, 'devicePixelRatio', { configurable: true, value: 3 });
+    const handle = mountScene(makeCanvas());
+    expect(three.state.renderer?.setPixelRatio).toHaveBeenLastCalledWith(2);
+    handle.dispose();
+
+    resetThree();
+    three.state.width = 3840;
+    three.state.height = 2160;
+    const highDensityCanvas = makeCanvas();
+    const highDensityHandle = mountScene(highDensityCanvas);
+    expect(three.state.renderer?.setPixelRatio).toHaveBeenLastCalledWith(1);
+    highDensityHandle.dispose();
+    if (originalPixelRatio) {
+      Object.defineProperty(window, 'devicePixelRatio', originalPixelRatio);
+    } else {
+      Reflect.deleteProperty(window, 'devicePixelRatio');
+    }
   });
 
   test('selects enabled cards by raycasting and ignores cards outside the active filter', () => {
@@ -707,6 +945,39 @@ describe('mountStackScene', () => {
     three.state.intersections = [{ object: node }];
     canvasClick();
     expect(onSelect).toHaveBeenCalledTimes(1);
+    handle.dispose();
+  });
+
+  test('highlights only actionable cards on hover and clears feedback on leave and filtering', () => {
+    setMotionPreference(true);
+    const canvas = makeCanvas();
+    const handle = mountScene(canvas);
+    const cardMeshes = three.state.scene?.children
+      // eslint-disable-next-line testing-library/no-node-access -- Three.js scene graph.
+      .flatMap((child) => child instanceof three.FakeGroup ? child.children : [])
+      .filter((mesh) => typeof mesh.userData.technologyId === 'string') ?? [];
+    const react = cardMeshes.find((mesh) => mesh.userData.technologyId === 'react');
+    if (!react) throw new Error('Expected React card');
+    const move = () => canvas.dispatchEvent(new PointerEvent('pointermove', {
+      pointerType: 'mouse', clientX: 600, clientY: 350, isPrimary: true,
+    }));
+    three.state.intersections = [{ object: react }];
+    const rest = { ...react.position };
+    const drawsBefore = drawing.fillRect.mock.calls.length;
+    move();
+    expect(canvas.dataset.stackHoveredTechnology).toBe('react');
+    expect(react.position).toMatchObject(rest);
+    expect(drawing.fillRect.mock.calls.length).toBeGreaterThan(drawsBefore);
+    canvas.dispatchEvent(new PointerEvent('pointerleave'));
+    expect(canvas.dataset.stackHoveredTechnology).toBe('');
+    move();
+    handle.update({
+      technologies, mode: '2d', filter: 'databases', selectedId: null,
+      onSelect: vi.fn(), onReceive: vi.fn(), ...zoomInput,
+    });
+    expect(canvas.dataset.stackHoveredTechnology).toBe('');
+    move();
+    expect(canvas.dataset.stackHoveredTechnology).toBe('');
     handle.dispose();
   });
 
@@ -881,5 +1152,30 @@ function canvasClick() {
       pointerId: 1,
       isPrimary: true,
     }));
+  }
+}
+
+function pointerDrag(
+  canvas: HTMLCanvasElement,
+  pointerType: string,
+  pointerId: number,
+  start: { x: number; y: number },
+  end: { x: number; y: number },
+) {
+  for (const [type, point] of [
+    ['pointerdown', start],
+    ['pointermove', end],
+    ['pointerup', end],
+  ] as const) {
+    const event = new PointerEvent(type, {
+      bubbles: true,
+      button: 0,
+      pointerId,
+      pointerType,
+      isPrimary: true,
+      clientX: point.x,
+      clientY: point.y,
+    });
+    canvas.dispatchEvent(event);
   }
 }

@@ -168,26 +168,33 @@ for (const {
           name: messages.categories.frontend,
           exact: true,
         });
-        const filterBounds = await frontend.boundingBox();
-        expect(filterBounds).not.toBeNull();
-        await page.touchscreen.tap(
-          filterBounds!.x + filterBounds!.width / 2,
-          filterBounds!.y + filterBounds!.height / 2,
+        await expect(stack.locator('[data-stack-canvas]')).toHaveAttribute(
+          'data-stack-scene-ready', 'true',
         );
+        await frontend.tap();
         await expect(frontend).toBeChecked();
 
+        await stack.getByRole('button', { name: messages.cad.list }).tap();
         const inactiveTechnology = stack.getByText(
           messages.technologies.chartJs.name,
           { exact: true },
         );
+        await inactiveTechnology.scrollIntoViewIfNeeded();
         const technologyBounds = await inactiveTechnology.boundingBox();
-        expect(technologyBounds).not.toBeNull();
+        if (!technologyBounds) throw new Error('The inactive technology must be visible');
+        // A locator tap correctly refuses disabled controls. Send a native touch
+        // at the now-stable visible target to prove the browser ignores it.
         await page.touchscreen.tap(
-          technologyBounds!.x + technologyBounds!.width / 2,
-          technologyBounds!.y + technologyBounds!.height / 2,
+          technologyBounds.x + technologyBounds.width / 2,
+          technologyBounds.y + technologyBounds.height / 2,
         );
         await expect(frontend).toBeChecked();
         await expect(inactiveTechnology).toBeVisible();
+        await expect(stack.getByRole('button', {
+          name: selectionName(messages.technologies.chartJs.name),
+        })).toBeDisabled();
+        await expect(stack.getByRole('region', { name: messages.detail.label }))
+          .toContainText(messages.detail.empty);
       } finally {
         await context.close();
       }

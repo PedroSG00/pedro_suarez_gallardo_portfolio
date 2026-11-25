@@ -1,8 +1,8 @@
-type AmbientMotionHandle = {
+export type AmbientMotionHandle = {
   dispose: () => void;
 };
 
-const AMBIENT_FRAME_INTERVAL = 1000 / 30;
+const AMBIENT_FRAME_INTERVAL = 1000 / 60;
 
 export function observeStackSceneMotion(
   host: HTMLElement,

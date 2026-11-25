@@ -1,5 +1,5 @@
-export const STACK_CARD_FACE_WIDTH = 512;
-export const STACK_CARD_FACE_HEIGHT = 256;
+export const STACK_CARD_FACE_WIDTH = 768;
+export const STACK_CARD_FACE_HEIGHT = 384;
 
 export function resolveStackTokenColor(
   container: HTMLElement,
@@ -21,13 +21,13 @@ export function resolveStackTokenColor(
 
 export function prepareStackCardMark(image: HTMLImageElement): HTMLCanvasElement {
   const stamp = document.createElement('canvas');
-  stamp.width = stamp.height = 144;
+  stamp.width = stamp.height = 216;
   const context = stamp.getContext('2d', { willReadFrequently: true });
   if (!context) return stamp;
 
   const width = image.naturalWidth || image.width;
   const height = image.naturalHeight || image.height;
-  const scale = 124 / Math.max(width, height);
+  const scale = 186 / Math.max(width, height);
   const left = (stamp.width - width * scale) / 2;
   const top = (stamp.height - height * scale) / 2;
   context.drawImage(image, left, top, width * scale, height * scale);
@@ -70,7 +70,7 @@ export function drawStackCardFace(
     STACK_CARD_FACE_HEIGHT,
   );
   if (mark) {
-    context.drawImage(mark, 25, 98, 120, 120);
+    context.drawImage(mark, 38, 147, 180, 180);
     context.globalCompositeOperation = 'source-in';
     context.fillStyle = ink;
     context.fillRect(0, 0, STACK_CARD_FACE_WIDTH, STACK_CARD_FACE_HEIGHT);
@@ -82,19 +82,19 @@ export function drawStackCardFace(
 
   context.fillStyle = ink;
   context.strokeStyle = ink;
-  context.lineWidth = 4;
-  context.strokeRect(2, 2, STACK_CARD_FACE_WIDTH - 4, STACK_CARD_FACE_HEIGHT - 4);
+  context.lineWidth = 6;
+  context.strokeRect(3, 3, STACK_CARD_FACE_WIDTH - 6, STACK_CARD_FACE_HEIGHT - 6);
   context.textBaseline = 'middle';
-  context.font = `400 32px ${font}`;
+  context.font = `400 48px ${font}`;
   context.textAlign = 'left';
-  context.fillText(`[${String(order).padStart(2, '0')}]`, 28, 40);
+  context.fillText(`[${String(order).padStart(2, '0')}]`, 42, 60);
   context.textAlign = 'right';
-  context.fillText(category.toUpperCase(), STACK_CARD_FACE_WIDTH - 28, 40, 340);
+  context.fillText(category.toUpperCase(), STACK_CARD_FACE_WIDTH - 42, 60, 510);
   context.globalAlpha = 0.34;
-  context.fillRect(0, 74, STACK_CARD_FACE_WIDTH, 2);
+  context.fillRect(0, 111, STACK_CARD_FACE_WIDTH, 3);
   context.globalAlpha = 1;
 
-  context.font = `700 56px ${font}`;
+  context.font = `700 84px ${font}`;
   context.textAlign = 'left';
-  context.fillText(name, 160, 159, 324);
+  context.fillText(name, 240, 238, 486);
 }

@@ -37,8 +37,9 @@ No se implementa una tarea mientras sus decisiones previas sigan abiertas. No se
 | T8 | Switch 2D/3D con continuidad espacial | RF-5 | T7 |
 | T9 | Zoom 3D con límites | RF-6 | T8 |
 | T10 | Rotación 3D y controles accesibles | RF-7 | T8, T9 |
-| T11 | Entrada, idioma y degradación sin WebGL | RF-8, RF-9 | T2–T10 |
-| T12 | Verificación de la matriz de aceptación | RF-1–RF-9 | T1–T11 |
+| T13 | Consola y detalle integrados, nitidez y movimiento fluido | RF-2–RF-7 | T5–T10 |
+| T11 | Entrada, idioma y degradación sin WebGL | RF-8, RF-9 | T2–T10, T13 |
+| T12 | Verificación de la matriz de aceptación | RF-1–RF-9 | T1–T11, T13 |
 
 ## T1 — Registrar tecnologías y descripciones bilingües
 
@@ -280,7 +281,8 @@ No se implementa una tarea mientras sus decisiones previas sigan abiertas. No se
 - La rueda sobre la escena acerca y aleja en la dirección esperada.
 - Los controles funcionan con ratón, teclado y tacto.
 - En los límites, más entradas en esa dirección no cambian el zoom.
-- Las cartas siguen explorables en ambos extremos.
+- El zoom-out mínimo muestra la composición completa; el zoom-in máximo amplía claramente la escena y puede recortar cartas periféricas.
+- Al volver a alejar, las cartas periféricas vuelven a quedar visibles y se pueden seleccionar.
 - La rueda fuera del canvas mantiene el desplazamiento de la página.
 
 **Qué debe quedar:**
@@ -289,9 +291,9 @@ No se implementa una tarea mientras sus decisiones previas sigan abiertas. No se
 
 **Criterio de hecho:** unitarios de límites y e2e de rueda y controles pasan; lint, typecheck y build pasan.
 
-**Estado:** completada (RF-6). El zoom 3D va del 85 % al 110 %, parte del 100 % en pasos de 5 puntos, y el máximo ajusta el área útil para que las cartas de los bordes sigan alcanzables. La rueda vertical solo controla el zoom sobre el canvas 3D; fuera de él y en 2D se conserva el desplazamiento nativo de la página, y se ignoran gestos horizontales y con Ctrl. Los controles bilingües funcionan con ratón, teclado y tacto; en un límite su dirección se desactiva sin perder el foco de teclado, y el cambio es inmediato también con movimiento reducido.
+**Estado:** completada y ampliada (RF-6). El zoom 3D va del 50 % al 150 %, parte del 100 % y cambia en pasos de 5. Al 50 % encuadra toda la composición; al 150 % acerca más allá del encuadre completo y puede recortar cartas periféricas, que reaparecen al alejarse. La rueda vertical solo controla el zoom sobre el canvas 3D; fuera de él y en 2D se conserva el desplazamiento nativo de la página, y se ignoran gestos horizontales y con Ctrl. Los controles bilingües funcionan con ratón, teclado y tacto; en los límites se desactiva la dirección correspondiente sin perder el foco, y el cambio es inmediato también con movimiento reducido.
 
-**Verificación:** 637 tests de Vitest (61 archivos) en verde; cobertura 92.20 % sentencias, 86.16 % ramas, 94.37 % funciones, 94.20 % líneas. Pasan typecheck, build y lint (excluyendo el aviso preexistente en `.tmp/R2-visual.mjs:51`). E2e de Stack: 35/35 en verde, incluidas las 3 nuevas pruebas de zoom (rueda con scroll preservado, límites y acceso a carta de borde, controles táctiles localizados) y las 6 de arrastre con coordenadas proyectadas. La suite e2e global terminó 344/348; las 4 fallas son pre-existing en `e2e/work/work.spec.ts:195` (foco por teclado en Work, ambos idiomas y temas), ajenas a T9 y observadas antes de esta tarea.
+**Verificación:** ampliación verificada en la prueba e2e de límites: zoom 50–150 %, encuadre completo al alejar, acercamiento por encima del encuadre y acceso a las cartas al recuperar la composición. E2E de Stack: 41/41 en verde; gates globales registrados en T10.
 
 ## T10 — Rotación 3D y controles accesibles
 
@@ -306,7 +308,7 @@ No se implementa una tarea mientras sus decisiones previas sigan abiertas. No se
 - Arrastrar el fondo rota en ambos ejes.
 - Arrastrar una carta mueve la carta y no rota.
 - Los controles rotan en la dirección indicada con teclado y tacto.
-- Los límites impiden orientaciones que hagan inexplorables las cartas.
+- La rotación horizontal completa 360° sin detenerse y vuelve al mismo ángulo; la inclinación vertical conserva límites explorables.
 - Sin movimiento autónomo; con movimiento reducido solo responde a la acción directa.
 
 **Qué debe quedar:**
@@ -315,13 +317,75 @@ No se implementa una tarea mientras sus decisiones previas sigan abiertas. No se
 
 **Criterio de hecho:** unitarios de ángulos y e2e de ratón, teclado, tacto y límites pasan; lint, typecheck y build pasan.
 
+**Estado:** completada y ampliada (RF-7). `stack-camera.ts` permite vueltas horizontales completas de 360° con yaw normalizado a −180°…180°; la inclinación vertical queda entre −20°…20°. Los controles accesibles rotan en pasos de 5° y no bloquean el giro horizontal. Arrastrar el fondo en 3D rota en ambos ejes; las cartas conservan su arrastre y no rotan la cámara. La orientación recalcula el encuadre. Los botones localizados funcionan por teclado y tacto, el límite vertical conserva el foco y el fondo táctil mantiene el scroll nativo. No hay rotación autónoma ni se desactivan las acciones directas con movimiento reducido.
+
+**Verificación:** `pnpm test`: 654/654 tests; cobertura 93.65 % sentencias, 87.97 % ramas, 95.53 % funciones y 95.67 % líneas. E2E de Stack: 41/41; incluyen vuelta horizontal completa por teclado, límites verticales, zoom 50–150 %, acceso a cartas tras alejarse y scroll táctil nativo. Pasan `pnpm typecheck`, `pnpm build` y ESLint sobre los archivos de T9/T10. `pnpm lint` global sigue bloqueado por el aviso preexistente `.tmp/R2-visual.mjs:51` (`before` asignado pero no usado); ese archivo no se modificó.
+
+## T13 — Consola y detalle integrados, nitidez y movimiento fluido
+
+**Objetivo:** integrar los controles y el detalle dentro del marco visual del canvas y asegurar que la escena conserve definición y respuesta en tamaños de pantalla variados.
+
+**RF:** RF-2–RF-7.
+
+**Depende de:** T5–T10.
+
+**Tests a escribir primero:**
+
+- Filtros, cambio de vista, lista, zoom y rotación aparecen como controles de icono dentro del marco de la escena; cada uno mantiene nombre accesible localizado y su acción actual.
+- El filtro activo se identifica visualmente y los radios siguen operables con teclado y tecnología de asistencia.
+- El detalle de la tecnología se muestra dentro del marco en la escena activa; mantiene selección, recepción, expulsión y contenido bilingüe. El fallback sin WebGL conserva su presentación plana.
+- En anchos 320, 390, 768, 1920 y 3840 px no hay scroll horizontal ni controles, cartas o textos recortados; en DPR alto el canvas usa resolución adecuada sin exceder el presupuesto de píxeles.
+- Los enlaces de categoría terminan en el borde de las cartas, se actualizan durante el arrastre y no aparecen detrás de las superficies.
+- El movimiento ambiental actualiza a 60 fps mientras está visible; reduced-motion lo detiene y conserva los gestos directos.
+
+**Qué debe quedar:**
+
+- Consola responsive dentro del marco visual, controles iconográficos con nombres localizados y detalle dentro de la escena.
+- Canvas adaptado al tamaño CSS y al DPR, texturas de carta de alta definición y presupuesto de búfer limitado.
+- Trazados integrados a las cartas y actualizados durante el movimiento.
+
+**Criterio de hecho:** unitarios y e2e de estructura accesible, interacción, resoluciones, nitidez y trazados pasan; lint, typecheck, test y build pasan. No iniciar T11.
+
+**Verificación:** `pnpm lint`, `pnpm typecheck`, `pnpm test` (660/660; 93,85 % sentencias, 88,30 % ramas, 95,56 % funciones y 95,86 % líneas) y `pnpm build` pasan. Una ejecución aislada de Stack pasó 43/43, incluidos los cinco anchos responsive en inglés y castellano; los resultados posteriores impiden considerarla estable. El primer intento global de `pnpm test:e2e` coincidió con otros procesos de validación: 311 pasaron y 42 fallaron por timeouts y expectativas de Stack que se corrigieron después. La repetición global sin otras validaciones, `pnpm exec playwright test --workers=4`, terminó con 342 aprobados y 11 fallidos: dos filtros táctiles de Stack (EN/ES), cuatro expectativas de navegación por teclado de Work, cuatro timeouts de inversión de filas de Work y un timeout de reflow de Work a 320 px y texto al 200 %.
+
+**Reproducción aislada previa al refinamiento:** `pnpm exec playwright test --last-failed --workers=1` terminó con 5 aprobados y 6 fallidos. Los cinco casos que antes agotaron el tiempo pasaron con un solo worker; esto no garantizaba su estabilidad en paralelo. Se reprodujeron los dos casos táctiles de Stack (el radio Frontend quedaba sin marcar tras el toque por coordenadas) y los cuatro de teclado de Work (tras Tab no había ningún enlace enfocado). El refinamiento posterior corrigió estas pruebas y verificó el resultado global completo.
+
+**Estado:** completada, incluido el refinamiento y su verificación global. T11 sigue sin iniciar.
+
+### Refinamiento solicitado — interacción y diseño
+
+- Corregir los tests táctiles con objetivos estables y la expectativa de teclado de Work para el nuevo control real que sigue en la página.
+- Escribir primero regresiones de hover, arrastre continuo, cancelación y colisiones de movimientos rápidos.
+- Invertir cartas habilitadas en hover, reforzar hover/foco/pressed de controles y separar los grupos de la consola.
+- Resolver arrastre por pasos, conservar desplazamientos de vecinas y evitar saltos al soltar.
+- Integrar el detalle como franja editorial responsive, sin tapar el dibujo ni reducir su legibilidad.
+- Verificar ambos idiomas, ambos temas, móvil/escritorio y movimiento reducido, sin tocar capas transversales ni iniciar T11.
+
+**Implementación del refinamiento:** hover por inversión sobre cartas habilitadas, cursores de agarre/rotación, controles con inversión en hover/foco y desplazamiento CSS solo sin movimiento reducido. Arrastre por pasos acotados, mayor separación de contacto, conservación de posiciones vecinas y restauración al cancelar. Detalle en franja completa, entrada CSS breve al cambiar de tecnología, cuerpo legible en móvil y filtros en retícula de cuatro columnas en pantallas estrechas. Sin nuevas dependencias ni cambios en capas transversales.
+
+**Verificación del refinamiento:** lint, typecheck, test (666/666; 93,83 % sentencias, 88,53 % ramas, 95,65 % funciones y 95,68 % líneas) y build pasan. Los cuatro casos de teclado de Work pasan; los dos táctiles de Stack pasan tras esperar la escena y tocar objetivos estables (el control deshabilitado se prueba con un toque nativo). La regresión de continuidad/cancelación y las de hover EN/ES pasan. Los tests de devolución consultan la geometría actual, no posiciones antiguas que las colisiones pueden desplazar. Revisión renderizada en 2D/3D, claro/oscuro y anchos 320, 390, 768 y 1440 px, incluidos nombres largos y detalle sin desbordamiento.
+
+**Corrección de la prueba de foco:** el primer global del refinamiento terminó con 354 aprobados y dos fallos en la nueva expectativa de foco visible EN/ES: enfocar por código tras usar el ratón no activa necesariamente `:focus-visible`. La prueba se corrigió para navegar realmente con `Shift+Tab` y comprobar el radio enfocado y su contorno. Ambos casos pasaron en la repetición aislada (2/2).
+
+**Cierre global (2026-11-25):** tras repetir lint, typecheck, test y build en orden, todos en verde, `pnpm test:e2e --workers=2` terminó con **356/356 aprobados en una sola ejecución** (14 minutos), incluidos los 46 casos de Stack y los de Work que fallaban anteriormente. No quedan fallos pendientes de este refinamiento.
+
+**Estado del refinamiento:** completado y verificado. T11 sigue sin iniciar.
+
+### Corrección posterior — movimiento y trazados durante el arrastre
+
+- El ciclo ambiental continúa mientras una carta está agarrada; la carta sujetada mantiene su posición bajo el puntero y el resto conserva el movimiento acotado. La fase se recalibra al interactuar para evitar saltos al reanudar.
+- Las conexiones actualizan sus vértices durante el movimiento. Si cambia el número de segmentos al ocupar o liberar el casillero, se reemplaza y libera la geometría anterior; `BufferGeometry.setFromPoints` no reduce el búfer existente.
+- Las regresiones verifican movimiento de vecinas durante un arrastre, continuidad de colisiones y geometría de trazados al cambiar su cantidad.
+
+**Verificación:** lint, typecheck, 669/669 tests (94,23 % sentencias, 88,77 % ramas, 95,98 % funciones y 96,06 % líneas), build y `pnpm test:e2e --workers=2` pasan. La suite global terminó con 357/357 aprobados en 13,4 minutos; los e2e focales de geometría y proyección pasaron 8/8 antes de la repetición. T11 sigue sin iniciar.
+
 ## T11 — Entrada, idioma y degradación sin WebGL
 
 **Objetivo:** fijar los estados iniciales y garantizar el contenido en todos los modos degradados.
 
 **RF:** RF-8, RF-9.
 
-**Depende de:** T2–T10.
+**Depende de:** T2–T10, T13.
 
 **Tests a escribir primero:**
 
@@ -347,7 +411,7 @@ No se implementa una tarea mientras sus decisiones previas sigan abiertas. No se
 
 **RF:** RF-1–RF-9.
 
-**Depende de:** T1–T11.
+**Depende de:** T1–T11, T13.
 
 **Tests a escribir primero:** no se añaden pruebas por cobertura; se comprueba que cada criterio EARS tiene un test observable escrito antes de su implementación.
 
