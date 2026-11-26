@@ -1,35 +1,26 @@
 import { expect, test } from '@playwright/test';
-import en from '../../messages/en.json';
-import es from '../../messages/es.json';
-import { readStackCardBounds } from './stack-geometry.helpers';
+import { canvasCoordinates, readStackCardBounds, type StackFootprint } from './stack-geometry.helpers';
+import { openStackScene } from './stack.helpers';
 
 const canvasSelector = '[data-stack-canvas]';
-const { stack: copy } = en;
 
 test('reframes the same moved cards continuously in both directions', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/en#stack');
-  const stack = page.getByRole('region', { name: 'Stack', exact: true });
-  const canvas = stack.locator(canvasSelector);
-  const view = stack.getByRole('switch', { name: copy.cad.view });
-  await expect(canvas).toHaveAttribute('data-stack-scene-ready', 'true');
+  const { canvas, view, technology, detail, filters, messages: copy } = await openStackScene(page, 'en');
   await expect(view).not.toBeChecked();
-  await canvas.scrollIntoViewIfNeeded();
-  const rect = await canvas.boundingBox();
-  if (!rect) throw new Error('Expected a displayed canvas');
+  const at = await canvasCoordinates(canvas);
   const { react } = await readStackCardBounds(canvas);
-  await page.mouse.move(rect.x + rect.width * react.x, rect.y + rect.height * react.y);
+  const start = at(react);
+  const destination = at({ x: 1.012, y: 0.24 });
+  await page.mouse.move(start.x, start.y);
   await page.mouse.down();
-  await page.mouse.move(rect.x + rect.width * 1.012, rect.y + rect.height * 0.24, { steps: 6 });
+  await page.mouse.move(destination.x, destination.y, { steps: 6 });
   await page.mouse.up();
 
-  const ts = stack.getByRole('button', {
-    name: copy.detail.select.replace('{name}', copy.technologies.typescript.name),
-  });
+  const ts = technology('typescript');
   await ts.press('Enter');
-  const filter = stack.getByRole('radio', { name: copy.categories.frontend });
+  const filter = filters.getByRole('radio', { name: copy.categories.frontend });
   await filter.check();
-  const detail = stack.getByRole('region', { name: copy.detail.label });
   await expect(detail).toContainText(copy.technologies.typescript.description);
   const initial = await readStackCardBounds(canvas);
   expect(initial.react.x).toBeGreaterThan(0.8);
@@ -50,9 +41,7 @@ test('reframes the same moved cards continuously in both directions', async ({ p
       const sample = () => {
         const { stackProjection, stackCardBounds } = element.dataset;
         values.push(Number(stackProjection));
-        const cards = JSON.parse(stackCardBounds ?? '{}') as Record<string, {
-          x: number; left: number; right: number; top: number; bottom: number;
-        }>;
+        const cards = JSON.parse(stackCardBounds ?? '{}') as Record<string, StackFootprint>;
         centers.push(cards.react?.x);
         visibleCards.push(Object.values(cards).filter(({ left, right, top, bottom }) =>
           left >= 0 && right <= 1 && top >= 0 && bottom <= 1).length);
@@ -87,10 +76,8 @@ test('reframes the same moved cards continuously in both directions', async ({ p
 
 test('changes projection in the first rendered frame with reduced motion', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/es#stack');
-  const canvas = page.locator(canvasSelector);
+  const { canvas, view } = await openStackScene(page, 'es');
   await expect(canvas).toHaveAttribute('data-stack-projection', '0');
-  const view = page.getByRole('switch', { name: es.stack.cad.view });
   for (const target of ['1', '0']) {
     const firstFrame = await view.evaluate((button, selector) => {
       (button as HTMLButtonElement).click();
@@ -109,10 +96,7 @@ test('keeps the full orthographic scene when a spatial depth buffer is unavailab
       return attributes && { ...attributes, depth: false };
     };
   });
-  await page.goto('/en#stack');
-  const stack = page.getByRole('region', { name: 'Stack', exact: true });
-  const canvas = stack.locator(canvasSelector);
-  await expect(canvas).toHaveAttribute('data-stack-scene-ready', 'true');
+  const { stack, canvas, messages: copy } = await openStackScene(page, 'en');
   await expect(stack.getByText(copy.cad.plane)).toBeVisible();
   await expect(stack.getByRole('switch')).toHaveCount(0);
   await expect(stack.getByRole('listitem')).toHaveCount(25);

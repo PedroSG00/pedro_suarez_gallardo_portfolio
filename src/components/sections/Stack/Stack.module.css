@@ -17,36 +17,20 @@
   min-width: 0;
 }
 
-[data-stack-workbench][data-active='true'] [data-stack-toolbar] {
-  grid-row: 1;
-}
-
-[data-stack-workbench][data-active='true'] [data-stack-drawing] {
-  grid-column: 1;
-}
-
 [data-stack-workbench][data-active='true'] [data-stack-readout] {
   grid-row: 3;
   grid-column: 1;
 }
 
 [data-stack-workbench][data-active='true'] [data-stack-stage] {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
   min-width: 0;
 }
 
-[data-stack-workbench][data-active='true'] [data-stack-drawing] {
-  grid-row: 2;
-}
-
 [data-stack-workbench][data-active='true'] [data-stack-detail-dock] {
-  grid-row: 1;
-  grid-column: 1;
-  grid-template-columns: minmax(0, 1fr);
   position: sticky;
   inset-block-start: 0;
   z-index: calc(var(--nav-z) - 1);
+  align-self: start;
   border-bottom: var(--line-width) solid var(--color-ink);
   padding: calc(var(--spacing) * 3) calc(var(--spacing) * 4);
   background: var(--color-surface);
@@ -60,6 +44,7 @@
 }
 
 [data-stack-workbench][data-active='true'] [data-stack-toolbar] {
+  grid-row: 1;
   padding: calc(var(--spacing) * 4);
   border-bottom: var(--line-width) solid var(--color-ink);
 }
@@ -491,9 +476,10 @@
     flex: 0 1 auto;
   }
 
-  [data-stack-workbench][data-active='true'] [data-stack-stage] {
+  [data-stack-workbench][data-active='true'] [data-stack-stage],
+  [data-stack-list-mode='true'] [data-stack-stage] {
+    display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(18rem, 0.38fr);
-    align-items: stretch;
   }
 
   [data-stack-workbench][data-active='true'] [data-stack-drawing] {
@@ -747,11 +733,6 @@
   background: var(--color-surface);
 }
 
-[data-stack-list-mode='true'] [data-stack-stage] {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-}
-
 [data-stack-list-mode='true'] [data-stack-engine] {
   display: none;
 }
@@ -767,18 +748,6 @@
   background: var(--color-surface);
 }
 
-[data-stack-workbench][data-active='true'] [data-stack-detail-dock],
-[data-stack-list-mode='true'] [data-stack-detail-dock] {
-  transition: inset-block-start var(--duration-state) ease;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  [data-stack-workbench][data-active='true'] [data-stack-detail-dock],
-  [data-stack-list-mode='true'] [data-stack-detail-dock] {
-    transition: none;
-  }
-}
-
 /* Keep the inspector at the viewport edge; make room only while the navbar is shown. */
 :root:has(header:not([data-hidden])) [data-stack-workbench][data-active='true'] [data-stack-detail-dock],
 :root:has(header:not([data-hidden])) [data-stack-list-mode='true'] [data-stack-detail-dock] {
@@ -786,10 +755,6 @@
 }
 
 [data-stack-workbench][data-active='false'] [data-stack-detail-dock]:not(:empty) {
-  padding: calc(var(--spacing) * 4);
-}
-
-[data-stack-workbench][data-active='false'] [data-stack-toolbar]:has([data-stack-filter-group]) {
   padding: calc(var(--spacing) * 4);
 }
 
@@ -884,6 +849,19 @@
 }
 
 @media (max-width: 1023px) {
+  [data-stack-workbench][data-active='true'] [data-stack-stage]::after,
+  [data-stack-list-mode='true'] [data-stack-stage]::after {
+    content: '';
+    display: block;
+    block-size: var(--nav-height);
+  }
+
+  [data-stack-workbench][data-active='true'] [data-stack-detail-dock] {
+    align-self: start;
+    max-block-size: none;
+    overflow: visible;
+  }
+
   [data-stack-detail-technology] {
     grid-template-columns: minmax(0, 1fr) auto;
     gap: calc(var(--spacing) * 2);
@@ -914,11 +892,6 @@
     font-size: var(--text-meta);
   }
 
-  [data-stack-list-mode='true'] [data-stack-filter-options] {
-    display: flex;
-  }
-
-  [data-stack-list-mode='true'] [data-stack-filter-option],
   [data-stack-list-mode='true'] [data-stack-view-controls] button {
     min-inline-size: max(44px, var(--touch-target));
     min-block-size: max(44px, var(--touch-target));
@@ -926,10 +899,6 @@
 }
 
 @media (min-width: 1024px) {
-  [data-stack-list-mode='true'] [data-stack-stage] {
-    grid-template-columns: minmax(0, 1fr) minmax(18rem, 0.38fr);
-  }
-
   [data-stack-list-mode='true'] [data-stack-stage]:has([data-stack-detail-dock]:empty) {
     grid-template-columns: minmax(0, 1fr);
   }

@@ -45,6 +45,14 @@ import type {
 } from '@/lib/stack/stack-scene-types';
 
 type Disposable = { dispose: () => void };
+type CardReturnAnimation = {
+  from: THREE.Vector3;
+  to: THREE.Vector3;
+  startedAt: number;
+  duration: number;
+  fromScale: number;
+  toScale: number;
+};
 type Card = {
   mesh: THREE.Mesh<THREE.BoxGeometry, THREE.Material[]>;
   outline: THREE.LineSegments;
@@ -61,6 +69,7 @@ type Card = {
   ambientBaselineSin: number;
   ambientBaselineCos: number;
   glide: StackGlide;
+  returnAnimation: CardReturnAnimation | null;
 };
 
 const CARD_DEPTH = 0.16;
@@ -117,6 +126,7 @@ function bridgeProjection(flat: THREE.Camera, space: THREE.Camera) {
 export function mountStackScene(
   canvas: HTMLCanvasElement,
   initial: StackSceneUpdate,
+  context: WebGL2RenderingContext,
 ): StackSceneHandle {
   const host = canvas.parentElement ?? canvas;
   const hostStyle = getComputedStyle(host);
@@ -142,10 +152,8 @@ export function mountStackScene(
   } | null = null;
   let disposed = false;
   let limits: StackBounds = { left: -1, right: 1, bottom: -1, top: 1 };
-  const renderer = new THREE.WebGLRenderer({
-    canvas, alpha: true, antialias: true, powerPreference: 'low-power',
-  });
-  const supportsPerspective = hasStackPerspectiveSupport(renderer.getContext());
+  const renderer = new THREE.WebGLRenderer({ canvas, context });
+  const supportsPerspective = hasStackPerspectiveSupport(context);
   let progress: number = supportsPerspective && initial.mode === '3d' ? 1 : 0;
   let activeCamera: THREE.Camera = progress ? space : flat;
   let blend: ReturnType<typeof bridgeProjection> | undefined;
@@ -160,7 +168,7 @@ export function mountStackScene(
   } | null = null;
   const projection = () => activeCamera;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.shadowMap.enabled = supportsPerspective;
+  renderer.shadowMap.enabled = supportsPerspective && progress > 0;
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
   const dragPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1));
@@ -296,6 +304,7 @@ export function mountStackScene(
       ambientBaselineSin: Math.sin(ambientPhase),
       ambientBaselineCos: Math.cos(ambientPhase),
       glide: createStackGlide(),
+      returnAnimation: null,
     };
     cards.set(technology.id, card);
     drawCard(card);
@@ -313,21 +322,23 @@ export function mountStackScene(
   connections.renderOrder = 1;
   connections.frustumCulled = false;
   scene.add(connections);
+  const connectionPoints: THREE.Vector3[] = [];
   let connectionPointCount = 0;
   let connectionPairs: ReturnType<typeof connectStackCards> = [];
-  const freeCards = () => [...cards.values()].filter((card) => card.technology.id !== current.selectedId);
+  const cardsOutsideSlot = () => Array.from(cards.values())
+    .filter((card) => card.technology.id !== current.selectedId);
+  let freeCards = cardsOutsideSlot();
   const refreshConnections = () => {
-    const available = freeCards();
-    const positions = new Map(available.map(({ technology, position }) => [
+    const positions = new Map(freeCards.map(({ technology, position }) => [
       technology.id, { x: position.x, y: position.y },
     ]));
     connectionPairs = connectStackCards(
-      available.map(({ technology }) => technology),
+      freeCards.map(({ technology }) => technology),
       positions,
     );
   };
   const updateConnections = () => {
-    const points: THREE.Vector3[] = [];
+    let count = 0;
     for (const [fromId, toId] of connectionPairs) {
       const fromCard = cards.get(fromId);
       const toCard = cards.get(toId);
@@ -337,29 +348,27 @@ export function mountStackScene(
       const length = Math.hypot(to.x - from.x, to.y - from.y);
       const directionX = length ? (to.x - from.x) / length : 1;
       const directionY = length ? (to.y - from.y) / length : 0;
-      const edgePoint = (item: Card, sign: number) => {
-        const halfWidth = STACK_CARD_WIDTH * item.scale / 2;
-        const halfHeight = STACK_CARD_HEIGHT * item.scale / 2;
-        const distance = Math.min(
-          directionX === 0 ? Infinity : halfWidth / Math.abs(directionX),
-          directionY === 0 ? Infinity : halfHeight / Math.abs(directionY),
-        ) + TRACE_EDGE_EXTENSION;
-        return new THREE.Vector3(
-          item.mesh.position.x + directionX * distance * sign,
-          item.mesh.position.y + directionY * distance * sign,
-          item.mesh.position.z + CARD_DEPTH / 2 + TRACE_SURFACE_OFFSET,
-        );
-      };
-      points.push(edgePoint(fromCard, 1), edgePoint(toCard, -1));
+      writeTraceEndpoint(count++, fromCard, directionX, directionY);
+      writeTraceEndpoint(count++, toCard, -directionX, -directionY);
     }
-    if (points.length !== connectionPointCount) {
+    if (count !== connectionPointCount) {
       const previousGeometry = connections.geometry;
       connections.geometry = new THREE.BufferGeometry();
       previousGeometry.dispose();
-      connectionPointCount = points.length;
+      connectionPointCount = count;
     }
-    connections.geometry.setFromPoints(points);
+    connectionPoints.length = count;
+    connections.geometry.setFromPoints(connectionPoints);
   };
+  function writeTraceEndpoint(index: number, card: Card, dx: number, dy: number) {
+    const { x, y, z } = card.mesh.position;
+    const distance = Math.min(
+      dx === 0 ? Infinity : STACK_CARD_WIDTH * card.scale / 2 / Math.abs(dx),
+      dy === 0 ? Infinity : STACK_CARD_HEIGHT * card.scale / 2 / Math.abs(dy),
+    ) + TRACE_EDGE_EXTENSION;
+    const point = (connectionPoints[index] ??= new THREE.Vector3());
+    point.set(x + dx * distance, y + dy * distance, z + CARD_DEPTH / 2 + TRACE_SURFACE_OFFSET);
+  }
 
   const updateCards = () => {
     let index = 0;
@@ -378,14 +387,25 @@ export function mountStackScene(
         card.outline.renderOrder = card.mesh.renderOrder;
       }
       if (inSlot) {
+        card.returnAnimation = null;
         card.glide = createStackGlide();
         card.mesh.position.set(0, 0, CARD_DEPTH);
       }
-      card.mesh.scale.setScalar(inSlot ? 1.22 : card.scale);
+      if (!card.returnAnimation) card.mesh.scale.setScalar(inSlot ? 1.22 : card.scale);
       if (redraw) drawCard(card);
       index++;
     }
   };
+
+  function finishCardReturns() {
+    for (const card of cards.values()) {
+      if (!card.returnAnimation) continue;
+      card.returnAnimation = null;
+      card.mesh.position.copy(card.position);
+      card.mesh.scale.setScalar(card.scale);
+      rebaseAmbient(card);
+    }
+  }
 
   let homePositions: ReturnType<typeof layoutStackCards>['positions'];
   let maximumZoomFit = 1;
@@ -474,21 +494,24 @@ export function mountStackScene(
     setCameraPose(cameraPose);
   }
 
+  let drawingSize: { width: number; height: number; ratio: number } | undefined;
   const resize = () => {
-    drag.cancel();
-    cancelBackgroundDrag();
-    const bounds = canvas.getBoundingClientRect();
-    const { width, height } = bounds;
+    const { width, height } = canvas.getBoundingClientRect();
     if (!width || !height) return;
-    const aspect = width / height;
-    const { positions, viewHeight } = layoutStackCards(initial.technologies, aspect);
-    homePositions = positions;
-    renderer.setPixelRatio(Math.min(
+    const ratio = Math.min(
       Math.max(window.devicePixelRatio || 1, MIN_DEVICE_PIXEL_RATIO),
       MAX_DEVICE_PIXEL_RATIO,
       Math.sqrt(MAX_DRAWING_BUFFER_PIXELS / (width * height)),
-    ));
-    renderer.setSize(width, height, false);
+    );
+    if (drawingSize?.width === width && drawingSize.height === height && drawingSize.ratio === ratio) return;
+    drawingSize = { width, height, ratio };
+    drag.cancel();
+    cancelBackgroundDrag();
+    finishCardReturns();
+    const aspect = width / height;
+    const { positions, viewHeight } = layoutStackCards(initial.technologies, aspect);
+    homePositions = positions;
+    renderer.setDrawingBufferSize(width, height, ratio);
     flat.left = -viewHeight * aspect / 2;
     flat.right = -flat.left;
     flat.top = viewHeight / 2;
@@ -571,6 +594,7 @@ export function mountStackScene(
 
   function projectStage(next: number) {
     progress = next;
+    renderer.shadowMap.enabled = supportsPerspective && next > 0;
     if (next === 0) activeCamera = flat;
     else if (next === 1) activeCamera = space;
     else {
@@ -645,7 +669,14 @@ export function mountStackScene(
   };
 
   function renderPositions(positions: readonly (StackBody & { card: Card })[]) {
-    for (const { card, x, y } of positions) card.mesh.position.set(x, y, card.position.z);
+    for (const { card, x, y } of positions) {
+      if (card.returnAnimation) {
+        card.position.set(x, y, card.position.z);
+        card.returnAnimation.to.set(x, y, card.position.z);
+      } else {
+        card.mesh.position.set(x, y, card.position.z);
+      }
+    }
   }
 
   function setAmbientBaseline(card: Card, time: number) {
@@ -665,7 +696,7 @@ export function mountStackScene(
       screenPoint.project(projection());
       return { x: (1 + screenPoint.x) / 2, y: (1 - screenPoint.y) / 2 };
     };
-    const geometry = freeCards().map((card) => {
+    const geometry = freeCards.map((card) => {
       const position = includeAmbientMovement ? card.mesh.position : card.position;
       const { x, y, halfWidth: w, halfHeight: h } = footprint(card, position);
       const { z } = position;
@@ -685,8 +716,12 @@ export function mountStackScene(
   }
 
   function settle(held?: Card) {
-    const bodies = freeCards().map((card) => ({
-      ...footprint(card, card === held ? card.mesh.position : card.position), card,
+    const bodies = freeCards.map((card) => ({
+      ...footprint(
+        card,
+        card === held && !card.returnAnimation ? card.mesh.position : card.position,
+      ),
+      card,
     }));
     const slot = slotFootprint();
     const resolved = resolveStackCollisions(
@@ -700,12 +735,13 @@ export function mountStackScene(
     renderPositions(resolved);
     refreshConnections();
     updateConnections();
-    settledGeometry();
+    settledGeometry(Boolean(held) || freeCards.some((card) => card.returnAnimation));
     render();
   }
 
   function returnToStack(card: Card, nextSlotId: StackTechnologyId | null) {
     card.glide = createStackGlide();
+    card.returnAnimation = null;
     const slot = slotFootprint();
     const inView = (point: StackPoint) => {
       const constrained = constrainStackCard(footprint(card, point), limits, slot);
@@ -721,7 +757,28 @@ export function mountStackScene(
       card.position.set(available.x, available.y, card.position.z);
       card.placed = true;
     }
+    const destination = new THREE.Vector3(card.position.x, card.position.y, card.position.z);
     rebaseAmbient(card);
+    const duration = stackProjectionDuration(
+      getComputedStyle(host).getPropertyValue(CAMERA_TRANSITION_DURATION_TOKEN),
+    );
+    if (duration === 0 || motionPreference?.matches) {
+      card.mesh.position.copy(destination);
+      card.mesh.scale.setScalar(card.scale);
+      return;
+    }
+    card.returnAnimation = {
+      from: new THREE.Vector3(
+        card.mesh.position.x,
+        card.mesh.position.y,
+        card.mesh.position.z,
+      ),
+      to: destination,
+      startedAt: ambientTime,
+      duration,
+      fromScale: card.mesh.scale.x,
+      toScale: card.scale,
+    };
   }
 
   const meshes = [...cards.values()].map(({ mesh }) => mesh);
@@ -746,8 +803,14 @@ export function mountStackScene(
       if (!card) return null;
       const point = pointAtDepth(card.mesh.position.z);
       if (!point) return null;
+      if (card.returnAnimation) {
+        card.position.copy(card.mesh.position);
+        card.returnAnimation = null;
+        card.mesh.scale.setScalar(card.scale);
+        rebaseAmbient(card);
+      }
       card.glide = createStackGlide();
-      const positions = freeCards().map((item) => ({
+      const positions = freeCards.map((item) => ({
         card: item, x: item.position.x, y: item.position.y, placed: item.placed,
       }));
       highlight(card);
@@ -760,8 +823,8 @@ export function mountStackScene(
       const held = new THREE.Vector3(point.x + dx, point.y + dy, card.mesh.position.z);
       const receiving = inside && isOverSlot(held);
       indicateSlot(receiving);
-      const bodies = freeCards().map((item) => ({
-        ...footprint(item, item.mesh.position), card: item,
+      const bodies = freeCards.map((item) => ({
+        ...footprint(item, item.returnAnimation ? item.position : item.mesh.position), card: item,
       }));
       const startPositions = new Map(bodies.map(({ card: item, x, y }) => [item, { x, y }]));
       const heldIndex = bodies.findIndex((item) => item.card === card);
@@ -892,9 +955,10 @@ export function mountStackScene(
       if (progress > 0) settledGeometry();
       render();
     }
-    freeCards().forEach((card) => { card.glide = createStackGlide(); });
+    finishCardReturns();
+    for (const card of freeCards) card.glide = createStackGlide();
     if (drag.target()) return;
-    freeCards().forEach((card) => {
+    freeCards.forEach((card) => {
       card.mesh.position.copy(card.position);
       rebaseAmbient(card);
     });
@@ -912,6 +976,29 @@ export function mountStackScene(
       : Math.min(Math.max((time - lastGlideTime) / 1000, 0), 1 / 30);
     lastGlideTime = time;
     ambientTime = time;
+    let returningCardMoved = false;
+    for (const card of freeCards) {
+      const animation = card.returnAnimation;
+      if (!animation) continue;
+      returningCardMoved = true;
+      const elapsed = Math.min(1, Math.max(0, (time - animation.startedAt) / animation.duration));
+      const eased = (1 - Math.cos(Math.PI * elapsed)) / 2;
+      card.mesh.position.set(
+        animation.from.x + (animation.to.x - animation.from.x) * eased,
+        animation.from.y + (animation.to.y - animation.from.y) * eased,
+        animation.from.z + (animation.to.z - animation.from.z) * eased,
+      );
+      card.mesh.scale.setScalar(
+        animation.fromScale + (animation.toScale - animation.fromScale) * eased,
+      );
+      if (elapsed === 1) {
+        card.position.copy(animation.to);
+        card.returnAnimation = null;
+        card.mesh.position.copy(animation.to);
+        card.mesh.scale.setScalar(animation.toScale);
+        rebaseAmbient(card);
+      }
+    }
     let cameraMoved = false;
     if (cameraTransition) {
       const elapsed = Math.min(1, (time - cameraTransition.startedAt) / cameraTransition.duration);
@@ -923,8 +1010,8 @@ export function mountStackScene(
     }
     const heldCard = drag.target()?.card;
     if (!motionPreference?.matches) {
-      for (const card of freeCards()) {
-        if (card === heldCard || card.glide.remaining <= 0) continue;
+      for (const card of freeCards) {
+        if (card === heldCard || card.returnAnimation || card.glide.remaining <= 0) continue;
         const step = advanceStackGlide(card.glide, deltaSeconds);
         card.glide = step.glide;
         if (!step.dx && !step.dy) continue;
@@ -945,14 +1032,16 @@ export function mountStackScene(
     // During slot preview the pointer owns the held position. Only its
     // neighbors should be pushed out of the slot by the ambient solver.
     const previewCard = slotPreviewActive ? heldCard : undefined;
-    const bodies = freeCards().filter((card) => card !== previewCard).map((card) => {
+    const bodies = (previewCard ? freeCards.filter((card) => card !== previewCard) : freeCards).map((card) => {
       const angle = card.ambientPhase + time * AMBIENT_RATE;
       const target = card === heldCard
         ? card.mesh.position
-        : {
-            x: card.position.x + (Math.sin(angle) - card.ambientBaselineSin) * AMBIENT_AMPLITUDE,
-            y: card.position.y + (Math.cos(angle) - card.ambientBaselineCos) * AMBIENT_AMPLITUDE,
-          };
+        : card.returnAnimation
+          ? card.position
+          : {
+              x: card.position.x + (Math.sin(angle) - card.ambientBaselineSin) * AMBIENT_AMPLITUDE,
+              y: card.position.y + (Math.cos(angle) - card.ambientBaselineCos) * AMBIENT_AMPLITUDE,
+            };
       return {
         ...footprint(card, target), card, anchor: card.position,
       };
@@ -960,8 +1049,11 @@ export function mountStackScene(
     const heldIndex = bodies.findIndex(({ card }) => card === heldCard);
     renderPositions(resolveStackCollisions(bodies, limits, slotFootprint(), heldIndex));
     updateConnections();
-    if (heldCard || cameraMoved || freeCards().some(({ glide }) => glide.remaining > 0)) {
-      settledGeometry(Boolean(heldCard));
+    if (
+      heldCard || cameraMoved || returningCardMoved ||
+      freeCards.some(({ glide }) => glide.remaining > 0)
+    ) {
+      settledGeometry(Boolean(heldCard) || returningCardMoved);
     }
     render();
   }
@@ -1008,12 +1100,14 @@ export function mountStackScene(
       const projectionChanged = current.mode !== update.mode;
       const zoomChanged = supportsPerspective && current.zoom !== update.zoom;
       const orientationChanged = current.yaw !== update.yaw || current.pitch !== update.pitch;
-      if (selectionChanged || projectionChanged || zoomChanged || current.filter !== update.filter) {
+      const filterChanged = current.filter !== update.filter;
+      if (selectionChanged || projectionChanged || zoomChanged || filterChanged) {
         drag.cancel();
         cancelBackgroundDrag();
         highlight(null);
       }
       current = update;
+      if (selectionChanged) freeCards = cardsOutsideSlot();
       if (zoomChanged || orientationChanged) {
         transitionCameraTo(
           { zoom: update.zoom, yaw: update.yaw, pitch: update.pitch },
@@ -1023,9 +1117,9 @@ export function mountStackScene(
       }
       const returning = selectionChanged && previousSelection ? cards.get(previousSelection) : undefined;
       if (returning) returnToStack(returning, update.selectedId);
-      updateCards();
+      if (selectionChanged || filterChanged) updateCards();
       if (selectionChanged) settle();
-      else if (zoomChanged || !projectionChanged) {
+      else if (zoomChanged || filterChanged) {
         if (zoomChanged && !cameraTransition) settledGeometry();
         render();
       }
@@ -1051,6 +1145,7 @@ export function mountStackScene(
       light.shadow.dispose();
       for (const resource of resources) resource.dispose();
       renderer.dispose();
+      renderer.forceContextLoss();
     },
   };
 }

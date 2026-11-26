@@ -2,16 +2,13 @@ import { describe, expect, test } from 'vitest';
 import { STACK_CATEGORIES, STACK_TECHNOLOGIES } from '@/content/stack';
 import {
   createInitialStackState,
-  createInitialStackFilterState,
   ejectStackTechnology,
   isStackTechnologyEnabled,
   receiveStackTechnology,
   selectStackTechnology,
   selectStackFilter,
-  type StackFilter,
 } from './stack-state';
 
-const FILTERS = ['all', ...STACK_CATEGORIES] as const satisfies readonly StackFilter[];
 const technology = (id: string) => {
   const match = STACK_TECHNOLOGIES.find((item) => item.id === id);
   if (!match) throw new Error(`Unknown technology: ${id}`);
@@ -20,9 +17,9 @@ const technology = (id: string) => {
 
 describe('stack filter state', () => {
   test('starts with All active', () => {
-    const state = createInitialStackFilterState();
+    const state = createInitialStackState();
 
-    expect(state).toEqual({ filter: 'all' });
+    expect(state).toEqual({ filter: 'all', selectedId: null });
     for (const category of STACK_CATEGORIES) {
       expect(isStackTechnologyEnabled(category, state)).toBe(true);
     }
@@ -31,7 +28,7 @@ describe('stack filter state', () => {
   test.each(STACK_CATEGORIES)(
     'keeps only %s enabled while that category is selected',
     (category) => {
-      const state = selectStackFilter(createInitialStackFilterState(), category);
+      const state = selectStackFilter(createInitialStackState(), category);
 
       expect(state.filter).toBe(category);
       for (const technologyCategory of STACK_CATEGORIES) {
@@ -42,16 +39,8 @@ describe('stack filter state', () => {
     },
   );
 
-  test.each(FILTERS)('selects %s as the single active filter', (filter) => {
-    const initialState = createInitialStackFilterState();
-    const nextState = selectStackFilter(initialState, filter);
-
-    expect(nextState.filter).toBe(filter);
-    expect(initialState.filter).toBe('all');
-  });
-
   test('All enables every category again', () => {
-    const filtered = selectStackFilter(createInitialStackFilterState(), 'frontend');
+    const filtered = selectStackFilter(createInitialStackState(), 'frontend');
     const state = selectStackFilter(filtered, 'all');
 
     expect(state.filter).toBe('all');
@@ -60,25 +49,14 @@ describe('stack filter state', () => {
     }
   });
 
-  test('starts with an empty detail slot and no selected technology', () => {
-    expect(createInitialStackState()).toEqual({
-      filter: 'all',
-      selectedId: null,
-      slotId: null,
-    });
-  });
-
   test('selects one enabled technology and replaces the current selection', () => {
     const initial = createInitialStackState();
     const selected = selectStackTechnology(initial, technology('react'));
     const replaced = selectStackTechnology(selected, technology('typescript'));
 
-    expect(selected).toMatchObject({ selectedId: 'react', slotId: 'react' });
-    expect(replaced).toMatchObject({
-      selectedId: 'typescript',
-      slotId: 'typescript',
-    });
-    expect(initial).toMatchObject({ selectedId: null, slotId: null });
+    expect(selected.selectedId).toBe('react');
+    expect(replaced.selectedId).toBe('typescript');
+    expect(initial.selectedId).toBeNull();
   });
 
   test('preserves the selection when the filter changes', () => {
@@ -90,7 +68,6 @@ describe('stack filter state', () => {
     expect(selectStackFilter(selected, 'testing-ci')).toMatchObject({
       filter: 'testing-ci',
       selectedId: 'react',
-      slotId: 'react',
     });
   });
 
@@ -99,7 +76,15 @@ describe('stack filter state', () => {
     const next = selectStackTechnology(filtered, technology('chartJs'));
 
     expect(next).toBe(filtered);
-    expect(next).toMatchObject({ selectedId: null, slotId: null });
+    expect(next.selectedId).toBeNull();
+  });
+
+  test('lets the flat list select outside the category without resetting the scene filter', () => {
+    const filtered = selectStackFilter(createInitialStackState(), 'frontend');
+    const outsideCategory = technology('chartJs');
+    const selected = selectStackTechnology(filtered, outsideCategory, true);
+    expect(selected).toEqual({ filter: 'frontend', selectedId: outsideCategory.id });
+    expect(receiveStackTechnology(filtered, outsideCategory, true).state).toEqual(selected);
   });
 
   test('receives an enabled technology into an empty slot', () => {
@@ -115,12 +100,12 @@ describe('stack filter state', () => {
     expect(received).toEqual({
       outcome: 'received',
       replacedId: null,
-      state: expect.objectContaining({ selectedId: 'react', slotId: 'react' }),
+      state: { filter: 'all', selectedId: 'react' },
     });
     expect(replaced).toEqual({
       outcome: 'replaced',
       replacedId: 'react',
-      state: expect.objectContaining({ selectedId: 'nodeJs', slotId: 'nodeJs' }),
+      state: { filter: 'all', selectedId: 'nodeJs' },
     });
   });
 
@@ -141,7 +126,7 @@ describe('stack filter state', () => {
 
     expect(ejected).toEqual({
       releasedId: 'react',
-      state: { filter: 'all', selectedId: null, slotId: null },
+      state: { filter: 'all', selectedId: null },
     });
     expect(empty).toEqual({ releasedId: null, state: ejected.state });
   });

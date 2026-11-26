@@ -1,6 +1,6 @@
 # Stack — Contenido EN/ES
 
-**Estado: revisión ampliada solicitada por el usuario; los textos se incorporan a ambos catálogos de idioma.**
+**Estado: propuesta ampliada incorporada a ambos catálogos y aprobación editorial explícita de las 25 descripciones EN/ES registrada el 2026-11-26.**
 
 Cada tecnología muestra una **descripción de la propia tecnología**: qué es y qué capacidades ofrece. No es un relato de uso personal, de proyectos ni de resultados, y no afirma niveles de dominio.
 
@@ -95,5 +95,6 @@ Cada tecnología muestra una **descripción de la propia tecnología**: qué es 
 - [x] Revisión ampliada solicitada e incorporada a ambos catálogos; los textos describen capacidades sin atribuciones personales.
 - [x] Aprobadas la instrucción del casillero y las etiquetas de categoría.
 - [x] Registrada en la constitución la incorporación de Three.js al stack cerrado.
+- [x] Aprobación editorial explícita de las 25 descripciones ampliadas EN/ES: confirmada por el usuario el 2026-11-26 («Sí, aprobadas»).
 
 Las descripciones no requieren datos del CV ni nombres de proyectos: si alguna se considera imprecisa, se corrige la redacción, no se añade contexto personal.

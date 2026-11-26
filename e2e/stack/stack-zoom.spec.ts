@@ -1,30 +1,6 @@
-import { expect, test, type Locator, type Page } from '@playwright/test';
-import en from '../../messages/en.json';
-import es from '../../messages/es.json';
-import { readStackCardBounds } from './stack-geometry.helpers';
-
-async function openStack(page: Page, locale: 'en' | 'es') {
-  await page.goto(`/${locale}#stack`);
-  const { stack: copy, shared: { nav } } = locale === 'en' ? en : es;
-  const stack = page.getByRole('region', { name: nav.stack, exact: true });
-  const canvas = stack.locator('[data-stack-canvas]');
-  await expect(canvas).toHaveAttribute('data-stack-scene-ready', 'true');
-  return {
-    stack,
-    canvas,
-    switcher: stack.getByRole('switch', { name: copy.cad.view }),
-    detail: stack.getByRole('region', { name: copy.detail.label }),
-    description: copy.technologies.react.description,
-    eject: copy.detail.eject,
-  };
-}
-
-async function canvasRect(canvas: Locator) {
-  await canvas.scrollIntoViewIfNeeded();
-  const rect = await canvas.boundingBox();
-  if (!rect) throw new Error('Expected a displayed canvas');
-  return rect;
-}
+import { expect, test, type Locator } from '@playwright/test';
+import { canvasCoordinates, canvasRect, readStackCardBounds } from './stack-geometry.helpers';
+import { openStackScene } from './stack.helpers';
 
 async function cardWidth(canvas: Locator) {
   const { react } = await readStackCardBounds(canvas);
@@ -35,7 +11,7 @@ test.describe('Stack zoom', () => {
   test.use({ reducedMotion: 'reduce', viewport: { width: 1280, height: 1050 } });
 
   test('only zooms on the 3D canvas and preserves page scrolling elsewhere', async ({ page }) => {
-    const { canvas, stack, switcher } = await openStack(page, 'en');
+    const { canvas, stack, view: switcher } = await openStackScene(page, 'en');
     const zoom = stack.getByRole('group', { name: '3D zoom' });
     const level = zoom.getByRole('status');
     await expect(zoom).toHaveCount(0);
@@ -67,12 +43,14 @@ test.describe('Stack zoom', () => {
   });
 
   test('widens zoom in both directions and restores the full composition when zoomed out', async ({ page }) => {
-    const { canvas, stack, switcher, detail, description, eject } = await openStack(page, 'en');
-    const flat = await canvasRect(canvas);
+    const { canvas, stack, view: switcher, detail, messages, eject } = await openStackScene(page, 'en');
+    const at = await canvasCoordinates(canvas);
     const { react } = await readStackCardBounds(canvas);
-    await page.mouse.move(flat.x + flat.width * react.x, flat.y + flat.height * react.y);
+    const start = at(react);
+    const destination = at({ x: 1.012, y: 0.24 });
+    await page.mouse.move(start.x, start.y);
     await page.mouse.down();
-    await page.mouse.move(flat.x + flat.width * 1.012, flat.y + flat.height * 0.24, { steps: 6 });
+    await page.mouse.move(destination.x, destination.y, { steps: 6 });
     await page.mouse.up();
     expect((await readStackCardBounds(canvas)).react.x).toBeGreaterThan(0.8);
 
@@ -92,7 +70,8 @@ test.describe('Stack zoom', () => {
       }
     };
 
-    for (let i = 0; i < 10; i++) await farther.click();
+    await farther.focus();
+    for (let i = 0; i < 10; i++) await farther.press('Enter');
     await expect(farther).toHaveAttribute('aria-disabled', 'true');
     await expect(farther).toBeFocused();
     await farther.press('Enter');
@@ -101,6 +80,7 @@ test.describe('Stack zoom', () => {
     await inspectFullComposition();
     const minimumWidth = await cardWidth(canvas);
 
+    await closer.focus();
     for (let i = 0; i < 20; i++) await closer.press('Space');
     await expect(closer).toHaveAttribute('aria-disabled', 'true');
     await expect(closer).toBeFocused();
@@ -113,11 +93,12 @@ test.describe('Stack zoom', () => {
     for (let i = 0; i < 20; i++) await farther.press('Enter');
     await expect(level).toHaveText('50%');
     await inspectFullComposition();
-    const rect = await canvasRect(canvas);
+    const projected = await canvasCoordinates(canvas);
     const { react: visibleReact } = await readStackCardBounds(canvas);
-    await page.mouse.click(rect.x + rect.width * visibleReact.x, rect.y + rect.height * visibleReact.y);
-    await expect(detail).toContainText(description);
-    await detail.getByRole('button', { name: eject }).click();
+    const target = projected(visibleReact);
+    await page.mouse.click(target.x, target.y);
+    await expect(detail).toContainText(messages.technologies.react.description);
+    await eject.click();
     await expect.poll(async () => (await readStackCardBounds(canvas)).react).toBeDefined();
   });
 
@@ -125,7 +106,7 @@ test.describe('Stack zoom', () => {
     test.use({ hasTouch: true, viewport: { width: 390, height: 950 } });
 
     test('offers localized zoom controls only while the 3D drawing is visible', async ({ page }) => {
-      const { canvas, stack, switcher } = await openStack(page, 'es');
+      const { canvas, stack, view: switcher, listToggle } = await openStackScene(page, 'es');
       await switcher.tap();
       const zoom = stack.getByRole('group', { name: 'Zoom 3D' });
       const width = await cardWidth(canvas);
@@ -135,7 +116,7 @@ test.describe('Stack zoom', () => {
       await zoom.getByRole('button', { name: 'Alejar', exact: true }).tap();
       await expect(zoom.getByRole('status')).toHaveText('100 %');
       expect(await cardWidth(canvas)).toBeCloseTo(width);
-      await stack.getByRole('button', { name: es.stack.cad.list }).tap();
+      await listToggle.tap();
       await expect(zoom).toHaveCount(0);
     });
   });

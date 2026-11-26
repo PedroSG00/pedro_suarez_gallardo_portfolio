@@ -116,6 +116,7 @@ El casillero central deberá comunicar cuándo acepta una carta, mostrar la tecn
 - Cuando se suelte una carta habilitada en el casillero, este confirmará la recepción con feedback visual breve, mostrará su marca, nombre y descripción, y expondrá un botón accesible para expulsarla.
 - Mientras una carta esté alojada, no quedará una copia interactiva de esa carta en la escena: el casillero será su ubicación visible y única.
 - Cuando se active «Expulsar» con ratón, teclado o tacto, la carta volverá al escenario en una posición libre, visible, dentro de límites y que no se solape por completo con otra carta ni con el casillero.
+- Con movimiento normal, la expulsión usará una curva ease-in-out fluida para animar la salida de la carta desde el casillero hasta su posición libre en el canvas; con `prefers-reduced-motion`, la colocará sin transición.
 - Cuando se seleccione otra tecnología mediante la lista accesible, la nueva pasará a ocupar el casillero y la anterior volverá a una posición libre visible; el cambio nunca crea duplicados ni cartas ocultas.
 - Al expulsar, el casillero volverá a su estado vacío y la descripción dejará de presentarse como selección activa.
 - Cuando se suelte una segunda carta habilitada sobre el casillero ocupado, la anterior volverá a una posición libre y visible, la nueva pasará al casillero y el feedback confirmará el reemplazo.
@@ -284,4 +285,5 @@ El sistema deberá ofrecer una presentación plana y completa cuando no haya Jav
 - Sin JavaScript o sin WebGL, Stack se presenta como una lista plana completa.
 - La escena se construye con Three.js; la implementación anterior con CSS se descartó y se retiró del repositorio.
 - Se autorizan las carpetas necesarias para Stack bajo `src/` conforme al plan. No se autorizan cambios en capas transversales ni otras dependencias.
-- Mensaje del usuario: «APRUEBO EL CONTENT-REVIEW». Quedan aprobados las etiquetas y la instrucción inicial de `docs/specs/09-stack/content-review.md`. Las descripciones de tecnología sustituyen a las fichas de uso y requieren nueva aprobación editorial antes de implementar.
+- Mensaje del usuario: «APRUEBO EL CONTENT-REVIEW». Quedaron aprobados las etiquetas y la instrucción inicial de `docs/specs/09-stack/content-review.md`. El usuario aprobó explícitamente las 25 descripciones ampliadas EN/ES el 2026-11-26 («Sí, aprobadas»); queda registrada esa aprobación posterior a la incorporación del contenido.
+- El usuario aprobó la revisión visual manual el 2026-11-26 («La revision visual manual queda aprobada»). Esta aprobación no sustituye las pruebas con tecnología de asistencia ni con navegadores nativos.

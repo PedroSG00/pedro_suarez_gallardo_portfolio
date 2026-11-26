@@ -1,7 +1,6 @@
 'use client';
 
-import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useMemo, useState, useSyncExternalStore } from 'react';
 import { useTranslations } from 'next-intl';
 import {
   FEATURED_STACK_TECHNOLOGY_IDS,
@@ -17,9 +16,7 @@ import {
   receiveStackTechnology,
   selectStackTechnology,
   selectStackFilter,
-  type StackState,
 } from '@/lib/stack/stack-state';
-import Reveal from '@/components/ui/Reveal/Reveal';
 import StackFilters, {
   type StackFilterOption,
 } from '@/components/sections/Stack/StackFilters';
@@ -28,6 +25,7 @@ import StackDetail, {
   type StackDetailTechnology,
 } from '@/components/sections/Stack/StackDetail';
 import StackWorkbench from '@/components/sections/Stack/StackWorkbench';
+import StackTechnologyList from '@/components/sections/Stack/StackTechnologyList';
 import type { StackSceneStatus } from '@/lib/stack/stack-scene-types';
 
 const STACK_LIST_ID = 'stack-technology-list';
@@ -49,90 +47,76 @@ const FEATURED_IDS: ReadonlySet<string> = new Set(
   FEATURED_STACK_TECHNOLOGY_IDS,
 );
 
-const CATEGORY_GROUPS = STACK_CATEGORIES.map((category) => ({
-  id: category,
-  technologies: STACK_TECHNOLOGIES.filter(
-    (technology) => technology.category === category,
-  ),
-}));
+const subscribeToHydration = () => () => {};
+const clientSnapshot = () => true;
+const serverSnapshot = () => false;
+
+function useLocalizedStack() {
+  const t = useTranslations('stack');
+  return useMemo(() => {
+    const categories = STACK_CATEGORIES.map((id) => ({
+      id, label: t(`categories.${CATEGORY_MESSAGE_KEYS[id]}`),
+    }));
+    const sceneTechnologies = STACK_TECHNOLOGIES.map((technology) => ({
+      ...technology,
+      name: t(`technologies.${technology.id}.name`),
+      categoryLabel: t(`categories.${CATEGORY_MESSAGE_KEYS[technology.category]}`),
+    }));
+    const technologies = sceneTechnologies.map((technology) => ({
+      ...technology,
+      description: t(`technologies.${technology.id}.description`),
+      selectLabel: t('detail.select', { name: technology.name }),
+      flatMark: FLAT_MARKS[technology.id] ?? technology.brandMark,
+      featured: FEATURED_IDS.has(technology.id),
+    }));
+    return {
+      filterOptions: [{ id: 'all', label: t('filters.all') }, ...categories] satisfies StackFilterOption[],
+      sceneTechnologies,
+      byId: new Map<string, (typeof technologies)[number]>(
+        technologies.map((technology) => [technology.id, technology]),
+      ),
+      groups: categories.map(({ id, label }) => ({
+        id, label, technologies: technologies.filter(({ category }) => category === id),
+      })),
+    };
+  }, [t]);
+}
 
 export default function StackFlatList() {
   const t = useTranslations('stack');
   const [stackState, setStackState] = useState(createInitialStackState);
   const [feedback, setFeedback] = useState<StackDetailFeedback | null>(null);
-  const [mounted, setMounted] = useState(false);
+  const interactive = useSyncExternalStore(subscribeToHydration, clientSnapshot, serverSnapshot);
   const [listOpen, setListOpen] = useState(false);
   const [sceneStatus, setSceneStatus] = useState<'checking' | StackSceneStatus>('checking');
   const sceneActive = sceneStatus === 'ready' || sceneStatus === 'flat';
   const flatView = !sceneActive || listOpen;
 
-  useEffect(() => {
-    // Keep JavaScript-only controls out of the server HTML.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true);
-  }, []);
-
-  const filterOptions: StackFilterOption[] = [
-    { id: 'all', label: t('filters.all') },
-    ...STACK_CATEGORIES.map((id) => ({
-      id,
-      label: t(`categories.${CATEGORY_MESSAGE_KEYS[id]}`),
-    })),
-  ];
-  const selectedTechnology = stackState.slotId
-    ? STACK_TECHNOLOGIES.find(
-        (technology) => technology.id === stackState.slotId,
-      )
-    : null;
+  const { byId, groups, filterOptions, sceneTechnologies } = useLocalizedStack();
+  const selectedTechnology = stackState.selectedId ? byId.get(stackState.selectedId) : undefined;
   const selectedDetail: StackDetailTechnology | null = selectedTechnology
     ? {
-         ...selectedTechnology,
-         brandMark: flatView
-           ? FLAT_MARKS[selectedTechnology.id] ?? selectedTechnology.brandMark
-           : selectedTechnology.brandMark,
-        name: t(`technologies.${selectedTechnology.id}.name`),
-        description: t(`technologies.${selectedTechnology.id}.description`),
+        ...selectedTechnology,
+        brandMark: flatView ? selectedTechnology.flatMark : selectedTechnology.brandMark,
       }
     : null;
-  const sceneTechnologies = STACK_TECHNOLOGIES.map((technology) => ({
-    ...technology,
-    name: t(`technologies.${technology.id}.name`),
-    categoryLabel: t(`categories.${CATEGORY_MESSAGE_KEYS[technology.category]}`),
-  }));
-
-  const isTechnologyEnabled = (id: string, state: StackState = stackState) => {
-    const technology = STACK_TECHNOLOGIES.find((item) => item.id === id);
-    return technology
-      ? flatView || isStackTechnologyEnabled(technology.category, state)
-      : false;
+  const isTechnologyEnabled = (id: string) => {
+    const technology = byId.get(id);
+    return technology !== undefined && isStackTechnologyEnabled(technology.category, stackState, flatView);
   };
 
   const handleReceive = (id: string) => {
-    const technology = STACK_TECHNOLOGIES.find((item) => item.id === id);
+    const technology = byId.get(id);
     if (!technology) return;
 
-    const receivingState = flatView
-      ? selectStackFilter(stackState, 'all')
-      : stackState;
-    const result = receiveStackTechnology(receivingState, technology);
-    setStackState(
-      flatView
-        ? selectStackFilter(result.state, stackState.filter)
-        : result.state,
-    );
-
+    const result = receiveStackTechnology(stackState, technology, flatView);
     if (result.outcome === 'disabled') return;
-    const name = t(`technologies.${technology.id}.name`);
-    const replacedTechnology = result.replacedId
-      ? STACK_TECHNOLOGIES.find((item) => item.id === result.replacedId)
-      : undefined;
+    setStackState(result.state);
+    const { name } = technology;
+    const replacedName = result.replacedId ? byId.get(result.replacedId)?.name : undefined;
     setFeedback(
-      result.outcome === 'replaced' && replacedTechnology
-        ? {
-            kind: 'replaced',
-            name,
-            replacedName: t(`technologies.${replacedTechnology.id}.name`),
-          }
+      replacedName
+        ? { kind: 'replaced', name, replacedName }
         : { kind: 'received', name },
     );
   };
@@ -141,31 +125,21 @@ export default function StackFlatList() {
     const result = ejectStackTechnology(stackState);
     setStackState(result.state);
     if (result.releasedId) {
-      const releasedTechnology = STACK_TECHNOLOGIES.find(
-        (technology) => technology.id === result.releasedId,
-      );
+      const releasedTechnology = byId.get(result.releasedId);
       if (releasedTechnology) {
         setFeedback({
           kind: 'ejected',
-          name: t(`technologies.${releasedTechnology.id}.name`),
+          name: releasedTechnology.name,
         });
       }
     }
   };
 
   const handleSceneSelect = (id: StackTechnologyId) => {
-    const technology = STACK_TECHNOLOGIES.find((item) => item.id === id);
+    const technology = byId.get(id);
     if (!technology) return;
 
-    setStackState((state) => {
-      const selectableState = flatView
-        ? selectStackFilter(state, 'all')
-        : state;
-      const nextState = selectStackTechnology(selectableState, technology);
-      return flatView
-        ? selectStackFilter(nextState, state.filter)
-        : nextState;
-    });
+    setStackState((state) => selectStackTechnology(state, technology, flatView));
     setFeedback(null);
   };
 
@@ -174,9 +148,9 @@ export default function StackFlatList() {
       data-stack-flat-list
       data-scene-active={sceneActive}
       data-scene-status={sceneStatus}
-      className="grid"
     >
       <StackWorkbench
+        interactive={interactive}
         active={sceneActive}
         supportsPerspective={sceneStatus === 'ready'}
         technologies={sceneTechnologies}
@@ -199,102 +173,27 @@ export default function StackFlatList() {
             }
           />
         }
-        detail={mounted && (
+        detail={interactive && (
           <StackDetail
             technology={selectedDetail}
             canDragCard={sceneActive && !listOpen}
             feedback={feedback}
-            canReceiveTechnology={(id) => isTechnologyEnabled(id)}
+            canReceiveTechnology={isTechnologyEnabled}
             onReceive={handleReceive}
             onEject={handleEject}
           />
         )}
-        list={renderList()}
+        list={
+          <StackTechnologyList
+            id={STACK_LIST_ID}
+            groups={groups}
+            state={stackState}
+            interactive={interactive}
+            flatView={flatView}
+            onSelect={handleSceneSelect}
+          />
+        }
       />
     </div>
   );
-
-  function renderList() {
-    return (
-      <div
-        id={STACK_LIST_ID}
-        data-stack-accessible-list={!flatView}
-        data-stack-list-interactive={mounted}
-      >
-        {CATEGORY_GROUPS.map(({ id, technologies }) => {
-          const headingId = `stack-category-${id}`;
-          const isCategoryActive =
-            flatView || isStackTechnologyEnabled(id, stackState);
-
-          return (
-            <Reveal key={id} variant="fade">
-              <div
-                data-stack-category={id}
-                data-active={isCategoryActive}
-              >
-                <h3 id={headingId} data-stack-category-heading>
-                  {t(`categories.${CATEGORY_MESSAGE_KEYS[id]}`)}
-                </h3>
-                <ul
-                  aria-labelledby={headingId}
-                  data-stack-technologies
-                  className="grid list-none"
-                >
-                  {technologies.map((technology) => {
-                    const { id: technologyId, brandMark } = technology;
-                    const name = t(`technologies.${technologyId}.name`);
-                    const isEnabled = isTechnologyEnabled(technologyId);
-
-                    return (
-                      <li
-                        key={technologyId}
-                        data-stack-technology={technologyId}
-                        data-featured={FEATURED_IDS.has(technologyId) ? '' : undefined}
-                        className="min-w-0 wrap-anywhere"
-                      >
-                        <div className="flex items-center gap-3">
-                          <Image
-                            src={flatView ? FLAT_MARKS[technologyId] ?? brandMark : brandMark}
-                            alt=""
-                            aria-hidden="true"
-                            role="img"
-                            width={48}
-                            height={32}
-                            unoptimized
-                            data-stack-brand-mark
-                            className="h-8 w-12 shrink-0 object-contain"
-                          />
-                          <span data-stack-technology-name>
-                            {mounted ? (
-                              <button
-                                type="button"
-                                aria-label={t('detail.select', { name })}
-                                aria-pressed={stackState.selectedId === technologyId}
-                                disabled={!isEnabled}
-                                data-stack-select
-                                onClick={() => handleSceneSelect(technologyId)}
-                              >
-                                {name}
-                              </button>
-                            ) : (
-                              name
-                            )}
-                          </span>
-                        </div>
-                        {(!mounted || !flatView) && (
-                          <p data-stack-technology-description className="max-w-prose text-body">
-                            {t(`technologies.${technologyId}.description`)}
-                          </p>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            </Reveal>
-          );
-        })}
-      </div>
-    );
-  }
 }

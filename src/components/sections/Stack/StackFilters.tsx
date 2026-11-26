@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import {
   Code,
   Database,
@@ -40,18 +39,6 @@ export default function StackFilters({
   options,
   onFilterChange,
 }: Props) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    // Keep controls out of the server HTML so the no-JavaScript list stays informational.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return null;
-  }
-
   return (
     <fieldset data-stack-filter-group>
       <legend>{groupLabel}</legend>

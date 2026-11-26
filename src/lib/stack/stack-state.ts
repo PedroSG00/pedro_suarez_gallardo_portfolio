@@ -7,13 +7,9 @@ export const ALL_STACK_FILTER = 'all' as const;
 
 export type StackFilter = typeof ALL_STACK_FILTER | StackCategoryId;
 
-export type StackFilterState = {
+export type StackState = {
   filter: StackFilter;
-};
-
-export type StackState = StackFilterState & {
   selectedId: StackTechnologyId | null;
-  slotId: StackTechnologyId | null;
 };
 
 type SelectableTechnology = {
@@ -27,78 +23,62 @@ export type StackReceiveResult = {
   state: StackState;
 };
 
-export function createInitialStackFilterState(): StackFilterState {
-  return { filter: ALL_STACK_FILTER };
-}
-
 export function createInitialStackState(): StackState {
-  return {
-    ...createInitialStackFilterState(),
-    selectedId: null,
-    slotId: null,
-  };
+  return { filter: ALL_STACK_FILTER, selectedId: null };
 }
 
-export function selectStackFilter<T extends StackFilterState>(
-  state: T,
-  filter: StackFilter,
-): T {
-  return { ...state, filter } as T;
+export function selectStackFilter(state: StackState, filter: StackFilter): StackState {
+  return state.filter === filter ? state : { ...state, filter };
 }
 
 export function isStackTechnologyEnabled(
   category: StackCategoryId,
-  state: StackFilterState,
+  state: StackState,
+  allowFiltered = false,
 ): boolean {
-  return state.filter === ALL_STACK_FILTER || state.filter === category;
+  return allowFiltered || state.filter === ALL_STACK_FILTER || state.filter === category;
+}
+
+function placeTechnology(state: StackState, selectedId: StackTechnologyId): StackState {
+  return state.selectedId === selectedId ? state : { ...state, selectedId };
 }
 
 export function selectStackTechnology(
   state: StackState,
   technology: SelectableTechnology,
+  allowFiltered = false,
 ): StackState {
-  if (!isStackTechnologyEnabled(technology.category, state)) return state;
-
-  return {
-    ...state,
-    selectedId: technology.id,
-    slotId: technology.id,
-  };
+  return isStackTechnologyEnabled(technology.category, state, allowFiltered)
+    ? placeTechnology(state, technology.id)
+    : state;
 }
 
 export function receiveStackTechnology(
   state: StackState,
   technology: SelectableTechnology,
+  allowFiltered = false,
 ): StackReceiveResult {
-  if (!isStackTechnologyEnabled(technology.category, state)) {
+  if (!isStackTechnologyEnabled(technology.category, state, allowFiltered)) {
     return { outcome: 'disabled', replacedId: null, state };
   }
 
-  const replacedId = state.slotId === technology.id ? null : state.slotId;
+  const replacedId = state.selectedId === technology.id ? null : state.selectedId;
   return {
     outcome: replacedId ? 'replaced' : 'received',
     replacedId,
-    state: {
-      ...state,
-      selectedId: technology.id,
-      slotId: technology.id,
-    },
+    state: placeTechnology(state, technology.id),
   };
 }
 
 export function ejectStackTechnology(
   state: StackState,
 ): { state: StackState; releasedId: StackTechnologyId | null } {
-  if (state.slotId === null) {
+  if (state.selectedId === null) {
     return { state, releasedId: null };
   }
 
   return {
-    releasedId: state.slotId,
-    state: {
-      ...state,
-      selectedId: null,
-      slotId: null,
-    },
+    releasedId: state.selectedId,
+    state: { ...state, selectedId: null },
   };
 }

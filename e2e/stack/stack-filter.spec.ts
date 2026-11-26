@@ -1,37 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { STACK_CATEGORIES, STACK_TECHNOLOGIES } from '@/content/stack';
-import en from '../../messages/en.json';
-import es from '../../messages/es.json';
-
-const CATEGORY_LABEL_KEYS = [
-  'frontend',
-  'dataVisualization',
-  'backendApis',
-  'databases',
-  'testingCi',
-  'aiTools',
-] as const;
-
-const LOCALES = [
-  {
-    locale: 'en',
-    messages: en.stack,
-    nav: en.shared.nav,
-    filterLabel: 'Filter by category',
-    allLabel: 'All',
-    selectionName: (name: string) => `Select ${name}`,
-  },
-  {
-    locale: 'es',
-    messages: es.stack,
-    nav: es.shared.nav,
-    filterLabel: 'Filtrar por categoría',
-    allLabel: 'Todas',
-    selectionName: (name: string) => `Seleccionar ${name}`,
-  },
-] as const;
-
-const THEMES = ['light', 'dark'] as const;
+import { canvasCoordinates, readStackCardBounds } from './stack-geometry.helpers';
+import { openStackScene, STACK_COPY, STACK_LOCALES } from './stack.helpers';
 
 function contrastRatio(foreground: string, background: string): number {
   const luminance = (color: string) => {
@@ -48,212 +18,127 @@ function contrastRatio(foreground: string, background: string): number {
     return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
   };
 
-  const foregroundLuminance = luminance(foreground);
-  const backgroundLuminance = luminance(background);
-  const lighter = Math.max(foregroundLuminance, backgroundLuminance);
-  const darker = Math.min(foregroundLuminance, backgroundLuminance);
-
+  const lighter = Math.max(luminance(foreground), luminance(background));
+  const darker = Math.min(luminance(foreground), luminance(background));
   return (lighter + 0.05) / (darker + 0.05);
 }
 
-for (const {
-  locale,
-  messages,
-  nav,
-  filterLabel,
-  allLabel,
-  selectionName,
-} of LOCALES) {
+for (const locale of STACK_LOCALES) {
+  const messages = STACK_COPY[locale].stack;
+
   test.describe(`/${locale}: Stack category filter`, () => {
     test.use({ reducedMotion: 'reduce' });
 
-    test('selects one category, preserves the full editorial list and restores All', async ({
-      page,
-    }) => {
-      await page.goto(`/${locale}#stack`);
+    test('filters in place and restores the category after leaving the keyboard-accessible list', async ({ page }) => {
+      const { canvas, filters, stack, technology, view, listToggle } = await openStackScene(page, locale);
+      const radio = (name: string) => filters.getByRole('radio', { name, exact: true });
+      const activeRadio = filters.getByRole('radio', { checked: true });
+      const all = radio(messages.filters.all);
+      const frontend = radio(messages.categories.frontend);
+      const dataVisualization = radio(messages.categories.dataVisualization);
+      const chartJs = technology('chartJs');
+      const nodeJs = technology('nodeJs');
+      const initialBounds = await readStackCardBounds(canvas);
 
-      const stack = page.getByRole('region', { name: nav.stack, exact: true });
-      const group = stack.getByRole('group', { name: filterLabel });
-      const radios = group.getByRole('radio');
-      const all = group.getByRole('radio', { name: allLabel, exact: true });
-      await expect(stack.locator('[data-stack-canvas]')).toHaveAttribute(
-        'data-stack-scene-ready', 'true',
-      );
-      const technologyButtons = stack.getByRole('listitem').getByRole('button');
-      const namesBefore = await technologyButtons.allTextContents();
-
-      await expect(radios).toHaveCount(STACK_CATEGORIES.length + 1);
+      await expect(filters.getByRole('radio')).toHaveCount(STACK_CATEGORIES.length + 1);
+      for (const name of Object.values(messages.categories)) {
+        await expect(radio(name)).toBeEnabled();
+      }
       await expect(all).toBeChecked();
-      for (const key of CATEGORY_LABEL_KEYS) {
-        await expect(
-          group.getByRole('radio', {
-            name: messages.categories[key],
-            exact: true,
-          }),
-        ).not.toBeChecked();
-      }
-
-      const frontend = group.getByRole('radio', {
-        name: messages.categories.frontend,
-        exact: true,
-      });
-      const dataVisualization = group.getByRole('radio', {
-        name: messages.categories.dataVisualization,
-        exact: true,
-      });
+      await expect(chartJs).toBeEnabled();
       await frontend.check();
-
       await expect(frontend).toBeChecked();
-      await expect(group.getByRole('radio', { checked: true })).toHaveCount(1);
-      await expect(stack.getByRole('listitem')).toHaveCount(
-        STACK_TECHNOLOGIES.length,
-      );
-      for (const technology of STACK_TECHNOLOGIES) {
-        await expect(
-          stack.getByText(messages.technologies[technology.id].name, {
-            exact: true,
-          }),
-        ).toBeVisible();
-      }
-      expect(await technologyButtons.allTextContents()).toEqual(
-        namesBefore,
-      );
+      await expect(activeRadio).toHaveCount(1);
+      await expect(stack.getByRole('listitem')).toHaveCount(STACK_TECHNOLOGIES.length);
+      await expect(chartJs).toBeDisabled();
+      await expect(nodeJs).toBeDisabled();
+      expect(await readStackCardBounds(canvas)).toEqual(initialBounds);
 
-      await expect(
-        stack.getByRole('button', {
-          name: selectionName(messages.technologies.chartJs.name),
-        }),
-      ).toBeDisabled();
-      await expect(
-        stack.getByRole('button', {
-          name: selectionName(messages.technologies.nodeJs.name),
-        }),
-      ).toBeDisabled();
-      await expect(frontend).toBeChecked();
-
-      await frontend.focus();
-      await page.keyboard.press('ArrowRight');
+      await frontend.press('ArrowRight');
       await expect(dataVisualization).toBeChecked();
       await page.keyboard.press('Tab');
-      await expect(stack.getByRole('switch', { name: messages.cad.view })).toBeFocused();
+      await expect(view).toBeFocused();
       await page.keyboard.press('Tab');
-      const listToggle = stack.getByRole('button', { name: messages.cad.list });
       await expect(listToggle).toBeFocused();
       await page.keyboard.press('Space');
-      await expect(group).toHaveCount(0);
+      await expect(filters).toHaveCount(0);
       await page.keyboard.press('Tab');
-
-      const chartJsButton = stack.getByRole('button', {
-        name: selectionName(messages.technologies.chartJs.name),
-      });
-      await expect(stack.getByRole('button', {
-        name: selectionName(messages.technologies.javascript.name),
-      })).toBeFocused();
-      await expect(chartJsButton).toBeEnabled();
-      await expect(stack.getByRole('button', {
-        name: selectionName(messages.technologies.nodeJs.name),
-      })).toBeEnabled();
+      await expect(technology('javascript')).toBeFocused();
+      await expect(nodeJs).toBeEnabled();
 
       await listToggle.click();
-      await expect(group).toBeVisible();
       await expect(dataVisualization).toBeChecked();
-      await expect(stack.getByRole('button', {
-        name: selectionName(messages.technologies.nodeJs.name),
-      })).toBeDisabled();
-
+      await expect(nodeJs).toBeDisabled();
       await all.check();
       await expect(all).toBeChecked();
-      await expect(group.getByRole('radio', { checked: true })).toHaveCount(1);
+      await expect(nodeJs).toBeEnabled();
     });
 
-    test('selects any technology from the list by touch and restores the canvas filter', async ({
-      browser,
-    }) => {
-      const context = await browser.newContext({
-        hasTouch: true,
-        reducedMotion: 'reduce',
-      });
+    test.describe('touch', () => {
+      test.use({ hasTouch: true });
 
-      try {
-        const page = await context.newPage();
-        await page.goto(`/${locale}#stack`);
-
-        const stack = page.getByRole('region', { name: nav.stack, exact: true });
-        const group = stack.getByRole('group', { name: filterLabel });
-        const frontend = group.getByRole('radio', {
-          name: messages.categories.frontend,
-          exact: true,
-        });
-        await expect(stack.locator('[data-stack-canvas]')).toHaveAttribute(
-          'data-stack-scene-ready', 'true',
-        );
+      test('selects an excluded technology in the list, restores the canvas filter and ejects', async ({ page }) => {
+        const { filters, listToggle, technology, detail, eject } = await openStackScene(page, locale);
+        const frontend = filters.getByRole('radio', { name: messages.categories.frontend, exact: true });
+        const chartJs = technology('chartJs');
         await frontend.tap();
         await expect(frontend).toBeChecked();
-
-        const listToggle = stack.getByRole('button', { name: messages.cad.list });
-        await listToggle.tap();
-        await expect(group).toHaveCount(0);
-        const chartJsButton = stack.getByRole('button', {
-          name: selectionName(messages.technologies.chartJs.name),
-        });
-        await expect(chartJsButton).toBeEnabled();
-        await chartJsButton.scrollIntoViewIfNeeded();
-        const technologyBounds = await chartJsButton.boundingBox();
-        if (!technologyBounds) throw new Error('Chart.js must be visible in the list');
-        await page.touchscreen.tap(
-          technologyBounds.x + technologyBounds.width / 2,
-          technologyBounds.y + technologyBounds.height / 2,
-        );
-        await expect(chartJsButton).toHaveAttribute('aria-pressed', 'true');
-        await expect(stack.getByRole('region', { name: messages.detail.label }))
-          .toContainText(messages.technologies.chartJs.description);
+        await expect(chartJs).toBeDisabled();
 
         await listToggle.tap();
-        await expect(group).toBeVisible();
+        await expect(filters).toHaveCount(0);
+        await chartJs.tap();
+        await expect(chartJs).toHaveAttribute('aria-pressed', 'true');
+        await expect(detail).toContainText(messages.technologies.chartJs.description);
+
+        await listToggle.tap();
         await expect(frontend).toBeChecked();
-        await expect(chartJsButton).toBeDisabled();
-      } finally {
-        await context.close();
-      }
+        await expect(chartJs).toBeDisabled();
+        await expect(detail).toContainText(messages.technologies.chartJs.description);
+        await eject.tap();
+        await expect(detail).toContainText(messages.detail.emptyWithDrag);
+        await expect(chartJs).toHaveAttribute('aria-pressed', 'false');
+      });
+
+      test('ignores a native tap on a filtered-out canvas card', async ({ page }) => {
+        await page.setViewportSize({ width: 390, height: 844 });
+        const { canvas, detail, filters, listToggle, technology } = await openStackScene(page, locale);
+        await listToggle.tap();
+        await technology('react').tap();
+        await expect(detail).toContainText(messages.technologies.react.description);
+        await listToggle.tap();
+
+        await filters.getByRole('radio', { name: messages.categories.frontend, exact: true }).check();
+        const at = await canvasCoordinates(canvas);
+        const before = (await readStackCardBounds(canvas)).chartJs;
+        const target = at(before);
+        expect(await canvas.evaluate(
+          (element, { x, y }) => document.elementFromPoint(x, y) === element,
+          target,
+        )).toBe(true);
+        await page.touchscreen.tap(target.x, target.y);
+
+        await expect(detail).toContainText(messages.technologies.react.description);
+        expect((await readStackCardBounds(canvas)).chartJs).toEqual(before);
+      });
     });
 
-    for (const theme of THEMES) {
-      test(`${theme} theme keeps inactive text attenuated with AA contrast`, async ({
-        page,
-      }) => {
+    for (const theme of ['light', 'dark'] as const) {
+      test(`${theme} theme keeps inactive text attenuated with AA contrast`, async ({ page }) => {
         await page.emulateMedia({ colorScheme: theme });
-        await page.goto(`/${locale}#stack`);
+        const { filters, stack } = await openStackScene(page, locale);
+        await filters.getByRole('radio', { name: messages.categories.frontend, exact: true }).check();
 
-        const stack = page.getByRole('region', { name: nav.stack, exact: true });
-        const group = stack.getByRole('group', { name: filterLabel });
-        await group
-          .getByRole('radio', {
-            name: messages.categories.frontend,
-            exact: true,
-          })
-          .check();
-
-        const [activePaint, inactivePaint] = await Promise.all(
-          [
-            stack.getByText(messages.technologies.react.name, { exact: true }),
-            stack.getByText(messages.technologies.chartJs.name, { exact: true }),
-          ].map((technology) =>
-            technology.evaluate((element) => ({
-              foreground: getComputedStyle(element).color,
-              background: getComputedStyle(document.body).backgroundColor,
-            })),
-          ),
-        );
-        const activeContrast = contrastRatio(
-          activePaint.foreground,
-          activePaint.background,
-        );
-        const inactiveContrast = contrastRatio(
-          inactivePaint.foreground,
-          inactivePaint.background,
-        );
-
-        expect(inactivePaint.foreground).not.toBe(activePaint.foreground);
+        const paint = (name: string) => stack.getByText(name, { exact: true }).evaluate((element) => ({
+          foreground: getComputedStyle(element).color,
+          background: getComputedStyle(document.body).backgroundColor,
+        }));
+        const [active, inactive] = await Promise.all([
+          paint(messages.technologies.react.name),
+          paint(messages.technologies.chartJs.name),
+        ]);
+        const activeContrast = contrastRatio(active.foreground, active.background);
+        const inactiveContrast = contrastRatio(inactive.foreground, inactive.background);
         expect(inactiveContrast).toBeGreaterThanOrEqual(4.5);
         expect(inactiveContrast).toBeLessThan(activeContrast);
       });

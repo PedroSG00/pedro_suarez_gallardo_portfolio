@@ -1,12 +1,6 @@
-import { expect, test } from '@playwright/test';
-import en from '../../messages/en.json';
-import es from '../../messages/es.json';
-import { readStackCardBounds } from './stack-geometry.helpers';
-
-const LOCALES = [
-  { locale: 'en', copy: en.stack, nav: en.shared.nav },
-  { locale: 'es', copy: es.stack, nav: es.shared.nav },
-] as const;
+import { expect, test, type Locator } from '@playwright/test';
+import { canvasCoordinates, readStackCardBounds } from './stack-geometry.helpers';
+import { openStackScene, STACK_LOCALES } from './stack.helpers';
 
 const RESPONSIVE_VIEWPORTS = [
   { width: 320, height: 950 },
@@ -18,20 +12,30 @@ const RESPONSIVE_VIEWPORTS = [
   { width: 3840, height: 2160 },
 ] as const;
 
-for (const { locale, copy, nav } of LOCALES) {
+const FRAME_CONTROLS =
+  '[data-stack-filter-option], [data-stack-view-controls] button, ' +
+  '[data-stack-zoom-controls] button, [data-stack-rotation-controls] button';
+
+function measureFrameElements(frame: Locator, selector: string) {
+  // Keep DOM nodes in the page realm: Firefox's remote bulk-locator
+  // evaluation can crash here after resizing with the scene active.
+  return frame.evaluate((element, selector) =>
+    Array.from(element.querySelectorAll(selector), (control) => {
+      const { left, right, width, height } = control.getBoundingClientRect();
+      return { left, right, width, height };
+    }), selector);
+}
+
+for (const locale of STACK_LOCALES) {
   test.describe(`/${locale}: Stack on a touch screen`, () => {
     test.use({ hasTouch: true, reducedMotion: 'reduce', viewport: { width: 320, height: 568 } });
 
     test('keeps the inspector beneath a visible navbar and pins it at the top when the navbar hides', async ({ page }) => {
-      await page.goto(`/${locale}#stack`);
-      const stack = page.getByRole('region', { name: nav.stack, exact: true });
-      const canvas = stack.locator('[data-stack-canvas]');
-      await expect(canvas).toHaveAttribute('data-stack-scene-ready', 'true');
+      const { stack, canvas, messages: copy, view, listToggle: list, detail, eject, technology } =
+        await openStackScene(page, locale);
       expect(await readStackCardBounds(canvas)).toHaveProperty('react');
       expect((await canvas.boundingBox())!.height).toBeLessThan(650);
 
-      const view = stack.getByRole('switch', { name: copy.cad.view });
-      const list = stack.getByRole('button', { name: copy.cad.list });
       await expect(view.getByText(copy.cad.view, { exact: true })).toBeVisible();
       await expect(list.getByText(copy.cad.list, { exact: true })).toBeVisible();
       await view.tap();
@@ -46,17 +50,22 @@ for (const { locale, copy, nav } of LOCALES) {
       await zoom.tap();
       await expect(stack.getByRole('group', { name: copy.cad.zoom.label })).toContainText('105');
       await list.tap();
-      await stack.getByRole('button', { name: copy.detail.select.replace('{name}', 'React') }).tap();
+      await technology('react').tap();
       await list.tap();
 
-      const detail = stack.getByRole('region', { name: copy.detail.label });
       const detailDock = stack.locator('[data-stack-detail-dock]');
       const heading = detail.getByRole('heading', { name: 'React' });
-      const eject = detail.getByRole('button', { name: copy.detail.eject });
       await expect(detail).toContainText(copy.technologies.react.description);
-      const nameBox = (await heading.boundingBox())!;
-      const ejectBox = (await eject.boundingBox())!;
-      expect(Math.abs(nameBox.y + nameBox.height / 2 - ejectBox.y - ejectBox.height / 2)).toBeLessThan(2);
+      await expect.poll(async () => {
+        const [nameBox, ejectBox] = await Promise.all([
+          heading.boundingBox(),
+          eject.boundingBox(),
+        ]);
+        if (!nameBox || !ejectBox) return Number.POSITIVE_INFINITY;
+        return Math.abs(
+          nameBox.y + nameBox.height / 2 - ejectBox.y - ejectBox.height / 2,
+        );
+      }).toBeLessThan(2);
 
       await page.setViewportSize({ width: 667, height: 375 });
       const navbar = page.getByRole('banner');
@@ -71,49 +80,41 @@ for (const { locale, copy, nav } of LOCALES) {
       await page.mouse.wheel(0, -120);
       await expect(navbar).not.toHaveAttribute('data-hidden');
       const navbarHeight = await navbar.evaluate((element) => element.getBoundingClientRect().height);
-      await expect.poll(() => detailDock.boundingBox().then((bounds) => bounds!.y))
-        .toBeGreaterThanOrEqual(navbarHeight - 1);
-      await expect.poll(() => detailDock.boundingBox().then((bounds) => bounds!.y))
-        .toBeLessThanOrEqual(navbarHeight + 1);
+      await expect.poll(async () => {
+        const dock = await detailDock.boundingBox();
+        // The navbar's border and transformed box can add a fractional pixel.
+        return dock ? Math.abs(Math.round(dock.y) - Math.round(navbarHeight)) : Infinity;
+      }).toBeLessThanOrEqual(1);
       await eject.tap();
       await expect(heading).toHaveCount(0);
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(667);
     });
   });
-}
 
-for (const { locale, copy, nav } of LOCALES) {
   test.describe(`/${locale}: Stack workbench`, () => {
-    test.use({ reducedMotion: 'reduce', deviceScaleFactor: 2 });
+    test.use({ reducedMotion: 'reduce' });
 
     test('responds to card hover without moving the target and clears inactive hover', async ({ page }) => {
       await page.setViewportSize({ width: 1280, height: 1050 });
-      await page.goto(`/${locale}#stack`);
-      const stack = page.getByRole('region', { name: nav.stack, exact: true });
-      const canvas = stack.locator('[data-stack-canvas]');
-      await expect(canvas).toHaveAttribute('data-stack-scene-ready', 'true');
-      await canvas.scrollIntoViewIfNeeded();
-      const bounds = await canvas.boundingBox();
-      if (!bounds) throw new Error('The drawing must be visible');
+      const { canvas, filters, messages: copy, view } = await openStackScene(page, locale);
+      const at = await canvasCoordinates(canvas);
       const before = await readStackCardBounds(canvas);
-      await page.mouse.move(
-        bounds.x + before.react.x * bounds.width,
-        bounds.y + before.react.y * bounds.height,
-      );
+      const target = at(before.react);
+      await page.mouse.move(target.x, target.y);
       await expect(canvas).toHaveAttribute('data-stack-hovered-technology', 'react');
       await expect(canvas).toHaveCSS('cursor', 'grab');
       expect(await readStackCardBounds(canvas)).toEqual(before);
-      await stack.getByRole('radio', { name: copy.categories.databases, exact: true }).check();
+      await filters.getByRole('radio', { name: copy.categories.databases, exact: true }).check();
       await expect(canvas).toHaveAttribute('data-stack-hovered-technology', '');
-      const frontend = stack.getByRole('radio', { name: copy.categories.frontend, exact: true });
+      const frontend = filters.getByRole('radio', { name: copy.categories.frontend, exact: true });
       const option = frontend.locator('..');
       const ink = await option.evaluate((element) => getComputedStyle(element).color);
       await frontend.hover();
       await expect(option).toHaveCSS('background-color', ink);
       await expect(frontend).not.toBeChecked();
-      await stack.getByRole('switch', { name: copy.cad.view }).focus();
+      await view.focus();
       await page.keyboard.press('Shift+Tab');
-      const activeFilter = stack.getByRole('radio', { checked: true });
+      const activeFilter = filters.getByRole('radio', { checked: true });
       await expect(activeFilter).toBeFocused();
       await expect(activeFilter.locator('..')).toHaveCSS('outline-style', 'solid');
     });
@@ -122,27 +123,16 @@ for (const { locale, copy, nav } of LOCALES) {
       page,
     }) => {
       await page.setViewportSize({ width: 1280, height: 1050 });
-      await page.goto(`/${locale}#stack`);
-
-      const stack = page.getByRole('region', { name: nav.stack, exact: true });
-      const frame = stack.getByRole('region', { name: copy.cad.title });
-      const canvas = frame.locator('[data-stack-canvas]');
-      const view = frame.getByRole('switch', { name: copy.cad.view });
-      const list = frame.getByRole('button', { name: copy.cad.list });
-      const detail = frame.getByRole('region', { name: copy.detail.label });
+      const { frame, canvas, view, listToggle: list, detail, eject, filters, technology, messages: copy } =
+        await openStackScene(page, locale);
       const detailDock = frame.locator('[data-stack-detail-dock]');
 
-      await expect(canvas).toHaveAttribute('data-stack-scene-ready', 'true');
-      await expect(frame.getByRole('group', { name: copy.filters.label })).toBeVisible();
-      await expect(frame.getByRole('radio')).toHaveCount(7);
-      await expect(view).toBeVisible();
+      await expect(filters).toBeVisible();
       await expect(view.locator('svg')).toBeVisible();
-      await expect(list).toBeVisible();
       await expect(list.locator('svg')).toBeVisible();
       await expect(detail).toBeVisible();
       await expect(frame.locator('[data-stack-drawing-note]')).toHaveText(copy.cad.hint);
 
-      const filters = frame.getByRole('group', { name: copy.filters.label });
       const all = filters.getByRole('radio', { name: copy.filters.all, exact: true });
       const filterBox = await all.locator('xpath=..').boundingBox();
       const viewBox = await view.boundingBox();
@@ -151,7 +141,6 @@ for (const { locale, copy, nav } of LOCALES) {
       expect(Math.abs(filterBox!.y - viewBox!.y)).toBeLessThanOrEqual(1);
       await expect(all.locator('xpath=..').locator('svg')).toBeVisible();
       await expect(all.locator('xpath=..')).toHaveAttribute('title', copy.filters.all);
-      await all.check();
 
       await view.click();
       const zoom = frame.getByRole('group', { name: copy.cad.zoom.label });
@@ -174,14 +163,9 @@ for (const { locale, copy, nav } of LOCALES) {
       await list.click();
       await expect(list).toHaveAttribute('aria-expanded', 'true');
       await expect(detail).toBeVisible();
-      const selectReact = copy.detail.select.replace(
-        '{name}',
-        copy.technologies.react.name,
-      );
-      await stack.getByRole('button', { name: selectReact }).click();
+      await technology('react').click();
       await expect(detail).toContainText(copy.technologies.react.description);
       await expect(frame.locator('[data-stack-drawing-note]')).toHaveCount(0);
-      const eject = detail.getByRole('button', { name: copy.detail.eject });
       await expect(eject.locator('svg')).toBeVisible();
       await list.click();
       await expect(list).toHaveAttribute('aria-expanded', 'false');
@@ -191,26 +175,29 @@ for (const { locale, copy, nav } of LOCALES) {
         await expect.poll(() =>
           page.evaluate(() => document.documentElement.scrollWidth),
         ).toBeLessThanOrEqual(viewport.width);
+        await expect.poll(() => canvas.evaluate((element: HTMLCanvasElement) =>
+          Math.abs(element.width / element.height - element.clientWidth / element.clientHeight),
+        )).toBeLessThan(0.01);
+        const cards = await readStackCardBounds(canvas);
+        expect(Object.keys(cards)).toHaveLength(24);
+        expect(cards).not.toHaveProperty('react');
+        await expect(detail).toContainText(copy.technologies.react.description);
 
         const frameBox = await frame.boundingBox();
         const canvasBox = await canvas.boundingBox();
         const detailBox = await detail.boundingBox();
         const dockBox = await detailDock.boundingBox();
-        const controlBoxes = await frame.locator(
-          '[data-stack-filter-option], [data-stack-view-controls] button, ' +
-          '[data-stack-zoom-controls] button, [data-stack-rotation-controls] button, ' +
-          '[data-stack-detail]',
-        ).evaluateAll((elements) => elements.map((element) => {
-          const { left, right } = element.getBoundingClientRect();
-          return { left, right };
-        }));
+        const controlBoxes = await measureFrameElements(frame, `${FRAME_CONTROLS}, [data-stack-detail]`);
 
         expect(frameBox).not.toBeNull();
         expect(canvasBox).not.toBeNull();
         expect(detailBox).not.toBeNull();
         expect(dockBox).not.toBeNull();
+        expect(canvasBox!.x).toBeGreaterThanOrEqual(frameBox!.x);
+        expect(canvasBox!.x + canvasBox!.width).toBeLessThanOrEqual(frameBox!.x + frameBox!.width);
         if (canvasBox && dockBox && viewport.width >= 1024) {
-          expect(dockBox.x).toBeGreaterThanOrEqual(canvasBox.x + canvasBox.width);
+          // Firefox rounds box origins and widths independently at 4K.
+          expect(canvasBox.x + canvasBox.width - dockBox.x).toBeLessThanOrEqual(0.01);
           expect(Math.abs(dockBox.y - canvasBox.y)).toBeLessThanOrEqual(1);
         } else if (viewport.width < 1024) {
           expect(await detailDock.evaluate((element) => getComputedStyle(element).position)).toBe('sticky');
@@ -266,6 +253,12 @@ for (const { locale, copy, nav } of LOCALES) {
       expect(await detail.evaluate((element) =>
         element.scrollWidth <= element.clientWidth,
       )).toBe(true);
+      const touchTargets = await measureFrameElements(frame, `${FRAME_CONTROLS}, [data-stack-eject]`);
+      expect(touchTargets.length).toBeGreaterThan(0);
+      for (const target of touchTargets) {
+        expect(target.width).toBeGreaterThanOrEqual(44);
+        expect(target.height).toBeGreaterThanOrEqual(44);
+      }
 
       await eject.click();
       await expect(detail).toContainText(copy.detail.emptyWithDrag);
@@ -276,12 +269,28 @@ for (const { locale, copy, nav } of LOCALES) {
         element.scrollWidth <= element.clientWidth,
       )).toBe(true);
       await expect(frame.locator('[data-stack-drawing-note]')).toHaveText(copy.cad.hint);
-      await expect(detail.getByRole('status')).toHaveText(
-        copy.detail.feedback.ejected.replace(
-          '{name}',
-          copy.technologies.react.name,
-        ),
-      );
     });
   });
 }
+
+test.describe('Stack canvas device-pixel sizing', () => {
+  test.use({
+    reducedMotion: 'reduce',
+    deviceScaleFactor: 2,
+    viewport: { width: 1280, height: 1050 },
+  });
+
+  test('keeps a high-density canvas sharp without exceeding its pixel budget', async ({ page }) => {
+    const { canvas } = await openStackScene(page, 'en');
+
+    const dimensions = await canvas.evaluate((element: HTMLCanvasElement) => ({
+      backingWidth: element.width,
+      backingHeight: element.height,
+      cssWidth: element.clientWidth,
+      cssHeight: element.clientHeight,
+    }));
+    expect(dimensions.backingWidth / dimensions.cssWidth).toBeGreaterThan(1);
+    expect(dimensions.backingHeight / dimensions.cssHeight).toBeGreaterThan(1);
+    expect(dimensions.backingWidth * dimensions.backingHeight).toBeLessThanOrEqual(3840 * 2160);
+  });
+});

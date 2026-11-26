@@ -1,25 +1,9 @@
-export function hasWebGLSupport(
-  createCanvas?: () => HTMLCanvasElement,
-): boolean {
-  if (
-    !createCanvas &&
-    typeof WebGLRenderingContext === 'undefined' &&
-    typeof WebGL2RenderingContext === 'undefined'
-  ) {
-    return false;
-  }
-
+export function createStackContext(canvas: HTMLCanvasElement): WebGL2RenderingContext | null {
+  if (typeof WebGL2RenderingContext === 'undefined') return null;
   try {
-    const canvas = (createCanvas ?? (() => document.createElement('canvas')))();
-    const context = canvas.getContext('webgl2') ?? canvas.getContext('webgl');
-    if (!context) return false;
-
-    context
-      .getExtension('WEBGL_lose_context')
-      ?.loseContext();
-    return true;
+    return canvas.getContext('webgl2', { alpha: true, powerPreference: 'low-power' });
   } catch {
-    return false;
+    return null;
   }
 }
 

@@ -26,6 +26,7 @@ const three = vi.hoisted(() => {
     loadedMarks: [] as string[],
     drawnMarks: [] as unknown[],
     drawnNames: [] as string[],
+    drawnNameColors: [] as { name: string; color: string }[],
     intersections: [] as { object: FakeMesh }[],
     frameCallbacks: [] as FrameRequestCallback[],
     cancelledFrames: [] as number[],
@@ -146,11 +147,11 @@ const three = vi.hoisted(() => {
   }
 
   class FakeGroup {
-    children: FakeMesh[] = [];
+    meshes: FakeMesh[] = [];
     position = new FakeVector();
 
     add(...objects: FakeMesh[]) {
-      this.children.push(...objects);
+      this.meshes.push(...objects);
     }
   }
 
@@ -213,9 +214,8 @@ const three = vi.hoisted(() => {
     shadowMap = { enabled: false };
     render = vi.fn();
     dispose = vi.fn();
-    setPixelRatio = vi.fn();
-    setSize = vi.fn();
-    getContext = () => ({ getContextAttributes: () => ({ depth: true }) });
+    forceContextLoss = vi.fn();
+    setDrawingBufferSize = vi.fn();
 
     constructor(public readonly options: Record<string, unknown>) {
       state.renderer = this;
@@ -353,6 +353,12 @@ const technologies = STACK_TECHNOLOGIES.map((technology) => ({
   categoryLabel: `Category: ${technology.category}`,
 }));
 
+function sceneMeshes() {
+  return three.state.scene?.children.flatMap((object) =>
+    object instanceof three.FakeGroup ? object.meshes : [],
+  ) ?? [];
+}
+
 const drawing = {
   clearRect: vi.fn(),
   drawImage: vi.fn((image: unknown) => {
@@ -364,9 +370,13 @@ const drawing = {
   getImageData: vi.fn(() => ({ data: Uint8ClampedArray.of(20, 20, 20, 255, 255, 255, 255, 255) })),
   putImageData: vi.fn(),
   strokeRect: vi.fn(),
+  fillStyle: '',
   fillText: vi.fn((name: string) => {
     if (name.startsWith('Name:') && !three.state.drawnNames.includes(name)) {
       three.state.drawnNames.push(name);
+    }
+    if (name.startsWith('Name:')) {
+      three.state.drawnNameColors.push({ name, color: drawing.fillStyle });
     }
   }),
   save: vi.fn(),
@@ -408,6 +418,7 @@ function resetThree() {
   three.state.loadedMarks.length = 0;
   three.state.drawnMarks.length = 0;
   three.state.drawnNames.length = 0;
+  three.state.drawnNameColors.length = 0;
   three.state.intersections.length = 0;
   three.state.frameCallbacks.length = 0;
   three.state.cancelledFrames.length = 0;
@@ -481,7 +492,7 @@ function mountScene(
     onReceive: vi.fn(),
     ...zoomInput,
     ...options,
-  });
+  }, { getContextAttributes: () => ({ depth: true }) } as WebGL2RenderingContext);
 }
 
 describe('mountStackScene', () => {
@@ -546,19 +557,9 @@ describe('mountStackScene', () => {
     setMotionPreference(true);
     const canvas = makeCanvas();
     const handle = mountScene(canvas);
-    const cardMeshes = three.state.scene?.children
-      .flatMap((child) =>
-        // Scene object traversal is the rendering contract under test, not DOM access.
-        // eslint-disable-next-line testing-library/no-node-access
-        child instanceof three.FakeGroup ? child.children : [],
-      )
+    const cardMeshes = sceneMeshes()
       .filter((mesh) => typeof mesh.userData.technologyId === 'string');
 
-    expect(three.state.renderer?.options).toMatchObject({
-      canvas,
-      alpha: true,
-      antialias: true,
-    });
     expect(cardMeshes).toHaveLength(STACK_TECHNOLOGIES.length);
     expect(three.state.loadedMarks).toEqual(
       technologies.map((technology) => technology.brandMark),
@@ -582,9 +583,31 @@ describe('mountStackScene', () => {
     expect(three.state.scene?.children.some(
       (child) => child instanceof three.FakeLight,
     )).toBe(true);
-    expect(three.state.renderer?.shadowMap.enabled).toBe(true);
+    expect(three.state.renderer?.shadowMap.enabled).toBe(false);
     expect(three.state.renderer?.render).toHaveBeenCalled();
     expect(three.state.frameCallbacks).toHaveLength(0);
+    handle.dispose();
+  });
+
+  test('enables shadows only while the perspective scene is active', () => {
+    setMotionPreference(true);
+    const initial = {
+      technologies,
+      mode: '2d' as const,
+      filter: 'all' as const,
+      selectedId: null,
+      onSelect: vi.fn(),
+      onReceive: vi.fn(),
+      ...zoomInput,
+    };
+    const handle = mountScene(makeCanvas(), initial);
+    expect(three.state.renderer?.shadowMap.enabled).toBe(false);
+
+    handle.update({ ...initial, mode: '3d' });
+    expect(three.state.renderer?.shadowMap.enabled).toBe(true);
+    handle.update(initial);
+    expect(three.state.renderer?.shadowMap.enabled).toBe(false);
+
     handle.dispose();
   });
 
@@ -592,12 +615,7 @@ describe('mountStackScene', () => {
     setMotionPreference(true);
     const handle = mountScene(makeCanvas());
 
-    const cardMeshes = three.state.scene?.children
-      .flatMap((child) =>
-        // Scene object traversal is the rendering contract under test, not DOM access.
-        // eslint-disable-next-line testing-library/no-node-access
-        child instanceof three.FakeGroup ? child.children : [],
-      )
+    const cardMeshes = sceneMeshes()
       .filter((mesh) => typeof mesh.userData.technologyId === 'string');
     const featured = cardMeshes?.filter((mesh) => mesh.userData.featured === true);
     const regular = cardMeshes?.find((mesh) => mesh.userData.featured === false);
@@ -633,14 +651,17 @@ describe('mountStackScene', () => {
     three.state.height = 720;
     three.state.resizeObserver?.trigger();
 
-    expect(three.state.renderer?.setSize).toHaveBeenLastCalledWith(
+    expect(three.state.renderer?.setDrawingBufferSize).toHaveBeenLastCalledWith(
       350,
       720,
-      false,
+      2,
     );
     expect(three.state.camera?.aspect).toBeCloseTo(350 / 720);
     expect(three.state.camera?.position.z).toBeGreaterThan(15);
     expect(three.state.camera?.updateProjectionMatrix).toHaveBeenCalled();
+    three.state.renderer?.render.mockClear();
+    three.state.resizeObserver?.trigger();
+    expect(three.state.renderer?.render).not.toHaveBeenCalled();
     handle.dispose();
   });
 
@@ -654,16 +675,16 @@ describe('mountStackScene', () => {
     const scene = three.state.scene;
     const floor = scene?.children.find((child) =>
       child instanceof three.FakeGroup &&
-      child.children.some((mesh) => mesh instanceof three.FakeGrid),
+      child.meshes.some((mesh) => mesh instanceof three.FakeGrid),
     );
     const cardGroup = scene?.children.find((child) =>
       child instanceof three.FakeGroup &&
-      child.children.some((mesh) => typeof mesh.userData.technologyId === 'string'),
+      child.meshes.some((mesh) => typeof mesh.userData.technologyId === 'string'),
     );
     if (!(floor instanceof three.FakeGroup) || !(cardGroup instanceof three.FakeGroup)) {
       throw new Error('Expected the 3D floor and technology cards');
     }
-    const cards = cardGroup.children.filter((mesh) => typeof mesh.userData.technologyId === 'string');
+    const cards = cardGroup.meshes.filter((mesh) => typeof mesh.userData.technologyId === 'string');
     const bottomCard = cards.reduce((lowest, card) =>
       card.position.y < lowest.position.y ? card : lowest,
     );
@@ -712,11 +733,7 @@ describe('mountStackScene', () => {
     const { render: draw } = three.state.renderer ?? {};
     const scene = three.state.scene;
     const flatCamera = draw?.mock.lastCall?.[1];
-    const cardMeshes = three.state.scene?.children
-      .flatMap((child) =>
-        // eslint-disable-next-line testing-library/no-node-access -- Three.js scene graph, not DOM.
-        child instanceof three.FakeGroup ? child.children : [],
-      )
+    const cardMeshes = sceneMeshes()
       .filter((mesh) => typeof mesh.userData.technologyId === 'string');
     expect(cardMeshes).toHaveLength(technologies.length);
     const initialPositions = cardMeshes?.map(({ position }) => ({ ...position }));
@@ -826,11 +843,7 @@ describe('mountStackScene', () => {
     const canvas = makeCanvas();
     const onRotate = vi.fn();
     const handle = mountScene(canvas, { ...zoomInput, mode: '3d', onRotate });
-    const card = three.state.scene?.children
-      .flatMap((child) =>
-        // eslint-disable-next-line testing-library/no-node-access -- Three.js scene graph.
-        child instanceof three.FakeGroup ? child.children : [],
-      )
+    const card = sceneMeshes()
       .find((mesh) => mesh.userData.technologyId === 'react');
     if (!card) throw new Error('Expected the React card in the scene');
 
@@ -932,11 +945,7 @@ describe('mountStackScene', () => {
   test('updates visible ambient movement at a 60 fps cadence', () => {
     setMotionPreference(false);
     const handle = mountScene(makeCanvas());
-    const cards = three.state.scene?.children
-      .flatMap((child) =>
-        // eslint-disable-next-line testing-library/no-node-access -- Three.js scene graph, not DOM.
-        child instanceof three.FakeGroup ? child.children : [],
-      )
+    const cards = sceneMeshes()
       .filter((mesh) => typeof mesh.userData.technologyId === 'string') ?? [];
     const rest = cards.map(({ position }) => ({ x: position.x, y: position.y }));
     three.state.observer?.trigger(true);
@@ -961,9 +970,7 @@ describe('mountStackScene', () => {
     setMotionPreference(false);
     const canvas = makeCanvas();
     const handle = mountScene(canvas);
-    const cards = three.state.scene?.children
-      // eslint-disable-next-line testing-library/no-node-access -- Three.js scene graph.
-      .flatMap((child) => child instanceof three.FakeGroup ? child.children : [])
+    const cards = sceneMeshes()
       .filter((mesh) => typeof mesh.userData.technologyId === 'string') ?? [];
     const held = cards.find((mesh) => mesh.userData.technologyId === 'react');
     const neighbor = cards.find((mesh) => mesh.userData.technologyId === 'typescript');
@@ -1008,11 +1015,7 @@ describe('mountStackScene', () => {
     if (!(connections instanceof three.FakeMesh)) {
       throw new Error('Expected category connection geometry');
     }
-    const cards = scene?.children
-      .flatMap((child) =>
-        // eslint-disable-next-line testing-library/no-node-access -- Three.js scene graph, not DOM.
-        child instanceof three.FakeGroup ? child.children : [],
-      )
+    const cards = sceneMeshes()
       .filter((mesh) => typeof mesh.userData.technologyId === 'string') ?? [];
     const before = connections.geometry.points.map(({ x, y, z }) => ({ x, y, z }));
     for (const point of before) {
@@ -1032,6 +1035,46 @@ describe('mountStackScene', () => {
     three.state.observer?.trigger(true);
     three.state.frameCallbacks.at(-1)?.(100);
     three.state.frameCallbacks.at(-1)?.(117);
+
+    expect(connections.geometry.points).not.toEqual(before);
+    handle.dispose();
+  });
+
+  test('updates category traces during a direct card drag', () => {
+    setMotionPreference(true);
+    const canvas = makeCanvas();
+    const handle = mountScene(canvas);
+    const scene = three.state.scene;
+    const connections = scene?.children.find(
+      (child) => child instanceof three.FakeMesh && child.geometry.points.length > 0,
+    );
+    const held = sceneMeshes()
+      .find((mesh) => mesh.userData.technologyId === 'react');
+    if (!(connections instanceof three.FakeMesh) || !held) {
+      throw new Error('Expected category traces and a React card');
+    }
+
+    const before = connections.geometry.points.map(({ x, y, z }) => ({ x, y, z }));
+    const planeHit = three.state.raycaster?.ray.intersectPlane;
+    planeHit
+      ?.mockReturnValueOnce(new three.FakeVector(held.position.x, held.position.y, held.position.z))
+      .mockReturnValueOnce(new three.FakeVector(held.position.x + 0.4, held.position.y, held.position.z));
+    three.state.intersections = [{ object: held }];
+    canvas.dispatchEvent(new PointerEvent('pointerdown', {
+      button: 0,
+      pointerId: 3,
+      pointerType: 'mouse',
+      isPrimary: true,
+      clientX: 600,
+      clientY: 350,
+    }));
+    canvas.dispatchEvent(new PointerEvent('pointermove', {
+      pointerId: 3,
+      pointerType: 'mouse',
+      isPrimary: true,
+      clientX: 620,
+      clientY: 350,
+    }));
 
     expect(connections.geometry.points).not.toEqual(before);
     handle.dispose();
@@ -1070,13 +1113,13 @@ describe('mountStackScene', () => {
     const originalPixelRatio = Object.getOwnPropertyDescriptor(window, 'devicePixelRatio');
     Object.defineProperty(window, 'devicePixelRatio', { configurable: true, value: 1 });
     const standardDensityHandle = mountScene(makeCanvas());
-    expect(three.state.renderer?.setPixelRatio).toHaveBeenLastCalledWith(2);
+    expect(three.state.renderer?.setDrawingBufferSize).toHaveBeenLastCalledWith(three.state.width, three.state.height, 2);
     standardDensityHandle.dispose();
 
     resetThree();
     Object.defineProperty(window, 'devicePixelRatio', { configurable: true, value: 3 });
     const highDensityHandle = mountScene(makeCanvas());
-    expect(three.state.renderer?.setPixelRatio).toHaveBeenLastCalledWith(3);
+    expect(three.state.renderer?.setDrawingBufferSize).toHaveBeenLastCalledWith(three.state.width, three.state.height, 3);
     highDensityHandle.dispose();
 
     resetThree();
@@ -1084,7 +1127,7 @@ describe('mountStackScene', () => {
     three.state.height = 2160;
     const highDensityCanvas = makeCanvas();
     const cappedHandle = mountScene(highDensityCanvas);
-    expect(three.state.renderer?.setPixelRatio).toHaveBeenLastCalledWith(1);
+    expect(three.state.renderer?.setDrawingBufferSize).toHaveBeenLastCalledWith(3840, 2160, 1);
     cappedHandle.dispose();
     if (originalPixelRatio) {
       Object.defineProperty(window, 'devicePixelRatio', originalPixelRatio);
@@ -1096,13 +1139,21 @@ describe('mountStackScene', () => {
   test('selects enabled cards by raycasting and ignores cards outside the active filter', () => {
     setMotionPreference(true);
     const onSelect = vi.fn();
-    const handle = mountScene(makeCanvas(), { onSelect });
-    const cardMeshes = three.state.scene?.children
-      .flatMap((child) =>
-        // Scene object traversal is the rendering contract under test, not DOM access.
-        // eslint-disable-next-line testing-library/no-node-access
-        child instanceof three.FakeGroup ? child.children : [],
-      )
+    const onPreviousSelect = vi.fn();
+    const initial = {
+      technologies,
+      mode: '2d' as const,
+      filter: 'all' as const,
+      selectedId: null,
+      onSelect: onPreviousSelect,
+      onReceive: vi.fn(),
+      ...zoomInput,
+    };
+    const handle = mountScene(makeCanvas(), initial);
+    three.state.renderer?.render.mockClear();
+    handle.update({ ...initial, onSelect });
+    expect(three.state.renderer?.render).not.toHaveBeenCalled();
+    const cardMeshes = sceneMeshes()
       .filter((mesh) => typeof mesh.userData.technologyId === 'string');
     const react = cardMeshes?.find((mesh) => mesh.userData.technologyId === 'react');
     const node = cardMeshes?.find((mesh) => mesh.userData.technologyId === 'nodeJs');
@@ -1112,20 +1163,51 @@ describe('mountStackScene', () => {
     three.state.intersections = [{ object: react }];
     canvasClick();
     expect(onSelect).toHaveBeenCalledWith('react');
+    expect(onPreviousSelect).not.toHaveBeenCalled();
     expect(three.state.raycaster?.setFromCamera).toHaveBeenCalled();
 
+    handle.update({ ...initial, filter: 'frontend', onSelect });
+    three.state.intersections = [{ object: node }];
+    canvasClick();
+    expect(onSelect).toHaveBeenCalledTimes(1);
+    handle.dispose();
+  });
+
+  test('paints filtered-out card faces with the muted accessible ink', () => {
+    setMotionPreference(true);
+    vi.spyOn(window, 'getComputedStyle').mockImplementation((element) => {
+      const token = (element as HTMLElement).style.color;
+      const color = token.includes('muted')
+        ? 'rgb(90, 87, 79)'
+        : token.includes('surface')
+          ? 'rgb(242, 239, 230)'
+          : 'rgb(18, 17, 16)';
+      return {
+        color,
+        fontFamily: 'monospace',
+        getPropertyValue: () => '',
+      } as unknown as CSSStyleDeclaration;
+    });
+    const handle = mountScene(makeCanvas());
     handle.update({
       technologies,
       mode: '2d',
       filter: 'frontend',
       selectedId: null,
-      onSelect,
+      onSelect: vi.fn(),
       onReceive: vi.fn(),
       ...zoomInput,
     });
-    three.state.intersections = [{ object: node }];
-    canvasClick();
-    expect(onSelect).toHaveBeenCalledTimes(1);
+
+    const latestNameColor = (id: string) => three.state.drawnNameColors
+      .filter(({ name }) => name === `Name: ${id}`)
+      .at(-1)?.color;
+    const activeColor = latestNameColor('react');
+    const inactiveColor = latestNameColor('chartJs');
+    expect(activeColor).toBeTruthy();
+    expect(inactiveColor).toBeTruthy();
+    expect(inactiveColor).not.toBe(activeColor);
+
     handle.dispose();
   });
 
@@ -1133,9 +1215,7 @@ describe('mountStackScene', () => {
     setMotionPreference(true);
     const canvas = makeCanvas();
     const handle = mountScene(canvas);
-    const cardMeshes = three.state.scene?.children
-      // eslint-disable-next-line testing-library/no-node-access -- Three.js scene graph.
-      .flatMap((child) => child instanceof three.FakeGroup ? child.children : [])
+    const cardMeshes = sceneMeshes()
       .filter((mesh) => typeof mesh.userData.technologyId === 'string') ?? [];
     const react = cardMeshes.find((mesh) => mesh.userData.technologyId === 'react');
     if (!react) throw new Error('Expected React card');
@@ -1165,12 +1245,7 @@ describe('mountStackScene', () => {
   test('moves the selected card into the slot and restores it when selection clears', () => {
     setMotionPreference(true);
     const handle = mountScene(makeCanvas());
-    const cardMeshes = three.state.scene?.children
-      .flatMap((child) =>
-        // Scene object traversal is the rendering contract under test, not DOM access.
-        // eslint-disable-next-line testing-library/no-node-access
-        child instanceof three.FakeGroup ? child.children : [],
-      )
+    const cardMeshes = sceneMeshes()
       .filter((mesh) => typeof mesh.userData.technologyId === 'string');
     const react = cardMeshes?.find((mesh) => mesh.userData.technologyId === 'react');
     if (!react) throw new Error('React card is missing');
@@ -1199,6 +1274,83 @@ describe('mountStackScene', () => {
     });
     expect(react.userData.inSlot).toBe(false);
     expect(react.position.y).toBe(originalPosition.y);
+    handle.dispose();
+  });
+
+  test('animates an ejected card from the slot to its free canvas position', () => {
+    setMotionPreference(false);
+    const canvas = makeCanvas();
+    canvas.style.setProperty('--duration-state', '200ms');
+    const initial = {
+      technologies,
+      mode: '2d' as const,
+      filter: 'all' as const,
+      selectedId: null,
+      onSelect: vi.fn(),
+      onReceive: vi.fn(),
+      ...zoomInput,
+    };
+    const handle = mountScene(canvas, initial);
+    const react = sceneMeshes()
+      .find((mesh) => mesh.userData.technologyId === 'react');
+    if (!react) throw new Error('React card is missing');
+    const originalPosition = { ...react.position };
+    const frame = (time: number) => three.state.frameCallbacks.at(-1)?.(time);
+
+    three.state.observer?.trigger(true);
+    frame(100);
+    frame(117);
+    handle.update({ ...initial, selectedId: 'react' });
+    expect(react.position).toMatchObject({ x: 0, y: 0 });
+    expect(react.scale.x).toBeCloseTo(1.22);
+
+    handle.update(initial);
+    expect(react.position).toMatchObject({ x: 0, y: 0 });
+
+    for (let time = 134; time <= 168; time += 17) frame(time);
+    const initialProgress = Math.hypot(react.position.x, react.position.y) /
+      Math.hypot(originalPosition.x, originalPosition.y);
+    expect(initialProgress).toBeLessThan(0.155);
+
+    for (let time = 185; time <= 236; time += 17) frame(time);
+    const remainingDistance = Math.hypot(
+      originalPosition.x - react.position.x,
+      originalPosition.y - react.position.y,
+    );
+    expect(remainingDistance).toBeGreaterThan(0);
+    expect(remainingDistance).toBeLessThan(Math.hypot(originalPosition.x, originalPosition.y));
+    expect(react.scale.x).toBeLessThan(1.22);
+
+    for (let time = 253; time <= 321; time += 17) frame(time);
+    expect(react.position).toMatchObject(originalPosition);
+    expect(react.scale.x).toBeCloseTo(1.13);
+    handle.dispose();
+  });
+
+  test('ejects a card immediately when reduced motion is requested', () => {
+    setMotionPreference(true);
+    const canvas = makeCanvas();
+    const initial = {
+      technologies,
+      mode: '2d' as const,
+      filter: 'all' as const,
+      selectedId: null,
+      onSelect: vi.fn(),
+      onReceive: vi.fn(),
+      ...zoomInput,
+    };
+    const handle = mountScene(canvas, initial);
+    const react = sceneMeshes()
+      .find((mesh) => mesh.userData.technologyId === 'react');
+    if (!react) throw new Error('React card is missing');
+    const originalPosition = { ...react.position };
+
+    handle.update({ ...initial, selectedId: 'react' });
+    expect(react.position).toMatchObject({ x: 0, y: 0 });
+    handle.update(initial);
+
+    expect(react.position).toMatchObject(originalPosition);
+    expect(three.state.frameCallbacks).toHaveLength(0);
     handle.dispose();
   });
 
@@ -1238,9 +1390,7 @@ describe('mountStackScene', () => {
   test('drifts slowly, freezes offscreen, and restores rest without moving the occupied slot', () => {
     const preference = setMotionPreference(false);
     const handle = mountScene(makeCanvas(), { selectedId: 'react' });
-    const meshes = three.state.scene?.children
-      // eslint-disable-next-line testing-library/no-node-access -- Three.js scene graph.
-      .flatMap((child) => child instanceof three.FakeGroup ? child.children : [])
+    const meshes = sceneMeshes()
       .filter((mesh) => typeof mesh.userData.technologyId === 'string') ?? [];
     const occupant = meshes.find((mesh) => mesh.userData.inSlot);
     const read = () => meshes.map(({ position: { x, y, z } }) => ({ x, y, z }));
@@ -1311,6 +1461,7 @@ describe('mountStackScene', () => {
     handle.dispose();
 
     expect(three.state.renderer?.dispose).toHaveBeenCalledOnce();
+    expect(three.state.renderer?.forceContextLoss).toHaveBeenCalledOnce();
     expect(three.state.geometries.length).toBeGreaterThan(0);
     expect(three.state.geometries.every((geometry) => geometry.disposed)).toBe(
       true,

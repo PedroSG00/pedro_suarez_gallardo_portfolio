@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { hasWebGLSupport } from '@/lib/stack/stack-capabilities';
+import { createStackContext } from '@/lib/stack/stack-capabilities';
 import type {
   StackSceneHandle,
   StackSceneStatus,
@@ -15,118 +15,63 @@ type Props = StackSceneUpdate & {
 
 export type { StackSceneTechnology };
 
-export default function StackCanvas({
-  technologies,
-  mode,
-  zoom,
-  yaw,
-  pitch,
-  filter,
-  selectedId,
-  onSelect,
-  onReceive,
-  onZoom,
-  onRotate,
-  onSceneStatusChange,
-}: Props) {
+export default function StackCanvas({ onSceneStatusChange, ...update }: Props) {
+  const { technologies, mode, yaw, pitch } = update;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const sceneRef = useRef<StackSceneHandle | null>(null);
-  const latestUpdateRef = useRef<StackSceneUpdate>({
-    technologies,
-    mode,
-    zoom,
-    yaw,
-    pitch,
-    filter,
-    selectedId,
-    onSelect,
-    onReceive,
-    onZoom,
-    onRotate,
-  });
-  const [webglAvailable, setWebglAvailable] = useState(false);
-  const [sceneReady, setSceneReady] = useState(false);
-
-  useEffect(() => {
-    const supported = hasWebGLSupport();
-    // Keep the canvas out of server HTML and fall back when WebGL is missing.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setWebglAvailable(supported);
-    if (!supported) onSceneStatusChange('fallback');
-  }, [onSceneStatusChange]);
+  const latestUpdateRef = useRef(update);
+  const [phase, setPhase] = useState<'loading' | 'ready' | 'fallback'>('loading');
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!webglAvailable || !canvas) return;
+    if (!canvas) return;
 
-    let cancelled = false;
-    const failToFlatList = () => {
-      if (cancelled) return;
+    let active = true;
+    let pendingContext: WebGL2RenderingContext | null = null;
+    const dispose = () => {
+      active = false;
+      canvas.removeEventListener('webglcontextlost', failToFlatList);
+      sceneRef.current?.dispose();
       sceneRef.current = null;
-      setSceneReady(false);
-      setWebglAvailable(false);
-      onSceneStatusChange('fallback');
+      pendingContext?.getExtension('WEBGL_lose_context')?.loseContext();
+      pendingContext = null;
     };
+    function failToFlatList() {
+      if (!active) return;
+      dispose();
+      setPhase('fallback');
+      onSceneStatusChange('fallback');
+    }
+    canvas.addEventListener('webglcontextlost', failToFlatList);
 
-    void import('@/components/sections/Stack/stack-scene')
-      .then(({ mountStackScene }) => {
-        if (cancelled) return;
-
-        try {
-          const scene = mountStackScene(canvas, latestUpdateRef.current);
-          if (cancelled) {
-            scene.dispose();
-            return;
-          }
-
-          sceneRef.current = scene;
-          setSceneReady(true);
-          onSceneStatusChange(scene.supportsPerspective ? 'ready' : 'flat');
-        } catch {
+    void Promise.resolve()
+      .then(async () => {
+        if (!active) return;
+        pendingContext = createStackContext(canvas);
+        if (!pendingContext) {
           failToFlatList();
+          return;
         }
+        const { mountStackScene } = await import('@/components/sections/Stack/stack-scene');
+        if (!active || !pendingContext) return;
+        const scene = mountStackScene(canvas, latestUpdateRef.current, pendingContext);
+        pendingContext = null;
+        sceneRef.current = scene;
+        setPhase('ready');
+        onSceneStatusChange(scene.supportsPerspective ? 'ready' : 'flat');
       })
       .catch(failToFlatList);
 
-    return () => {
-      cancelled = true;
-      sceneRef.current?.dispose();
-      sceneRef.current = null;
-    };
-  }, [webglAvailable, onSceneStatusChange]);
+    return dispose;
+  }, [onSceneStatusChange]);
 
   useLayoutEffect(() => {
-    const update: StackSceneUpdate = {
-      technologies,
-      mode,
-      zoom,
-      yaw,
-      pitch,
-      filter,
-      selectedId,
-      onSelect,
-      onReceive,
-      onZoom,
-      onRotate,
-    };
     latestUpdateRef.current = update;
-    if (sceneReady) sceneRef.current?.update(update);
-  }, [
-    technologies,
-    mode,
-    zoom,
-    yaw,
-    pitch,
-    filter,
-    selectedId,
-    onSelect,
-    onReceive,
-    onZoom,
-    onRotate,
-    sceneReady,
-  ]);
+    sceneRef.current?.update(update);
+  });
 
-  if (!webglAvailable) return null;
+  if (phase === 'fallback') return null;
+  const sceneReady = phase === 'ready';
 
   return (
     <div

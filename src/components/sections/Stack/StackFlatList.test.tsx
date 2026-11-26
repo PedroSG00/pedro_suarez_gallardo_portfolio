@@ -248,19 +248,7 @@ describe.each(LOCALES)(
       expect(button).toBeEnabled();
     }
 
-    for (const role of [
-      'checkbox',
-      'textbox',
-      'combobox',
-      'slider',
-      'progressbar',
-      'switch',
-    ] as const) {
-      expect(screen.queryByRole(role)).not.toBeInTheDocument();
-    }
-    expect(screen.queryByRole('navigation')).not.toBeInTheDocument();
-    // eslint-disable-next-line testing-library/no-node-access
-    expect(document.querySelector('canvas')).toBeNull();
+    expect(screen.queryByRole('switch')).not.toBeInTheDocument();
   });
   },
 );

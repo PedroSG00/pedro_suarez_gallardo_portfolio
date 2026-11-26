@@ -6,12 +6,12 @@ import { STACK_TECHNOLOGIES } from '@/content/stack';
 import StackCanvas from './StackCanvas';
 
 const mocks = vi.hoisted(() => ({
-  detectWebGL: vi.fn<() => boolean>(),
+  createContext: vi.fn<() => WebGL2RenderingContext | null>(),
   mountStackScene: vi.fn(),
 }));
 
 vi.mock('@/lib/stack/stack-capabilities', () => ({
-  hasWebGLSupport: mocks.detectWebGL,
+  createStackContext: mocks.createContext,
 }));
 
 vi.mock('./stack-scene', () => ({
@@ -39,6 +39,7 @@ const onReceive = vi.fn();
 const onZoom = vi.fn();
 const onRotate = vi.fn();
 const onSceneStatusChange = vi.fn();
+const context = { getExtension: () => null } as unknown as WebGL2RenderingContext;
 const sceneHandle = {
   supportsPerspective: true,
   update: vi.fn(),
@@ -67,7 +68,7 @@ function renderCanvas(props: Partial<ComponentProps<typeof StackCanvas>> = {}) {
 
 describe('StackCanvas', () => {
   beforeEach(() => {
-    mocks.detectWebGL.mockReset();
+    mocks.createContext.mockReset().mockReturnValue(context);
     mocks.mountStackScene.mockReset();
     sceneHandle.update.mockReset();
     sceneHandle.dispose.mockReset();
@@ -83,17 +84,15 @@ describe('StackCanvas', () => {
   });
 
   test('keeps the canvas and its controls absent when WebGL is unavailable', async () => {
-    mocks.detectWebGL.mockReturnValue(false);
+    mocks.createContext.mockReturnValue(null);
     renderCanvas();
 
-    await waitFor(() => expect(mocks.detectWebGL).toHaveBeenCalledOnce());
+    await waitFor(() => expect(onSceneStatusChange).toHaveBeenLastCalledWith('fallback'));
     expect(screen.queryByTestId('stack-canvas')).not.toBeInTheDocument();
     expect(mocks.mountStackScene).not.toHaveBeenCalled();
-    expect(onSceneStatusChange).toHaveBeenLastCalledWith('fallback');
   });
 
   test('mounts an aria-hidden canvas with the complete localized card registry', async () => {
-    mocks.detectWebGL.mockReturnValue(true);
     renderCanvas();
 
     const canvas = await screen.findByTestId('stack-canvas');
@@ -107,17 +106,13 @@ describe('StackCanvas', () => {
     expect(canvas).toHaveAttribute('aria-hidden', 'true');
     expect(canvas).toBeVisible();
 
-    await waitFor(() => expect(mocks.mountStackScene).toHaveBeenCalledOnce());
-    expect(mocks.mountStackScene.mock.calls[0]?.[1]).toMatchObject({
-      technologies,
-      filter: 'all',
-      selectedId: null,
-    });
+    expect(mocks.mountStackScene).toHaveBeenCalledExactlyOnceWith(
+      canvas, expect.objectContaining({ technologies, filter: 'all', selectedId: null }), context,
+    );
     expect(onSceneStatusChange).toHaveBeenLastCalledWith('ready');
   });
 
   test('forwards canvas selection and drops and updates filter and selected state', async () => {
-    mocks.detectWebGL.mockReturnValue(true);
     const { rerender } = renderCanvas();
     await waitFor(async () =>
       expect(
@@ -165,7 +160,6 @@ describe('StackCanvas', () => {
   });
 
   test('reports a usable 2D scene when perspective is unsupported', async () => {
-    mocks.detectWebGL.mockReturnValue(true);
     mocks.mountStackScene.mockReturnValue({ ...sceneHandle, supportsPerspective: false });
     renderCanvas();
     await waitFor(() => expect(onSceneStatusChange).toHaveBeenLastCalledWith('flat'));
@@ -173,7 +167,6 @@ describe('StackCanvas', () => {
   });
 
   test('disposes the scene and reports it inactive on unmount', async () => {
-    mocks.detectWebGL.mockReturnValue(true);
     const { unmount } = renderCanvas();
     await waitFor(async () =>
       expect(
@@ -188,7 +181,6 @@ describe('StackCanvas', () => {
   });
 
   test('falls back to the flat list when scene initialization fails', async () => {
-    mocks.detectWebGL.mockReturnValue(true);
     mocks.mountStackScene.mockImplementation(() => {
       throw new Error('WebGL renderer initialization failed');
     });
@@ -197,6 +189,22 @@ describe('StackCanvas', () => {
     await waitFor(() =>
       expect(onSceneStatusChange).toHaveBeenLastCalledWith('fallback'),
     );
+    expect(screen.queryByTestId('stack-canvas')).not.toBeInTheDocument();
+  });
+
+  test('disposes the scene and falls back when its WebGL context is lost', async () => {
+    renderCanvas();
+    const canvas = await screen.findByTestId('stack-canvas');
+    await waitFor(() =>
+      expect(canvas).toHaveAttribute('data-stack-scene-ready', 'true'),
+    );
+
+    act(() => {
+      canvas.dispatchEvent(new Event('webglcontextlost'));
+    });
+
+    await waitFor(() => expect(onSceneStatusChange).toHaveBeenLastCalledWith('fallback'));
+    expect(sceneHandle.dispose).toHaveBeenCalledOnce();
     expect(screen.queryByTestId('stack-canvas')).not.toBeInTheDocument();
   });
 });

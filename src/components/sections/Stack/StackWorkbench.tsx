@@ -21,6 +21,7 @@ import {
 } from '@/lib/stack/stack-camera';
 
 type Props = {
+  interactive: boolean;
   active: boolean;
   supportsPerspective: boolean;
   technologies: readonly StackSceneTechnology[];
@@ -39,7 +40,7 @@ type Props = {
 };
 
 export default function StackWorkbench({
-  active, supportsPerspective, technologies, filter, selectedId, selectedName, listId, listOpen,
+  interactive, active, supportsPerspective, technologies, filter, selectedId, selectedName, listId, listOpen,
   filters, detail, list, onSelect, onReceive, onToggleList, onSceneStatusChange,
 }: Props) {
   const t = useTranslations('stack.cad');
@@ -108,8 +109,9 @@ export default function StackWorkbench({
         </div>
       </div>
       <div data-stack-stage>
+        <div data-stack-detail-dock>{detail}</div>
         <div data-stack-drawing data-mode={mode} hidden={listOpen}>
-          <StackCanvas
+          {interactive && <StackCanvas
             mode={mode}
             zoom={zoom}
             yaw={orientation.yaw}
@@ -122,10 +124,9 @@ export default function StackWorkbench({
             onSelect={onSelect}
             onReceive={onReceive}
             onSceneStatusChange={onSceneStatusChange}
-          />
+          />}
           {active && !selectedId && <p data-stack-drawing-note aria-hidden="true">{t('hint')}</p>}
         </div>
-        <div data-stack-detail-dock>{detail}</div>
         {list}
       </div>
       {active && (

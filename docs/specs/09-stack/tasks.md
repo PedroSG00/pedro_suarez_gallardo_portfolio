@@ -2,18 +2,19 @@
 
 **Fuente:** `docs/specs/09-stack/spec.md` y `docs/specs/09-stack/plan.md`.
 **Regla de trabajo:** tests primero; sin dependencias adicionales; sin cambios en capas compartidas sin aprobación explícita.
-**Estado:** implementación reiniciada. La anterior (registro, sección estática, filtros y mensajes) se retiró del repositorio; el árbol solo contiene documentación de Stack. Las decisiones nuevas de marcas, volumen, movimiento y slot amplían la aceptación y requieren verificación aunque una tarea histórica figure como completada.
+**Estado (2026-11-26):** la revisión visual manual y las 25 descripciones están aprobadas. El resize se confirmó también en Firefox estable. T11 y T12 mantienen pendientes las comprobaciones con tecnología de asistencia real y Safari nativo. La aprobación explícita del movimiento ambiental sigue sin registrar.
 
-## Bloqueos previos
+## Aprobaciones y decisiones editoriales
 
-Antes de implementar T1:
+T1 está implementada. Estado de las aprobaciones y decisiones editoriales:
 
-- [x] Aprobar las 25 descripciones EN/ES de `docs/specs/09-stack/content-review.md` y la instrucción del casillero. Aprobado por el usuario.
+- [x] Aprobación previa de las etiquetas y la instrucción inicial del casillero.
+- [x] Aprobación explícita de las 25 descripciones EN/ES de `docs/specs/09-stack/content-review.md`; confirmada por el usuario el 2026-11-26.
 - [x] Registrar en `docs/constitution.md` la incorporación de Three.js al stack cerrado. Es una capa transversal: requiere autorización explícita. Autorizado y registrado.
 - [x] Adoptar las 25 tecnologías y seis categorías de la sección 4 del brief, con prioridad visual de React y TypeScript.
 - [x] Casillero inicial sin selección, con instrucción breve.
 - [x] Registrar y validar 25 marcas propias en recursos SVG locales; documentar fuentes, licencias conocidas, límites de marca y arte original en `public/stack/ATTRIBUTION.md`. Los permisos de marca no se presumen: el uso identifica las tecnologías y no implica respaldo.
-- [ ] Definir dirección de arte de la escena como un único sistema volumétrico: cartas, caras con marcas, slot, escenario, escala, materiales, luces, sombras y perspectiva.
+- [x] Definir dirección de arte de la escena como un único sistema volumétrico: cartas, caras con marcas, slot, escenario, escala, materiales, luces, sombras y perspectiva. Revisión visual manual aprobada por el usuario el 2026-11-26.
 - [ ] Aprobar el comportamiento de movimiento ambiental pausado, colisiones estables, pausa fuera de vista y reduced-motion.
 - [x] Definir exclusividad del slot, feedback de recepción, reemplazo al soltar sobre una ocupación y expulsión a posición visible libre. El usuario confirma que el drop nuevo reemplaza a la tecnología alojada.
 - [x] Conservar posiciones, filtro, selección y descripción al alternar 2D↔3D.
@@ -65,7 +66,7 @@ No se implementa una tarea mientras sus decisiones previas sigan abiertas. No se
 
 **Criterio de hecho:** pasan los tests de integridad y paridad; las 25 descripciones están aprobadas y presentes en ambos idiomas.
 
-**Estado:** completada. `src/content/stack.ts` conserva el registro canónico de 25 tecnologías, seis categorías, orden editorial, ids únicos e iconos existentes, y añade una referencia local única `brandMark` por tecnología. `public/stack/` contiene los 25 SVG: marcas de tecnología con fuente/licencia y límites documentados en `ATTRIBUTION.md`, y arte original propio para REST APIs y WebSockets, que no tienen logotipo oficial. Los mensajes EN/ES mantienen nombre y descripción aprobados para las 25 claves. `src/content/stack.test.ts` verifica integridad, orden, categorías, prioridad, paridad, SVG locales únicos y atribución; también conserva la cobertura editorial de descripciones. Licencias no declaradas por la fuente se indican como no concedidas, y no se afirma autorización de marca ni respaldo.
+**Estado:** implementación técnica presente y aprobación editorial de las descripciones ampliadas registrada el 2026-11-26. `src/content/stack.ts` conserva el registro canónico de 25 tecnologías, seis categorías, orden editorial, ids únicos e iconos existentes, y añade una referencia local única `brandMark` por tecnología. `public/stack/` contiene los 25 SVG: marcas de tecnología con fuente/licencia y límites documentados en `ATTRIBUTION.md`, y arte original propio para REST APIs y WebSockets, que no tienen logotipo oficial. Los mensajes EN/ES contienen nombre y descripciones para las 25 claves. `src/content/stack.test.ts` verifica integridad, orden, categorías, prioridad, paridad, SVG locales únicos y atribución; también conserva la cobertura editorial de descripciones. Licencias no declaradas por la fuente se indican como no concedidas, y no se afirma autorización de marca ni respaldo.
 
 ## T2 — Lista plana accesible e integración de la sección
 
@@ -131,7 +132,7 @@ No se implementa una tarea mientras sus decisiones previas sigan abiertas. No se
 - Selección por activación accesible muestra la descripción correcta en el idioma activo.
 - Al aproximar una carta habilitada, el casillero entra en hover; salir revierte ese estado.
 - Al soltar una carta, el casillero confirma recepción, presenta marca/nombre/descripcion y un botón «Expulsar».
-- Soltar una segunda carta con el slot ocupado la rechaza con feedback y la devuelve a zona visible libre.
+- Soltar una segunda carta con el slot ocupado reemplaza a la anterior, devuelve la anterior a una zona libre visible y confirma el reemplazo.
 - La carta alojada no permanece en el conjunto visible/interactivo de cartas; no hay carta bajo el slot.
 - «Expulsar» funciona con teclado, ratón y tacto, vacía el slot y coloca la carta dentro de límites, visible y sin ocultar otras.
 - Seleccionar otra reemplaza la anterior; solo hay una seleccionada.
@@ -144,7 +145,7 @@ No se implementa una tarea mientras sus decisiones previas sigan abiertas. No se
 
 **Criterio de hecho:** unitarios de estado, tests de sección y e2e de selección accesible pasan; lint y typecheck pasan.
 
-**Estado:** completada (RF-3, RF-4a). `stack-state.ts` mantiene una única selección y ocupación del casillero, conserva la descripción al filtrar, reemplaza la selección accesible, rechaza recepciones con el slot ocupado o desde categorías inactivas y devuelve el id liberado al expulsar. `StackDetail` presenta la instrucción aprobada, marca/nombre/descripción, hover de recepción, feedback localizado y el botón accesible «Expulsar». Los controles de selección solo aparecen tras hidratar, por lo que la lista sin JavaScript sigue siendo informativa. `StackDetail.test.tsx`, `stack-state.test.ts`, `StackFlatList.test.tsx` y `e2e/stack/stack-selection.spec.ts` cubren estados, idiomas, filtro, ratón, teclado y tacto. La lista actual mantiene visible la tecnología expulsada; la fuente de arrastre de la escena y su colocación geométrica pertenecen a las tareas posteriores.
+**Estado:** completada (RF-3, RF-4a). `stack-state.ts` mantiene una única selección y ocupación del casillero, conserva la descripción al filtrar, reemplaza la selección con una carta habilitada, rechaza recepciones desde categorías inactivas y devuelve el id liberado al expulsar. `StackDetail` presenta la instrucción aprobada, marca/nombre/descripción, hover de recepción, feedback localizado y el botón accesible «Expulsar». Los controles de selección solo aparecen tras hidratar, por lo que la lista sin JavaScript sigue siendo informativa. `StackDetail.test.tsx`, `stack-state.test.ts`, `StackFlatList.test.tsx` y los e2e de selección y filtro cubren estados, idiomas, teclado y tacto. La fuente de arrastre y la colocación geométrica pertenecen a las tareas posteriores.
 
 ## T5 — Escena Three.js con marcas y cartas volumétricas
 
@@ -192,7 +193,7 @@ No se implementa una tarea mientras sus decisiones previas sigan abiertas. No se
 - El gesto de arrastre no se confunde con seleccionar sin arrastrar, en ratón y táctil.
 - El arrastre no bloquea el desplazamiento de la página fuera del gesto.
 - Acercar/retirar una carta alterna el hover del slot; soltar confirma recepción.
-- Con slot ocupado, un segundo drop da feedback de rechazo y vuelve a posición visible.
+- Con slot ocupado, un segundo drop confirma el reemplazo y devuelve la carta anterior a una posición visible.
 - «Expulsar» funciona por teclado, ratón y tacto; la carta vuelve a posición libre, sin ocultarse bajo el slot.
 - Estado accesible ocupado/vacío y nombre localizado del botón de expulsión.
 
@@ -202,7 +203,7 @@ No se implementa una tarea mientras sus decisiones previas sigan abiertas. No se
 
 **Criterio de hecho:** tests de interacción y e2e de drop dentro/fuera pasan; lint, typecheck y build pasan.
 
-**Estado:** completada en su alcance (RF-4: arrastre; RF-4a: conexión con el casillero). Las cartas habilitadas se arrastran con ratón o tacto en 2D y 3D; al soltar fuera conservan la posición sin cambiar la selección. El casillero se resalta al acercar una carta, confirma la recepción y rechaza un segundo drop. Al expulsar, la carta vuelve al escenario en una posición visible fuera del casillero. Se mantienen la selección sin arrastre y el scroll desde el fondo. Los límites generales y las colisiones quedan para T7.
+**Estado:** completada en su alcance (RF-4: arrastre; RF-4a: conexión con el casillero). Las cartas habilitadas se arrastran con ratón o tacto en 2D y 3D; al soltar fuera conservan la posición sin cambiar la selección. El casillero se resalta al acercar una carta y confirma la recepción o el reemplazo. Al expulsar, la carta vuelve al escenario en una posición visible fuera del casillero. Se mantienen la selección sin arrastre y el scroll desde el fondo. Los límites generales y las colisiones quedan para T7.
 
 **Verificación:** 604 tests de Vitest y 29 e2e de Stack en verde; pasan typecheck, build y lint de Stack. El lint global falla por el aviso previo de `.tmp/R2-visual.mjs:51`. La suite e2e global terminó con 324/339 aprobados y 15 fallos en las suites de About, Hero, Navbar y Work.
 
@@ -232,7 +233,7 @@ No se implementa una tarea mientras sus decisiones previas sigan abiertas. No se
 **Qué debe quedar:**
 
 - `stack-geometry` con límites verificables y sin valores mágicos repetidos.
-- Posiciones expulsadas/rechazadas siempre libres y visibles, calculadas respetando límites, cartas vecinas y zona del casillero.
+- Posiciones de las cartas expulsadas o reemplazadas siempre libres y visibles, calculadas respetando límites, cartas vecinas y zona del casillero.
 - Sin scroll horizontal ni recortes.
 
 **Criterio de hecho:** unitarios de límites y repulsión, y e2e en móvil y escritorio, pasan; lint, typecheck y build pasan.
@@ -408,7 +409,7 @@ No se implementa una tarea mientras sus decisiones previas sigan abiertas. No se
 - Reforzar jerarquía, legibilidad y estados vacío/ocupado del detalle sin añadir color de acento ni cubrir las cartas.
 - Regresiones bilingües para reemplazo/expulsión y e2e de composición responsive, persistencia del inspector y visibilidad del contenido.
 
-**Estado:** implementación en curso; T11 no se inicia.
+**Estado:** alcance automatizado implementado; revisión visual manual aprobada en T12.
 
 ## T11 — Entrada, idioma y degradación sin WebGL
 
@@ -432,9 +433,19 @@ No se implementa una tarea mientras sus decisiones previas sigan abiertas. No se
 **Qué debe quedar:**
 
 - La degradación no depende de una capa de error ni de hidratación.
-- Sin cambios en `Reveal`, layout raíz ni `globals.css` sin aprobación.
+- La solicitud explícita del usuario del 2026-11-26 para corregir todos los bloqueos pendientes autoriza el ajuste de `Reveal`; no se modifica el layout raíz ni `globals.css`.
 
 **Criterio de hecho:** pruebas de fallbacks, idioma, tema y accesibilidad pasan; lint, typecheck y build pasan.
+
+**Progreso verificado (2026-11-26):** los e2e de entrada nueva en EN/ES comprueban el reinicio a 2D, «Todas» y sin selección; el cambio de idioma en ambos sentidos comprueba el mismo reinicio. Sin JavaScript y sin WebGL se conserva la lista completa. La suite comprueba contraste AA de las cartas atenuadas en ambos temas e idiomas, cambio de proyección en el primer fotograma con movimiento reducido, y reflujo a 320 px con texto al 200 %. Los roles, nombres, estados y el uso con teclado se verifican automáticamente; queda pendiente la prueba con tecnología de asistencia real.
+
+**Diagnóstico cruzado (2026-11-26, Playwright con 1 worker):** 21/21 pruebas de reflujo con WebGL activo, sticky móvil, 4K y densidad alta pasan en Chromium, Firefox y WebKit. El cierre de Firefox se reproducía al medir los controles mediante `locator.evaluateAll()`; al medirlos dentro de `frame.evaluate()` desaparece sin cambiar el renderizador. La prueba conserva los redimensionamientos en la misma página y ahora verifica en cada tamaño el ajuste del búfer, las 24 cartas libres y la descripción de la carta alojada. `Reveal` conserva el fallback visible estático verificado en WebKit.
+
+A 320 px y con texto al 200 %, Firefox podía dejar el punto inicial de arrastre detrás del inspector sticky aun cuando el canvas estaba dentro del viewport. La prueba desplaza la página hasta dejarlo accesible y comprueba el destino real del puntero antes de arrastrar; los cuatro bordes pasan dos veces en cada motor (6/6).
+
+La matriz ampliada de contraste, teclado, movimiento reducido, zoom y fallbacks sin JavaScript/WebGL terminó con 49 aprobados y 2 saltos esperados (la comprobación específica de WebKit no corre en otros motores).
+
+La revisión visual manual está aprobada. **Firefox estable 161.0 para Windows**, ejecutado con ventana y verificado mediante WebDriver BiDi, completó en EN/ES el cambio a 3D, la selección, los siete cambios de viewport de 320 px a 4K con WebGL activo y la expulsión. No se perdió la selección ni ninguna carta. WebKit de Playwright no sustituye la comprobación en Safari nativo ni las pruebas con un lector de pantalla real.
 
 ## T12 — Verificación de la matriz de aceptación
 
@@ -459,3 +470,36 @@ No se implementa una tarea mientras sus decisiones previas sigan abiertas. No se
 - Limitaciones de verificación nativa en Safari y Firefox registradas para la spec 12.
 
 **Criterio de hecho:** todos los criterios de RF-1–RF-9 están cubiertos y en verde, los gates pasan y no quedan decisiones ni contenido pendientes.
+
+**Comprobación con lector de pantalla:** recorrer las seis categorías y sus cartas en EN/ES; comprobar que los logos no se anuncian por separado. Con teclado, cambiar filtro y vista, seleccionar una carta, verificar el anuncio del estado y leer la descripción; expulsarla y comprobar el anuncio y el foco. Repetir con VoiceOver y Safari y con NVDA y Firefox, sin dar por válida la comprobación solo por la presencia de atributos ARIA.
+
+**Comprobación en Safari nativo:** abrir `/en#stack` y `/es#stack`, alternar 2D/3D, seleccionar y expulsar una carta, y redimensionar sin recargar con una selección activa. Confirmar que no desaparecen cartas ni controles, que el detalle sigue legible y que Stack no se atenúa indebidamente al hacer scroll. Repetir con movimiento reducido y comprobar los gestos directos sin animación ambiental. Registrar versión de Safari, sistema y cualquier fallo reproducible.
+
+**Estado:** el usuario aprobó la revisión visual de la escena y las 25 descripciones. Firefox estable verificó el resize. Para cerrar T12 faltan Safari nativo, los recorridos con lectores de pantalla reales y la confirmación explícita del comportamiento del movimiento ambiental. WebKit de Playwright, el teclado automatizado y las aserciones de roles/estados no sustituyen esas comprobaciones.
+
+## Refactor de mantenimiento
+
+- Alcance: Stack, su lógica y sus pruebas; sin cambios en la UI, dependencias, configuración de lint o Playwright ni componentes compartidos.
+- Conservar HTML informativo sin JavaScript, fallback sin WebGL, semántica accesible, animaciones y estado observable en los mismos flujos.
+- Evitar cálculos y renderizados sin cambios visuales. Quitar las supresiones ESLint de Stack sin sustituirlas por exclusiones. Retirar solo comprobaciones duplicadas y mantener los umbrales de cobertura.
+
+**Resultado:** un contexto WebGL 2 por canvas activo y carga de Three.js solo cuando ese contexto existe. La hidratación se decide una vez para la sección; la lista renderiza un catálogo localizado que se reutiliza entre interacciones y la selección del casillero tiene una sola fuente de verdad. La escena reutiliza los vértices de trazado y la lista de cartas libres, y omite los redimensionamientos y actualizaciones sin cambios visuales. Se retiraron reglas CSS duplicadas o inalcanzables, recorridos repetidos de la escena en las pruebas y las supresiones ESLint de Stack.
+
+**Verificación:** lint, tipos, 675 unitarias (93,54 % sentencias, 87,33 % ramas, 96,16 % funciones, 95,46 % líneas) y build pasan. La matriz focal posterior al refactor pasa 48/48 en Chromium, Firefox y WebKit; Firefox estable 161.0 repite sin incidencias los siete cambios de viewport de 320 px a 4K, la selección y la expulsión en EN/ES. La prueba de inercia captura el movimiento desde el evento de liberación dentro del navegador, comprueba que el gesto empujó a la carta vecina y conserva el umbral de movimiento. Pasó 12/12 en paralelo y en la ejecución integral final: 378 aprobados, 1 omisión esperada de una prueba exclusiva de WebKit y ningún fallo.
+
+### Refactor de los E2E
+
+La suite de Stack pasa de 67 a 61 casos. Reutiliza la entrada a la escena, los selectores accesibles y la conversión de coordenadas. El recorrido táctil de filtro, selección y expulsión es único; se verifica 4K en la misma página y con selección activa. La prueba de la lista comprueba el orden exacto por categoría y la prioridad tipográfica sin usar atributos internos para determinarla. La prueba ambiental verifica que los repintados WebGL se detienen al salir del viewport y se reanudan al volver; la pausa por pestaña inactiva se comprueba en `stack-scene.test.ts`.
+
+**Verificación:** pasan `pnpm lint`, `pnpm typecheck`, `pnpm test` (675/675, mismo nivel de cobertura) y `pnpm build`. La nueva prueba de pausa y reanudación pasó 8/8 con cuatro workers. En la suite integral pasaron los 61 casos de Stack: **372 aprobados, 1 omisión esperada de una prueba exclusiva de WebKit y ningún fallo**. No se modificó `playwright.config.ts`.
+
+La primera matriz cruzada de los E2E refactorizados detectó cuatro fallos de prueba en Firefox. La comprobación sin JavaScript usa ahora aserciones CSS individuales en vez de la evaluación masiva que cerraba la página. A 4K, el borde compartido del canvas y el inspector admite una tolerancia de 0,01 px para el redondeo de las coordenadas, sin permitir un solapamiento visible. Tras las correcciones, la matriz focal pasó **45/45** en Chromium, Firefox y WebKit. La suite integral volvió a pasar con **372 aprobados y 1 omisión esperada**, sin fallos.
+
+| Criterio | Evidencia principal en `e2e/stack/` |
+|---|---|
+| RF-1: catálogo, orden, marcas y prioridad | `stack-flat-list.spec.ts`, `stack-no-js.spec.ts`, `stack-scene.spec.ts` |
+| RF-2: filtros, teclado, tacto y contraste | `stack-filter.spec.ts`, `stack-workbench.spec.ts`, `stack-projection.spec.ts` |
+| RF-3 y RF-4a: selección, detalle, reemplazo y expulsión | `stack-selection.spec.ts`, `stack-drag.spec.ts`, `stack-filter.spec.ts`, `stack-workbench.spec.ts` |
+| RF-4: gestos, límites, colisiones y movimiento | `stack-drag.spec.ts`, `stack-geometry.spec.ts`, `stack-workbench.spec.ts`; trazados y pausa por pestaña en `stack-scene.test.ts` |
+| RF-5 a RF-7: proyección, zoom y rotación | `stack-projection.spec.ts`, `stack-zoom.spec.ts`, `stack-rotation.spec.ts` |
+| RF-8 y RF-9: reinicios y fallbacks | `stack-selection.spec.ts`, `stack-no-js.spec.ts`, `stack-scene.spec.ts` |

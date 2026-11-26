@@ -1,23 +1,15 @@
 import { expect, test } from '@playwright/test';
 import { STACK_CATEGORIES, STACK_TECHNOLOGIES } from '@/content/stack';
-import en from '../../messages/en.json';
-import es from '../../messages/es.json';
+import { stackControls, STACK_LOCALES } from './stack.helpers';
 
-const LOCALES = [
-  { locale: 'en', messages: en.stack, nav: en.shared.nav },
-  { locale: 'es', messages: es.stack, nav: es.shared.nav },
-] as const;
-
-for (const { locale, messages, nav } of LOCALES) {
+for (const locale of STACK_LOCALES) {
   test.describe(`/${locale}: Stack without JavaScript`, () => {
     test.use({ javaScriptEnabled: false, reducedMotion: 'reduce' });
 
-    test('serves the complete, readable flat list in both languages', async ({ page }) => {
+    test('serves the complete, readable flat list with decorative logos', async ({ page }) => {
       await page.goto(`/${locale}`);
 
-      const stack = page.getByRole('region', { name: nav.stack, exact: true });
-      await expect(stack).toHaveCount(1);
-      await expect(stack.getByRole('heading', { level: 2 })).toHaveCount(1);
+      const { stack, messages } = stackControls(page, locale);
       await expect(stack.getByRole('list')).toHaveCount(STACK_CATEGORIES.length);
       await expect(stack.getByRole('listitem')).toHaveCount(
         STACK_TECHNOLOGIES.length,
@@ -33,6 +25,7 @@ for (const { locale, messages, nav } of LOCALES) {
 
       const marks = stack.getByRole('img', { includeHidden: true });
       await expect(marks).toHaveCount(STACK_TECHNOLOGIES.length);
+      await expect(stack.getByRole('img')).toHaveCount(0);
       for (const [index, technology] of STACK_TECHNOLOGIES.entries()) {
         await expect(marks.nth(index)).toHaveAttribute(
           'src',
@@ -45,11 +38,7 @@ for (const { locale, messages, nav } of LOCALES) {
       const reveals = stack.locator('[data-reveal-root]');
       await expect(reveals).toHaveCount(STACK_CATEGORIES.length);
       for (const reveal of await reveals.all()) {
-        expect(
-          await reveal.evaluate((element) =>
-            Number(getComputedStyle(element).opacity),
-          ),
-        ).toBe(1);
+        await expect(reveal).toHaveCSS('opacity', '1');
       }
 
       await expect(stack.locator('canvas')).toHaveCount(0);

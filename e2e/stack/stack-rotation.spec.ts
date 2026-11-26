@@ -1,19 +1,12 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
-import en from '../../messages/en.json';
-import es from '../../messages/es.json';
-import { readStackCardBounds } from './stack-geometry.helpers';
+import { canvasCoordinates, readStackCardBounds } from './stack-geometry.helpers';
+import { openStackScene, type StackLocale } from './stack.helpers';
 
-type Locale = 'en' | 'es';
-
-async function openScene(page: Page, locale: Locale) {
-  const copy = locale === 'en' ? en : es;
-  await page.goto(`/${locale}#stack`);
-  const stack = page.getByRole('region', { name: copy.shared.nav.stack, exact: true });
-  const canvas = stack.locator('[data-stack-canvas]');
-  await expect(canvas).toHaveAttribute('data-stack-scene-ready', 'true');
-  await stack.getByRole('switch', { name: copy.stack.cad.view }).click();
-  await expect(canvas).toHaveAttribute('data-stack-projection', '1');
-  return { stack, canvas, copy };
+async function openScene(page: Page, locale: StackLocale) {
+  const scene = await openStackScene(page, locale);
+  await scene.view.click();
+  await expect(scene.canvas).toHaveAttribute('data-stack-projection', '1');
+  return scene;
 }
 
 async function readOrientation(canvas: Locator) {
@@ -37,9 +30,7 @@ async function findEmptyPoint(canvas: Locator) {
     },
   );
   if (!point) throw new Error('Expected an empty point on the canvas');
-  const rect = await canvas.boundingBox();
-  if (!rect) throw new Error('Expected a displayed canvas');
-  return { x: rect.x + rect.width * point.x, y: rect.y + rect.height * point.y };
+  return (await canvasCoordinates(canvas))(point);
 }
 
 test.describe('Stack 3D rotation', () => {
@@ -113,7 +104,8 @@ test.describe('Stack 3D rotation', () => {
   test.describe('touch controls', () => {
     test.use({ hasTouch: true, viewport: { width: 390, height: 950 } });
 
-    test('uses localized controls and keeps touch scrolling available on the canvas', async ({ page }) => {
+    test('uses localized controls and keeps touch scrolling available on the canvas', async ({ page, browserName }) => {
+      test.skip(browserName !== 'chromium', 'Native touch scrolling uses Chromium CDP');
       const { stack, canvas, copy } = await openScene(page, 'es');
       const controls = stack.getByRole('group', { name: copy.stack.cad.rotation.label });
       const left = controls.getByRole('button', { name: copy.stack.cad.rotation.left });

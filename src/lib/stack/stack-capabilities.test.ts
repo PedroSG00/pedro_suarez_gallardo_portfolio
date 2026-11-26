@@ -1,56 +1,34 @@
-import { describe, expect, test, vi } from 'vitest';
-import { hasWebGLSupport } from './stack-capabilities';
+import { afterEach, describe, expect, test, vi } from 'vitest';
+import { createStackContext } from './stack-capabilities';
 
-describe('hasWebGLSupport', () => {
-  test('accepts WebGL 2 and releases the probe context', () => {
-    const loseContext = vi.fn();
-    const getExtension = vi.fn(() => ({ loseContext }));
-    const webgl2 = { getExtension } as unknown as WebGL2RenderingContext;
-    const canvas = {
-      getContext: vi.fn((type: string) => (type === 'webgl2' ? webgl2 : null)),
-    } as unknown as HTMLCanvasElement;
+describe('createStackContext', () => {
+  afterEach(() => vi.unstubAllGlobals());
 
-    expect(hasWebGLSupport(() => canvas)).toBe(true);
-    expect(canvas.getContext).toHaveBeenCalledWith('webgl2');
-    expect(getExtension).toHaveBeenCalledWith('WEBGL_lose_context');
-    expect(loseContext).toHaveBeenCalledOnce();
+  test('reuses the drawing context instead of allocating and releasing a probe', () => {
+    vi.stubGlobal('WebGL2RenderingContext', class {});
+    const context = {};
+    const getContext = vi.fn(() => context);
+    expect(createStackContext({ getContext } as unknown as HTMLCanvasElement)).toBe(context);
+    expect(getContext).toHaveBeenCalledExactlyOnceWith('webgl2', {
+      alpha: true,
+      powerPreference: 'low-power',
+    });
   });
 
-  test('falls back to WebGL 1 when WebGL 2 is unavailable', () => {
-    const webgl = {
-      getExtension: vi.fn(() => null),
-    } as unknown as WebGLRenderingContext;
-    const canvas = {
-      getContext: vi.fn((type: string) => (type === 'webgl' ? webgl : null)),
-    } as unknown as HTMLCanvasElement;
-
-    expect(hasWebGLSupport(() => canvas)).toBe(true);
-    expect(canvas.getContext).toHaveBeenNthCalledWith(1, 'webgl2');
-    expect(canvas.getContext).toHaveBeenNthCalledWith(2, 'webgl');
+  test.each(['unavailable', 'blocked'] as const)('falls back when WebGL 2 is %s', (reason) => {
+    vi.stubGlobal('WebGL2RenderingContext', class {});
+    const getContext = vi.fn(() => {
+      if (reason === 'blocked') throw new Error('WebGL is blocked');
+      return null;
+    });
+    expect(createStackContext({ getContext } as unknown as HTMLCanvasElement)).toBeNull();
+    expect(getContext).toHaveBeenCalledOnce();
   });
 
-  test('returns false when neither WebGL context is available', () => {
-    const canvas = {
-      getContext: vi.fn(() => null),
-    } as unknown as HTMLCanvasElement;
-
-    expect(hasWebGLSupport(() => canvas)).toBe(false);
-  });
-
-  test('returns false when the browser rejects a WebGL context', () => {
-    const canvas = {
-      getContext: vi.fn(() => {
-        throw new Error('WebGL is blocked');
-      }),
-    } as unknown as HTMLCanvasElement;
-
-    expect(hasWebGLSupport(() => canvas)).toBe(false);
-  });
-
-  test('does not probe a DOM canvas when browser WebGL APIs are absent', () => {
-    const createCanvas = vi.fn();
-
-    expect(hasWebGLSupport()).toBe(false);
-    expect(createCanvas).not.toHaveBeenCalled();
+  test('does not attempt initialization on browsers without WebGL 2', () => {
+    vi.stubGlobal('WebGL2RenderingContext', undefined);
+    const getContext = vi.fn();
+    expect(createStackContext({ getContext } as unknown as HTMLCanvasElement)).toBeNull();
+    expect(getContext).not.toHaveBeenCalled();
   });
 });
