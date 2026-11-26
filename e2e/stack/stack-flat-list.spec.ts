@@ -100,16 +100,18 @@ for (const locale of STACK_LOCALES) {
         await openStackScene(page, locale);
       await listToggle.click();
       const frontend = frame.getByRole('list', { name: messages.categories.frontend });
-      const cards = frontend.getByRole('listitem');
-      const desktopColumns = await cards.evaluateAll((items) =>
-        new Set(items.map((item) => item.getBoundingClientRect().left)).size,
+      // Measure the list in the page realm rather than passing multiple remote
+      // element handles to Firefox after switching views.
+      const measureColumns = () => frontend.evaluate((list) =>
+        new Set(Array.from(list.children, (card) => card.getBoundingClientRect().left)).size,
       );
+      const desktopColumns = await measureColumns();
+      expect(desktopColumns).toBeGreaterThan(1);
       await technology('react').click();
       await expect(inspector).toContainText(messages.technologies.react.description);
       await page.setViewportSize({ width: 320, height: 760 });
-      const mobileColumns = await cards.evaluateAll((items) =>
-        new Set(items.map((item) => item.getBoundingClientRect().left)).size,
-      );
+      const mobileColumns = await measureColumns();
+      expect(mobileColumns).toBeGreaterThan(0);
       expect(mobileColumns).toBeLessThan(desktopColumns);
       await technology('playwright').click();
       await expect(inspector).toBeInViewport();

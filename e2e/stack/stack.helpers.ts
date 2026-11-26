@@ -33,6 +33,7 @@ export function stackControls(page: Page, locale: StackLocale) {
 export async function openStackScene(page: Page, locale: StackLocale, anchor = '#stack') {
   await page.goto(`/${locale}${anchor}`);
   const controls = stackControls(page, locale);
-  await expect(controls.canvas).toHaveAttribute('data-stack-scene-ready', 'true');
+  // First render also waits for the local card textures and WebGL initialization.
+  await expect(controls.canvas).toHaveAttribute('data-stack-scene-ready', 'true', { timeout: 10_000 });
   return controls;
 }

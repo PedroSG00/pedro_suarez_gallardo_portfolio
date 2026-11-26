@@ -120,6 +120,11 @@ test.describe('Stack card geometry', () => {
     const at = await coordinates();
     const from = at(initial.react);
     const to = at(initial.typescript);
+    const pointer = await canvas.evaluateHandle((element: HTMLCanvasElement) => ({
+      id: new Promise<number>((resolve) => {
+        element.addEventListener('pointerdown', (event) => resolve(event.pointerId), { once: true });
+      }),
+    }));
     await page.mouse.move(from.x, from.y);
     await page.mouse.down();
     await page.mouse.move(to.x, to.y, { steps: 8 });
@@ -129,7 +134,13 @@ test.describe('Stack card geometry', () => {
     await page.mouse.move(to.x, to.y + 20, { steps: 3 });
     const continuing = await geometry(canvas);
     expect(continuing.typescript).not.toEqual(initial.typescript);
-    await canvas.dispatchEvent('pointercancel', { pointerId: 1 });
+    const pointerId = await pointer.evaluate(({ id }) => id);
+    await pointer.dispose();
+    await canvas.evaluate((element, pointerId) => {
+      element.dispatchEvent(new PointerEvent('pointercancel', {
+        bubbles: true, pointerId, pointerType: 'mouse', isPrimary: true,
+      }));
+    }, pointerId);
     await expect.poll(() => geometry(canvas)).toEqual(initial);
     await page.mouse.up();
   });
