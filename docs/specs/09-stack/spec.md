@@ -272,7 +272,7 @@ El sistema deberá ofrecer una presentación plana y completa cuando no haya Jav
 - Los trazados se adhieren a los bordes de las cartas, respetan profundidad y siguen las cartas durante el arrastre y el movimiento ambiental.
 - En 3D funcionan el zoom de 50–150 % y la rotación horizontal completa de 360° más la inclinación vertical acotada, mediante ratón y controles accesibles.
 - Movimiento reducido, ausencia de JavaScript y ausencia de WebGL dejan el contenido completo visible como lista plana o modo 2D.
-- Se verifican ambos idiomas, ambos temas, teclado, tecnología de asistencia, pantallas táctiles y adaptación a viewport antes del cierre.
+- Antes del cierre de Stack se verifican ambos idiomas, ambos temas, teclado, pantallas táctiles y adaptación a viewport. Las comprobaciones nativas con Safari y lectores de pantalla reales —VoiceOver/Safari y NVDA/Firefox— se reservan para la fase transversal 12 del roadmap, posterior a las specs 01–11.
 - Las descripciones por tecnología están revisadas y aprobadas; no hay campos ni traducciones pendientes.
 - Los tests de aceptación se escriben antes de implementar. El cierre requiere los gates definidos por el proyecto y las pruebas e2e aplicables.
 
@@ -286,4 +286,4 @@ El sistema deberá ofrecer una presentación plana y completa cuando no haya Jav
 - La escena se construye con Three.js; la implementación anterior con CSS se descartó y se retiró del repositorio.
 - Se autorizan las carpetas necesarias para Stack bajo `src/` conforme al plan. No se autorizan cambios en capas transversales ni otras dependencias.
 - Mensaje del usuario: «APRUEBO EL CONTENT-REVIEW». Quedaron aprobados las etiquetas y la instrucción inicial de `docs/specs/09-stack/content-review.md`. El usuario aprobó explícitamente las 25 descripciones ampliadas EN/ES el 2026-11-26 («Sí, aprobadas»); queda registrada esa aprobación posterior a la incorporación del contenido.
-- El usuario aprobó la revisión visual manual el 2026-11-26 («La revision visual manual queda aprobada»). Esta aprobación no sustituye las pruebas con tecnología de asistencia ni con navegadores nativos.
+- El usuario aprobó la revisión visual manual el 2026-11-26 («La revision visual manual queda aprobada»). Esta aprobación no sustituye las pruebas con tecnología de asistencia ni con navegadores nativos, que se realizarán en la fase transversal 12 del roadmap.

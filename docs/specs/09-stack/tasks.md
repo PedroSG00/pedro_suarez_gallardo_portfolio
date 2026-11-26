@@ -2,7 +2,7 @@
 
 **Fuente:** `docs/specs/09-stack/spec.md` y `docs/specs/09-stack/plan.md`.
 **Regla de trabajo:** tests primero; sin dependencias adicionales; sin cambios en capas compartidas sin aprobación explícita.
-**Estado (2026-11-26):** la revisión visual manual y las 25 descripciones están aprobadas. El resize se confirmó también en Firefox estable. T11 y T12 mantienen pendientes las comprobaciones con tecnología de asistencia real y Safari nativo. La aprobación explícita del movimiento ambiental sigue sin registrar.
+**Estado (2026-11-26):** la revisión visual manual y las 25 descripciones están aprobadas. El resize se confirmó también en Firefox estable. Las verificaciones con Safari nativo y tecnología de asistencia real se reservan para la fase transversal 12 del roadmap; no bloquean T11 ni T12 de Stack. La aprobación explícita del movimiento ambiental sigue sin registrar.
 
 ## Aprobaciones y decisiones editoriales
 
@@ -437,7 +437,7 @@ No se implementa una tarea mientras sus decisiones previas sigan abiertas. No se
 
 **Criterio de hecho:** pruebas de fallbacks, idioma, tema y accesibilidad pasan; lint, typecheck y build pasan.
 
-**Progreso verificado (2026-11-26):** los e2e de entrada nueva en EN/ES comprueban el reinicio a 2D, «Todas» y sin selección; el cambio de idioma en ambos sentidos comprueba el mismo reinicio. Sin JavaScript y sin WebGL se conserva la lista completa. La suite comprueba contraste AA de las cartas atenuadas en ambos temas e idiomas, cambio de proyección en el primer fotograma con movimiento reducido, y reflujo a 320 px con texto al 200 %. Los roles, nombres, estados y el uso con teclado se verifican automáticamente; queda pendiente la prueba con tecnología de asistencia real.
+**Progreso verificado (2026-11-26):** los e2e de entrada nueva en EN/ES comprueban el reinicio a 2D, «Todas» y sin selección; el cambio de idioma en ambos sentidos comprueba el mismo reinicio. Sin JavaScript y sin WebGL se conserva la lista completa. La suite comprueba contraste AA de las cartas atenuadas en ambos temas e idiomas, cambio de proyección en el primer fotograma con movimiento reducido, y reflujo a 320 px con texto al 200 %. Los roles, nombres, estados y el uso con teclado se verifican automáticamente; la prueba con tecnología de asistencia real se reserva para la fase transversal 12.
 
 **Diagnóstico cruzado (2026-11-26, Playwright con 1 worker):** 21/21 pruebas de reflujo con WebGL activo, sticky móvil, 4K y densidad alta pasan en Chromium, Firefox y WebKit. El cierre de Firefox se reproducía al medir los controles mediante `locator.evaluateAll()`; al medirlos dentro de `frame.evaluate()` desaparece sin cambiar el renderizador. La prueba conserva los redimensionamientos en la misma página y ahora verifica en cada tamaño el ajuste del búfer, las 24 cartas libres y la descripción de la carta alojada. `Reveal` conserva el fallback visible estático verificado en WebKit.
 
@@ -445,7 +445,7 @@ A 320 px y con texto al 200 %, Firefox podía dejar el punto inicial de arrastre
 
 La matriz ampliada de contraste, teclado, movimiento reducido, zoom y fallbacks sin JavaScript/WebGL terminó con 49 aprobados y 2 saltos esperados (la comprobación específica de WebKit no corre en otros motores).
 
-La revisión visual manual está aprobada. **Firefox estable 161.0 para Windows**, ejecutado con ventana y verificado mediante WebDriver BiDi, completó en EN/ES el cambio a 3D, la selección, los siete cambios de viewport de 320 px a 4K con WebGL activo y la expulsión. No se perdió la selección ni ninguna carta. WebKit de Playwright no sustituye la comprobación en Safari nativo ni las pruebas con un lector de pantalla real.
+La revisión visual manual está aprobada. **Firefox estable 161.0 para Windows**, ejecutado con ventana y verificado mediante WebDriver BiDi, completó en EN/ES el cambio a 3D, la selección, los siete cambios de viewport de 320 px a 4K con WebGL activo y la expulsión. No se perdió la selección ni ninguna carta. WebKit de Playwright no sustituye las comprobaciones nativas, reservadas para la fase transversal 12.
 
 ## T12 — Verificación de la matriz de aceptación
 
@@ -467,15 +467,11 @@ La revisión visual manual está aprobada. **Firefox estable 161.0 para Windows*
 - Las 25 descripciones aprobadas y completas en ambos idiomas.
 - Gates en orden: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm test:e2e`.
 - Cobertura global mínima del 85 % en líneas, funciones, ramas y sentencias.
-- Limitaciones de verificación nativa en Safari y Firefox registradas para la spec 12.
-
 **Criterio de hecho:** todos los criterios de RF-1–RF-9 están cubiertos y en verde, los gates pasan y no quedan decisiones ni contenido pendientes.
 
-**Comprobación con lector de pantalla:** recorrer las seis categorías y sus cartas en EN/ES; comprobar que los logos no se anuncian por separado. Con teclado, cambiar filtro y vista, seleccionar una carta, verificar el anuncio del estado y leer la descripción; expulsarla y comprobar el anuncio y el foco. Repetir con VoiceOver y Safari y con NVDA y Firefox, sin dar por válida la comprobación solo por la presencia de atributos ARIA.
+**Verificación transversal diferida:** las comprobaciones con Safari nativo y lectores reales —incluidos VoiceOver/Safari y NVDA/Firefox— corresponden a la fase 12 del roadmap, después de completar las specs 01–11. Las pruebas automatizadas de teclado, roles y estados, y WebKit de Playwright, no las sustituyen.
 
-**Comprobación en Safari nativo:** abrir `/en#stack` y `/es#stack`, alternar 2D/3D, seleccionar y expulsar una carta, y redimensionar sin recargar con una selección activa. Confirmar que no desaparecen cartas ni controles, que el detalle sigue legible y que Stack no se atenúa indebidamente al hacer scroll. Repetir con movimiento reducido y comprobar los gestos directos sin animación ambiental. Registrar versión de Safari, sistema y cualquier fallo reproducible.
-
-**Estado:** el usuario aprobó la revisión visual de la escena y las 25 descripciones. Firefox estable verificó el resize. Para cerrar T12 faltan Safari nativo, los recorridos con lectores de pantalla reales y la confirmación explícita del comportamiento del movimiento ambiental. WebKit de Playwright, el teclado automatizado y las aserciones de roles/estados no sustituyen esas comprobaciones.
+**Estado:** el usuario aprobó la revisión visual de la escena y las 25 descripciones. Firefox estable verificó el resize. Safari nativo y lectores reales quedan reservados para la fase transversal 12; no bloquean el cierre de T12 de Stack. Sigue pendiente la confirmación explícita del comportamiento del movimiento ambiental.
 
 ## Refactor de mantenimiento
 
