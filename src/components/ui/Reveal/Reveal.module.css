@@ -41,6 +41,12 @@
   transform: none;
 }
 
+[data-reveal-content] {
+  opacity: 1;
+  transform: none;
+  clip-path: none;
+}
+
 .excluded,
 [data-reveal-excluded] {
   opacity: 1;
@@ -77,7 +83,6 @@
     --psg-reveal-entry-offset: var(--motion-distance, 0px);
     --psg-reveal-entry-clip: 100%;
   }
-
   to {
     --psg-reveal-entry-opacity: 1;
     --psg-reveal-entry-offset: 0px;
@@ -91,7 +96,6 @@
     --psg-reveal-exit-offset: 0px;
     --psg-reveal-exit-clip: 0%;
   }
-
   to {
     --psg-reveal-exit-opacity: 0;
     --psg-reveal-exit-offset: calc(0px - var(--motion-distance, 0px));
@@ -104,16 +108,11 @@
   and (animation-range: cover 80% cover 100%)
   and (view-timeline-name: --reveal-entry)
   and (timeline-scope: --reveal-entry) {
-  .reveal,
   [data-reveal-root] {
     timeline-scope: --reveal-entry, --reveal-exit;
-  }
-
-  [data-reveal-root] {
     animation:
       reveal-enter auto linear both,
       reveal-exit auto linear both;
-    /* Edge markers keep the reading interval independent of block height. */
     animation-timeline: --reveal-entry, --reveal-exit;
     animation-range:
       cover var(--psg-reveal-entry-start, 0%) cover 18%,
@@ -129,22 +128,7 @@
       )
     );
   }
-}
 
-/* RF-04: last-section blocks only animate entry (no exit),
-   stay at opacity 1 at end (fill-mode forwards) and have bottom
-   padding to reach the stable zone at the end of the page. */
-[data-reveal-root][data-last-section] {
-  padding-bottom: calc(var(--spacing) * 75);
-  animation: reveal-enter auto linear both;
-  animation-timeline: --reveal-entry;
-  animation-range: cover var(--psg-reveal-entry-start, 0%) cover 18%;
-  animation-fill-mode: forwards;
-  opacity: var(--psg-reveal-entry-opacity);
-  transform: translateY(var(--psg-reveal-entry-offset));
-}
-
-/* Variant "clip": the block is uncovered by a bottom inset, no displacement. */
   [data-reveal-root][data-reveal-variant="clip"] {
     transform: none;
     clip-path: inset(
@@ -155,22 +139,43 @@
     );
   }
 
-  /* Variant "fade": opacity only, no displacement or clipping. */
   [data-reveal-root][data-reveal-variant="fade"] {
     transform: none;
   }
 
-/* Server-rendered content stays static until this block confirms hydration.
-   JavaScript availability is independent of scroll-timeline support. */
-[data-reveal-root]:not([data-reveal-ready]) {
+  [data-reveal-root][data-last-section] {
+    padding-bottom: calc(var(--spacing) * 75);
+    animation: reveal-enter auto linear both;
+    animation-timeline: --reveal-entry;
+    animation-range: cover var(--psg-reveal-entry-start, 0%) cover 18%;
+    opacity: var(--psg-reveal-entry-opacity);
+    transform: translateY(var(--psg-reveal-entry-offset));
+  }
+}
+
+[data-reveal-root]:not([data-reveal-ready]),
+[data-reveal-root][data-reveal-forced-visible],
+[data-reveal-root][data-reveal-forced-visible] [data-reveal-content] {
   animation: none;
   opacity: 1;
   transform: none;
   clip-path: none;
 }
 
+/* WebKit accepts scroll-timeline declarations but leaves named marker timelines inert. */
+@supports (-webkit-touch-callout: none) {
+  [data-reveal-root],
+  [data-reveal-content] {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    clip-path: none;
+  }
+}
+
 @supports not (animation-timeline: view()) {
-  [data-reveal-root] {
+  [data-reveal-root],
+  [data-reveal-content] {
     animation: none;
     opacity: 1;
     transform: none;
@@ -178,17 +183,9 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  [data-reveal-root] {
-    animation: none;
-    opacity: 1;
-    transform: none;
-    clip-path: none;
-  }
-}
-
-@media print {
-  [data-reveal-root] {
+@media (prefers-reduced-motion: reduce), print {
+  [data-reveal-root],
+  [data-reveal-content] {
     animation: none;
     opacity: 1;
     transform: none;

@@ -32,7 +32,7 @@ async function mountRevealFixture(
       <section class="reveal" data-reveal-root data-reveal-ready data-reveal-variant="${variant}" role="group" aria-label="Scroll content">
         <span data-reveal-entry-marker aria-hidden="true"></span>
         <span data-reveal-exit-marker aria-hidden="true"></span>
-        <h2>Scroll content</h2>
+        <div data-reveal-content><h2>Scroll content</h2></div>
       </section>
     </main>
   `);
@@ -58,15 +58,39 @@ async function scrollBlockTopTo(
 
   return reveal.evaluate((element) => {
     const styles = window.getComputedStyle(element);
+    const content = element.querySelector<HTMLElement>('[data-reveal-content]');
+    if (!content) throw new Error('Reveal content is missing');
+    const contentStyles = window.getComputedStyle(content);
     const transform = new DOMMatrixReadOnly(styles.transform);
-    return { opacity: Number(styles.opacity), translateY: transform.m42 };
+    const contentTransform = new DOMMatrixReadOnly(contentStyles.transform);
+    return {
+      opacity: Number(styles.opacity) * Number(contentStyles.opacity),
+      translateY: transform.m42 + contentTransform.m42,
+    };
   });
 }
 
 test.describe('Reveal edge-based opacity', () => {
-  test('has opacity below one as its top edge enters the lower 15% of the viewport', async ({
+  test('keeps every variant fully visible when reduced motion is requested', async ({
     page,
   }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    for (const variant of ['rise', 'clip', 'fade']) {
+      await mountRevealFixture(page, BLOCK_HEIGHT, variant);
+      for (const position of [VIEWPORT_HEIGHT * 0.85, VIEWPORT_HEIGHT * 0.5, 0]) {
+        expect(await scrollBlockTopTo(page, position)).toEqual({
+          opacity: 1,
+          translateY: 0,
+        });
+      }
+    }
+  });
+
+  test('has opacity below one as its top edge enters the lower 15% of the viewport', async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(browserName === 'webkit', 'WebKit uses the static visible fallback');
     await mountRevealFixture(page);
 
     const { opacity, translateY } = await scrollBlockTopTo(
@@ -78,7 +102,11 @@ test.describe('Reveal edge-based opacity', () => {
     expect(translateY).not.toBe(0);
   });
 
-  test('has opacity one in the stable region between the edge margins', async ({ page }) => {
+  test('has opacity one in the stable region between the edge margins', async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(browserName === 'webkit', 'WebKit uses the static visible fallback');
     await mountRevealFixture(page, VIEWPORT_HEIGHT * 1.2);
 
     const { opacity, translateY } = await scrollBlockTopTo(
@@ -92,7 +120,9 @@ test.describe('Reveal edge-based opacity', () => {
 
   test('has opacity below one as its bottom edge enters the upper 15% of the viewport', async ({
     page,
+    browserName,
   }) => {
+    test.skip(browserName === 'webkit', 'WebKit uses the static visible fallback');
     await mountRevealFixture(page);
 
     const { opacity, translateY } = await scrollBlockTopTo(
@@ -106,7 +136,9 @@ test.describe('Reveal edge-based opacity', () => {
 
   test('changes continuously and monotonically through entry and exit margins', async ({
     page,
+    browserName,
   }) => {
+    test.skip(browserName === 'webkit', 'WebKit uses the static visible fallback');
     await mountRevealFixture(page);
 
     const entryOpacities: number[] = [];
@@ -138,7 +170,8 @@ test.describe('Reveal edge-based opacity', () => {
   });
 
   for (const variant of ['rise', 'clip', 'fade']) {
-    test(`${variant}: keeps all portions of a six-viewport block fully readable before a reversible edge-based exit`, async ({ page }) => {
+    test(`${variant}: keeps all portions of a six-viewport block fully readable before a reversible edge-based exit`, async ({ page, browserName }) => {
+      test.skip(browserName === 'webkit', 'WebKit uses the static visible fallback');
       const height = VIEWPORT_HEIGHT * 6;
       await mountRevealFixture(page, height, variant);
       const block = page.getByRole('group', { name: 'Scroll content' });
@@ -147,7 +180,12 @@ test.describe('Reveal edge-based opacity', () => {
       for (const top of [650, -500, -1500, -2500, -3500, -4500, 250 - height]) {
         const state = await scrollBlockTopTo(page, top);
         expect(state).toEqual({ opacity: 1, translateY: 0 });
-        await expect(block).toHaveCSS('clip-path', variant === 'clip' ? 'inset(0px 0px 0%)' : 'none');
+        const clipPaths = await block.evaluate((element) => {
+          const content = element.querySelector('[data-reveal-content]');
+          if (!content) throw new Error('Reveal content is missing');
+          return [getComputedStyle(element).clipPath, getComputedStyle(content).clipPath];
+        });
+        expect(clipPaths.every((clipPath) => !clipPath.includes('100%'))).toBe(true);
       }
       const exit = await scrollBlockTopTo(page, 100 - height);
       expect(exit.opacity).toBeGreaterThan(0);
@@ -160,5 +198,21 @@ test.describe('Reveal edge-based opacity', () => {
       expect(reversedExit.opacity).toBeCloseTo(exit.opacity, 4);
       expect(reversedExit.translateY).toBeCloseTo(exit.translateY, 4);
     });
+  }
+});
+
+test('keeps WebKit content fully visible when scroll timelines fall back to static', async ({
+  page,
+  browserName,
+}) => {
+  test.skip(browserName !== 'webkit', 'This fallback applies to WebKit');
+  for (const variant of ['rise', 'clip', 'fade']) {
+    await mountRevealFixture(page, BLOCK_HEIGHT, variant);
+    for (const position of [VIEWPORT_HEIGHT * 0.85, VIEWPORT_HEIGHT * 0.5, 0]) {
+      expect(await scrollBlockTopTo(page, position)).toEqual({
+        opacity: 1,
+        translateY: 0,
+      });
+    }
   }
 });
