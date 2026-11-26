@@ -2,7 +2,7 @@
 
 **Fuente:** `docs/specs/09-stack/spec.md` y `docs/specs/09-stack/plan.md`.
 **Regla de trabajo:** tests primero; sin dependencias adicionales; sin cambios en capas compartidas sin aprobación explícita.
-**Estado (2026-11-26):** la revisión visual manual y las 25 descripciones están aprobadas. El resize se confirmó también en Firefox estable. Las verificaciones con Safari nativo y tecnología de asistencia real se reservan para la fase transversal 12 del roadmap; no bloquean T11 ni T12 de Stack. La aprobación explícita del movimiento ambiental sigue sin registrar.
+**Estado:** spec 09 cerrada. La revisión visual manual, las 25 descripciones y el movimiento ambiental están aprobados. El resize se confirmó también en Firefox estable. Las verificaciones con Safari nativo y tecnología de asistencia real se reservan para la fase transversal 12 del roadmap; no bloquean el cierre de Stack.
 
 ## Aprobaciones y decisiones editoriales
 
@@ -15,7 +15,7 @@ T1 está implementada. Estado de las aprobaciones y decisiones editoriales:
 - [x] Casillero inicial sin selección, con instrucción breve.
 - [x] Registrar y validar 25 marcas propias en recursos SVG locales; documentar fuentes, licencias conocidas, límites de marca y arte original en `public/stack/ATTRIBUTION.md`. Los permisos de marca no se presumen: el uso identifica las tecnologías y no implica respaldo.
 - [x] Definir dirección de arte de la escena como un único sistema volumétrico: cartas, caras con marcas, slot, escenario, escala, materiales, luces, sombras y perspectiva. Revisión visual manual aprobada por el usuario el 2026-11-26.
-- [ ] Aprobar el comportamiento de movimiento ambiental pausado, colisiones estables, pausa fuera de vista y reduced-motion.
+- [x] Aprobar el comportamiento de movimiento ambiental pausado, colisiones estables, pausa fuera de vista y reduced-motion. El usuario confirmó las aprobaciones pendientes al solicitar el cierre de la spec.
 - [x] Definir exclusividad del slot, feedback de recepción, reemplazo al soltar sobre una ocupación y expulsión a posición visible libre. El usuario confirma que el drop nuevo reemplaza a la tecnología alojada.
 - [x] Conservar posiciones, filtro, selección y descripción al alternar 2D↔3D.
 - [x] Sustituir la propuesta CSS por Three.js.
@@ -467,11 +467,12 @@ La revisión visual manual está aprobada. **Firefox estable 161.0 para Windows*
 - Las 25 descripciones aprobadas y completas en ambos idiomas.
 - Gates en orden: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm test:e2e`.
 - Cobertura global mínima del 85 % en líneas, funciones, ramas y sentencias.
+
 **Criterio de hecho:** todos los criterios de RF-1–RF-9 están cubiertos y en verde, los gates pasan y no quedan decisiones ni contenido pendientes.
 
 **Verificación transversal diferida:** las comprobaciones con Safari nativo y lectores reales —incluidos VoiceOver/Safari y NVDA/Firefox— corresponden a la fase 12 del roadmap, después de completar las specs 01–11. Las pruebas automatizadas de teclado, roles y estados, y WebKit de Playwright, no las sustituyen.
 
-**Estado:** el usuario aprobó la revisión visual de la escena y las 25 descripciones. Firefox estable verificó el resize. Safari nativo y lectores reales quedan reservados para la fase transversal 12; no bloquean el cierre de T12 de Stack. Sigue pendiente la confirmación explícita del comportamiento del movimiento ambiental.
+**Estado:** T12 completada. El usuario aprobó la revisión visual de la escena, las 25 descripciones y el comportamiento del movimiento ambiental. Firefox estable verificó el resize. Safari nativo y lectores reales quedan reservados para la fase transversal 12; no bloquean el cierre de Stack.
 
 ## Refactor de mantenimiento
 
@@ -490,6 +491,8 @@ La suite de Stack pasa de 67 a 61 casos. Reutiliza la entrada a la escena, los s
 **Verificación:** pasan `pnpm lint`, `pnpm typecheck`, `pnpm test` (675/675, mismo nivel de cobertura) y `pnpm build`. La nueva prueba de pausa y reanudación pasó 8/8 con cuatro workers. En la suite integral pasaron los 61 casos de Stack: **372 aprobados, 1 omisión esperada de una prueba exclusiva de WebKit y ningún fallo**. No se modificó `playwright.config.ts`.
 
 La primera matriz cruzada de los E2E refactorizados detectó cuatro fallos de prueba en Firefox. La comprobación sin JavaScript usa ahora aserciones CSS individuales en vez de la evaluación masiva que cerraba la página. A 4K, el borde compartido del canvas y el inspector admite una tolerancia de 0,01 px para el redondeo de las coordenadas, sin permitir un solapamiento visible. Tras las correcciones, la matriz focal pasó **45/45** en Chromium, Firefox y WebKit. La suite integral volvió a pasar con **372 aprobados y 1 omisión esperada**, sin fallos.
+
+**Verificación de cierre (2026-11-27):** el E2E mide el reflujo dentro de la página y cancela el arrastre con el identificador real del puntero, sin asumir el mismo valor en todos los motores. La espera de inicialización de la escena tiene un margen de 10 s; no se cambió el comportamiento del sitio. Las tres regresiones de Firefox pasaron dos veces cada una. Pasaron lint, typecheck, los **675 unitarios**, build y el E2E integral con dos workers (**372 aprobados, 1 omisión esperada**). La matriz completa de Stack en Chromium, Firefox y WebKit terminó con **179 aprobados, 4 omisiones esperadas** (dos pruebas de gestos nativos exclusivas de Chromium) y ningún fallo.
 
 | Criterio | Evidencia principal en `e2e/stack/` |
 |---|---|
