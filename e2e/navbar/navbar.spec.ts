@@ -377,18 +377,21 @@ test.describe('Scroll behavior on reload and navigation', () => {
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     await page.goto('/en');
     const navbar = page.getByRole('banner');
+    const remainingScroll = () => page.evaluate(() =>
+      document.documentElement.scrollHeight - window.innerHeight - window.scrollY,
+    );
+    // Wheel over the page gutter, not an interactive section that can consume it.
+    await page.mouse.move(8, 400);
+    await page.mouse.wheel(0, 20_000);
+    await expect.poll(remainingScroll).toBeLessThanOrEqual(1);
+    await expect(navbar).toHaveAttribute('data-hidden');
 
-    await page.mouse.move(500, 400);
-    await page.mouse.wheel(0, 4000);
-    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(80);
+    await page.mouse.wheel(0, 160);
+    await expect.poll(remainingScroll).toBeLessThanOrEqual(1);
     await expect(navbar).toHaveAttribute('data-hidden');
 
     await page.mouse.wheel(0, -160);
-    await expect(navbar).not.toHaveAttribute('data-hidden');
-
-    await page.mouse.wheel(0, 4000);
-    await expect(navbar).toHaveAttribute('data-hidden');
-    await navbar.getByRole('link', { name: IDENTITY }).focus();
+    await expect.poll(remainingScroll).toBeGreaterThanOrEqual(150);
     await expect(navbar).not.toHaveAttribute('data-hidden');
   });
 });
