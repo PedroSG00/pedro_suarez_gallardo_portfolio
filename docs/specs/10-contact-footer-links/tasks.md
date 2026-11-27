@@ -21,6 +21,8 @@
 
 ## T1 — Añadir contenido bilingüe e integrar Contact
 
+**Estado:** hecha.
+
 **Objetivo:** sustituir el encabezado reservado por la sección Contact con el contenido aprobado en inglés y español.
 
 **RF:** RF-1.
@@ -43,6 +45,8 @@
 **Criterio de hecho:** los tests de contenido y de integración pasan en `/en` y `/es`; la sección está en el orden correcto y no duplica encabezado ni destino; lint, typecheck y build pasan.
 
 ## T2 — Crear y probar la resolución compartida de enlaces
+
+**Estado:** hecha.
 
 **Objetivo:** resolver etiquetas, destinos, target y aviso accesible a partir del locale y de la ubicación Contact/Footer, sin duplicar datos.
 
@@ -67,6 +71,8 @@
 **Criterio de hecho:** todos los casos de la tabla de locales, ubicaciones y entradas incompletas pasan; no hay fallback al CV de otro idioma; lint y typecheck pasan.
 
 ## T3 — Mostrar los cuatro canales en Contact
+
+**Estado:** hecha.
 
 **Objetivo:** ofrecer email, LinkedIn, GitHub y CV desde Contact con etiquetas localizadas y comportamiento de apertura acordado.
 
@@ -93,6 +99,8 @@
 
 ## T4 — Alinear el Footer con los enlaces y etiquetas compartidos
 
+**Estado:** hecha.
+
 **Objetivo:** conservar el Footer existente y garantizar que sus canales y destinos coinciden con Contact, manteniendo el aviso accesible acordado.
 
 **RF:** RF-2, RF-3, RF-4, RF-5, RF-6, RF-8.
@@ -117,6 +125,8 @@
 **Criterio de hecho:** los tests del Footer pasan en inglés y español; los enlaces externos se anuncian solo a tecnologías de asistencia y el resto del Footer sigue disponible ante una URL ausente.
 
 ## T5 — Aplicar el momento firma y la respuesta accesible del email
+
+**Estado:** hecha.
 
 **Objetivo:** presentar el email como enlace prominente e invertir su tratamiento visual en hover y foco, sin duplicar el componente de enlace.
 

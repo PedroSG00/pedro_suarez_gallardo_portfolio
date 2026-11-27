@@ -235,6 +235,8 @@
   },
   "contact": {
     "intro": "Contact",
+    "title": "Let's build something solid.",
+    "body": "Tell me what you need. Email or LinkedIn, whichever is easier.",
     "email": "Email",
     "linkedin": "LinkedIn",
     "github": "GitHub",
