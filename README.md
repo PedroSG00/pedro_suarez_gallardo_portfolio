@@ -54,7 +54,7 @@ Install the only supported browser once with `pnpm exec playwright install chrom
 
 ## Continuous integration
 
-`.github/workflows/ci.yml` runs six parallel jobs on every push to `main` and every pull request: `lint`, `typecheck`, `test`, `build`, `e2e` and `sonar`. Node comes from `.node-version`, pnpm from `packageManager`, and a step fails if either does not match. The `test` and `e2e` jobs upload diagnostics (`coverage`, Playwright report and traces) even when they fail. Nothing is silenced: no `continue-on-error`, no lowered thresholds.
+`.github/workflows/ci.yml` runs six required checks on pushes and pull requests targeting `main`: `lint`, `typecheck`, `test`, `build`, `e2e` and `sonar`. The `e2e` check requires all three parallel Chromium shards to pass. Node comes from `.node-version`, pnpm from `packageManager`, and a step fails if either does not match. The test job and each E2E shard upload their own diagnostics (`coverage`, Playwright report and traces) even when they fail. Nothing is silenced: no `continue-on-error`, no lowered thresholds.
 
 ## Windows and Linux
 
