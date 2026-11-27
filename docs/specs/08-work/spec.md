@@ -8,6 +8,10 @@ El brief de contenido define las cinco entradas en inglés y castellano. Cada un
 
 El momento firma combina la entrada de cada fila acompañada por su número tabular con una inversión de color al pasar el cursor.
 
+### Reajuste visual — 2026-11-22
+
+Se refuerza la composición editorial sin cambiar contenido ni comportamiento: la apertura usa una escala contenida, no mayor que el encabezado de sección, y menos espacio vertical; cada fila combina un índice compacto, un icono lineal propio, un titular destacado y una explicación con tecnologías en una columna secundaria en escritorio. Los iconos representan aplicaciones web, supervisión, administración, flujos e infraestructura; son decorativos, no añaden nombres accesibles ni focos y acompañan la inversión y el movimiento de su fila. En móvil las piezas se apilan en orden de lectura. La jerarquía debe distinguir claramente titular y descripción; los cinco resultados siguen siendo informativos, con inversión completa y el movimiento compartido existente. Solo se modifica la presentación local de Work, reutilizando los tokens del tema e Iconoir.
+
 ## Usuarios
 
 - **Reclutadores**, que quieren valorar rápidamente los resultados y capacidades relevantes de Pedro.

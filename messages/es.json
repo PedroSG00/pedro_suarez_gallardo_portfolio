@@ -79,7 +79,159 @@
     }
   },
   "stack": {
-    "intro": "Stack"
+    "intro": "Stack",
+    "categories": {
+      "frontend": "Frontend",
+      "dataVisualization": "Visualización de datos",
+      "backendApis": "Backend y APIs",
+      "databases": "Bases de datos",
+      "testingCi": "Testing y CI/CD",
+      "aiTools": "IA y herramientas"
+    },
+    "filters": {
+      "label": "Filtrar por categoría",
+      "all": "Todas"
+    },
+    "cad": {
+      "title": "Mesa de tecnologías",
+      "engine": "Three.js / CAD",
+      "view": "Vista 3D",
+      "viewOptions": "2D / 3D",
+      "zoom": {
+        "label": "Zoom 3D",
+        "in": "Acercar",
+        "out": "Alejar",
+        "level": "{level} %"
+      },
+      "rotation": {
+        "label": "Rotación 3D",
+        "left": "Girar a la izquierda",
+        "right": "Girar a la derecha",
+        "up": "Inclinar arriba",
+        "down": "Inclinar abajo"
+      },
+      "list": "Lista de tecnologías",
+      "plane": "2D // Ortográfica",
+      "space": "3D // Perspectiva",
+      "hint": "Elige o arrastra al casillero",
+      "modules": "{count} módulos",
+      "slot": "Ranura: {name}",
+      "empty": "vacía"
+    },
+    "detail": {
+      "label": "Detalle de tecnología",
+      "empty": "Selecciona una carta para ver qué es.",
+      "emptyWithDrag": "Selecciona una carta o arrástrala aquí para ver qué es.",
+      "select": "Seleccionar {name}",
+      "eject": "Expulsar",
+      "feedback": {
+        "received": "{name} está ahora en el casillero.",
+        "replaced": "{name} sustituye a {replacedName} en el casillero.",
+        "ejected": "{name} ha vuelto al stack."
+      }
+    },
+    "technologies": {
+      "javascript": {
+        "name": "JavaScript",
+        "description": "JavaScript es un lenguaje de programación usado en toda la web. Da comportamiento interactivo al navegador y también puede ejecutarse fuera de él mediante entornos como Node.js."
+      },
+      "typescript": {
+        "name": "TypeScript",
+        "description": "TypeScript amplía JavaScript con un sistema de tipos estáticos. Detecta muchos errores durante el desarrollo y se compila a JavaScript."
+      },
+      "react": {
+        "name": "React",
+        "description": "React es una biblioteca de JavaScript para crear interfaces a partir de componentes. Actualiza la interfaz mostrada cuando cambian los datos o la interacción."
+      },
+      "nextJs": {
+        "name": "Next.js",
+        "description": "Next.js es un framework de React para crear aplicaciones web. Incluye enrutamiento y admite renderizado en servidor, generación estática y otras estrategias."
+      },
+      "html": {
+        "name": "HTML",
+        "description": "HTML es el lenguaje de marcado que estructura el contenido web. Sus elementos describen encabezados, enlaces, formularios, medios y otras partes de una página."
+      },
+      "css": {
+        "name": "CSS",
+        "description": "CSS es el lenguaje de estilos que presenta documentos web. Controla la maquetación, tipografía, color, diseño adaptable y estados visuales."
+      },
+      "chartJs": {
+        "name": "Chart.js",
+        "description": "Chart.js es una biblioteca de JavaScript para crear gráficos. Ofrece tipos de gráfico habituales y opciones para visualizaciones interactivas y adaptables."
+      },
+      "recharts": {
+        "name": "Recharts",
+        "description": "Recharts es una biblioteca de gráficos construida con componentes de React. Sus gráficos componibles aplican patrones de React para convertir datos en visualizaciones."
+      },
+      "nodeJs": {
+        "name": "Node.js",
+        "description": "Node.js es un entorno de ejecución de JavaScript para aplicaciones y herramientas. Ejecuta JavaScript fuera del navegador y ofrece API para el desarrollo de servidor."
+      },
+      "expressJs": {
+        "name": "Express.js",
+        "description": "Express es un framework web para Node.js. Sus API de rutas y middleware ayudan a estructurar servidores HTTP y API web."
+      },
+      "restApis": {
+        "name": "REST APIs",
+        "description": "REST es un estilo arquitectónico para aplicaciones en red que usan HTTP. Las API REST exponen recursos mediante URL y métodos HTTP estándar."
+      },
+      "webSockets": {
+        "name": "WebSockets",
+        "description": "WebSocket es un protocolo para mantener una conexión bidireccional entre cliente y servidor. Permite intercambiar mensajes por una misma conexión sin repetir peticiones HTTP."
+      },
+      "cSharp": {
+        "name": "C#",
+        "description": "C# es un lenguaje de programación de propósito general y tipado estático. Forma parte del ecosistema .NET y permite desarrollar aplicaciones multiplataforma."
+      },
+      "python": {
+        "name": "Python",
+        "description": "Python es un lenguaje de programación de propósito general y sintaxis legible. Su biblioteca estándar y su ecosistema de paquetes permiten crear scripts, automatizaciones, herramientas de datos y aplicaciones web."
+      },
+      "mysql": {
+        "name": "MySQL",
+        "description": "MySQL es un sistema gestor de bases de datos relacionales. Almacena datos estructurados en tablas y permite consultarlos, relacionarlos y gestionarlos mediante SQL."
+      },
+      "mongodb": {
+        "name": "MongoDB",
+        "description": "MongoDB es una base de datos orientada a documentos. Almacena registros como documentos similares a JSON y admite esquemas flexibles, índices y agregaciones."
+      },
+      "jest": {
+        "name": "Jest",
+        "description": "Jest es un framework de pruebas para JavaScript. Incluye un ejecutor, aserciones, dobles de prueba y utilidades para ejecutar tests."
+      },
+      "vitest": {
+        "name": "Vitest",
+        "description": "Vitest es un framework de pruebas diseñado para trabajar con Vite. Ofrece una API compatible con Jest y reutiliza el sistema de transformación y resolución de módulos de Vite."
+      },
+      "playwright": {
+        "name": "Playwright",
+        "description": "Playwright es un framework de automatización de navegadores. Controla Chromium, Firefox y WebKit para probar páginas y flujos de usuario de extremo a extremo."
+      },
+      "githubActions": {
+        "name": "GitHub Actions",
+        "description": "GitHub Actions automatiza flujos de trabajo de los repositorios. Puede ejecutar tareas ante eventos como envíos de cambios, solicitudes de integración o ejecuciones programadas."
+      },
+      "githubCopilot": {
+        "name": "GitHub Copilot",
+        "description": "GitHub Copilot es un asistente de programación con IA integrado en herramientas de desarrollo. Ofrece sugerencias de código y ayuda conversacional en editores y flujos compatibles."
+      },
+      "claudeCode": {
+        "name": "Claude Code",
+        "description": "Claude Code es un agente de programación con IA que trabaja con repositorios de software. Puede inspeccionar archivos, hacer cambios y ejecutar comandos de desarrollo desde interfaces compatibles."
+      },
+      "opencode": {
+        "name": "OpenCode",
+        "description": "OpenCode es un agente de programación con IA de código abierto. Conecta modelos de lenguaje con herramientas para explorar, editar y ejecutar código en el entorno de desarrollo."
+      },
+      "git": {
+        "name": "Git",
+        "description": "Git es un sistema de control de versiones distribuido. Registra cambios en commits y permite crear ramas y fusionarlas en repositorios locales y compartidos."
+      },
+      "github": {
+        "name": "GitHub",
+        "description": "GitHub es una plataforma para alojar repositorios Git y colaborar en software. Incluye herramientas para revisar código, gestionar incidencias y automatizar proyectos."
+      }
+    }
   },
   "contact": {
     "intro": "Contacto",

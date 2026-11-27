@@ -12,6 +12,7 @@ Minimal in elements, spectacular in execution: an editorial, high-impact piece, 
 - Monospaced typography at extreme scale: massive fluid headlines against small, readable body text.
 - Visible grid, numbered sections, inverted blocks, asymmetry and generous negative space.
 - CSS-only motion: every block animates **in as it enters the viewport and out as it leaves** while scrolling, plus staggered entrances and themed transitions. Anchor scrolling uses native smooth behavior only when `prefers-reduced-motion` is not set; reload and locale switching keep the viewport position.
+- Stack's planned signature moment: a striking canvas of floating technology cards with a switch that naturally transitions between 2D and 3D. Selecting or dragging a card to a central slot reveals information about that technology; the interaction must remain usable without drag, 3D, or motion.
 - Voice: short, affirmative, benefit first.
 
 Details live in `AGENTS.md`; each section defines its own "signature moment".
@@ -53,7 +54,7 @@ Install the only supported browser once with `pnpm exec playwright install chrom
 
 ## Continuous integration
 
-`.github/workflows/ci.yml` runs six parallel jobs on every push to `main` and every pull request: `lint`, `typecheck`, `test`, `build`, `e2e` and `sonar`. Node comes from `.node-version`, pnpm from `packageManager`, and a step fails if either does not match. The `test` and `e2e` jobs upload diagnostics (`coverage`, Playwright report and traces) even when they fail. Nothing is silenced: no `continue-on-error`, no lowered thresholds.
+`.github/workflows/ci.yml` runs six required checks on pushes and pull requests targeting `main`: `lint`, `typecheck`, `test`, `build`, `e2e` and `sonar`. The `e2e` check requires all three parallel Chromium shards to pass. Node comes from `.node-version`, pnpm from `packageManager`, and a step fails if either does not match. The test job and each E2E shard upload their own diagnostics (`coverage`, Playwright report and traces) even when they fail. Nothing is silenced: no `continue-on-error`, no lowered thresholds.
 
 ## Windows and Linux
 
@@ -83,6 +84,7 @@ Everything runs from the repository root in PowerShell and in bash: `pnpm instal
 │   ├── reveal/                   # Reveal primitive specs
 │   ├── scroll-motion/            # Scroll-motion reveal specs
 │   ├── shell/                    # Shell layout specs
+│   ├── stack/                    # Stack section specs
 │   ├── no-js/                    # No-JavaScript fallback specs
 │   ├── anchors/                  # Anchor jump specs
 │   └── evidence/                 # RF evidence specs
@@ -144,7 +146,7 @@ Every route is wrapped by the global shell: `SkipLink`, `Navbar`, `<main>` and `
 1. **Hero**: name, role, pitch, support, metadata and calls to action. Home of the site's signature moment (staggered entry, cursor, outline and parallax).
 2. **About** (`01`): reserved destination; implemented in spec 07 — portrait, biografía, cualidades, afirmación firma con progresión palabra a palabra, fallbacks de movimiento y sin JavaScript.
 3. **Work** (`02`): reserved destination, heading only.
-4. **Stack** (`03`): reserved destination, heading only.
+4. **Stack** (`03`): implemented in spec 09 — accessible flat list with the 25 technologies and their descriptions in both languages, React/TypeScript priority and no controls until the Three.js scene lands.
 5. **Contact** (`04`): reserved destination, heading only.
 
 **Parked:** the Projects section and the `/projects/[slug]` pages are out of scope for now. They return when there is a new project, with their own spec. See `content-brief.md`, section 10.

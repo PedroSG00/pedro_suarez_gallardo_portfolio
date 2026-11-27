@@ -27,6 +27,7 @@ const DEFAULT_VARIANT: RevealVariant = 'rise';
 const FORCED_VISIBLE_STYLE: React.CSSProperties = {
   opacity: 1,
   transform: 'none',
+  clipPath: 'none',
 };
 
 function resolveVariant(variant: RevealVariant): RevealVariant {
@@ -120,6 +121,7 @@ export default function Reveal({
       data-reveal-ready={!isExcluded && isMotionReady ? '' : undefined}
       data-reveal-excluded={isExcluded ? '' : undefined}
       data-reveal-variant={isExcluded ? undefined : resolveVariant(variant)}
+      data-reveal-forced-visible={forceVisible ? '' : undefined}
       data-last-section={isLastSection ? '' : undefined}
       role={role}
       aria-label={ariaLabel}
@@ -136,7 +138,7 @@ export default function Reveal({
           <span data-reveal-exit-marker aria-hidden="true" />
         </>
       )}
-      {children}
+      <div data-reveal-content>{children}</div>
     </div>
   );
 }

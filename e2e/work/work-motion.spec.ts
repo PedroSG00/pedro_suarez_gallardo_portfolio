@@ -43,7 +43,7 @@ async function openWork(page: Page, locale: string, label: string, theme: string
   await page.goto(`/${locale}`);
   await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
   await page.evaluate(() => document.fonts.ready);
-  const list = page.getByRole('region', { name: label }).getByRole('list');
+  const list = page.getByRole('region', { name: label, exact: true }).getByRole('list');
   expect(await list.evaluate((element) => element.tagName)).toBe('OL');
   const rows = list.getByRole('listitem');
   await expect(rows).toHaveCount(5);

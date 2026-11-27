@@ -33,7 +33,7 @@ Fuera de alcance por ahora: sección de proyectos y ruta `/projects/[slug]` (fut
 | 06 | `06-shell-and-hero` | `Navbar`, `Footer` y `Hero`: nombre a todo el ancho, líneas escalonadas, cursor parpadeante, paso a contorno con parallax | 04, 05 | Memorable a primera vista en ambos temas e idiomas; navegación por teclado completa |
 | 07 | `07-about` | Frase invertida que se ilumina palabra a palabra, valores como etiquetas, foto de perfil | 05, 06 | Contenido solo de `messages/`; el efecto degrada a texto estático |
 | 08 | `08-work` | Cinco filas de resultado con número tabular, inversión en hover, etiquetas de tecnología desde `content/` | 05, 06 | Añadir o quitar una fila es solo datos |
-| 09 | `09-stack` | Grupos desde `content/stack.ts`, frontend primero, etiquetas mono escalonadas | 05 | Sin marcado duplicado entre grupos |
+| 09 | `09-stack` | Canvas de cartas tecnológicas flotantes con switch 2D/3D de transición natural y casillero central informativo; frontend primero, contenido desde `content/stack.ts` | 05 | Interacción espectacular, accesible sin arrastrar y con fallback estático sin 3D |
 | 10 | `10-contact-footer-links` | Titular gigante con `clip`, email como enlace enorme, LinkedIn, GitHub y CV por idioma | 05 | Enlaces verificados; CV EN y ES correctos |
 | 11 | `11-seo-metadata` | Metadatos por idioma, `hreflang`, sitemap, robots, imagen OG generada desde el diseño | 06–10 | Metadatos correctos en ambos idiomas |
 | 12 | `12-a11y-perf-pass` | Contraste, teclado, lectores de pantalla, reduced-motion, LCP, soporte de `animation-timeline` en Safari y Firefox y decisión sobre el fallback | 01–11 | Lighthouse 95+ en todas las categorías; fallback decidido |

@@ -14,22 +14,25 @@ export default function Work() {
   return (
     <Section id="work" labelledBy="work-heading">
       <SectionHeading id="work-heading" index="02" label={navigation('experience')} />
-      <div className="relative mx-auto grid max-w-[calc(var(--grid-max-width)+2*var(--grid-gutter))] gap-8 px-(--grid-gutter) pb-12 wrap-anywhere">
+      <div data-work-content className="relative mx-auto grid max-w-[calc(var(--grid-max-width)+2*var(--grid-gutter))] px-(--grid-gutter) pb-12 wrap-anywhere">
         <Heading level={3}>{t('title')}</Heading>
         <ol role="list" className="grid list-none">
-          {WORK_ENTRIES.map(({ id, technologies }, index) => (
+          {WORK_ENTRIES.map(({ id, technologies, icon: Icon }, index) => (
             <li
               key={id}
               data-work-row
-              className="min-w-0 border-t-(length:--line-width) border-line py-8"
+              className="min-w-0 border-t-(length:--line-width) border-line"
             >
               <Reveal>
-                <div className="grid min-w-0 gap-4 md:grid-cols-[max-content_minmax(0,1fr)] md:gap-8">
-                  <span data-work-number aria-hidden="true" className="text-meta text-ink-muted tabular-nums">
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
-                  <div className="grid min-w-0 gap-4">
-                    <Heading level={4}>{t(`items.${id}.title`)}</Heading>
+                <div data-work-composition>
+                  <div className="flex items-center gap-3">
+                    <Icon role="img" aria-hidden="true" focusable="false" className="size-8 shrink-0" />
+                    <span data-work-number aria-hidden="true" className="tabular-nums">
+                      {String(index + 1).padStart(2, '0')}
+                    </span>
+                  </div>
+                  <Heading level={4}>{t(`items.${id}.title`)}</Heading>
+                  <div data-work-details className="grid min-w-0 gap-4">
                     <p className="max-w-prose text-body">{t(`items.${id}.result`)}</p>
                     <div data-work-technologies className="flex flex-wrap gap-2">
                       {technologies.map((technology) => (

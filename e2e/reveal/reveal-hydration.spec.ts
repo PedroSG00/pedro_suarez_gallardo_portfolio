@@ -60,6 +60,11 @@ for (const locale of ['en', 'es'] as const) {
         const block = page.locator('#about [data-reveal-root]').first();
         await expect(block).toBeVisible();
         const height = await block.evaluate((node) => node.getBoundingClientRect().height);
+        await page.evaluate(() => {
+          const spacer = document.createElement('div');
+          spacer.style.height = '200vh';
+          document.body.append(spacer);
+        });
 
         await placeBlock(page, block, 900);
         await expect.poll(() => block.evaluate((node) => Number(getComputedStyle(node).opacity))).toBeLessThan(1);
@@ -68,7 +73,7 @@ for (const locale of ['en', 'es'] as const) {
 
         await placeBlock(page, block, 500);
         await expect(block).toHaveCSS('opacity', '1');
-        // About deliberately keeps tall content readable until its local exit range.
+        // Move the complete block past the top edge to enter its exit range.
         await placeBlock(page, block, -height * 0.85);
         await expect.poll(() => block.evaluate((node) => Number(getComputedStyle(node).opacity))).toBeLessThan(1);
         await placeBlock(page, block, 500);

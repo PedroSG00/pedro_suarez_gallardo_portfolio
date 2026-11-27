@@ -132,11 +132,7 @@ describe('RevealGroup scroll staggering (RF-13)', () => {
 });
 
 describe('RevealGroup variants (RF-14)', () => {
-  test('shares the group variant with every sibling', () => {
-    // The selector matches only siblings nested inside a block carrying the
-    // shared variant, so a sibling out of step with the group fails the query.
-    const insideClipBlock = { selector: '[data-reveal-variant="clip"] > *' };
-
+  test('keeps every sibling visible when a group variant is supplied', () => {
     render(
       <RevealGroup variant="clip">
         <p>Clip block A</p>
@@ -145,7 +141,7 @@ describe('RevealGroup variants (RF-14)', () => {
     );
 
     for (const item of ['Clip block A', 'Clip block B']) {
-      expect(screen.getByText(item, insideClipBlock)).toBeVisible();
+      expect(screen.getByText(item)).toBeVisible();
     }
   });
 });

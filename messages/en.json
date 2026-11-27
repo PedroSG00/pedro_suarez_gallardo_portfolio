@@ -79,7 +79,159 @@
     }
   },
   "stack": {
-    "intro": "Stack"
+    "intro": "Stack",
+    "categories": {
+      "frontend": "Frontend",
+      "dataVisualization": "Data visualization",
+      "backendApis": "Backend & APIs",
+      "databases": "Databases",
+      "testingCi": "Testing & CI/CD",
+      "aiTools": "AI & Tools"
+    },
+    "filters": {
+      "label": "Filter by category",
+      "all": "All"
+    },
+    "cad": {
+      "title": "Technology workbench",
+      "engine": "Three.js / CAD",
+      "view": "3D view",
+      "viewOptions": "2D / 3D",
+      "zoom": {
+        "label": "3D zoom",
+        "in": "Zoom in",
+        "out": "Zoom out",
+        "level": "{level}%"
+      },
+      "rotation": {
+        "label": "3D rotation",
+        "left": "Rotate left",
+        "right": "Rotate right",
+        "up": "Tilt up",
+        "down": "Tilt down"
+      },
+      "list": "Technology list",
+      "plane": "2D // Orthographic",
+      "space": "3D // Perspective",
+      "hint": "Select or drag to the slot",
+      "modules": "{count} modules",
+      "slot": "Slot: {name}",
+      "empty": "empty"
+    },
+    "detail": {
+      "label": "Technology detail",
+      "empty": "Select a card to see what it is.",
+      "emptyWithDrag": "Select a card or drag it here to see what it is.",
+      "select": "Select {name}",
+      "eject": "Eject",
+      "feedback": {
+        "received": "{name} is now in the detail slot.",
+        "replaced": "{name} replaced {replacedName} in the detail slot.",
+        "ejected": "{name} returned to the stack."
+      }
+    },
+    "technologies": {
+      "javascript": {
+        "name": "JavaScript",
+        "description": "JavaScript is a programming language used across the web. It powers interactive behavior in browsers and can also run outside them through runtimes such as Node.js."
+      },
+      "typescript": {
+        "name": "TypeScript",
+        "description": "TypeScript extends JavaScript with a static type system. It catches many mistakes during development and compiles to JavaScript."
+      },
+      "react": {
+        "name": "React",
+        "description": "React is a JavaScript library for building user interfaces from components. It updates the rendered interface as data and user input change."
+      },
+      "nextJs": {
+        "name": "Next.js",
+        "description": "Next.js is a React framework for building web applications. It includes routing and supports server rendering, static generation and other rendering strategies."
+      },
+      "html": {
+        "name": "HTML",
+        "description": "HTML is the markup language that structures web content. Its elements describe headings, links, forms, media and other parts of a page."
+      },
+      "css": {
+        "name": "CSS",
+        "description": "CSS is the style language used to present web documents. It controls layout, typography, color, responsive behavior and visual states."
+      },
+      "chartJs": {
+        "name": "Chart.js",
+        "description": "Chart.js is a JavaScript library for creating charts. It provides common chart types and options for responsive, interactive visualizations."
+      },
+      "recharts": {
+        "name": "Recharts",
+        "description": "Recharts is a charting library built with React components. Its composable charts use familiar React patterns to map data into visualizations."
+      },
+      "nodeJs": {
+        "name": "Node.js",
+        "description": "Node.js is a JavaScript runtime for applications and tools. It runs JavaScript outside the browser and provides APIs for server-side development."
+      },
+      "expressJs": {
+        "name": "Express.js",
+        "description": "Express is a web framework for Node.js. Its routing and middleware APIs help structure HTTP servers and web APIs."
+      },
+      "restApis": {
+        "name": "REST APIs",
+        "description": "REST is an architectural style for networked applications that use HTTP. REST APIs expose resources through URLs and standard HTTP methods."
+      },
+      "webSockets": {
+        "name": "WebSockets",
+        "description": "WebSocket is a protocol for a persistent, bidirectional connection between a client and server. It lets both sides exchange messages over one connection without repeated HTTP requests."
+      },
+      "cSharp": {
+        "name": "C#",
+        "description": "C# is a statically typed, general-purpose programming language. It belongs to the .NET ecosystem and supports application development across platforms."
+      },
+      "python": {
+        "name": "Python",
+        "description": "Python is a general-purpose programming language with readable syntax. Its standard library and package ecosystem support scripting, automation, data work and web development."
+      },
+      "mysql": {
+        "name": "MySQL",
+        "description": "MySQL is a relational database management system. It stores structured data in tables and supports queries, relationships and transactions through SQL."
+      },
+      "mongodb": {
+        "name": "MongoDB",
+        "description": "MongoDB is a document-oriented database. It stores records as JSON-like documents and supports flexible schemas, indexes and aggregation."
+      },
+      "jest": {
+        "name": "Jest",
+        "description": "Jest is a JavaScript testing framework. It provides a test runner, assertions, mocks and utilities for running tests."
+      },
+      "vitest": {
+        "name": "Vitest",
+        "description": "Vitest is a testing framework designed to work with Vite. It offers a Jest-compatible API and uses Vite's transform and module-resolution pipeline."
+      },
+      "playwright": {
+        "name": "Playwright",
+        "description": "Playwright is a browser automation framework. It drives Chromium, Firefox and WebKit to test pages and end-to-end user flows."
+      },
+      "githubActions": {
+        "name": "GitHub Actions",
+        "description": "GitHub Actions automates workflows for repositories. It can run jobs in response to events such as pushes, pull requests and scheduled triggers."
+      },
+      "githubCopilot": {
+        "name": "GitHub Copilot",
+        "description": "GitHub Copilot is an AI coding assistant integrated into development tools. It offers code completions and conversational help in supported editors and workflows."
+      },
+      "claudeCode": {
+        "name": "Claude Code",
+        "description": "Claude Code is an AI coding agent that works with software repositories. It can inspect files, make changes and run development commands through supported interfaces."
+      },
+      "opencode": {
+        "name": "OpenCode",
+        "description": "OpenCode is an open-source AI coding agent. It connects language models with tools for exploring, editing and running code in a development environment."
+      },
+      "git": {
+        "name": "Git",
+        "description": "Git is a distributed version control system. It records changes as commits and supports branching and merging across local and shared repositories."
+      },
+      "github": {
+        "name": "GitHub",
+        "description": "GitHub is a platform for hosting Git repositories and collaborating on software. It adds tools for code review, issue tracking and project automation."
+      }
+    }
   },
   "contact": {
     "intro": "Contact",
