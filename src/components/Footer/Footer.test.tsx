@@ -61,6 +61,7 @@ describe('Footer', () => {
       expect(icon).toHaveAttribute('aria-hidden', 'true');
     }
     expect(links[0]).not.toHaveAttribute('rel');
+    expect(screen.getByText(site.email, { exact: true })).toBeVisible();
     for (const link of links.slice(1)) {
       expect(link).toHaveAttribute('rel', 'noreferrer noopener');
     }

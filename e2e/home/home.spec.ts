@@ -208,6 +208,58 @@ test.describe('home structure', () => {
       });
 
       for (const colorScheme of ['light', 'dark'] as const) {
+        test(`Contact and Footer keep AA contrast and fit at 200% in ${colorScheme}`, async ({ page }) => {
+          await page.emulateMedia({ colorScheme, reducedMotion: 'reduce' });
+          await page.goto(`/${locale}#contact`);
+          const contact = page.getByRole('region', { name: expectedH2[3], exact: true });
+          const footer = page.getByRole('contentinfo');
+          const text = contact.getByRole('heading').or(contact.getByRole('paragraph'))
+            .or(footer.getByRole('paragraph'))
+            .or(footer.getByText('suarezgallardopedro@gmail.com', { exact: true }));
+          const links = contact.getByRole('link').or(footer.getByRole('link'));
+          const checkContrast = async (element: (typeof links)) => {
+            const { foreground, background, size, weight } = await element.evaluate((node) => {
+              const { color, fontSize, fontWeight } = getComputedStyle(node);
+              let background = 'rgba(0, 0, 0, 0)';
+              for (let ancestor: Element | null = node; ancestor; ancestor = ancestor.parentElement) {
+                background = getComputedStyle(ancestor).backgroundColor;
+                if (background !== 'rgba(0, 0, 0, 0)' && background !== 'transparent') break;
+              }
+              return { foreground: color, background, size: parseFloat(fontSize), weight: Number(fontWeight) };
+            });
+            const isLarge = size >= 24 || (size >= 18.67 && weight >= 700);
+            expect(getContrastRatio(foreground, background), await element.innerText()).toBeGreaterThanOrEqual(isLarge ? 3 : 4.5);
+          };
+
+          for (const element of await text.or(links).all()) await checkContrast(element);
+          for (const link of await links.all()) {
+            await link.hover();
+            await checkContrast(link);
+          }
+          for (const group of [contact.getByRole('link'), footer.getByRole('link')]) {
+            await page.mouse.move(0, 0);
+            await group.first().focus();
+            for (const link of await group.all()) {
+              await expect(link).toBeFocused();
+              await checkContrast(link);
+              await page.keyboard.press('Tab');
+            }
+          }
+
+          await page.setViewportSize({ width: 320, height: 720 });
+          await page.addStyleTag({ content: 'html { font-size: 200%; }' });
+          for (const element of await text.or(links).all()) {
+            await expect(element).toBeVisible();
+            const fits = await element.evaluate((node) => {
+              const { left, right } = node.getBoundingClientRect();
+              return left >= 0 && right <= document.documentElement.clientWidth
+                && node.scrollWidth <= node.clientWidth + 1;
+            });
+            expect(fits, await element.innerText()).toBe(true);
+          }
+          expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
+        });
+
         test(`the ${colorScheme} contact email is prominent and inverts on hover and keyboard focus`, async ({ page }) => {
           await page.emulateMedia({ colorScheme });
           await page.goto(`/${locale}`);

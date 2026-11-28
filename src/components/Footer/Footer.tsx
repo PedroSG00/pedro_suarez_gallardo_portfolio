@@ -49,7 +49,7 @@ export default function Footer({ locale, site, labels }: Props) {
           {links.map(({ channel, href, label, target, srLabel }) => {
             const Icon = CHANNEL_ICONS[channel];
             return (
-              <li key={channel}>
+              <li key={channel} className="min-w-0">
                 <Link
                   href={href}
                   target={target}
@@ -58,6 +58,9 @@ export default function Footer({ locale, site, labels }: Props) {
                 >
                   {label}
                 </Link>
+                {channel === 'email' && (
+                  <span className="mt-2 block text-meta text-ink-muted wrap-anywhere">{site.email}</span>
+                )}
               </li>
             );
           })}

@@ -175,6 +175,8 @@
 
 **Criterio de hecho:** las verificaciones de entrada, zona estable, final de página, Footer, movimiento reducido, carga inicial y sin JavaScript pasan; `pnpm test:e2e`, lint, typecheck y build pasan.
 
+- [x] T6 completada.
+
 ## T7 — Validar destinos estáticos, CV y fallos de enlaces
 
 **Objetivo:** confirmar que los destinos obligatorios existen y que los errores externos no producen estados o sustituciones incorrectos.
@@ -200,6 +202,8 @@
 
 **Criterio de hecho:** los dos CV son accesibles, íntegros y del idioma correcto; no hay fallback entre CV; los destinos sociales son los aprobados y un fallo externo no rompe la página. Si falla un CV, la tarea queda bloqueada.
 
+- [x] T7 completada.
+
 ## T8 — Verificar la matriz completa y cerrar los gates
 
 **Objetivo:** comprobar trazabilidad y comportamiento integrado de RF-1 a RF-8 en ambos idiomas, temas y condiciones relevantes.
@@ -223,6 +227,23 @@
 - Pasan, en orden, `pnpm lint`, `pnpm typecheck`, `pnpm test` y `pnpm build`.
 - Pasa `pnpm test:e2e` con la cobertura de movimiento y locales requerida.
 - Todos los RF tienen evidencia asociada y no quedan fallos de CV, traducciones, accesibilidad o enlaces.
+
+**Evidencia cotejada:**
+
+| RF | Evidencia unitaria | Evidencia E2E (Chromium) |
+|---|---|---|
+| RF-1 | `Contact.test.tsx`: encabezado, titular y cuerpo exactos en EN/ES; `i18n-parity.test.ts`: mismas claves en ambos idiomas. | `home.spec.ts`: jerarquía y secciones localizadas. |
+| RF-2 | `contact-links.test.ts`, `Contact.test.tsx` y `Footer.test.tsx`: cuatro canales con etiquetas y destinos localizados. | `home.spec.ts`: mismo orden y destinos en Contact y Footer en EN/ES. |
+| RF-3 | `Contact.test.tsx`, `Footer.test.tsx` y `contact-links.test.ts`: `mailto`, email visible sin copia y sin apertura en otra pestaña. | `home.spec.ts`: destinatario y activación con Enter al 200 % de tamaño de texto. |
+| RF-4 | `contact-links.test.ts`, `Contact.test.tsx`, `Footer.test.tsx` y `Link.test.tsx`: destinos, nueva pestaña y aviso accesible según ubicación. | `home.spec.ts`: destino, `target`, `rel` y aviso solo para lectores de pantalla, en ambos idiomas; `contact-destinations.spec.ts`: perfiles y navegación ante un destino inaccesible. |
+| RF-5 | `contact-links.test.ts`, `Contact.test.tsx` y `Footer.test.tsx`: CV por idioma, sin sustituir el CV ausente. | `contact-destinations.spec.ts`: respuesta PDF y huella de cada documento revisado, cambio de idioma y 404 sin sustitución; `home.spec.ts`: aviso accesible según ubicación. |
+| RF-6 | `Footer.test.tsx`: copyright en EN/ES; se omite si falta sin romper los enlaces. | — |
+| RF-7 | `Contact.test.tsx` y `Link.test.tsx`: semántica, nombre accesible y enlace nativo. | `home.spec.ts`: prominencia, inversión en hover y foco, contraste AA y adaptación al 200 %; `contact-motion.spec.ts`: recorte reversible, primer fotograma, final visible sin animar Footer, movimiento reducido y navegación sin JavaScript, en EN/ES y ambos temas. |
+| RF-8 | `contact-links.test.ts` y `Footer.test.tsx`: datos vacíos o incompletos sin romper el render de los canales restantes. | `contact-destinations.spec.ts`: 404 sin sustitución y fallo social sin inutilizar la home; `home.spec.ts` e `i18n-routing.spec.ts`: sin errores de página o hidratación. |
+
+**Gates:** `pnpm lint` → `pnpm typecheck` → `pnpm test` (698 pasan, 0 fallan; cobertura global por encima del 85 % en las cuatro métricas) → `pnpm build` → `pnpm test:e2e` (404 pasan, 0 fallan, 1 omitido). La primera ejecución e2e falló en la prueba de scroll al final de `navbar.spec.ts`; la repetición de la suite completa pasó sin cambios de código.
+
+- [x] T8 completada.
 
 ## Trazabilidad RF → tareas
 
