@@ -129,7 +129,15 @@
     );
   }
 
-  [data-reveal-root][data-reveal-variant="clip"] {
+  [data-reveal-root]:where([data-last-section]) {
+    animation: reveal-enter auto linear both;
+    animation-timeline: --reveal-entry;
+    animation-range: cover var(--psg-reveal-entry-start, 0%) cover 18%;
+    opacity: var(--psg-reveal-entry-opacity);
+    transform: translateY(var(--psg-reveal-entry-offset));
+  }
+
+  [data-reveal-root]:where([data-reveal-variant="clip"]) {
     transform: none;
     clip-path: inset(
       0 0 calc(
@@ -139,17 +147,8 @@
     );
   }
 
-  [data-reveal-root][data-reveal-variant="fade"] {
+  [data-reveal-root]:where([data-reveal-variant="fade"]) {
     transform: none;
-  }
-
-  [data-reveal-root][data-last-section] {
-    padding-bottom: calc(var(--spacing) * 75);
-    animation: reveal-enter auto linear both;
-    animation-timeline: --reveal-entry;
-    animation-range: cover var(--psg-reveal-entry-start, 0%) cover 18%;
-    opacity: var(--psg-reveal-entry-opacity);
-    transform: translateY(var(--psg-reveal-entry-offset));
   }
 }
 

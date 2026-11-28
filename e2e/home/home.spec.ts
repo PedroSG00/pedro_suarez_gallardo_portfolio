@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { getContrastRatio } from '../about/about-helpers';
 
 const DESTINATIONS = [
   { id: 'about' },
@@ -21,6 +22,19 @@ const WORK_TITLE_BY_LOCALE: Record<string, string> = {
   en: "What I've built.",
   es: 'Lo que he construido.',
 };
+
+const CONTACT_COPY_BY_LOCALE: Record<string, { title: string; body: string }> = {
+  en: {
+    title: "Let's build something solid.",
+    body: 'Tell me what you need. Email or LinkedIn, whichever is easier.',
+  },
+  es: {
+    title: 'Construyamos algo sólido.',
+    body: 'Cuéntame qué necesitas. Por email o LinkedIn, como te resulte más cómodo.',
+  },
+};
+
+const CONTACT_EMAIL_LABELS: Record<string, string> = { en: 'Email', es: 'Correo' };
 
 test.describe('home smoke', () => {
   test('the home responds without page errors', async ({ page }) => {
@@ -83,6 +97,14 @@ test.describe('home structure', () => {
           } else if (id === 'stack') {
             await expect(section.getByRole('heading', { level: 3 })).toHaveCount(6);
             await expect(section.locator('h1, h4, h5, h6')).toHaveCount(0);
+          } else if (id === 'contact') {
+            const { title, body } = CONTACT_COPY_BY_LOCALE[locale];
+            const contact = page.getByRole('region', { name: expectedH2[index], exact: true });
+            await expect(contact).toHaveCount(1);
+            await expect(contact).toHaveAttribute('id', 'contact');
+            await expect(contact.getByRole('heading', { level: 2 })).toHaveText(`04 / ${expectedH2[index]}`);
+            await expect(contact.getByRole('heading', { level: 3, name: title, exact: true })).toBeVisible();
+            await expect(contact.getByText(body, { exact: true })).toBeVisible();
           } else {
             await expect(section.locator('h1, h3, h4, h5, h6')).toHaveCount(0);
           }
@@ -141,7 +163,8 @@ test.describe('home structure', () => {
         await page.emulateMedia({ reducedMotion: 'reduce' });
         await page.goto(`/${locale}`);
         const heading = page.getByRole('heading', { level: 1 });
-        const actions = page.getByRole('main').getByRole('link');
+        const hero = page.getByRole('region').filter({ has: heading });
+        const actions = hero.getByRole('link');
         const footer = page.getByRole('contentinfo');
         await expect(actions).toHaveCount(2);
         const [title, primary, secondary, footerLink] = await Promise.all([
@@ -154,6 +177,170 @@ test.describe('home structure', () => {
         expect(primary?.x).toBe(title?.x);
         expect(secondary?.y).toBe(primary?.y);
         expect(footerLink?.x).toBe(title?.x);
+      });
+
+      test('the footer matches Contact destinations and only announces new tabs to assistive technology', async ({ page }) => {
+        await page.emulateMedia({ reducedMotion: 'reduce' });
+        await page.goto(`/${locale}`);
+
+        const contact = page.getByRole('region', { name: expectedH2[3], exact: true });
+        const footer = page.getByRole('contentinfo');
+        const links = footer.getByRole('link');
+        const labels = locale === 'es' ? ['Correo', 'LinkedIn', 'GitHub', 'Currículum'] : ['Email', 'LinkedIn', 'GitHub', 'CV'];
+        const newTab = locale === 'es' ? 'se abre en una pestaña nueva' : 'opens in a new tab';
+
+        await expect(links).toHaveCount(labels.length);
+        for (const [index, label] of labels.entries()) {
+          const footerLink = links.nth(index);
+          const contactLink = contact.getByRole('link', { name: label, exact: index !== 0 });
+          await expect(footerLink).toHaveAttribute('href', (await contactLink.getAttribute('href'))!);
+          if (index === 0) {
+            await expect(footerLink).toHaveAccessibleName(label);
+            await expect(footerLink).not.toHaveAttribute('target', '_blank');
+          } else {
+            await expect(footerLink).toHaveAccessibleName(`${label} ${newTab}`);
+            await expect(footerLink).toHaveAttribute('target', '_blank');
+            await expect(footerLink).toHaveAttribute('rel', 'noreferrer noopener');
+            const notice = footerLink.getByText(newTab, { exact: true });
+            await expect(notice).toHaveCSS('clip-path', 'inset(50%)');
+          }
+        }
+      });
+
+      for (const colorScheme of ['light', 'dark'] as const) {
+        test(`Contact and Footer keep AA contrast and fit at 200% in ${colorScheme}`, async ({ page }) => {
+          await page.emulateMedia({ colorScheme, reducedMotion: 'reduce' });
+          await page.goto(`/${locale}#contact`);
+          const contact = page.getByRole('region', { name: expectedH2[3], exact: true });
+          const footer = page.getByRole('contentinfo');
+          const text = contact.getByRole('heading').or(contact.getByRole('paragraph'))
+            .or(footer.getByRole('paragraph'))
+            .or(footer.getByText('suarezgallardopedro@gmail.com', { exact: true }));
+          const links = contact.getByRole('link').or(footer.getByRole('link'));
+          const checkContrast = async (element: (typeof links)) => {
+            const { foreground, background, size, weight } = await element.evaluate((node) => {
+              const { color, fontSize, fontWeight } = getComputedStyle(node);
+              let background = 'rgba(0, 0, 0, 0)';
+              for (let ancestor: Element | null = node; ancestor; ancestor = ancestor.parentElement) {
+                background = getComputedStyle(ancestor).backgroundColor;
+                if (background !== 'rgba(0, 0, 0, 0)' && background !== 'transparent') break;
+              }
+              return { foreground: color, background, size: parseFloat(fontSize), weight: Number(fontWeight) };
+            });
+            const isLarge = size >= 24 || (size >= 18.67 && weight >= 700);
+            expect(getContrastRatio(foreground, background), await element.innerText()).toBeGreaterThanOrEqual(isLarge ? 3 : 4.5);
+          };
+
+          for (const element of await text.or(links).all()) await checkContrast(element);
+          for (const link of await links.all()) {
+            await link.hover();
+            await checkContrast(link);
+          }
+          for (const group of [contact.getByRole('link'), footer.getByRole('link')]) {
+            await page.mouse.move(0, 0);
+            await group.first().focus();
+            for (const link of await group.all()) {
+              await expect(link).toBeFocused();
+              await checkContrast(link);
+              await page.keyboard.press('Tab');
+            }
+          }
+
+          await page.setViewportSize({ width: 320, height: 720 });
+          await page.addStyleTag({ content: 'html { font-size: 200%; }' });
+          for (const element of await text.or(links).all()) {
+            await expect(element).toBeVisible();
+            const fits = await element.evaluate((node) => {
+              const { left, right } = node.getBoundingClientRect();
+              return left >= 0 && right <= document.documentElement.clientWidth
+                && node.scrollWidth <= node.clientWidth + 1;
+            });
+            expect(fits, await element.innerText()).toBe(true);
+          }
+          expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
+        });
+
+        test(`the ${colorScheme} contact email is prominent and inverts on hover and keyboard focus`, async ({ page }) => {
+          await page.emulateMedia({ colorScheme });
+          await page.goto(`/${locale}`);
+          expect(await page.evaluate(() => matchMedia('(hover: hover)').matches)).toBe(true);
+
+          const name = expectedH2[3];
+          const navigationLink = page.getByRole('navigation').getByRole('link', { name, exact: true });
+          const contact = page.getByRole('region', { name, exact: true });
+          const email = contact.getByRole('link', { name: CONTACT_EMAIL_LABELS[locale] });
+          const address = email.getByText(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+          const readColors = () => address.evaluate((element) => ({
+            foreground: getComputedStyle(element).color,
+            background: getComputedStyle(element.closest('a')!).backgroundColor,
+          }));
+          const addressSize = await address.evaluate((element) => parseFloat(getComputedStyle(element).fontSize));
+          const secondarySizes = await contact.getByRole('link', {
+            name: /^(LinkedIn|GitHub|CV|Currículum)$/,
+          }).evaluateAll((elements) => elements.map((element) => parseFloat(getComputedStyle(element).fontSize)));
+          expect(secondarySizes).toHaveLength(3);
+          expect(addressSize).toBeGreaterThanOrEqual(2 * Math.max(...secondarySizes));
+
+          const rest = await readColors();
+          const inverted = { foreground: rest.background, background: rest.foreground };
+          expect(getContrastRatio(rest.foreground, rest.background)).toBeGreaterThanOrEqual(4.5);
+
+          await email.hover();
+          await expect.poll(readColors).toEqual(inverted);
+          const hover = await readColors();
+          expect(getContrastRatio(hover.foreground, hover.background)).toBeGreaterThanOrEqual(4.5);
+          await page.mouse.move(0, 0);
+          await expect.poll(readColors).toEqual(rest);
+
+          await navigationLink.click();
+          await expect(contact.getByRole('heading', { level: 2 })).toBeFocused();
+          await page.mouse.move(0, 0);
+          await page.keyboard.press('Tab');
+          await expect(email).toBeFocused();
+          await expect.poll(readColors).toEqual(hover);
+          await page.keyboard.press('Tab');
+          await expect(contact.getByRole('link', { name: 'LinkedIn' })).toBeFocused();
+          await expect.poll(readColors).toEqual(rest);
+        });
+      }
+
+      test('the visible email fits at 200% text size and still activates with Enter', async ({ page }) => {
+        await page.setViewportSize({ width: 320, height: 720 });
+        await page.emulateMedia({ reducedMotion: 'reduce' });
+        await page.goto(`/${locale}#contact`);
+        const name = expectedH2[3];
+        const contact = page.getByRole('region', { name, exact: true });
+        const email = contact.getByRole('link', { name: CONTACT_EMAIL_LABELS[locale] });
+        const address = email.getByText(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+        const fontSize = () => address.evaluate((element) => parseFloat(getComputedStyle(element).fontSize));
+        const initialSize = await fontSize();
+        await page.addStyleTag({ content: 'html { font-size: 200%; }' });
+        await expect.poll(fontSize).toBeGreaterThanOrEqual(initialSize * 2);
+        await expect(address).toBeVisible();
+        await expect(email).toHaveAttribute('href', `mailto:${await address.innerText()}`);
+
+        const fits = await address.evaluate((element) => {
+          const range = document.createRange();
+          range.selectNodeContents(element);
+          const lines = [...range.getClientRects()];
+          const link = element.closest('a')!.getBoundingClientRect();
+          const viewport = document.documentElement.clientWidth;
+          return lines.length > 0 && link.left >= 0 && link.right <= viewport
+            && lines.every(({ left, right }) => left >= link.left && right <= link.right)
+            && document.documentElement.scrollWidth === viewport;
+        });
+        expect(fits).toBe(true);
+
+        await email.focus();
+        await expect(email).toBeFocused();
+        await email.evaluate((element) => {
+          element.addEventListener('click', (event) => {
+            event.preventDefault(); // Keep the OS mail handler out of the test.
+            element.setAttribute('data-mail-activated', 'true');
+          }, { once: true });
+        });
+        await page.keyboard.press('Enter');
+        await expect(email).toHaveAttribute('data-mail-activated', 'true');
       });
 
     });

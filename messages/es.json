@@ -235,10 +235,12 @@
   },
   "contact": {
     "intro": "Contacto",
-    "email": "Email",
+    "title": "Construyamos algo sólido.",
+    "body": "Cuéntame qué necesitas. Por email o LinkedIn, como te resulte más cómodo.",
+    "email": "Correo",
     "linkedin": "LinkedIn",
     "github": "GitHub",
-    "cv": "CV"
+    "cv": "Currículum"
   },
   "footer": {
     "text": "Pedro Suárez Gallardo",

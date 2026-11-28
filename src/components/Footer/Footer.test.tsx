@@ -25,7 +25,7 @@ const labelsEn = {
   newTab: enMessages.shared.newTab,
 };
 
-function renderFooter(locale: Locale = 'en', props = {}) {
+function renderFooter(locale: Locale = 'en', props: Partial<React.ComponentProps<typeof Footer>> = {}) {
   return renderWithIntl(
     <Footer
       locale={locale}
@@ -36,48 +36,55 @@ function renderFooter(locale: Locale = 'en', props = {}) {
 }
 
 describe('Footer', () => {
-  test('shows the four English destinations with decorative icons and safe, announced new tabs', () => {
-    renderFooter();
-    expect(screen.getAllByRole('link')).toHaveLength(4);
-    for (const [name, href] of [
-      ['GitHub opens in a new tab', site.githubUrl],
-      ['LinkedIn opens in a new tab', site.linkedinUrl],
-      ['Email', `mailto:${site.email}`],
-      ['CV opens in a new tab', site.cvPath.en],
-    ] as const) {
-      const link = screen.getByRole('link', { name });
+  test.each([
+    { locale: 'en', email: 'Email', cv: 'CV', newTab: 'opens in a new tab', copyright: enMessages.footer.copyright },
+    { locale: 'es', email: 'Correo', cv: 'Currículum', newTab: 'se abre en una pestaña nueva', copyright: esMessages.footer.copyright },
+  ] as const)('shows the four localized destinations in order for $locale', ({ locale, email, cv, newTab, copyright }) => {
+    renderFooter(locale);
+    const links = screen.getAllByRole('link');
+    expect(links).toHaveLength(4);
+    const expectedLinks = [
+      { label: email, href: `mailto:${site.email}`, newWindow: false },
+      { label: 'LinkedIn', href: site.linkedinUrl, newWindow: true },
+      { label: 'GitHub', href: site.githubUrl, newWindow: true },
+      { label: cv, href: site.cvPath[locale], newWindow: true },
+    ];
+
+    for (const [index, { label, href, newWindow }] of expectedLinks.entries()) {
+      const link = links[index];
+      expect(link).toHaveAccessibleName(newWindow ? `${label} ${newTab}` : label);
       expect(link).toHaveAttribute('href', href);
+      expect(link).toHaveAttribute('target', newWindow ? '_blank' : '_self');
       // eslint-disable-next-line testing-library/no-node-access
       const icon = link.querySelector('svg');
       expect(icon).toBeInTheDocument();
       expect(icon).toHaveAttribute('aria-hidden', 'true');
     }
-    for (const name of ['GitHub', 'LinkedIn', 'CV']) {
-      const link = screen.getByRole('link', { name: `${name} opens in a new tab` });
-      expect(link).toHaveAttribute('target', '_blank');
+    expect(links[0]).not.toHaveAttribute('rel');
+    expect(screen.getByText(site.email, { exact: true })).toBeVisible();
+    for (const link of links.slice(1)) {
       expect(link).toHaveAttribute('rel', 'noreferrer noopener');
     }
-    expect(screen.getByRole('link', { name: 'Email' })).not.toHaveAttribute('target');
-    expect(screen.getAllByText('opens in a new tab')).toHaveLength(3);
-    expect(screen.getByText(enMessages.footer.copyright)).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /theme/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /idioma|language|english|español/i })).not.toBeInTheDocument();
+    expect(screen.getAllByText(newTab)).toHaveLength(3);
+    expect(screen.getByText(copyright)).toBeInTheDocument();
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(screen.queryByRole('switch')).not.toBeInTheDocument();
   });
 
-  test('uses the Spanish CV and translations for the Spanish locale', () => {
-    renderFooter('es');
-    const cv = screen.getByRole('link', { name: 'CV se abre en una pestaña nueva' });
-    expect(cv).toHaveAttribute('href', '/ES_Pedro_Suarez_Gallardo_CV.pdf');
-    expect(screen.getByRole('link', { name: 'Email' })).toBeInTheDocument();
-    expect(screen.getByText(esMessages.footer.copyright)).toBeInTheDocument();
-  });
-
-  test('omits a missing GitHub URL and keeps the remaining links', () => {
-    renderFooter('en', { site: { ...site, githubUrl: '' } });
+  test.each(['', '   '])('omits an empty or blank GitHub URL (%j) and keeps the remaining footer', (githubUrl) => {
+    renderFooter('en', { site: { ...site, githubUrl } });
     expect(screen.queryByRole('link', { name: 'GitHub opens in a new tab' })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'LinkedIn opens in a new tab' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'CV opens in a new tab' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Email' })).toBeInTheDocument();
+    expect(screen.getByText(enMessages.footer.copyright)).toBeInTheDocument();
+  });
+
+  test('does not substitute the English CV if the Spanish CV is missing', () => {
+    renderFooter('es', { site: { ...site, cvPath: { ...site.cvPath, es: '' } } });
+    expect(screen.getAllByRole('link')).toHaveLength(3);
+    expect(screen.queryByRole('link', { name: /currículum|cv/i })).not.toBeInTheDocument();
+    expect(screen.getByText(esMessages.footer.copyright)).toBeInTheDocument();
   });
 
   test('omits a missing copyright without breaking the remaining footer', () => {

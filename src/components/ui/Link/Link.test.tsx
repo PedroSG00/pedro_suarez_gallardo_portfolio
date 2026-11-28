@@ -43,6 +43,19 @@ describe('Link', () => {
     expect(visible).toHaveLength(1);
   });
 
+  test('keeps the native link contract with custom presentation', () => {
+    render(
+      <Link href="https://example.com" target="_blank" className="prominent">
+        External
+      </Link>
+    );
+    const link = screen.getByRole('link', { name: 'External' });
+    expect(link).toHaveAttribute('href', 'https://example.com');
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', 'noreferrer noopener');
+    expect(fireEvent.click(link)).toBe(true);
+  });
+
   test('empty href does not navigate and prevents default', () => {
     const openSpy = vi.spyOn(window, 'open');
     render(<Link href="">Contact me</Link>);

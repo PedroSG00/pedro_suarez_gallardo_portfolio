@@ -10,6 +10,7 @@ type Props = {
   ariaLabel?: string;
   srLabel?: string;
   tone?: 'primary' | 'default';
+  className?: string;
 };
 
 export default function Link({
@@ -20,6 +21,7 @@ export default function Link({
   ariaLabel,
   srLabel,
   tone = 'default',
+  className = '',
 }: Props) {
   if (!children || href === undefined) {
     return null;
@@ -45,6 +47,7 @@ export default function Link({
         ${tone === 'primary'
           ? 'bg-ink font-emphasis text-surface hover:bg-surface hover:text-ink'
           : 'bg-surface text-ink hover:bg-ink hover:text-surface'}
+        ${className}
       `}
     >
       {icon}
