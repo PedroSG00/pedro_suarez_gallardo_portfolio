@@ -382,8 +382,12 @@ test.describe('Scroll behavior on reload and navigation', () => {
     );
     // Wheel over the page gutter, not an interactive section that can consume it.
     await page.mouse.move(8, 400);
-    await page.mouse.wheel(0, 20_000);
-    await expect.poll(remainingScroll).toBeLessThanOrEqual(1);
+    await expect.poll(async () => {
+      const remaining = await remainingScroll();
+      // The page can settle at a different scroll position after a wheel event.
+      if (remaining > 1) await page.mouse.wheel(0, Math.ceil(remaining));
+      return remaining;
+    }).toBeLessThanOrEqual(1);
     await expect(navbar).toHaveAttribute('data-hidden');
 
     await page.mouse.wheel(0, 160);
