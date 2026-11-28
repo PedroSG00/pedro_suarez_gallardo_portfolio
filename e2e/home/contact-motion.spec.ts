@@ -56,16 +56,16 @@ for (const locale of ['en', 'es'] as const) {
         await page.evaluate(() => document.fonts.ready);
 
         const partialEntry = async () => {
+          // Content above Contact can finish laying out after the first scroll.
+          await placeTitle(title, 0.98);
           const state = await paint(title);
           return state.clipped && state.opacity > 0 && state.opacity < 1;
         };
-        await placeTitle(title, 0.98);
         await expect.poll(partialEntry).toBe(true);
 
         await placeTitle(title, 0.5);
         await expect.poll(() => paint(title)).toMatchObject({ opacity: 1, clipped: false });
 
-        await placeTitle(title, 0.98);
         await expect.poll(partialEntry).toBe(true);
         await expect.poll(() => paint(footer)).toEqual(FULL_PAINT);
 
