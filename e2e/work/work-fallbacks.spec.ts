@@ -224,6 +224,16 @@ for (const item of LOCALES) {
         const anchoredY = await page.evaluate(() => scrollY);
         expect(anchoredY).toBeGreaterThan(0);
         const anchoredPaint = await frame(page);
+        // Keep the direct-anchor check above, but remove its fragment before
+        // testing reload restoration. A remaining #work is itself a scroll
+        // instruction and can correctly return the browser to that anchor.
+        await page.evaluate(() =>
+          window.history.replaceState(
+            window.history.state,
+            '',
+            `${window.location.pathname}${window.location.search}`,
+          ),
+        );
         // A fresh direct visit must match approaching the same position by scroll.
         await page.evaluate(() => scrollTo({ top: 0, behavior: 'instant' }));
         await settle(page);
